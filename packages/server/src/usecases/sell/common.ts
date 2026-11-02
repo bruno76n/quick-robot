@@ -4,7 +4,7 @@ import { BusinessError, type LineItemInput } from '@app/contract';
 import { free as freeOf, itemNeed, physical, reserved, setCost, setPrice, type LineItemData, type OrderStatus, type OrderStockView, type SaleData } from '@app/core';
 import {
   getCollection, listCollections, listLineItems, listOrders, listPayments, listProducts, physicalStock,
-  type Ctx, type Executor, type LineItemRow, type OrderRow, type PaymentRow, type ProductFull, type SaleRow,
+  type Ctx, type Executor, type LineItemRow, type OrderRow, type PaymentRow, type ProductFull, type SaleFact, type SaleRow,
 } from '@app/db';
 import { costOf, loadCostingContext, priceOf, setPartsOf, supplyIdsOf } from '../../views/costing';
 import { notFound } from '../../http';
@@ -127,3 +127,12 @@ export async function childrenOf(ex: Executor, ctx: Ctx, kind: 'sale' | 'order',
 /** Short text of the items: "2 × Llavero, 1 × Set". */
 export const itemsText = (items: readonly { qty: number; name: string }[]) => items.map((i) => `${i.qty} × ${i.name}`).join(', ');
 export const cents = (pesos: number) => Math.round(Math.round((pesos + Number.EPSILON) * 100) / 100 * 100);
+
+/** A sale's sums as core data: one synthetic line with the totals (same income, commission, cost, profit and owed). */
+export function factSale(f: SaleFact, commissionPct: number): SaleData {
+  return {
+    id: f.id, commissionPct, payments: f.tracksPayments ? [f.paidCents / 100] : null,
+    items: [{ kind: 'piece', productId: null, name: '', qty: 1, price: f.grossCents / 100, list: f.listCents / 100, cost: f.costCents / 100 }],
+    returned: f.return ? { on: f.return.on, restock: f.return.restock, refund: f.return.refundCents / 100, note: f.return.note } : null,
+  };
+}

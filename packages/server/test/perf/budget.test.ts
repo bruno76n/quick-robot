@@ -1,6 +1,7 @@
 // Time budgets of docs/15 §2 on the load set of §1 (PGlite, p95). Over 2× the budget fails; over 1× is
 // printed so the phase report can note it. Slow to prepare (~1–2 min): runs with `pnpm perf` (PERF=1).
 import { generateLoad, LOAD } from '@app/db/load-test';
+import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { applyDevelopmentSeed } from '../../src/dev-seed';
 import { makeHarness, type Harness } from '../harness';
@@ -28,7 +29,7 @@ async function measure(name: string, budget: number, fn: () => Promise<unknown>,
   for (let i = 0; i < runs; i++) { const t = performance.now(); await fn(); times.push(performance.now() - t); }
   const p95 = Math.round(times.sort((a, b) => a - b)[Math.min(times.length - 1, Math.ceil(times.length * 0.95) - 1)]!);
   results.push({ name, p95, budget });
-  expect(p95, `${name}: p95 ${p95} ms, budget ${budget} ms`).toBeLessThanOrEqual(budget * 2);
+  expect.soft(p95, `${name}: p95 ${p95} ms, budget ${budget} ms`).toBeLessThanOrEqual(budget * 2);
 }
 const get = (p: string) => async () => { const r = await h.call('GET', `/api/v1${p}`); if (r.status !== 200) throw new Error(`${p} → ${r.status}`); return r.json as J; };
 const post = async (p: string, body?: unknown) => { const r = await h.call('POST', `/api/v1${p}`, body === undefined ? {} : { body }); if (r.status >= 300) throw new Error(`${p} → ${r.status} ${JSON.stringify(r.json)}`); return (r.json as J).data as J; };
@@ -61,5 +62,29 @@ describe.runIf(RUN)(`budgets of docs/15 §2 with ${LOAD.sales} sales`, () => {
     await measure('deliverOrder', 800, async () => { sales.push((await post(`/orders/${orderIds[i++]}/deliver`, { on: '2026-11-02' })).saleId); });
     i = 0;
     await measure('returnSale', 800, () => post(`/sales/${sales[i++]}/return`, { on: '2026-11-02', restock: false }));
+  });
+});
+
+/** docs/15 §3: the 6 heavy queries use their indexes; a full scan of a big table fails. */
+describe.runIf(RUN)('EXPLAIN of the heavy queries', () => {
+  const BIG = /Seq Scan on (sale|line_item|payment|stock_movement|spool_movement|supply_movement|print_run|"order")\b/;
+  const plan = async (q: ReturnType<typeof sql>) => {
+    await h.db.execute(sql`set enable_seqscan = on`);
+    const r = await h.db.execute(sql`explain ${q}`);
+    return ((r as unknown as { rows: Record<string, string>[] }).rows ?? []).map((x) => Object.values(x)[0]).join('\n');
+  };
+  it('sales page, sale items, customer page, stock of a piece, 30-day report, active orders', async () => {
+    const ws = h.A.workspaceId;
+    const one = ((await h.db.execute(sql`select id, customer_id from sale where workspace_id = ${ws} and customer_id is not null limit 1`)) as unknown as { rows: { id: string; customer_id: string }[] }).rows[0]!;
+    const prod = ((await h.db.execute(sql`select id from product where workspace_id = ${ws} and tracks_stock limit 1`)) as unknown as { rows: { id: string }[] }).rows[0]!.id;
+    const queries: [string, ReturnType<typeof sql>][] = [
+      ['sales page', sql`select * from sale where workspace_id = ${ws} and deleted_at is null order by "on" desc, created_at desc, id desc limit 50`],
+      ['items of a page', sql`select parent_id, sum(qty * price_cents) from line_item where workspace_id = ${ws} and parent_kind = 'sale' and parent_id in (${one.id}) group by parent_id`],
+      ['customer page', sql`select * from sale where workspace_id = ${ws} and deleted_at is null and customer_id = ${one.customer_id}`],
+      ['stock of a piece', sql`select coalesce(sum(qty), 0) from stock_movement where workspace_id = ${ws} and product_id = ${prod}`],
+      ['30-day report', sql`select * from sale where workspace_id = ${ws} and deleted_at is null and "on" >= '2026-10-03' and "on" <= '2026-11-01'`],
+      ['home: active orders', sql`select * from "order" where workspace_id = ${ws} and deleted_at is null and status in ('quoted', 'accepted', 'in_production', 'ready')`],
+    ];
+    for (const [name, q] of queries) { const p = await plan(q); console.log(`-- ${name}\n${p}`); expect.soft(p, name).not.toMatch(BIG); }
   });
 });

@@ -1,15 +1,15 @@
 // Phase 3 fills the hooks that phase 2 left for stock, sales, queues, profit and channel usage.
-import { usageOf } from '@app/db';
+import { soldTotals, usageOf } from '@app/db';
 import { printerHooks } from '../printers';
 import { productHooks } from '../products';
 import { setChannelUsage } from '../settings';
 import { queueViews } from './queue';
-import { grossProfitAndExpenses } from './reports';
-import { activeOrderFolios, soldOf, stockOf } from './stock';
+import { grossProfitAndExpensesFast as grossProfitAndExpenses } from './fast';
+import { activeOrderFolios, stockOf } from './stock';
 
 productHooks.stock = stockOf;
 productHooks.activeOrderFolios = activeOrderFolios;
-productHooks.sold = soldOf;
+productHooks.sold = soldTotals;
 printerHooks.queue = async (tx, ctx, printerIds, now) => {
   const q = await queueViews(tx, ctx, { printerIds }, now);
   return new Map([...q].map(([id, list]) => [id, list.map((e) => ({ id: e.id, orderId: e.orderId, orderNumber: e.orderNumber, text: e.text, minutes: e.minutes, startedAt: e.startedAt, remainingMinutes: e.remainingMinutes, progress: e.progress }))]));

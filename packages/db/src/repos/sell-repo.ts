@@ -3,7 +3,7 @@ import { and, asc, count, desc, eq, gte, ilike, inArray, isNotNull, isNull, lte,
 import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
 import type { Ctx } from '../ctx';
 import type { Executor } from '../db';
-import { customer, expense, lineItem, order, payment, printQueueEntry, printRun, printRunFilament, sale, spoolMovement, stockLevels, stockMovement, supplyMovement, workspace } from '../schema';
+import { customer, expense, lineItem, order, payment, printQueueEntry, printRun, printRunFilament, sale, salesChannel, spoolMovement, stockLevels, stockMovement, supplyMovement, workspace } from '../schema';
 import { inWorkspace, likePattern } from './scope';
 
 type NewRow<T extends { $inferInsert: object }> = Omit<T['$inferInsert'], 'workspaceId' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
@@ -261,4 +261,109 @@ export async function updateExpense(ex: Executor, ctx: Ctx, id: string, patch: P
 export async function setExpenseDeleted(ex: Executor, ctx: Ctx, id: string, deletedAt: Date | null) {
   const [r] = await ex.update(expense).set({ deletedAt, updatedAt: new Date() }).where(and(inWorkspace(expense.workspaceId, ctx), eq(expense.id, id), live(expense.deletedAt, !deletedAt))).returning();
   return r;
+}
+
+// ---------- Aggregates for lists, reports and home (docs/15 §3: the database sums, the app does not walk rows) ----------
+export interface SaleFact {
+  id: string; on: string; channelId: string; customerId: string | null; orderId: string | null; note: string; tracksPayments: boolean; return: SaleRow['return'];
+  grossCents: number; costCents: number; listCents: number; pieces: number; paidCents: number; itemsText: string;
+}
+/** Sums of the items and payments of some sales (by id), or of all live sales. */
+async function saleSums(ex: Executor, ctx: Ctx, ids?: readonly string[]) {
+  if (ids && !ids.length) return new Map<string, { gross: number; cost: number; list: number; pieces: number; text: string; paid: number }>();
+  const byIds = (col: PgColumn) => (ids ? inArray(col, [...ids]) : undefined);
+  const items = await ex.select({
+    parentId: lineItem.parentId,
+    gross: sql<string>`sum(${lineItem.qty} * ${lineItem.priceCents})`, cost: sql<string>`sum(${lineItem.qty} * ${lineItem.costCents})`,
+    list: sql<string>`sum(${lineItem.qty} * ${lineItem.listCents})`,
+    pieces: sql<string>`sum(case when ${lineItem.kind} = 'set' then ${lineItem.qty} * coalesce((select sum((p->>'qty')::int) from jsonb_array_elements(${lineItem.parts}) p), 0) else ${lineItem.qty} end)`,
+    text: sql<string>`string_agg(${lineItem.qty} || ' × ' || ${lineItem.name}, ', ' order by ${lineItem.position})`,
+  }).from(lineItem).where(and(inWorkspace(lineItem.workspaceId, ctx), eq(lineItem.parentKind, 'sale'), byIds(lineItem.parentId))).groupBy(lineItem.parentId);
+  const pays = await ex.select({ parentId: payment.parentId, paid: sql<string>`sum(${payment.amountCents})` })
+    .from(payment).where(and(inWorkspace(payment.workspaceId, ctx), eq(payment.parentKind, 'sale'), byIds(payment.parentId))).groupBy(payment.parentId);
+  const paid = new Map(pays.map((p) => [p.parentId, Number(p.paid)]));
+  return new Map(items.map((r) => [r.parentId, { gross: Number(r.gross), cost: Number(r.cost), list: Number(r.list), pieces: Number(r.pieces), text: r.text ?? '', paid: paid.get(r.parentId) ?? 0 }]));
+}
+
+/** Free text over the note, the customer name and the item names, in SQL (the list never loads every row). */
+const saleText = (ctx: Ctx, q?: string) => (q ? or(
+  ilike(sale.note, likePattern(q)),
+  sql`exists (select 1 from ${customer} c where c.workspace_id = ${ctx.workspaceId} and c.id = ${sale.customerId} and c.name ilike ${likePattern(q)})`,
+  sql`exists (select 1 from ${lineItem} li where li.workspace_id = ${ctx.workspaceId} and li.parent_kind = 'sale' and li.parent_id = ${sale.id} and li.name ilike ${likePattern(q)})`,
+) : undefined);
+
+/** One row per live sale with its sums; with limit, only that page is summed (index on sale (workspace_id, on)). */
+export async function saleFacts(ex: Executor, ctx: Ctx, f: SaleFilter & { q?: string | undefined; owedOnly?: boolean; limit?: number; offset?: number } = {}): Promise<SaleFact[]> {
+  if (f.ids && !f.ids.length) return [];
+  let q = ex.select().from(sale).where(and(saleWhere(ctx, f), saleText(ctx, f.q), f.owedOnly ? and(eq(sale.tracksPayments, true), isNull(sale.return)) : undefined))
+    .orderBy(desc(sale.on), desc(sale.createdAt), desc(sale.id)).$dynamic();
+  if (f.limit !== undefined) q = q.limit(f.limit).offset(f.offset ?? 0);
+  const rows = await q;
+  const sums = await saleSums(ex, ctx, f.limit !== undefined || f.ids || f.owedOnly || f.from || f.customerId || f.orderId ? rows.map((r) => r.id) : undefined);
+  return rows.map((s) => {
+    const x = sums.get(s.id) ?? { gross: 0, cost: 0, list: 0, pieces: 0, text: '', paid: 0 };
+    return { id: s.id, on: s.on, channelId: s.channelId, customerId: s.customerId, orderId: s.orderId, note: s.note, tracksPayments: s.tracksPayments, return: s.return, grossCents: x.gross, costCents: x.cost, listCents: x.list, pieces: x.pieces, paidCents: x.paid, itemsText: x.text };
+  });
+}
+
+export interface SaleTotalsRow { key: string | null; count: number; grossCents: number; incomeCents: number; commissionCents: number; costCents: number; owedCents: number; pieces: number; listCents: number }
+/** Totals of the filtered sales in one SQL query (docs/04 §6 rules), optionally per customer or channel. */
+export async function saleTotals(ex: Executor, ctx: Ctx, f: SaleFilter & { q?: string | undefined } = {}, by?: 'customer' | 'channel'): Promise<SaleTotalsRow[]> {
+  const it = ex.select({
+    parentId: lineItem.parentId, gross: sql<string>`sum(${lineItem.qty} * ${lineItem.priceCents})`.as('gross'), cost: sql<string>`sum(${lineItem.qty} * ${lineItem.costCents})`.as('cost'),
+    list: sql<string>`sum(${lineItem.qty} * ${lineItem.listCents})`.as('list'),
+    pieces: sql<string>`sum(case when ${lineItem.kind} = 'set' then ${lineItem.qty} * coalesce((select sum((p->>'qty')::int) from jsonb_array_elements(${lineItem.parts}) p), 0) else ${lineItem.qty} end)`.as('pieces'),
+  }).from(lineItem).where(and(eq(lineItem.workspaceId, ctx.workspaceId), eq(lineItem.parentKind, 'sale'))).groupBy(lineItem.parentId).as('it');
+  const pa = ex.select({ parentId: payment.parentId, paid: sql<string>`sum(${payment.amountCents})`.as('paid') }).from(payment)
+    .where(and(eq(payment.workspaceId, ctx.workspaceId), eq(payment.parentKind, 'sale'))).groupBy(payment.parentId).as('pa');
+  const gross = sql`coalesce(${it.gross}, 0)`;
+  const income = sql`case when ${sale.return} is null then ${gross} else 0 end`;
+  const key = by === 'customer' ? sale.customerId : by === 'channel' ? sale.channelId : sql<string>`null`;
+  const base = ex.select({
+    key: by ? sql<string | null>`${key}` : sql<string | null>`min(null::text)`, count: sql<string>`count(*)`, gross: sql<string>`sum(${gross})`, income: sql<string>`sum(${income})`,
+    commission: sql<string>`sum(${income} * ${salesChannel.commissionPct} / 100)`,
+    cost: sql<string>`sum(case when (${sale.return}->>'restock')::boolean then 0 else coalesce(${it.cost}, 0) end)`,
+    owed: sql<string>`sum(case when ${sale.tracksPayments} and ${sale.return} is null then greatest(0, ${gross} - coalesce(${pa.paid}, 0)) else 0 end)`,
+    pieces: sql<string>`sum(case when ${sale.return} is null then coalesce(${it.pieces}, 0) else 0 end)`,
+    list: sql<string>`sum(case when ${sale.return} is null then coalesce(${it.list}, 0) else 0 end)`,
+  }).from(sale)
+    .leftJoin(it, eq(it.parentId, sale.id)).leftJoin(pa, eq(pa.parentId, sale.id))
+    .leftJoin(salesChannel, and(eq(salesChannel.workspaceId, sale.workspaceId), eq(salesChannel.id, sale.channelId)))
+    .where(and(saleWhere(ctx, f), saleText(ctx, f.q))).$dynamic();
+  const rows = by ? await base.groupBy(sql`${key}`) : await base;
+  return rows.map((r) => ({ key: r.key, count: Number(r.count), grossCents: Number(r.gross ?? 0), incomeCents: Number(r.income ?? 0), commissionCents: Number(r.commission ?? 0), costCents: Number(r.cost ?? 0), owedCents: Number(r.owed ?? 0), pieces: Number(r.pieces ?? 0), listCents: Number(r.list ?? 0) }));
+}
+
+export interface OrderFact { id: string; number: number; customerId: string; status: string; channelId: string; createdOn: string; dueOn: string; deliveredOn: string | null; filamentDeducted: boolean; grossCents: number; costCents: number; paidCents: number }
+/** One row per live order with its sums. */
+export async function orderFacts(ex: Executor, ctx: Ctx, f: OrderFilter = {}): Promise<OrderFact[]> {
+  inWorkspace(order.workspaceId, ctx);
+  const items = ex.select({ parentId: lineItem.parentId, gross: sql<string>`sum(${lineItem.qty} * ${lineItem.priceCents})`.as('gross'), cost: sql<string>`sum(${lineItem.qty} * ${lineItem.costCents})`.as('cost') })
+    .from(lineItem).where(and(eq(lineItem.workspaceId, ctx.workspaceId), eq(lineItem.parentKind, 'order'))).groupBy(lineItem.parentId).as('it');
+  const pays = ex.select({ parentId: payment.parentId, paid: sql<string>`sum(${payment.amountCents})`.as('paid') })
+    .from(payment).where(and(eq(payment.workspaceId, ctx.workspaceId), eq(payment.parentKind, 'order'))).groupBy(payment.parentId).as('pa');
+  const rows = await ex.select({ o: order, gross: items.gross, cost: items.cost, paid: pays.paid }).from(order)
+    .leftJoin(items, eq(items.parentId, order.id)).leftJoin(pays, eq(pays.parentId, order.id))
+    .where(and(inWorkspace(order.workspaceId, ctx), isNull(order.deletedAt), f.statuses ? inArray(order.status, [...f.statuses]) : undefined, f.customerId ? eq(order.customerId, f.customerId) : undefined))
+    .orderBy(asc(order.number));
+  return rows.map((r) => ({ id: r.o.id, number: r.o.number, customerId: r.o.customerId, status: r.o.status, channelId: r.o.channelId, createdOn: r.o.createdOn, dueOn: r.o.dueOn, deliveredOn: r.o.deliveredOn, filamentDeducted: r.o.filamentDeducted, grossCents: Number(r.gross ?? 0), costCents: Number(r.cost ?? 0), paidCents: Number(r.paid ?? 0) }));
+}
+
+/** Pieces sold per product (sets opened into their parts) and sets per collection, without returned sales. */
+export async function soldTotals(ex: Executor, ctx: Ctx) {
+  inWorkspace(sale.workspaceId, ctx);
+  const live = and(eq(sale.workspaceId, ctx.workspaceId), isNull(sale.deletedAt), isNull(sale.return));
+  const pieces = await ex.select({ productId: lineItem.productId, n: sql<string>`sum(${lineItem.qty})` }).from(lineItem)
+    .innerJoin(sale, and(eq(sale.workspaceId, lineItem.workspaceId), eq(sale.id, lineItem.parentId)))
+    .where(and(live, eq(lineItem.parentKind, 'sale'), eq(lineItem.kind, 'piece'))).groupBy(lineItem.productId);
+  const parts = await ex.select({ productId: sql<string>`p->>'productId'`, n: sql<string>`sum(${lineItem.qty} * (p->>'qty')::int)` })
+    .from(sql`${lineItem} cross join lateral jsonb_array_elements(${lineItem.parts}) p`)
+    .innerJoin(sale, and(eq(sale.workspaceId, lineItem.workspaceId), eq(sale.id, lineItem.parentId)))
+    .where(and(live, eq(lineItem.parentKind, 'sale'), eq(lineItem.kind, 'set'))).groupBy(sql`p->>'productId'`);
+  const sets = await ex.select({ collectionId: lineItem.collectionId, n: sql<string>`sum(${lineItem.qty})` }).from(lineItem)
+    .innerJoin(sale, and(eq(sale.workspaceId, lineItem.workspaceId), eq(sale.id, lineItem.parentId)))
+    .where(and(live, eq(lineItem.parentKind, 'sale'), eq(lineItem.kind, 'set'))).groupBy(lineItem.collectionId);
+  const products = new Map<string, number>();
+  for (const r of [...pieces, ...parts]) if (r.productId) products.set(r.productId, (products.get(r.productId) ?? 0) + Number(r.n));
+  return { products, collections: new Map(sets.filter((r) => r.collectionId).map((r) => [r.collectionId!, Number(r.n)])) };
 }
