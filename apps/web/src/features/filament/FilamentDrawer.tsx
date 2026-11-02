@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import type { FilamentDetail, Spool } from '@app/contract';
+import { MovementDialog } from './MovementDialog';
 import { Button } from '../../components/Button';
 import { Drawer } from '../../components/Drawer';
 import { Pill, type Tone } from '../../components/Pill';
@@ -14,17 +16,17 @@ const t = es.filament;
 const d = t.drawer;
 const movementTone = { failure: 'bad', waste: 'warn', purchase: 'info', consumption: 'plain', adjustment: 'plain' } as const satisfies Record<string, Tone>;
 
-function SpoolCard({ s }: { s: Spool }) {
+function SpoolCard({ s, onMovement, onEdit }: { s: Spool; onMovement: () => void; onEdit: () => void }) {
   return (
     <li className="grid gap-[6px] rounded-card border border-line bg-bg px-3 py-[10px]" data-testid="spool-card">
       <div className="flex flex-wrap items-center gap-2">
         <b>{s.brand || t.noBrand}</b>
         {s.usedFirst ? <Pill tone="info">{d.usedFirst}</Pill> : s.status === 'empty' ? <Pill tone="plain">{t.spoolStatus.empty}</Pill> : null}
         <span className="ml-auto inline-flex gap-[6px]">
-          <Button variant="ghost" size="sm" disabled title={es.app.nextPhase}>
+          <Button variant="ghost" size="sm" onClick={onMovement}>
             {d.movement}
           </Button>
-          <Button variant="ghost" size="sm" disabled title={es.app.nextPhase}>
+          <Button variant="ghost" size="sm" onClick={onEdit}>
             {d.edit}
           </Button>
         </span>
@@ -42,7 +44,7 @@ function SpoolCard({ s }: { s: Spool }) {
   );
 }
 
-function Detail({ f, onAddSpool }: { f: FilamentDetail; onAddSpool: () => void }) {
+function Detail({ f, onAddSpool, onMovement, onEdit }: { f: FilamentDetail; onAddSpool: () => void; onMovement: (spoolId?: string) => void; onEdit: (spool: Spool) => void }) {
   const name = filamentName(f);
   const several = f.spools.length > 1;
   const brandOf = new Map(f.spools.map((s) => [s.id, s.brand || t.noBrand]));
@@ -82,7 +84,7 @@ function Detail({ f, onAddSpool }: { f: FilamentDetail; onAddSpool: () => void }
           {d.addSpoolOf(name)}
         </Button>
         {f.spoolCount > 0 && (
-          <Button size="sm" disabled title={es.app.nextPhase}>
+          <Button size="sm" onClick={() => onMovement()}>
             {d.recordMovement}
           </Button>
         )}
@@ -98,7 +100,7 @@ function Detail({ f, onAddSpool }: { f: FilamentDetail; onAddSpool: () => void }
       {f.spools.length ? (
         <ul className="m-0 mt-2 grid list-none gap-2 p-0">
           {f.spools.map((s) => (
-            <SpoolCard key={s.id} s={s} />
+            <SpoolCard key={s.id} s={s} onMovement={() => onMovement(s.id)} onEdit={() => onEdit(s)} />
           ))}
         </ul>
       ) : (
@@ -145,11 +147,29 @@ function Detail({ f, onAddSpool }: { f: FilamentDetail; onAddSpool: () => void }
   );
 }
 
-export function FilamentDrawer({ filamentId, onClose, onAddSpool }: { filamentId: string | undefined; onClose: () => void; onAddSpool: (filamentId: string) => void }) {
+export function FilamentDrawer({
+  filamentId,
+  onClose,
+  onAddSpool,
+  onEditSpool,
+}: {
+  filamentId: string | undefined;
+  onClose: () => void;
+  onAddSpool: (filamentId: string) => void;
+  onEditSpool: (filamentId: string, spool: Spool) => void;
+}) {
   const { data, error, isPending } = useFilament(filamentId);
+  const [movement, setMovement] = useState<{ spoolId?: string } | null>(null);
   return (
     <Drawer open={!!filamentId} onOpenChange={(o) => !o && onClose()} kicker={d.kicker} closeLabel={d.close}>
-      {isPending ? <p className="text-ink-2">{es.app.loading}</p> : error ? <p className="text-red-ink">{errorText(error)}</p> : <Detail f={data} onAddSpool={() => onAddSpool(data.id)} />}
+      {isPending ? (
+        <p className="text-ink-2">{es.app.loading}</p>
+      ) : error ? (
+        <p className="text-red-ink">{errorText(error)}</p>
+      ) : (
+        <Detail f={data} onAddSpool={() => onAddSpool(data.id)} onMovement={(spoolId) => setMovement(spoolId ? { spoolId } : {})} onEdit={(s) => onEditSpool(data.id, s)} />
+      )}
+      {movement && data && <MovementDialog filament={data} {...(movement.spoolId ? { spoolId: movement.spoolId } : {})} onClose={() => setMovement(null)} />}
     </Drawer>
   );
 }

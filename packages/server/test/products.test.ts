@@ -104,6 +104,11 @@ describe('products', () => {
     const get = await app.request(`/api/v1/files/${id}`);
     expect(get.headers.get('content-type')).toBe('image/png');
     expect(new Uint8Array(await get.arrayBuffer())).toEqual(png);
+    // saved together with the piece: kept when omitted, removed with null, inherited by a variant
+    expect((await saveProduct(useCaseDeps(database), ctxA, p.id, piece())).photoUrl).toBe(`/api/v1/files/${id}`);
+    expect((await saveProductAsVariant(useCaseDeps(database), ctxA, p.id, piece({ name: 'Var foto' }))).photoUrl).toBe(`/api/v1/files/${id}`);
+    expect((await saveProduct(useCaseDeps(database), ctxA, p.id, piece({ photoFileId: null }))).photoUrl).toBeNull();
+    await expect(saveProduct(useCaseDeps(database), ctxB, null, piece({ photoFileId: id }))).rejects.toThrow();
     expect((await appFor(database, ctxB).request(`/api/v1/files/${id}`)).status).toBe(404);
     const bad = await app.request('/api/v1/files', { method: 'POST', body: 'x', headers: { 'content-type': 'text/html' } });
     expect(bad.status).toBe(415);

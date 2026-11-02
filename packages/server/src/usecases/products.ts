@@ -2,7 +2,7 @@
 // deleteCollection (+ restore). Costs are never stored: they are computed on read with core.
 import { BusinessError, CollectionInput, ProductInput, type Collection, type Product, type ProductParsed } from '@app/contract';
 import { mergeParts } from '@app/core';
-import { collectionRepo, filamentRepo, printerRepo, productRepo, supplyRepo, type Ctx, type Executor, type ProductData, type ProductLines } from '@app/db';
+import { collectionRepo, fileRepo, filamentRepo, printerRepo, productRepo, supplyRepo, type Ctx, type Executor, type ProductData, type ProductLines } from '@app/db';
 import { getCollection, getProduct } from '../queries/catalogue';
 import type { UseCaseDeps } from './deps';
 
@@ -15,6 +15,7 @@ async function validateProduct(tx: Executor, ctx: Ctx, input: ProductParsed, sel
   for (const s of supplies) if (!(await supplyRepo.get(tx, ctx, s.supplyId))) throw new BusinessError('SUPPLY_NOT_FOUND');
   if (input.printerId && !(await printerRepo.get(tx, ctx, input.printerId))) throw new BusinessError('PRINTER_NOT_FOUND');
   if (input.parentId && (input.parentId === selfId || !(await productRepo.get(tx, ctx, input.parentId)))) throw new BusinessError('PRODUCT_NOT_FOUND', 'Parent not found');
+  if (input.photoFileId && !(await fileRepo.get(tx, ctx, input.photoFileId))) throw new BusinessError('NOT_FOUND', 'Photo not found');
   const spec = input.spec && Object.values(input.spec).some((v) => v && String(v).trim()) ? input.spec : null;
   return {
     data: {
@@ -37,7 +38,7 @@ async function validateProduct(tx: Executor, ctx: Ctx, input: ProductParsed, sel
   };
 }
 
-/** Create (id = null) or update a piece. The photo is kept (it changes through setProductPhoto). */
+/** Create (id = null) or update a piece, photo included (one transaction). */
 export async function saveProduct(deps: UseCaseDeps, ctx: Ctx, id: string | null, raw: unknown): Promise<Product> {
   const input = ProductInput.parse(raw);
   if (!id) await deps.entitlements.assert(ctx, 'products.create', 1);
@@ -46,11 +47,11 @@ export async function saveProduct(deps: UseCaseDeps, ctx: Ctx, id: string | null
       const cur = await productRepo.get(tx, ctx, id);
       if (!cur) throw new BusinessError('PRODUCT_NOT_FOUND');
       const { data, lines } = await validateProduct(tx, ctx, input, id);
-      await productRepo.update(tx, ctx, id, { ...data, photoFileId: cur.photoFileId }, lines);
+      await productRepo.update(tx, ctx, id, { ...data, photoFileId: input.photoFileId === undefined ? cur.photoFileId : input.photoFileId }, lines);
       return getProduct(tx, ctx, id);
     }
     const { data, lines } = await validateProduct(tx, ctx, input);
-    return getProduct(tx, ctx, (await productRepo.insert(tx, ctx, data, lines)).id);
+    return getProduct(tx, ctx, (await productRepo.insert(tx, ctx, { ...data, photoFileId: input.photoFileId ?? null }, lines)).id);
   });
 }
 
@@ -62,7 +63,7 @@ export async function saveProductAsVariant(deps: UseCaseDeps, ctx: Ctx, fromId: 
     const from = await productRepo.get(tx, ctx, fromId);
     if (!from) throw new BusinessError('PRODUCT_NOT_FOUND');
     const { data, lines } = await validateProduct(tx, ctx, { ...input, parentId: fromId });
-    return getProduct(tx, ctx, (await productRepo.insert(tx, ctx, { ...data, photoFileId: from.photoFileId }, lines)).id);
+    return getProduct(tx, ctx, (await productRepo.insert(tx, ctx, { ...data, photoFileId: input.photoFileId === undefined ? from.photoFileId : input.photoFileId }, lines)).id);
   });
 }
 

@@ -20,6 +20,9 @@ const PATHS = {
   search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/>',
   edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/>',
   chevron: '<path d="m6 9 6 6 6-6"/>',
+  check: '<path d="M5 12.5 10 17.5 19 7"/>',
+  warn: '<path d="M12 4 2.5 20h19z"/><path d="M12 10v4.5M12 17.5v.1"/>',
+  trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/>',
 } as const;
 
 export type IconName = keyof typeof PATHS;

@@ -43,3 +43,8 @@ export function Toaster() {
     </div>
   );
 }
+
+/** Notice with "Deshacer" for destructive actions (soft delete → restore). */
+export function showUndo(message: string, undoLabel: string, restore: () => Promise<unknown>, after?: () => void) {
+  useToast.getState().show(message, { label: undoLabel, run: () => void restore().then(() => after?.()) });
+}

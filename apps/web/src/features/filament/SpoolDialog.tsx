@@ -1,7 +1,14 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import { AddSpoolInput, type Filament } from '@app/contract';
+import { AddSpoolInput, type Filament, type Spool } from '@app/contract';
 import { canonicalName, DEFAULT_BRANDS, DEFAULT_COLORS, DEFAULT_MATERIALS, filamentKey, findColorHex, spoolCostPerGram, toCents } from '@app/core';
+import { useQueryClient } from '@tanstack/react-query';
+import { api } from '../../lib/api';
+import { useCatalog, useInvalidate } from '../../lib/queries';
+import { textFromCents, textFromNum } from '../../lib/numbers';
+import { useTwoTap } from '../../components/useTwoTap';
+import { showUndo } from '../../components/Toast';
+import { filamentKeys } from './api';
 import { Button } from '../../components/Button';
 import { Dialog } from '../../components/Dialog';
 import { Field } from '../../components/Field';
@@ -40,6 +47,7 @@ export function SpoolDialog({
   onOpenChange,
   filaments,
   filamentId,
+  spool,
   onAdded,
 }: {
   open: boolean;
@@ -47,8 +55,14 @@ export function SpoolDialog({
   filaments: readonly Filament[];
   /** Pre-selected filament ("Agregar rollo de PLA Negro"): the picker bar stays closed. */
   filamentId?: string;
+  /** Edit this spool (of `filamentId`). */
+  spool?: Spool;
   onAdded: (filamentId: string) => void;
 }) {
+  const catalog = useCatalog();
+  const invalidate = useInvalidate();
+  const qc = useQueryClient();
+  const two = useTwoTap();
   const ids = useId();
   const toast = useToast((s) => s.show);
   const addSpool = useAddSpool();
@@ -56,20 +70,25 @@ export function SpoolDialog({
   const [barOpen, setBarOpen] = useState(true);
   const preset = filaments.find((f) => f.id === filamentId);
 
+  const cat = catalog.data;
   const lists = useMemo(
     () => ({
-      materials: uniq([...DEFAULT_MATERIALS, ...filaments.map((f) => f.material)]),
-      colors: [...DEFAULT_COLORS, ...filaments.map((f) => ({ name: f.color, hex: f.hex }))],
-      brands: uniq([...DEFAULT_BRANDS, ...filaments.flatMap((f) => f.brands)]),
+      materials: uniq([...(cat?.materials ?? DEFAULT_MATERIALS), ...filaments.map((f) => f.material)]),
+      colors: [...(cat?.colors ?? DEFAULT_COLORS), ...filaments.map((f) => ({ name: f.color, hex: f.hex }))],
+      brands: uniq([...(cat?.brands ?? DEFAULT_BRANDS), ...filaments.flatMap((f) => f.brands)]),
     }),
-    [filaments],
+    [filaments, cat],
   );
   const colorNames = useMemo(() => uniq(lists.colors.map((c) => c.name)), [lists]);
 
   const { register, handleSubmit, reset, control, setValue } = useForm<FormValues>();
   useEffect(() => {
     if (!open) return;
-    reset({ material: preset?.material ?? '', color: preset?.color ?? '', hex: preset?.hex ?? '', brand: preset?.brands[0] ?? '', cost: '', shipping: '0', grams: '1000', purchasedOn: todayIso() });
+    reset(
+      spool
+        ? { material: preset?.material ?? '', color: preset?.color ?? '', hex: preset?.hex ?? '', brand: spool.brand, cost: textFromCents(spool.costCents), shipping: textFromCents(spool.shippingCents), grams: textFromNum(spool.grams), purchasedOn: spool.purchasedOn }
+        : { material: preset?.material ?? '', color: preset?.color ?? '', hex: preset?.hex ?? '', brand: preset?.brands[0] ?? '', cost: '', shipping: '0', grams: '1000', purchasedOn: todayIso() },
+    );
     setErrors({});
     setBarOpen(!preset);
     addSpool.reset();
@@ -93,7 +112,16 @@ export function SpoolDialog({
 
   let joinNote: React.ReactNode;
   if (!chosen) joinNote = <Note>{t.joinHelp}</Note>;
-  else if (existing && existing.activeSpoolCount > 0) {
+  else if (spool && existing && existing.id === filamentId) {
+    const j = t.belongsTo(filamentName(existing));
+    joinNote = (
+      <Note tone="ok">
+        {j.before}
+        <b>{j.name}</b>
+        {j.after}
+      </Note>
+    );
+  } else if (existing && existing.activeSpoolCount > 0) {
     const j = t.joins(filamentName(existing), formatGrams(existing.remainingGrams), existing.activeSpoolCount, formatGrams(existing.remainingGrams + (grams > 0 ? grams : 0)));
     joinNote = (
       <Note tone="ok">
@@ -149,7 +177,17 @@ export function SpoolDialog({
     const parsed = AddSpoolInput.safeParse(input);
     if (!parsed.success) return setErrors({ server: es.errors.VALIDATION_FAILED });
     try {
+      if (spool) {
+        const result = await api.filaments.updateSpool(spool.id, input);
+        qc.setQueryData(filamentKeys.detail(result.filament.id), result.filament);
+        await invalidate('spools');
+        toast(result.filament.id !== filamentId ? t.savedIn(filamentName(result.filament)) : t.saved);
+        onOpenChange(false);
+        onAdded(result.filament.id);
+        return;
+      }
       const result = await addSpool.mutateAsync(input);
+      await invalidate('spools');
       toast(t.added(filamentName(result.filament), formatGrams(result.filament.remainingGrams)));
       onOpenChange(false);
       onAdded(result.filament.id);
@@ -166,7 +204,7 @@ export function SpoolDialog({
     <Dialog
       open={open}
       onOpenChange={onOpenChange}
-      title={t.title}
+      title={spool ? t.editTitle : t.title}
       wide
       onSubmit={(e) => void onSubmit(e)}
       footer={
@@ -175,7 +213,7 @@ export function SpoolDialog({
             {t.cancel}
           </Button>
           <Button variant="primary" type="submit" disabled={addSpool.isPending}>
-            {addSpool.isPending ? t.saving : t.submit}
+            {addSpool.isPending ? t.saving : spool ? t.editSubmit : t.submit}
           </Button>
         </>
       }
@@ -261,6 +299,29 @@ export function SpoolDialog({
         <p role="alert" className="rounded-card bg-red-soft px-[14px] py-[11px] text-[13.5px] text-red-ink">
           {errors.server}
         </p>
+      )}
+      {spool && (
+        <div className="border-t border-line pt-[14px]">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-red-ink"
+            onClick={() =>
+              two.tap(async () => {
+                try {
+                  const r = await api.filaments.deleteSpool(spool.id);
+                  await invalidate('spools');
+                  onOpenChange(false);
+                  showUndo(t.deleted, es.app.undo, () => api.filaments.restoreSpool(spool.id), () => void invalidate('spools').then(() => qc.invalidateQueries({ queryKey: filamentKeys.detail(r.filamentId) })));
+                } catch (e) {
+                  setErrors({ server: errorText(e) });
+                }
+              })
+            }
+          >
+            {two.armed ? es.app.confirmDelete : t.deleteSpool}
+          </Button>
+        </div>
       )}
     </Dialog>
   );

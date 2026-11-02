@@ -32,6 +32,8 @@ export const ProductInput = z.object({
   spec: PrintSpec.nullable().default(null),
   filaments: z.array(z.object({ filamentId: Id, grams: z.number().min(0) })).max(20),
   supplies: z.array(z.object({ supplyId: Id, qty: z.number().min(0) })).max(20).default([]),
+  /** Uploaded photo: undefined keeps the current one (a variant inherits its parent's), null removes it. */
+  photoFileId: Id.nullable().optional(),
 });
 export type ProductInput = z.input<typeof ProductInput>;
 export type ProductParsed = z.output<typeof ProductInput>;

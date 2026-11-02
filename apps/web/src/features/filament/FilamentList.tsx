@@ -1,6 +1,6 @@
 import { useNavigate, useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
-import type { Filament } from '@app/contract';
+import type { Filament, Spool } from '@app/contract';
 import { PageHeader } from '../../components/AppShell';
 import { Button } from '../../components/Button';
 import { Icon } from '../../components/Icon';
@@ -48,7 +48,7 @@ export function FilamentList() {
   const { data, error, isPending, refetch } = useFilaments();
   const search = useSearch({ from: '/filamentos' });
   const navigate = useNavigate({ from: '/filamentos' });
-  const [dialog, setDialog] = useState<{ open: boolean; filamentId?: string }>({ open: false });
+  const [dialog, setDialog] = useState<{ open: boolean; filamentId?: string; spool?: Spool }>({ open: false });
   const openDrawer = (id: string | undefined) => void navigate({ search: id ? { f: id } : {}, replace: !id });
 
   const totals = data?.totals;
@@ -99,10 +99,16 @@ export function FilamentList() {
           </tbody>
         </Table>
       )}
-      <FilamentDrawer filamentId={search.f} onClose={() => openDrawer(undefined)} onAddSpool={(id) => setDialog({ open: true, filamentId: id })} />
+      <FilamentDrawer
+        filamentId={search.f}
+        onClose={() => openDrawer(undefined)}
+        onAddSpool={(id) => setDialog({ open: true, filamentId: id })}
+        onEditSpool={(id, spool) => setDialog({ open: true, filamentId: id, spool })}
+      />
       <SpoolDialog
         open={dialog.open}
         {...(dialog.filamentId ? { filamentId: dialog.filamentId } : {})}
+        {...(dialog.spool ? { spool: dialog.spool } : {})}
         filaments={data?.items ?? []}
         onOpenChange={(open) => setDialog((d) => ({ ...d, open }))}
         onAdded={(id) => openDrawer(id)}

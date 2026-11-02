@@ -10,7 +10,8 @@ export type SupplyMovementRow = typeof supplyMovement.$inferSelect;
 type SupplyData = Pick<SupplyRow, 'name' | 'nameKey' | 'unit' | 'costCents' | 'minimum' | 'note' | 'supplierId'>;
 
 export const supplyRepo = {
-  list: (ex: Executor, ctx: Ctx): Promise<SupplyRow[]> => ex.select().from(supply).where(scope(ctx, supply)).orderBy(asc(supply.name)),
+  /** In the order they were created (as the mockup lists them). */
+  list: (ex: Executor, ctx: Ctx): Promise<SupplyRow[]> => ex.select().from(supply).where(scope(ctx, supply)).orderBy(asc(supply.createdAt), asc(supply.id)),
   async get(ex: Executor, ctx: Ctx, id: string): Promise<SupplyRow | undefined> {
     const [row] = await ex.select().from(supply).where(scope(ctx, supply, eq(supply.id, id)));
     return row;

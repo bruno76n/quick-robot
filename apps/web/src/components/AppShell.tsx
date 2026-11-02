@@ -66,9 +66,9 @@ export function AppShell() {
           {name && <Mark name={name} size={28} />}
           {name}
         </span>
-        <Button variant="primary" size="sm" disabled title={es.app.nextPhase}>
+        <Link to="/productos/pieza/nueva" className="inline-flex min-h-8 items-center rounded-btn border border-btn bg-btn px-[11px] py-1 text-[13.5px] font-medium text-btn-ink no-underline hover:brightness-[1.45]">
           {es.app.newPiece}
-        </Button>
+        </Link>
       </header>
 
       <aside
@@ -85,10 +85,10 @@ export function AppShell() {
             <b className="text-[21px] font-semibold leading-none tracking-[-0.03em]">{name}</b>
           </div>
         </div>
-        <Button variant="primary" block disabled title={es.app.nextPhase}>
+        <Link to="/productos/pieza/nueva" className="inline-flex min-h-[38px] w-full items-center justify-center gap-[7px] rounded-btn border border-btn bg-btn px-[14px] py-2 font-medium text-btn-ink no-underline hover:brightness-[1.45]">
           <Icon name="plus" size={16} strokeWidth={2} />
           {es.app.newPiece}
-        </Button>
+        </Link>
         <button
           type="button"
           disabled

@@ -12,7 +12,7 @@
   --line: #e7e7ec;
   --line-2: #d2d2da;
   --purple: #6b3fd4;
-  --purple-soft: #efe9fd;
+  --purple-soft: #eeeef2;
   --btn: #121214;
   --btn-ink: #ffffff;
   --green: #00ae42;
@@ -25,12 +25,14 @@
   --red-ink: #b3223f;
   --red-soft: #fde8ec;
   --blue: #3f86c9;
-  --c-m: #4c28a8;
-  --c-l: #6b3fd4;
-  --c-q: #9b7de6;
-  --c-t: #c4b2f2;
-  --c-e: #e0d7f8;
-  --c-f: #8b8b96;
+  /* Cost layers (calculator bar). Final values of the mockup: greys; failures reserve pink. */
+  --c-m: #2d2d35;
+  --c-l: #5a5a65;
+  --c-q: #8b8b97;
+  --c-t: #b9b9c3;
+  --c-e: #dcdce3;
+  --c-f: #d6a2ab;
+  --sh-up: 0 10px 28px rgba(18, 18, 20, 0.1);
   --bar: #5a5a65;
   --font: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color-scheme: light;
@@ -102,6 +104,46 @@
   .stk { display: inline-block; width: 92px; height: 8px; background: var(--panel-2); border-radius: 99px; overflow: hidden; vertical-align: middle; }
   .stk > i { display: block; height: 100%; border-radius: 99px; background-color: var(--bar); }
   .stk.low > i { background-color: var(--red); }
+  /* Piece drawn in layers with its filament colors (mockup .lay). */
+  .lay {
+    --w: 62px; --h: 56px; position: relative; z-index: 1; display: inline-block; flex: none;
+    width: calc(var(--w) * var(--z, 1)); height: calc(var(--h) * var(--z, 1)); background: var(--lb, #c9c9d1);
+    box-shadow: inset 0 0 0 1px rgba(32, 26, 54, 0.16), inset 0 -8px 12px rgba(18, 18, 20, 0.1); overflow: hidden;
+  }
+  .lay::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(255, 255, 255, 0.38) 0%, rgba(255, 255, 255, 0) 38%, rgba(18, 18, 20, 0.1) 100%); }
+  .lay.s0 { --w: 62px; --h: 56px; border-radius: 50% 50% 10px 10px / 62% 62% 10px 10px; }
+  .lay.s1 { --w: 54px; --h: 66px; border-radius: 14px 14px 8px 8px; }
+  .lay.s2 { --w: 76px; --h: 46px; border-radius: 26px 26px 8px 8px / 30px 30px 8px 8px; }
+  .lay.sm { --z: 0.62; }
+  .lay-row { display: flex; align-items: flex-end; gap: 6px; position: relative; z-index: 1; }
+  .lay-row .lay { --z: 0.78; }
+  /* Piece tile stage with its shadow line (mockup .pt-top). */
+  .stage { position: relative; height: 112px; background: var(--panel); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 15px; margin: 6px; border-radius: 15px; }
+  .stage::after { content: ''; position: absolute; left: 16%; right: 16%; bottom: 10px; height: 5px; border-radius: 5px; background: var(--panel-2); }
+  .stage.has-img { padding: 0; overflow: hidden; }
+  .stage.has-img::after { display: none; }
+  /* Cost vs profit bar (mockup .mbar). */
+  .mbar { display: flex; gap: 2px; width: 120px; height: 8px; border-radius: 99px; overflow: hidden; background: var(--panel-2); }
+  .mbar > i { display: block; height: 100%; }
+  .mbar > .c { background-color: var(--c-l); }
+  .mbar > .g { background-color: var(--green); }
+  .mbar.loss > .c { background-color: var(--red); }
+  /* Rank / progress bar (mockup .rk-b). */
+  .rk-b { position: relative; height: 10px; background: var(--panel); border-radius: 99px; }
+  .rk-b > i { display: block; height: 100%; background-color: var(--green); border-radius: 99px; transition: width 0.25s; }
+  .rk-b.warn > i { background-color: var(--amber); }
+  .rk-b.bad > i { background-color: var(--red); }
+  .rk-b > s { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink-3); border-radius: 2px; }
+  /* Calculator breakdown bar (mockup .sbar). */
+  .sbar { display: flex; gap: 2px; height: 22px; border-radius: 3px; overflow: hidden; background: var(--panel-2); }
+  .sbar > i { display: block; height: 100%; min-width: 2px; background-color: var(--s); transition: width 0.25s; }
+  .sbar > i.gain { background-color: var(--green); }
+  .sbar.loss { box-shadow: 0 0 0 2px var(--red); }
+  .lk { display: inline-block; width: 12px; height: 12px; border-radius: 3px; background: var(--s); margin-right: 8px; vertical-align: -1px; }
+  /* Cards */
+  .card { background: var(--bg); border-radius: 20px; box-shadow: 0 0 0 1px var(--line), 0 1px 2px rgba(18, 18, 20, 0.04); }
+  .card-hover { transition: box-shadow 0.18s, transform 0.18s; }
+  .card-hover:hover, .card-hover:focus-visible { box-shadow: 0 0 0 1px var(--line-2), var(--sh-up); transform: translateY(-2px); }
   .sw { display: inline-block; width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(32, 26, 54, 0.28); flex: none; }
 }
 
