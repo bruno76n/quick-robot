@@ -2,7 +2,7 @@
 import type { ExpenseInput } from '@app/contract';
 import {
   addDays, ALL_TIME_FROM, daysBetween, expenseInRange, expensesInRange, filamentPurchase, fixedPerMonth, floorPrice, inPeriod, investmentRecovered, isActive,
-  itemLines, itemMaterial, maintenanceState, normalizeName, orderOwed, rankProducts, saleOwed, salesTotals, setCost, setPrice, supplyPurchase, type ExpenseData, type OrderStatus,
+  itemMaterial, maintenanceState, normalizeName, orderOwed, saleOwed, salesTotals, setCost, setPrice, supplyPurchase, type ExpenseData, type OrderStatus,
 } from '@app/core';
 import {
   getExpense, getSettings, insertExpense, listAllFilaments, listChannels, listCollections, listCustomers, listExpenses, listOrders, listPrinters, listProducts,
@@ -11,12 +11,12 @@ import {
 import type { Deps } from '../../deps';
 import { notFound } from '../../http';
 import { costOf, loadCostingContext, setPartsOf, supplyIdsOf } from '../../views/costing';
-import { cents, childrenOf, commissionOf, itemsText, lineItemData, orderData, saleData } from './common';
+import { cents, childrenOf, commissionOf, factSale, itemsText, lineItemData, orderData, saleData } from './common';
 import { queueViews } from './queue';
-import { grossProfitAndExpensesFast } from './fast';
+import { grossProfitAndExpensesFast, totalsOf } from './fast';
 // Reportes › taller y estado actual (agent D).
-import { orderPaid, orderProfit, orderTotal, saleGross } from '@app/core';
-import { firstSaleOn, listPrintRuns, listSpoolMovements } from '@app/db';
+import { orderPaid, orderProfit, orderTotal } from '@app/core';
+import { collectionLines, firstSaleOn, listPrintRuns, productLines, saleFacts, saleTotals, searchOrders, spoolUseByFilament, type SaleTotalsRow } from '@app/db';
 import { priceOf } from '../../views/costing';
 import { loadStock } from './common';
 
@@ -59,7 +59,7 @@ export async function restoreExpense(deps: Deps, ctx: Ctx, id: string) {
 // ---------- Sales data for reports ----------
 async function allSales(ex: Executor, ctx: Ctx, f: { from?: string; to?: string; owedOnly?: boolean } = {}) {
   const channels = await listChannels(ex, ctx);
-  const rows = (await listSales(ex, ctx, { from: f.from, to: f.to })).filter((s) => !f.owedOnly || (s.tracksPayments && !s.return));
+  const rows = await listSales(ex, ctx, { from: f.from, to: f.to, owedOnly: f.owedOnly });
   const ch = await childrenOf(ex, ctx, 'sale', rows.map((s) => s.id));
   return { channels, rows, data: rows.map((s) => ({ ...saleData(s, ch.items(s.id), ch.payments(s.id), commissionOf(channels, s.channelId)), customerId: s.customerId })) };
 }
@@ -67,10 +67,6 @@ async function allSales(ex: Executor, ctx: Ctx, f: { from?: string; to?: string;
 /** Gross profit since always and expenses since always to today: the investment of the printers (docs/04 §11). */
 export const grossProfitAndExpenses = grossProfitAndExpensesFast;
 
-const totalsView = (t: ReturnType<typeof salesTotals>, extra: { count: number; list: number; discount: number }) => ({
-  incomeCents: cents(t.income), commissionCents: cents(t.commission), costCents: cents(t.cost), profitCents: cents(t.profit), pieces: t.pieces,
-  marginPct: Math.round(t.marginPct * 10) / 10, count: extra.count, listCents: cents(extra.list), discountCents: cents(extra.discount),
-});
 
 /** Workshop (filament used, print runs, printers) in a range and the current state (inventory, orders in progress) for Reportes. */
 async function reportWorkshopAndState(ex: Executor, ctx: Ctx, from: string, to: string) {
@@ -79,15 +75,15 @@ async function reportWorkshopAndState(ex: Executor, ctx: Ctx, from: string, to: 
   const settings = await getSettings(ex, ctx);
   const use = new Map<string, { filamentId: string; name: string; hex: string; grams: number }>();
   let used = 0; let lost = 0;
-  for (const f of fils) {
-    for (const m of await listSpoolMovements(ex, ctx, f.id, { limit: 100_000 })) {
-      if (m.on < from || m.on > to || !['consumption', 'failure', 'waste'].includes(m.kind)) continue;
-      const x = use.get(f.id) ?? { filamentId: f.id, name: `${f.material} ${f.color}`, hex: f.hex, grams: 0 };
-      x.grams += -m.grams; used += -m.grams; if (m.kind !== 'consumption') lost += -m.grams;
-      use.set(f.id, x);
-    }
+  const byId = new Map(fils.map((f) => [f.id, f]));
+  for (const m of await spoolUseByFilament(ex, ctx, from, to)) {
+    const f = byId.get(m.filamentId);
+    if (!f) continue;
+    const x = use.get(f.id) ?? { filamentId: f.id, name: `${f.material} ${f.color}`, hex: f.hex, grams: 0 };
+    x.grams += m.grams; used += m.grams; if (m.kind !== 'consumption') lost += m.grams;
+    use.set(f.id, x);
   }
-  const runs = (await listPrintRuns(ex, ctx)).filter((r) => r.on >= from && r.on <= to);
+  const runs = await listPrintRuns(ex, ctx, { from, to });
   const printers = await listPrinters(ex, ctx);
   const kwh = (settings?.kwhPriceCents ?? 0) / 100;
   const round1 = (n: number) => Math.round(n * 10) / 10;
@@ -135,73 +131,72 @@ export async function report(deps: Deps, ex: Executor, ctx: Ctx, q: { period?: '
   else if (q.period === 'all') { const first = await firstSaleOn(ex, ctx); from = first && first < today ? first : first ? today : addDays(today, -29); }
   else from = addDays(today, -(Number(q.period ?? '30') - 1));
   const days = daysBetween(from, to) + 1;
-  const { channels, data } = await allSales(ex, ctx, { from: q.period === 'all' ? from : addDays(from, -days), to });
-  const inR = (on: string, a: string, b: string) => on >= a && on <= b;
-  const period = data.filter((s) => inR(s.on, from, to));
-  const prev = q.period === 'all' ? null : data.filter((s) => inR(s.on, addDays(from, -days), addDays(from, -1)));
-  const extra = (list: typeof data) => {
-    const ok = list.filter((s) => !s.returned);
-    return { count: list.length, list: ok.reduce((a, s) => a + s.items.reduce((x, it) => x + it.qty * it.list, 0), 0), discount: ok.reduce((a, s) => a + s.items.reduce((x, it) => x + Math.max(0, it.qty * it.list - it.qty * it.price), 0), 0) };
-  };
+  // Everything is summed in SQL (docs/15 §2: "Todo" with 25 000 sales ≤ 1.5 s); core rules are the same as salesTotals.
+  const channels = await listChannels(ex, ctx);
+  const tv = (r: SaleTotalsRow | undefined) => { const t = totalsOf(r); return { incomeCents: t.incomeCents, commissionCents: t.commissionCents, costCents: t.costCents, profitCents: t.profitCents, pieces: t.pieces, marginPct: t.marginPct, count: t.count, listCents: t.listCents, discountCents: Math.round(r?.discountCents ?? 0) }; };
+  const range = { from, to };
+  const prevRange = q.period === 'all' ? null : { from: addDays(from, -days), to: addDays(from, -1) };
+  const groups = await saleTotals(ex, ctx, range, 'all');
+  const group = (prefix: string) => groups.filter((r) => r.key?.startsWith(prefix)).map((r) => ({ ...r, key: r.key!.slice(prefix.length) || null }));
+  const totalsRow = groups.find((r) => r.key === 'total');
+  const prevRow = prevRange ? (await saleTotals(ex, ctx, prevRange))[0] : undefined;
   const products = await listProducts(ex, ctx, { withDeleted: true });
   const names = new Map(products.map((p) => [p.id, p.name]));
   const customers = new Map((await listCustomers(ex, ctx, { withDeleted: true })).map((c) => [c.id, c.name]));
   const exps = await listExpenses(ex, ctx);
   const expensesCents = cents(expensesInRange(exps.map(expenseData), from, to));
-  const T = salesTotals(period);
-  // Buckets: days up to 10, weeks up to 100, months beyond (mockup).
+  const T = tv(totalsRow);
+  // Buckets: days up to 10, weeks up to 100, months beyond (mockup); the sums per day come from SQL.
   const unit = days <= 10 ? 'day' : days <= 100 ? 'week' : 'month';
+  const perDay = group('d:').sort((a, b) => (a.key ?? '').localeCompare(b.key ?? ''));
   const buckets: { from: string; to: string; partial: boolean; incomeCents: number; costCents: number; commissionCents: number; profitCents: number; count: number; pieces: number }[] = [];
+  let d = 0;
   for (let s = from; s <= to;) {
     let e = s;
     if (unit === 'week') { const wd = (new Date(`${s}T12:00:00Z`).getUTCDay() + 6) % 7; e = addDays(s, 6 - wd); }
     if (unit === 'month') { while (e < to && addDays(e, 1).slice(0, 7) === s.slice(0, 7)) e = addDays(e, 1); }
     const end = e > to ? to : e;
-    const xs = period.filter((x) => inR(x.on, s, end));
-    const t = salesTotals(xs);
-    buckets.push({ from: s, to: end, partial: e > to || (unit === 'month' && addDays(end, 1).slice(0, 7) === s.slice(0, 7)), incomeCents: cents(t.income), costCents: cents(t.cost), commissionCents: cents(t.commission), profitCents: cents(t.profit), count: xs.length, pieces: t.pieces });
+    const acc = { incomeCents: 0, costCents: 0, commissionCents: 0, profitCents: 0, count: 0, pieces: 0 };
+    while (d < perDay.length && (perDay[d]!.key ?? '') <= end) {
+      const t = totalsOf(perDay[d]!);
+      acc.incomeCents += t.incomeCents; acc.costCents += t.costCents; acc.commissionCents += t.commissionCents; acc.profitCents += t.profitCents; acc.count += t.count; acc.pieces += t.pieces;
+      d++;
+    }
+    buckets.push({ from: s, to: end, partial: e > to || (unit === 'month' && addDays(end, 1).slice(0, 7) === s.slice(0, 7)), ...acc });
     s = addDays(end, 1);
   }
-  const byCollection = new Map<string, { id: string; name: string; qty: number; income: number; cost: number; profit: number }>();
-  for (const s of period.filter((x) => !x.returned)) for (const it of s.items) {
-    if (it.kind !== 'set' || !it.collectionId) continue;
-    const x = byCollection.get(it.collectionId) ?? { id: it.collectionId, name: it.name, qty: 0, income: 0, cost: 0, profit: 0 };
-    x.qty += it.qty; x.income += it.qty * it.price; x.cost += it.qty * it.cost; x.profit += it.qty * it.price * (1 - s.commissionPct / 100) - it.qty * it.cost;
-    byCollection.set(it.collectionId, x);
-  }
-  const byCustomer = new Map<string, { id: string | null; name: string; count: number; income: number; profit: number; owed: number }>();
-  for (const s of period) {
-    const k = s.customerId ?? '';
-    const x = byCustomer.get(k) ?? { id: s.customerId, name: s.customerId ? customers.get(s.customerId) ?? '' : '', count: 0, income: 0, profit: 0, owed: 0 };
-    const t = salesTotals([s]); x.count += 1; x.income += t.income; x.profit += t.profit; x.owed += s.customerId ? saleOwed(s) : 0;
-    byCustomer.set(k, x);
-  }
-  // Cost concepts: each sold line split by the current breakdown of its piece.
+  const lines = await productLines(ex, ctx, range);
+  const ranking = lines.map((l) => ({ ...l, name: names.get(l.productId) ?? l.name, times: l.costCents > 0 ? l.incomeCents / l.costCents : 0 })).sort((a, b) => b.profitCents - a.profitCents);
+  const byCollection = (await collectionLines(ex, ctx, range)).sort((a, b) => b.profitCents - a.profitCents);
+  const byCustomerRows = group('c:').map((r) => ({ r, t: totalsOf(r) })).sort((a, b) => b.t.incomeCents - a.t.incomeCents);
+  const byChannelRows = new Map(group('h:').map((r) => [r.key, r]));
+  // Cost concepts: each sold piece's cost split by the current breakdown of that piece.
   const c = await loadCostingContext(ex, ctx, supplyIdsOf(products));
   const byId = new Map(products.map((p) => [p.id, p]));
   const k = { M: 0, L: 0, Q: 0, E: 0, F: 0 };
-  for (const s of period.filter((x) => !x.returned)) for (const it of s.items) for (const l of itemLines(it)) {
+  for (const l of lines) {
     const p = byId.get(l.productId);
     const b = p ? costOf(p, c) : null;
-    if (b && b.total > 0) for (const key of ['M', 'L', 'Q', 'E', 'F'] as const) k[key] += (l.cost * b[key]) / b.total;
-    else k.E += l.cost;
+    const cost = l.costCents / 100;
+    if (b && b.total > 0) for (const key of ['M', 'L', 'Q', 'E', 'F'] as const) k[key] += (cost * b[key]) / b.total;
+    else k.E += cost;
   }
   const g = await grossProfitAndExpenses(ex, ctx, today);
   const printers = await listPrinters(ex, ctx);
   const inv = investmentRecovered(g.grossProfit, g.expenses, printers.map((p) => ({ id: p.id, costPesos: p.costCents / 100, hours: p.hours })));
   const W = await reportWorkshopAndState(ex, ctx, from, to);
-  const prevExpensesCents = prev ? cents(expensesInRange(exps.map(expenseData), addDays(from, -days), addDays(from, -1))) : null;
+  const prevExpensesCents = prevRange ? cents(expensesInRange(exps.map(expenseData), addDays(from, -days), addDays(from, -1))) : null;
   return {
     range: { from, to, days, unit, period: q.from && q.to ? 'custom' : q.period ?? '30' },
-    totals: totalsView(T, extra(period)), previous: prev ? totalsView(salesTotals(prev), extra(prev)) : null,
-    byChannel: channels.map((ch) => { const xs = period.filter((s) => s.channelId === ch.id); return { channelId: ch.id, name: ch.name, commissionPct: ch.commissionPct, ...totalsView(salesTotals(xs), extra(xs)) }; }).filter((x) => x.count > 0),
-    topProducts: rankProducts(period, (id) => names.get(id)).map((r) => ({ productId: r.productId, name: r.name, hexes: W.hexesOf(r.productId), qty: r.qty, incomeCents: cents(r.income), costCents: cents(r.cost), profitCents: cents(r.profit), times: Math.round(r.times * 10) / 10 })),
-    byCollection: [...byCollection.values()].sort((a, b) => b.profit - a.profit).map((x) => ({ id: x.id, name: x.name, qty: x.qty, incomeCents: cents(x.income), costCents: cents(x.cost), profitCents: cents(x.profit) })),
-    byCustomer: [...byCustomer.values()].sort((a, b) => b.income - a.income).map((x) => ({ id: x.id, name: x.name, count: x.count, incomeCents: cents(x.income), profitCents: cents(x.profit), owedCents: x.id ? cents(x.owed + W.owedByCustomer(x.id)) : 0 })),
+    totals: T, previous: prevRange ? tv(prevRow) : null,
+    byChannel: channels.map((ch) => ({ channelId: ch.id, name: ch.name, commissionPct: ch.commissionPct, ...tv(byChannelRows.get(ch.id)) })).filter((x) => x.count > 0),
+    topProducts: ranking.map((r) => ({ productId: r.productId, name: r.name, hexes: W.hexesOf(r.productId), qty: r.qty, incomeCents: Math.round(r.incomeCents), costCents: Math.round(r.costCents), profitCents: Math.round(r.profitCents), times: Math.round(r.times * 10) / 10 })),
+    byCollection: byCollection.map((x) => ({ id: x.id, name: x.name, qty: x.qty, incomeCents: Math.round(x.incomeCents), costCents: Math.round(x.costCents), profitCents: Math.round(x.profitCents) })),
+    byCustomer: byCustomerRows.map(({ r, t }) => ({ id: r.key, name: r.key ? customers.get(r.key) ?? '' : '', count: t.count, incomeCents: t.incomeCents, profitCents: t.profitCents, owedCents: r.key ? Math.round(t.owedCents + W.owedByCustomer(r.key) * 100) : 0 })),
     costConcepts: { materialCents: cents(k.M), powerCents: cents(k.L), machineCents: cents(k.Q), extrasCents: cents(k.E), failureReserveCents: cents(k.F) },
-    buckets, expensesCents, netProfitCents: cents(T.profit) - expensesCents,
+    buckets, expensesCents, netProfitCents: T.profitCents - expensesCents,
     investmentRecovered: { equipmentCents: cents(inv.equipment), hours: inv.hours, netCents: cents(inv.net), recoveredPct: Math.round(inv.recoveredPct * 10) / 10 },
-    periodSales: period.length,
+    periodSales: T.count,
     hasExpenses: exps.length > 0, previousExpensesCents: prevExpensesCents,
     workshop: W.workshop, inventory: W.inventory, ordersNow: W.ordersNow,
   };
@@ -275,7 +270,7 @@ export async function purchases(_deps: Deps, ex: Executor, ctx: Ctx) {
 export async function home(deps: Deps, ex: Executor, ctx: Ctx) {
   const today = deps.clock.today();
   const { data: recent } = await allSales(ex, ctx, { from: addDays(today, -29), to: today });
-  const { data, rows } = await allSales(ex, ctx, { owedOnly: true });
+  const owing = (await saleFacts(ex, ctx, { owedOnly: true })).map((f) => ({ f, owed: saleOwed(factSale(f, 0)) })).filter((x) => x.owed > 0);
   const last30 = recent.filter((s) => inPeriod(s.on, today, 30));
   const t = salesTotals(last30);
   const channels = await listChannels(ex, ctx);
@@ -301,7 +296,7 @@ export async function home(deps: Deps, ex: Executor, ctx: Ctx) {
   }
   for (const f of fils) { const own = spools.filter((s) => s.filamentId === f.id); if (own.length && left(f.id) <= 150) attentions.push({ kind: 'filament_low', severity: left(f.id) <= 0.5 ? 'bad' : 'warn', target: { type: 'filament', id: f.id }, params: { name: filName(f.id), grams: Math.round(left(f.id)) } }); }
   for (const { o } of [...active].sort((x, y) => x.o.dueOn.localeCompare(y.o.dueOn))) { const d = daysBetween(today, o.dueOn); if (d <= 2) attentions.push({ kind: 'order_due', severity: d < 0 ? 'bad' : 'warn', target: { type: 'order', id: o.id }, params: { number: o.number, customer: customers.get(o.customerId) ?? '', days: d, dueOn: o.dueOn, status: o.status } }); }
-  for (const [i, s] of [...data.entries()].sort((x, y) => x[1].on.localeCompare(y[1].on))) { const owed = saleOwed(s); if (owed > 0) attentions.push({ kind: 'sale_owed', severity: 'info', target: { type: 'sale', id: s.id }, params: { customer: rows[i]!.customerId ? customers.get(rows[i]!.customerId!) ?? '' : '', owedCents: cents(owed), on: s.on } }); }
+  for (const { f, owed } of [...owing].sort((x, y) => x.f.on.localeCompare(y.f.on))) attentions.push({ kind: 'sale_owed', severity: 'info', target: { type: 'sale', id: f.id }, params: { customer: f.customerId ? customers.get(f.customerId) ?? '' : '', owedCents: cents(owed), on: f.on } });
   const c = await loadCostingContext(ex, ctx, supplyIdsOf(products));
   for (const p of products) {
     if (p.mode !== 'value' || !p.priceCents) continue;
@@ -325,7 +320,7 @@ export async function home(deps: Deps, ex: Executor, ctx: Ctx) {
   return {
     stats: {
       incomeCents: cents(t.income), profitCents: cents(t.profit), marginPct: Math.round(t.marginPct * 10) / 10, sales: last30.length, pieces: t.pieces,
-      activeOrders: active.length, owedCents: cents(active.reduce((a, x) => a + orderOwed(x.d), 0) + data.reduce((a, s) => a + saleOwed(s), 0)),
+      activeOrders: active.length, owedCents: cents(active.reduce((a, x) => a + orderOwed(x.d), 0) + owing.reduce((a, x) => a + x.owed, 0)),
       inProduction: active.filter((x) => x.o.status === 'in_production').length, ready: active.filter((x) => x.o.status === 'ready').length,
       printersBusy: printingNow.length, printers: printers.length, products: products.length,
     },
@@ -339,19 +334,20 @@ export async function search(_deps: Deps, ex: Executor, ctx: Ctx, q: string) {
   const needle = normalizeName(q);
   const hit = (...t: (string | null | undefined)[]) => t.some((x) => x && normalizeName(x).includes(needle));
   const productsAll = await listProducts(ex, ctx);
-  const c = await loadCostingContext(ex, ctx, supplyIdsOf(productsAll));
-  const products = productsAll.filter((p) => hit(p.name, p.note, ...p.tags)).slice(0, 8).map((p) => ({ id: p.id, name: p.name, listCents: cents(priceOf(p, c)) }));
+  const foundProducts = productsAll.filter((p) => hit(p.name, p.note, ...p.tags)).slice(0, 8);
+  const foundCols = (await listCollections(ex, ctx)).filter((col) => hit(col.name)).slice(0, 8);
+  // Prices are costed only when something matched (the costing context is the heavy part).
+  const c = foundProducts.length || foundCols.length ? await loadCostingContext(ex, ctx, supplyIdsOf(productsAll)) : null;
+  const products = foundProducts.map((p) => ({ id: p.id, name: p.name, listCents: cents(priceOf(p, c!)) }));
   const byId = new Map(productsAll.map((p) => [p.id, p]));
-  const collections = (await listCollections(ex, ctx)).filter((col) => hit(col.name)).slice(0, 8).map((col) => ({ id: col.id, name: col.name, priceCents: cents(setPrice(col.priceCents ? col.priceCents / 100 : null, setPartsOf(col, byId, c))) }));
+  const collections = foundCols.map((col) => ({ id: col.id, name: col.name, priceCents: cents(setPrice(col.priceCents ? col.priceCents / 100 : null, setPartsOf(col, byId, c!))) }));
   const customersAll = await listCustomers(ex, ctx);
   const customers = customersAll.filter((x) => hit(x.name, x.phone, x.note)).slice(0, 8).map((x) => ({ id: x.id, name: x.name, type: x.type, phone: x.phone }));
-  const cname = new Map((await listCustomers(ex, ctx, { withDeleted: true })).map((x) => [x.id, x.name]));
-  const ordersAll = await listOrders(ex, ctx);
-  const oc = await childrenOf(ex, ctx, 'order', ordersAll.map((o) => o.id));
-  const orders = ordersAll.filter((o) => hit(`#${o.number}`, String(o.number), o.note, cname.get(o.customerId), itemsText(oc.items(o.id)))).slice(0, 8).map((o) => ({ id: o.id, number: o.number, customer: cname.get(o.customerId) ?? '', status: o.status, itemsText: itemsText(oc.items(o.id)) }));
-  const salesAll = [...await listSales(ex, ctx)].sort((a, b) => b.on.localeCompare(a.on));
-  const sc = await childrenOf(ex, ctx, 'sale', salesAll.map((s) => s.id));
-  const sales = salesAll.filter((s) => hit(s.note, cname.get(s.customerId ?? ''), itemsText(sc.items(s.id)))).slice(0, 8).map((s) => ({ id: s.id, on: s.on, itemsText: itemsText(sc.items(s.id)), customer: cname.get(s.customerId ?? '') ?? '', totalCents: cents(saleGross({ items: sc.items(s.id).map(lineItemData) })) }));
+  const cname = new Map(customersAll.map((x) => [x.id, x.name]));
+  const found = await searchOrders(ex, ctx, q);
+  const oc = await childrenOf(ex, ctx, 'order', found.map((o) => o.id));
+  const orders = found.map((o) => ({ id: o.id, number: o.number, customer: cname.get(o.customerId) ?? '', status: o.status, itemsText: itemsText(oc.items(o.id)) }));
+  const sales = (await saleFacts(ex, ctx, { q, limit: 8 })).map((s) => ({ id: s.id, on: s.on, itemsText: s.itemsText, customer: cname.get(s.customerId ?? '') ?? '', totalCents: Math.round(s.grossCents) }));
   const fils = (await listAllFilaments(ex, ctx)).filter((f) => hit(`${f.material} ${f.color}`)).slice(0, 8);
   const spools = await listSpools(ex, ctx, fils.map((f) => f.id));
   const filaments = fils.map((f) => ({ id: f.id, name: `${f.material} ${f.color}`, hex: f.hex, remainingGrams: Math.round(spools.filter((x) => x.filamentId === f.id).reduce((a, x) => a + Math.max(0, x.remainingGrams), 0) * 10) / 10 }));

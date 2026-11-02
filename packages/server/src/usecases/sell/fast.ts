@@ -1,7 +1,7 @@
 // Read paths for big data sets (docs/15 §1–3): sums come from SQL (saleFacts, saleTotals, orderFacts),
 // the app only applies the rules of core on one row per sale or order.
-import { ALL_TIME_FROM, customerStats, expensesInRange, isActive, orderOwed, saleCommission, saleCost, saleIncome, saleOwed, saleProfit, type OrderStatus } from '@app/core';
-import { listChannels, listCustomers, listExpenses, orderFacts, saleFacts, saleTotals, type Ctx, type Executor, type OrderFact, type SaleFilter, type SaleTotalsRow } from '@app/db';
+import { ALL_TIME_FROM, expensesInRange, isActive, orderOwed, saleCommission, saleCost, saleIncome, saleOwed, saleProfit, type OrderStatus } from '@app/core';
+import { listChannels, listCustomers, listExpenses, orderTotalsByCustomer, saleFacts, saleTotals, type Ctx, type Executor, type OrderFact, type SaleFilter, type SaleTotalsRow } from '@app/db';
 import { cents, commissionOf, factSale } from './common';
 
 const pct = (profit: number, income: number) => (income ? Math.round((profit / income) * 1000) / 10 : 0);
@@ -34,21 +34,19 @@ export async function saleListFast(ex: Executor, ctx: Ctx, f: SaleFilter & { q?:
 
 const orderData = (o: OrderFact) => ({ status: o.status as OrderStatus, items: [{ kind: 'piece' as const, name: '', qty: 1, price: o.grossCents / 100, list: 0, cost: o.costCents / 100 }], commissionPct: 0, payments: [o.paidCents / 100] });
 
-/** Per customer: orders, active, sales, income, profit, owed and last activity (docs/04 §12), from SQL sums. */
-export async function customerTotals(ex: Executor, ctx: Ctx, customerId?: string) {
-  const channels = await listChannels(ex, ctx);
-  const sales = await saleFacts(ex, ctx, customerId ? { customerId } : {});
-  const orders = await orderFacts(ex, ctx, customerId ? { customerId } : {});
-  const bySale = new Map<string, typeof sales>();
-  for (const s of sales) if (s.customerId) bySale.set(s.customerId, [...(bySale.get(s.customerId) ?? []), s]);
-  const byOrder = new Map<string, OrderFact[]>();
-  for (const o of orders) byOrder.set(o.customerId, [...(byOrder.get(o.customerId) ?? []), o]);
+/** Per customer: orders, active, sales, income, profit, owed and last activity (docs/04 §12), summed in SQL. */
+export async function customerTotals(ex: Executor, ctx: Ctx) {
+  const all = new Map((await saleTotals(ex, ctx, {}, 'customer')).map((r) => [r.key, r]));
+  // Returned sales do not count in income and profit (docs/04 §12): the same query keeps their cost apart.
+  const kept = new Map([...all].map(([key, r]) => [key, totalsOf({ ...r, costCents: r.keptCostCents })]));
+  const orders = await orderTotalsByCustomer(ex, ctx);
   return (id: string) => {
-    const st = customerStats(
-      (byOrder.get(id) ?? []).map((o) => ({ ...orderData(o), createdOn: o.createdOn, dueOn: o.dueOn })),
-      (bySale.get(id) ?? []).map((s) => ({ ...factSale(s, commissionOf(channels, s.channelId)), on: s.on })),
-    );
-    return { orders: st.orders, activeOrders: st.activeOrders, sales: st.sales, incomeCents: cents(st.income), profitCents: cents(st.profit), owedCents: cents(st.owed), lastActivity: st.lastActivity };
+    const a = all.get(id); const k = kept.get(id); const o = orders.get(id);
+    const last = [a?.lastOn, o?.lastOn].filter((x): x is string => !!x).sort().at(-1) ?? null;
+    return {
+      orders: o?.orders ?? 0, activeOrders: o?.active ?? 0, sales: a?.count ?? 0, incomeCents: k?.incomeCents ?? 0, profitCents: k?.profitCents ?? 0,
+      owedCents: Math.round((o?.owedCents ?? 0) + (a?.owedCents ?? 0)), lastActivity: last,
+    };
   };
 }
 

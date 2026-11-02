@@ -1,6 +1,11 @@
 // Time budgets of docs/15 §2 on the load set of §1 (PGlite, p95). Over 2× the budget fails; over 1× is
 // printed so the phase report can note it. Slow to prepare (~1–2 min): runs with `pnpm perf` (PERF=1).
+import { connectPglite, DEFAULT_MIGRATIONS } from '@app/db';
 import { generateLoad, LOAD } from '@app/db/load-test';
+import { createHash } from 'node:crypto';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { applyDevelopmentSeed } from '../../src/dev-seed';
@@ -13,9 +18,18 @@ type J = Record<string, any>; // eslint-disable-line @typescript-eslint/no-expli
 
 beforeAll(async () => {
   if (!RUN) return;
-  h = await makeHarness();
-  await applyDevelopmentSeed(h.deps, h.A);
-  await generateLoad(h.db, h.A, { today: h.deps.clock.today(), nextId: () => h.deps.ids.next() });
+  // The load set takes minutes to build: it is kept as a dump next to the test database, per migrations + generator.
+  const key = createHash('sha256').update(readFileSync(new URL('../../../db/seed/load-test.ts', import.meta.url))).update(readdirSync(DEFAULT_MIGRATIONS).join()).digest('hex').slice(0, 12);
+  const file = join(tmpdir(), 'app-test-db', `perf-${key}.tar`);
+  if (existsSync(file)) {
+    h = await makeHarness({}, await connectPglite({ loadDataDir: new Blob([readFileSync(file)]), migrate: false }));
+  } else {
+    h = await makeHarness();
+    await applyDevelopmentSeed(h.deps, h.A);
+    await generateLoad(h.db, h.A, { today: h.deps.clock.today(), nextId: () => h.deps.ids.next() });
+    mkdirSync(join(tmpdir(), 'app-test-db'), { recursive: true });
+    writeFileSync(file, Buffer.from(await (await h.conn.dump!()).arrayBuffer()));
+  }
 }, 900_000);
 afterAll(async () => {
   if (!RUN) return;
@@ -25,6 +39,7 @@ afterAll(async () => {
 });
 
 async function measure(name: string, budget: number, fn: () => Promise<unknown>, runs = 7) {
+  if (process.env.PERF_ONLY && !new RegExp(process.env.PERF_ONLY).test(name)) return;
   const times: number[] = [];
   await fn();
   for (let i = 0; i < runs; i++) { const t = performance.now(); await fn(); times.push(performance.now() - t); }

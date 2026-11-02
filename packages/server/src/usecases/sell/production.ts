@@ -3,7 +3,7 @@ import { BusinessError, type PrintRunInput, type Warning } from '@app/contract';
 import { printRunEffects, printRunLock } from '@app/core';
 import {
   addPrinterHours, deleteLedgerRowsOfPrintRun, getOrder, listQueue, deletePrintRun as deleteRun, getFile, getPrinter, getProduct, getPrintRun, insertPrintRun, insertPrintRunFilaments,
-  insertStockMovements, listAllFilaments, listOrders, listPrinters, listSpoolMovements, listPrintRunFilaments, listPrintRuns, listProducts, listSpools, stockMovementsByRef, transaction, updateProduct,
+  insertStockMovements, listAllFilaments, listOrders, listPrinters, listSpoolMovements, listPrintRunFilaments, listPrintRuns, printRunTotals, listProducts, listSpools, stockMovementsByRef, transaction, updateProduct,
   type Ctx, type Executor,
 } from '@app/db';
 import type { Deps } from '../../deps';
@@ -13,16 +13,19 @@ import { markReadyIn } from './orders';
 import { dequeue } from './queue';
 import { deductFilament, shortfall, useSupplies } from './material';
 
-export async function printRunList(_deps: Deps, ex: Executor, ctx: Ctx, f: { reason?: string | undefined; page: number; pageSize: number }) {
-  const runs = await listPrintRuns(ex, ctx, { reason: f.reason });
-  const fil = await listPrintRunFilaments(ex, ctx, runs.map((r) => r.id));
+/** One page of print runs; totals over the whole filter come from SQL (docs/15 §3). */
+export async function printRunList(_deps: Deps, ex: Executor, ctx: Ctx, f: { reason?: string | undefined; page: number; pageSize: number; ids?: readonly string[] }) {
+  const runs = await listPrintRuns(ex, ctx, { reason: f.reason, ids: f.ids, limit: f.pageSize, offset: (f.page - 1) * f.pageSize });
+  const filRows = await listPrintRunFilaments(ex, ctx, runs.map((r) => r.id));
+  const byRun = new Map<string, typeof filRows>();
+  for (const x of filRows) byRun.set(x.printRunId, [...(byRun.get(x.printRunId) ?? []), x]);
   const products = new Map((await listProducts(ex, ctx, { withDeleted: true })).map((p) => [p.id, p.name]));
   const printers = new Map((await listPrinters(ex, ctx)).map((p) => [p.id, p.name]));
   const fils = new Map((await listAllFilaments(ex, ctx)).map((x) => [x.id, x]));
   const orderIds = [...new Set(runs.map((r) => r.orderId).filter((x): x is string => !!x))];
   const orders = new Map((orderIds.length ? await listOrders(ex, ctx, { ids: orderIds }) : []).map((o) => [o.id, o.number]));
-  const all = runs.map((r) => {
-    const fs = fil.filter((x) => x.printRunId === r.id);
+  const items = runs.map((r) => {
+    const fs = byRun.get(r.id) ?? [];
     return {
       id: r.id, on: r.on, productId: r.productId, name: r.productId ? products.get(r.productId) ?? '' : r.text, text: r.text, qty: r.qty, printerId: r.printerId,
       printerName: r.printerId ? printers.get(r.printerId) ?? null : null, result: r.result, hours: r.hours, reason: r.reason, orderId: r.orderId, orderNumber: r.orderId ? orders.get(r.orderId) ?? null : null,
@@ -30,14 +33,15 @@ export async function printRunList(_deps: Deps, ex: Executor, ctx: Ctx, f: { rea
       filaments: fs.map((x) => ({ filamentId: x.filamentId, name: fils.get(x.filamentId) ? `${fils.get(x.filamentId)!.material} ${fils.get(x.filamentId)!.color}` : '', hex: fils.get(x.filamentId)?.hex ?? '#c9c9d1', grams: x.grams })),
     };
   });
-  const totals = { pieces: all.filter((r) => r.result === 'ok').reduce((a, r) => a + r.qty, 0), hours: Math.round(all.reduce((a, r) => a + r.hours, 0) * 100) / 100, grams: Math.round(all.reduce((a, r) => a + r.grams, 0) * 10) / 10, failed: all.filter((r) => r.result === 'fail').length };
-  return { items: all.slice((f.page - 1) * f.pageSize, f.page * f.pageSize), page: f.page, pageSize: f.pageSize, total: all.length, totals };
+  const t = await printRunTotals(ex, ctx, { reason: f.reason, ids: f.ids });
+  const totals = { pieces: t.pieces, hours: Math.round(t.hours * 100) / 100, grams: Math.round(t.grams * 10) / 10, failed: t.failed };
+  return { items, page: f.page, pageSize: f.pageSize, total: t.count, totals };
 }
 
 export async function printRunDetail(deps: Deps, ex: Executor, ctx: Ctx, id: string) {
   const r = await getPrintRun(ex, ctx, id);
   if (!r) throw notFound('print_run');
-  const view = (await printRunList(deps, ex, ctx, { page: 1, pageSize: 100_000 })).items.find((x) => x.id === id)!;
+  const view = (await printRunList(deps, ex, ctx, { page: 1, pageSize: 1, ids: [id] })).items[0]!;
   // What undoing it would do (mockup prodDlg): pieces it added, filament it gives back, or why it is locked.
   const piecesAdded = (await stockMovementsByRef(ex, ctx, id)).filter((m) => m.kind === 'print').reduce((a, m) => a + m.qty, 0);
   const free = r.productId ? (await loadStock(ex, ctx)).free(r.productId) : 0;

@@ -9,7 +9,7 @@ import {
 } from '@app/core';
 import {
   addPrinterHours, deleteLineItems, deletePayment, getChannel, getCustomer, getOrder, getPrinter, insertLineItems, insertOrder, insertPayments,
-  insertPrintRun, insertPrintRunFilaments, insertSale, insertStockMovements, listChannels, listCustomers, listOrders, listPrinters, listProducts,
+  insertPrintRun, insertPrintRunFilaments, insertSale, insertStockMovements, listChannels, listCustomers, countOrders, listOrders, listPrinters, listProducts,
   listQueue, nextOrderNumber, setOrderDeleted, transaction, updateLineItem, updateOrder, type Ctx, type Executor, type LineItemRow, type OrderRow,
 } from '@app/db';
 import type { Deps } from '../../deps';
@@ -43,10 +43,11 @@ const materialOf = (items: readonly LineItemRow[], products: Awaited<ReturnType<
 export async function orderList(deps: Deps, ex: Executor, ctx: Ctx, f: { statuses?: readonly string[] | undefined; view?: string | undefined; month?: string | undefined; customerId?: string | undefined; q?: string | undefined; page: number; pageSize: number }) {
   const channels = await listChannels(ex, ctx);
   const customers = new Map((await listCustomers(ex, ctx, { withDeleted: true })).map((c) => [c.id, c.name]));
-  let rows = await listOrders(ex, ctx, {
-    statuses: f.statuses, customerId: f.customerId,
-    ...(f.month ? { dueFrom: `${f.month}-01`, dueTo: `${f.month}-31` } : {}),
-  });
+  // A plain list pages in SQL; the board, a month or a text search filter the (small) matching set.
+  const paged = !f.q && f.view !== 'board' && !f.month;
+  const filter = { statuses: f.statuses, customerId: f.customerId, ...(f.month ? { dueFrom: `${f.month}-01`, dueTo: `${f.month}-31` } : {}) };
+  let rows = await listOrders(ex, ctx, paged ? { ...filter, limit: f.pageSize, offset: (f.page - 1) * f.pageSize } : f.view === 'board' && !f.statuses ? { ...filter, statuses: ['quoted', 'accepted', 'in_production', 'ready', 'delivered'] } : filter);
+  const total = paged ? await countOrders(ex, ctx, filter) : 0;
   if (f.view === 'board') {
     const delivered = rows.filter((o) => o.status === 'delivered').sort((a, b) => (b.deliveredOn ?? '').localeCompare(a.deliveredOn ?? '') || b.number - a.number).slice(0, 3);
     rows = [...rows.filter((o) => isActive(o.status as OrderStatus)), ...delivered];
@@ -72,7 +73,7 @@ export async function orderList(deps: Deps, ex: Executor, ctx: Ctx, f: { statuse
       jobs: jobs.map((j) => ({ printerId: j.printerId, printerName: j.printerName, progress: j.progress, remainingMinutes: j.remainingMinutes, waitMinutes: j.waitMinutes, position: j.position })),
     };
   });
-  return { items: all.slice((f.page - 1) * f.pageSize, f.page * f.pageSize), page: f.page, pageSize: f.pageSize, total: all.length };
+  return paged ? { items: all, page: f.page, pageSize: f.pageSize, total } : { items: all.slice((f.page - 1) * f.pageSize, f.page * f.pageSize), page: f.page, pageSize: f.pageSize, total: all.length };
 }
 
 export async function orderDetail(deps: Deps, ex: Executor, ctx: Ctx, id: string, opts: { deleted?: boolean } = {}) {

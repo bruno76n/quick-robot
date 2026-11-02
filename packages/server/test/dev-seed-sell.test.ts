@@ -19,6 +19,7 @@ describe('seeded phase 3 figures', () => {
     near(pesos(r.totals.incomeCents), e.ingreso); near(pesos(r.totals.commissionCents), e.comision); near(pesos(r.totals.costCents), e.costo); near(pesos(r.totals.profitCents), e.ganancia);
     expect(r.totals.pieces).toBe(e.piezas);
     expect(r.topProducts.slice(0, golden.rankingPiezas.length).map((x) => x.name)).toEqual(golden.rankingPiezas.map((x: { nombre: string }) => x.nombre));
+    for (const [i, e] of (golden.rankingPiezas as { cant: number; ganancia: number }[]).entries()) { expect(r.topProducts[i]!.qty).toBe(e.cant); near(pesos(r.topProducts[i]!.profitCents), e.ganancia); }
     near(r.investmentRecovered.recoveredPct, golden.inversion.recuperadoPct, 0.06);
   });
 

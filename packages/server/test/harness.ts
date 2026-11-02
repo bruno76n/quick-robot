@@ -21,8 +21,8 @@ export function tokenAuth(sessions: Record<string, Session>): AuthProvider {
   return { resolve: async (req) => sessions[(req.headers.get('authorization') ?? '').replace(/^Bearer /, '')] ?? null };
 }
 
-export async function makeHarness(over: Partial<Deps> = {}) {
-  const conn = await openTestDb();
+export async function makeHarness(over: Partial<Deps> = {}, given?: Awaited<ReturnType<typeof openTestDb>>) {
+  const conn = given ?? await openTestDb();
   const A: Ctx = { workspaceId: wsId('00a'), userId: wsId('00a') };
   const B: Ctx = { workspaceId: wsId('00b'), userId: wsId('00b') };
   await ensureWorkspace(conn.db, A, { name: 'Negocio A', email: 'a@example.test', userName: 'A' });
