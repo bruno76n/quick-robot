@@ -22,7 +22,7 @@ Sistema para negocios de impresión 3D. Un solo producto: web con suscripción; 
 | [14 · Convenciones y pruebas](14-convenciones-y-pruebas.md) | Cómo se nombra y se escribe el código, cómo se escribe una prueba, datos de prueba y cobertura mínima |
 | [15 · Rendimiento y errores](15-rendimiento-y-errores.md) | Presupuestos de tiempo, límites, y qué ve la persona cuando algo falla |
 | [prompts](prompts.md) | **Un prompt listo para pegar por cada fase**, plantilla de informe y qué hacer entre fases |
-| [decisiones](decisiones.md) · [progreso](progreso.md) | Registro de decisiones y estado de cada pantalla (los llena Claude Code) |
+| [bitácora](bitacora.md) · [decisiones](decisiones.md) · [progreso](progreso.md) | Bitácora de la construcción y cómo seguir en la Mac; registro de decisiones y estado de cada pantalla (los llena Claude Code) |
 
 Además: `CLAUDE.md` en la raíz del proyecto resume las reglas para quien programe.
 
