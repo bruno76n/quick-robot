@@ -10,11 +10,19 @@ const NODE_BUILTINS =
 const restrict = (patterns) => ['error', { patterns }];
 const ban = (regex, message) => ({ regex, message });
 
-/** Comparisons against the runtime mode are forbidden in rules and use cases (docs/02 §7.6). */
-const noModeBranching = [
-  'error',
-  { selector: "BinaryExpression[right.value='cloud'], BinaryExpression[right.value='local']", message: "No mode branching in rules or use cases; inject a dependency instead (docs/02 §7.6)." },
+/** Security (docs/11 · A05 Inyección, A08 Integridad): no injected markup, no SQL built from strings. */
+const SECURITY_SYNTAX = [
+  { selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']", message: 'No dangerouslySetInnerHTML: React escapes output (docs/11 A05).' },
+  { selector: "AssignmentExpression[left.property.name=/^(innerHTML|outerHTML)$/]", message: 'No innerHTML/outerHTML (docs/11 A05).' },
+  { selector: "CallExpression[callee.property.name='insertAdjacentHTML']", message: 'No insertAdjacentHTML (docs/11 A05).' },
+  { selector: "CallExpression[callee.object.name='document'][callee.property.name='write']", message: 'No document.write (docs/11 A05).' },
+  { selector: "CallExpression[callee.property.name='execute'] > :matches(Literal, TemplateLiteral, BinaryExpression).arguments", message: 'SQL only through Drizzle builders or the sql`` tag (parameterized) — never a string (docs/11 A05).' },
 ];
+const securitySyntax = (...extra) => ['error', ...SECURITY_SYNTAX, ...extra];
+const MODE_BRANCH = { selector: "BinaryExpression[right.value='cloud'], BinaryExpression[right.value='local']", message: 'No mode branching in rules or use cases; inject a dependency instead (docs/02 §7.6).' };
+
+/** Comparisons against the runtime mode are forbidden in rules and use cases (docs/02 §7.6). */
+const noModeBranching = securitySyntax(MODE_BRANCH);
 
 export default tseslint.config(
   {
@@ -27,6 +35,13 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       '@typescript-eslint/consistent-type-imports': 'error',
+      // Security (docs/11)
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+      'no-script-url': 'error',
+      'no-restricted-properties': ['error', { object: 'sql', property: 'raw', message: 'sql.raw skips parameters (docs/11 A05).' }],
+      'no-restricted-syntax': securitySyntax(),
     },
   },
 
@@ -91,7 +106,7 @@ export default tseslint.config(
     // UI text lives only in i18n/es.ts (CLAUDE.md › Idioma).
     files: ['apps/web/src/**/*.tsx'],
     rules: {
-      'no-restricted-syntax': ['error', { selector: 'JSXText[value=/[A-Za-zÁÉÍÓÚáéíóúñÑ0-9]/]', message: 'UI text goes in apps/web/src/i18n/es.ts.' }],
+      'no-restricted-syntax': securitySyntax({ selector: 'JSXText[value=/[A-Za-zÁÉÍÓÚáéíóúñÑ0-9]/]', message: 'UI text goes in apps/web/src/i18n/es.ts.' }),
     },
   },
   {

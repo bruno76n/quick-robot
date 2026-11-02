@@ -22,9 +22,15 @@ const cases: [fixture: string, path: string, rule: string][] = [
   ['db-imports-core.ts', 'packages/db/src/violation.ts', 'no-restricted-imports'],
   ['contract-imports-core.ts', 'packages/contract/src/violation.ts', 'no-restricted-imports'],
   ['usecase-mode-branch.ts', 'packages/server/src/usecases/violation.ts', 'no-restricted-syntax'],
+  // Security (docs/11)
+  ['web-dangerous-html.tsx', 'apps/web/src/violation.tsx', 'no-restricted-syntax'],
+  ['web-inner-html.ts', 'apps/web/src/violation.ts', 'no-restricted-syntax'],
+  ['db-sql-string.ts', 'packages/db/src/violation.ts', 'no-restricted-syntax'],
+  ['db-sql-raw.ts', 'packages/db/src/violation.ts', 'no-restricted-properties'],
+  ['server-eval.ts', 'packages/server/src/violation.ts', 'no-eval'],
 ];
 
-describe('package boundaries (negative test)', () => {
+describe('package boundaries and security lint (negative test)', () => {
   it.each(cases)('%s is rejected when placed at %s', async (fixture, path, rule) => {
     const messages = await lintAs(fixture, path);
     expect(messages.some((m) => m.ruleId === rule && m.severity === 2)).toBe(true);
