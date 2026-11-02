@@ -131,3 +131,6 @@ Claude Code leyó la v2 completa: confirmó que las 9 contradicciones estaban re
 - **Semilla de la fase 3:** clientes, pedidos, ventas, libro de existencias, registros de producción, gastos y colas se copian de la copia del mockup tal cual (con su foto del momento), directo a los repositorios; los movimientos de rollo e insumo conservan su referencia al registro que los creó.
 - **Puertos de `pnpm dev` configurables** (`WEB_PORT`, `API_PORT`) y carpeta de compilación de las E2E (`E2E_WEB_DIST`), para correr varias instancias a la vez.
 - **Pruebas de rendimiento aparte** (`pnpm perf`, `PERF=1`): generar el conjunto de `15 §1` tarda minutos, así que no corren en cada `pnpm test`.
+- **Registro "para existencias" de una pieza sin existencias** activa "llevar existencias" y suma las piezas (como el mockup y `04 §8`); antes se perdían.
+- **Compras · "Últimas compras":** el primer movimiento de cada insumo se toma como su existencia inicial, no como compra. **Marcado para revisión.**
+- **Compras ordenadas por urgencia** dentro de cada proveedor, y los proveedores en el orden en que se agregaron (sin proveedor al final), como el mockup.

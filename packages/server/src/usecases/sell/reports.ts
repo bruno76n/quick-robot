@@ -14,7 +14,7 @@ import { costOf, loadCostingContext, setPartsOf, supplyIdsOf } from '../../views
 import { cents, childrenOf, commissionOf, itemsText, lineItemData, orderData, saleData } from './common';
 import { queueViews } from './queue';
 // Reportes › taller y estado actual (agent D).
-import { orderPaid, orderProfit, orderTotal } from '@app/core';
+import { orderPaid, orderProfit, orderTotal, saleGross } from '@app/core';
 import { listPrintRuns, listSpoolMovements } from '@app/db';
 import { priceOf } from '../../views/costing';
 import { loadStock } from './common';
@@ -254,7 +254,8 @@ export async function purchases(_deps: Deps, ex: Executor, ctx: Ctx) {
       return line && { ...line, name: s.name, hex: null, unit: s.unit, brand: '', missingGrams: 0, stock: s.stock, minimum: s.minimum, remainingGrams: 0, orderNumbers: [] as number[], urgency, urgent: urgency === 2 };
     }),
   ].filter((x): x is NonNullable<typeof x> => !!x).sort((a, b) => b.urgency - a.urgency);
-  const order = [...suppliers.map((s) => s.id as string | null), null];
+  // Groups in the order the suppliers were added (ids are time-ordered), like the mockup; no supplier last.
+  const order = [...[...suppliers].sort((a, b) => a.id.localeCompare(b.id)).map((s) => s.id as string | null), null];
   const groups = order.filter((sid) => lines.some((l) => l.supplierId === sid)).map((sid) => {
     const sup = sid ? suppliers.find((s) => s.id === sid) : undefined;
     const ls = lines.filter((l) => l.supplierId === sid);
@@ -340,16 +341,23 @@ export async function home(deps: Deps, ex: Executor, ctx: Ctx) {
 export async function search(_deps: Deps, ex: Executor, ctx: Ctx, q: string) {
   const needle = normalizeName(q);
   const hit = (...t: (string | null | undefined)[]) => t.some((x) => x && normalizeName(x).includes(needle));
-  const products = (await listProducts(ex, ctx)).filter((p) => hit(p.name, p.note, ...p.tags)).slice(0, 8).map((p) => ({ id: p.id, name: p.name }));
+  const productsAll = await listProducts(ex, ctx);
+  const c = await loadCostingContext(ex, ctx, supplyIdsOf(productsAll));
+  const products = productsAll.filter((p) => hit(p.name, p.note, ...p.tags)).slice(0, 8).map((p) => ({ id: p.id, name: p.name, listCents: cents(priceOf(p, c)) }));
+  const byId = new Map(productsAll.map((p) => [p.id, p]));
+  const collections = (await listCollections(ex, ctx)).filter((col) => hit(col.name)).slice(0, 8).map((col) => ({ id: col.id, name: col.name, priceCents: cents(setPrice(col.priceCents ? col.priceCents / 100 : null, setPartsOf(col, byId, c))) }));
   const customersAll = await listCustomers(ex, ctx);
-  const customers = customersAll.filter((c) => hit(c.name, c.phone, c.note)).slice(0, 8).map((c) => ({ id: c.id, name: c.name }));
-  const cname = new Map((await listCustomers(ex, ctx, { withDeleted: true })).map((c) => [c.id, c.name]));
+  const customers = customersAll.filter((x) => hit(x.name, x.phone, x.note)).slice(0, 8).map((x) => ({ id: x.id, name: x.name, type: x.type, phone: x.phone }));
+  const cname = new Map((await listCustomers(ex, ctx, { withDeleted: true })).map((x) => [x.id, x.name]));
   const ordersAll = await listOrders(ex, ctx);
   const oc = await childrenOf(ex, ctx, 'order', ordersAll.map((o) => o.id));
-  const orders = ordersAll.filter((o) => hit(`#${o.number}`, String(o.number), o.note, cname.get(o.customerId), itemsText(oc.items(o.id)))).slice(0, 8).map((o) => ({ id: o.id, number: o.number, customer: cname.get(o.customerId) ?? '', status: o.status }));
-  const salesAll = await listSales(ex, ctx);
+  const orders = ordersAll.filter((o) => hit(`#${o.number}`, String(o.number), o.note, cname.get(o.customerId), itemsText(oc.items(o.id)))).slice(0, 8).map((o) => ({ id: o.id, number: o.number, customer: cname.get(o.customerId) ?? '', status: o.status, itemsText: itemsText(oc.items(o.id)) }));
+  const salesAll = [...await listSales(ex, ctx)].sort((a, b) => b.on.localeCompare(a.on));
   const sc = await childrenOf(ex, ctx, 'sale', salesAll.map((s) => s.id));
-  const sales = salesAll.filter((s) => hit(s.note, cname.get(s.customerId ?? ''), itemsText(sc.items(s.id)))).slice(0, 8).map((s) => ({ id: s.id, on: s.on, itemsText: itemsText(sc.items(s.id)), customer: cname.get(s.customerId ?? '') ?? '' }));
-  const filaments = (await listAllFilaments(ex, ctx)).filter((f) => hit(`${f.material} ${f.color}`)).slice(0, 8).map((f) => ({ id: f.id, name: `${f.material} ${f.color}`, hex: f.hex }));
-  return { products, customers, orders, sales, filaments };
+  const sales = salesAll.filter((s) => hit(s.note, cname.get(s.customerId ?? ''), itemsText(sc.items(s.id)))).slice(0, 8).map((s) => ({ id: s.id, on: s.on, itemsText: itemsText(sc.items(s.id)), customer: cname.get(s.customerId ?? '') ?? '', totalCents: cents(saleGross({ items: sc.items(s.id).map(lineItemData) })) }));
+  const fils = (await listAllFilaments(ex, ctx)).filter((f) => hit(`${f.material} ${f.color}`)).slice(0, 8);
+  const spools = await listSpools(ex, ctx, fils.map((f) => f.id));
+  const filaments = fils.map((f) => ({ id: f.id, name: `${f.material} ${f.color}`, hex: f.hex, remainingGrams: Math.round(spools.filter((x) => x.filamentId === f.id).reduce((a, x) => a + Math.max(0, x.remainingGrams), 0) * 10) / 10 }));
+  const supplies = (await listSupplies(ex, ctx, { page: 1, pageSize: 100_000 })).items.filter((x) => hit(x.name, x.note)).slice(0, 8).map((x) => ({ id: x.id, name: x.name, stock: x.stock, unit: x.unit }));
+  return { products, collections, customers, orders, sales, filaments, supplies };
 }
