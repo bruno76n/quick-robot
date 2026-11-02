@@ -17,7 +17,7 @@
     "@app/core": "workspace:*",
     "@app/db": "workspace:*",
     "hono": "4.13.13",
-    "@hono/node-server": "1.19.17"
+    "@hono/node-server": "2.1.5"
   },
   "devDependencies": {
     "@types/node": "22.20.5",
