@@ -16,7 +16,7 @@ import { openTestDb } from '../src/testing';
 import { twoWorkspaces, uid, type WsData } from './fixtures';
 
 /** Tables covered by this file. A new table with workspace_id must be added here (and tested). */
-const COVERED = new Set(['membership', 'filament', 'spool', 'spool_movement', 'workspace_settings', 'sales_channel', 'catalog_item', 'file', 'supplier', 'supply', 'supply_movement', 'printer', 'maintenance_task', 'expense', 'product', 'product_filament', 'product_supply', 'collection', 'collection_part']);
+const COVERED = new Set(['membership', 'filament', 'spool', 'spool_movement', 'workspace_settings', 'sales_channel', 'catalog_item', 'file', 'supplier', 'supply', 'supply_movement', 'printer', 'maintenance_task', 'expense', 'product', 'product_filament', 'product_supply', 'collection', 'collection_part', 'stock_movement', 'customer', 'order', 'sale', 'line_item', 'payment', 'print_run', 'print_run_filament', 'print_queue_entry']);
 const WITHOUT_WORKSPACE = new Set(['workspace', 'user']);
 
 let conn: Connection;

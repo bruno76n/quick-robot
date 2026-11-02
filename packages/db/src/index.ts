@@ -9,3 +9,4 @@ export * from './repos/settings-repo';
 export * from './repos/supply-repo';
 export * from './repos/printer-repo';
 export * from './repos/product-repo';
+export * from './repos/sell-repo';

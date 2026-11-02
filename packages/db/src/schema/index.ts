@@ -6,4 +6,5 @@ export * from './spool';
 export * from './spool-movement';
 export * from './printer';
 export * from './product';
+export * from './sell';
 export * from './views';
