@@ -11,6 +11,8 @@ import { ConfirmButton } from './ConfirmButton';
 import { DocumentDialog, documentText } from './DocumentSheet';
 import { CommandLayer, GOTO, installShortcuts, ShortcutsDialog } from './Shortcuts';
 import { toast, useToast } from './Toast';
+import { LoadingSkeleton } from './LoadingSkeleton';
+import { QueryClient as QC, useQuery } from '@tanstack/react-query';
 
 const went: string[] = [];
 beforeEach(() => { went.length = 0; setNavigator(async (href) => { went.push(href); }); });
@@ -143,5 +145,19 @@ describe('two-tap button and shell', () => {
     expect(document.body.textContent).toContain('Mi Taller');
     for (const btn of screen.getAllByRole('button')) fireEvent.click(btn);
     expect(onSearch).toHaveBeenCalled();
+  });
+});
+
+describe('loading skeleton', () => {
+  it('appears only when a first load takes more than 300 ms', async () => {
+    vi.useFakeTimers();
+    const qc = new QC();
+    const Slow = () => { useQuery({ queryKey: ['slow'], queryFn: () => new Promise(() => undefined) }); return null; };
+    render(<QueryClientProvider client={qc}><LoadingSkeleton /><Slow /></QueryClientProvider>);
+    await act(async () => { vi.advanceTimersByTime(10); });
+    expect(screen.queryByTestId('loading-skeleton')).toBeNull();
+    await act(async () => { vi.advanceTimersByTime(400); });
+    expect(screen.getByTestId('loading-skeleton')).toBeTruthy();
+    vi.useRealTimers();
   });
 });

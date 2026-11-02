@@ -108,7 +108,7 @@ Diferencias aceptadas:
   1. En "Últimas compras" de Compras, el primer movimiento de cada insumo cuenta como existencia inicial, no como compra.
   2. La búsqueda de ventas y pedidos distingue acentos ("cafe" no encuentra "café"); la de piezas y clientes no.
   3. Los valores de arranque de un negocio nuevo (ya anotados en la fase 2).
-- **Pendiente para la fase 4:** las pantallas de falla de escritorio (servidor caído, migración fallida, archivo dañado) y "Copia de seguridad" en Ajustes. El "esqueleto a los 300 ms" de `15 §5` se cubre con el texto "Cargando…" de cada pantalla; no hay un esqueleto gráfico.
+- **Pendiente para la fase 4:** las pantallas de falla de escritorio (servidor caído, migración fallida, archivo dañado) y "Copia de seguridad" en Ajustes. El "esqueleto a los 300 ms" de `15 §5` se agregó después del cierre (ver `informe-fase-4.md`).
 
 ## Qué conviene que revises
 1. **Un pedido completo:** créalo en Armar pedido, acéptalo, ponlo en producción con "Descontar filamento", termina los trabajos en Impresoras y entrégalo. Revisa que la venta aparezca en Ventas y que Existencias y Filamentos bajen.

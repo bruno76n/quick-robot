@@ -74,10 +74,11 @@ test('the server does not answer: fixed banner with Reintentar; the screen comes
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 });
 
-test('a slow load says so after 8 s and offers Reintentar', async ({ page }) => {
+test('a slow load shows the skeleton after 300 ms, says so after 8 s and offers Reintentar', async ({ page }) => {
   await page.goto(`${server.url}/inicio`);
   await page.route('**/api/v1/expenses**', async (r) => { await new Promise((ok) => setTimeout(ok, 12_000)); await r.continue().catch(() => undefined); });
   await page.goto(`${server.url}/gastos`);
+  await expect(page.getByTestId('loading-skeleton')).toBeVisible({ timeout: 2_000 });
   await expect(page.getByText('Tarda más de lo normal.')).toBeVisible({ timeout: 11_000 });
   await expect(page.getByRole('button', { name: 'Reintentar' })).toBeVisible();
 });

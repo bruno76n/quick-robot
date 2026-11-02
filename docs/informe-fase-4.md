@@ -75,6 +75,9 @@ Todo lo que se puede probar sin una Mac está hecho y en verde. Lo que falta nec
 - **Ajustes de prueba solo en desarrollo:** `DESKTOP_USER_DATA` y `DESKTOP_TEST_MIGRATIONS` solo funcionan en compilaciones de prueba. El `.dmg` de entrega los ignora.
 - **El registro de errores** ya no guarda los valores de las consultas.
 
+## Agregado después del cierre de la fase 3
+- **Esqueleto de carga lenta** (`15 §5`): si la primera carga de una pantalla tarda más de 300 ms aparece un esqueleto gris; a los 8 s, "Tarda más de lo normal" con Reintentar. Probado en `e2e/failure-states.spec.ts` y con una prueba unitaria. El mockup no tiene uno; usa sus colores y radios.
+
 ## Bloqueado o dudoso
 - **No se pudo probar aquí** (no hay macOS): el `.dmg`, el menú de Mac, "Abrir al iniciar sesión" y "Mostrar archivo de registro" en Finder.
 - **Electron 42.11.15:** `pnpm audit` marca problemas altos en todas las versiones anteriores a 42.11.16. Se usó la más nueva con dos semanas publicada, y queda **una** advertencia ignorada a propósito: GHSA-jr5w-w6x2-84p9, certificados intermedios de eMudhra. Es poco relevante porque la ventana solo habla con `127.0.0.1`. **A partir del 2026-11-03 hay que subir a ≥ 42.11.16 y quitar la excepción** de `pnpm-workspace.yaml`.

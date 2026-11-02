@@ -6,6 +6,7 @@ import { AppShell } from '../components/AppShell';
 import { Banner } from '../components/Banner';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { openPalette } from '../components/CommandPalette';
+import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { CommandLayer } from '../components/Shortcuts';
 import { ToastViewport } from '../components/Toast';
 import { es } from '../i18n/es';
@@ -43,6 +44,7 @@ export function Root() {
     <>
       <AppShell businessName={business?.name || me.data?.workspace.name || ''} trade={business?.trade ?? ''} banner={banner} onNewPiece={() => void go('/productos/pieza')} onSearch={openPalette}>
         <ErrorBoundary resetKey={path} onHome={() => void go('/inicio')}>
+          <LoadingSkeleton />
           <Outlet />
         </ErrorBoundary>
       </AppShell>
