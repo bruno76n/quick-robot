@@ -1,0 +1,9 @@
+{
+  "name": "@app/contract",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "description": "What client and server say to each other (docs/12): Zod schemas and error codes.",
+  "dependencies": { "zod": "4.6.7" }
+}
