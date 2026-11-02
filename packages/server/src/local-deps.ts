@@ -6,6 +6,10 @@ import { localEntitlements } from './providers/local/entitlements';
 import { createLocalFiles } from './providers/local/files';
 import { noopMailer } from './providers/local/mailer';
 
+/** Fixed ids of the only user and business in local mode (docs/05). */
+export const LOCAL_WORKSPACE_ID = '00000000-0000-7000-8000-000000000001';
+export const LOCAL_USER_ID = '00000000-0000-7000-8000-000000000002';
+
 /** Local-mode dependencies (used by the dev runner now and by apps/desktop in phase 4). */
 export function localDeps(o: { database: Database; workspaceId: string; userId: string; filesDir: string; secret?: string; webDist?: string }): AppDeps {
   return {

@@ -26,6 +26,13 @@ export function Dialog({
         <RD.Overlay className="fixed inset-0 z-[80] bg-[rgba(20,12,40,.5)]" />
         <RD.Content
           aria-describedby={undefined}
+          onOpenAutoFocus={(e) => {
+            const target = (e.currentTarget as HTMLElement).querySelector<HTMLElement>('[data-autofocus]');
+            if (target) {
+              e.preventDefault();
+              target.focus();
+            }
+          }}
           className={cn(
             'fixed left-1/2 top-1/2 z-[81] flex max-h-[calc(100%-32px)] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-dialog border border-line-2 bg-bg text-ink shadow-[0_24px_70px_rgba(25,12,60,.35)] focus:outline-none',
             wide ? 'w-[min(800px,calc(100vw-32px))]' : 'w-[min(540px,calc(100vw-32px))]',

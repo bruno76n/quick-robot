@@ -7,19 +7,22 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "pnpm --filter @app/server dev",
+    "dev": "concurrently -k -n api,web -c magenta,cyan \"pnpm --filter @app/server dev\" \"pnpm --filter @app/web dev\"",
+    "dev:file": "concurrently -k -n api,web -c magenta,cyan \"pnpm --filter @app/server dev:file\" \"pnpm --filter @app/web dev\"",
+    "start": "pnpm build && pnpm --filter @app/server start:local",
     "build": "pnpm --filter @app/web build",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint . --max-warnings 0 && depcruise packages apps --config .dependency-cruiser.cjs",
     "lint:negative": "vitest run --project tools",
-    "typecheck": "pnpm -r --parallel typecheck",
+    "typecheck": "tsc --noEmit -p tsconfig.json && pnpm -r --parallel typecheck",
     "e2e": "playwright test"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",
     "@playwright/test": "1.63.0",
     "@types/node": "22.20.5",
+    "concurrently": "9.2.1",
     "dependency-cruiser": "17.4.3",
     "eslint": "9.39.5",
     "eslint-plugin-react-hooks": "5.2.0",

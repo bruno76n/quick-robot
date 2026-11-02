@@ -196,7 +196,7 @@ export function SpoolDialog({
           <p className="max-w-[64ch] text-[13px] text-ink-3">{t.barHint}</p>
           <div className="grid grid-cols-3 gap-x-[14px] gap-y-3 max-[560px]:grid-cols-1">
             <Field label={t.material} htmlFor={fid('material')}>
-              <input id={fid('material')} list={fid('materials')} placeholder={t.choosePlaceholder} {...register('material')} />
+              <input id={fid('material')} list={fid('materials')} placeholder={t.choosePlaceholder} data-autofocus={preset ? undefined : ''} {...register('material')} />
               <datalist id={fid('materials')}>
                 {lists.materials.map((m) => (
                   <option key={m} value={m} />
@@ -204,7 +204,7 @@ export function SpoolDialog({
               </datalist>
             </Field>
             <Field label={t.color} htmlFor={fid('color')}>
-              <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-[6px]">
+              <div className={color.isNew && !knownHex ? 'grid grid-cols-[minmax(0,1fr)_auto] gap-[6px]' : 'grid'}>
                 <input id={fid('color')} list={fid('colors')} placeholder={t.choosePlaceholder} {...register('color')} />
                 {color.isNew && !knownHex && <input type="color" aria-label={t.colorSwatch} className="w-[46px]" {...register('hex')} />}
               </div>
@@ -225,7 +225,7 @@ export function SpoolDialog({
           </div>
         </div>
       </details>
-      {errors.filament ? (
+      {errors.filament && !chosen ? (
         <p role="alert" className="rounded-card bg-red-soft px-[14px] py-[11px] text-[13.5px] text-red-ink">
           {errors.filament}
         </p>
@@ -234,7 +234,7 @@ export function SpoolDialog({
       )}
       <div className="grid grid-cols-2 gap-x-[14px] gap-y-3 max-[560px]:grid-cols-1">
         <Field label={t.cost} htmlFor={fid('cost')} error={errors.cost}>
-          <UnitInput id={fid('cost')} unit={es.units.money} inputMode="decimal" placeholder={t.costPlaceholder} aria-invalid={!!errors.cost} {...register('cost')} />
+          <UnitInput id={fid('cost')} data-autofocus={preset ? '' : undefined} unit={es.units.money} inputMode="decimal" placeholder={t.costPlaceholder} aria-invalid={!!errors.cost} {...register('cost')} />
         </Field>
         <Field label={t.shipping} htmlFor={fid('shipping')} help={t.shippingHelp}>
           <UnitInput id={fid('shipping')} unit={es.units.money} inputMode="decimal" {...register('shipping')} />
