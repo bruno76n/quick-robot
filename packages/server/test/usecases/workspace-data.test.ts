@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { applyDevelopmentSeed } from '../../src/dev-seed';
-import { ensureDailyBackup, exportData, importWorkspace } from '../../src/usecases/workspace-data';
+import { ensureDailyBackup, exportData } from '../../src/usecases/workspace-data';
 import { B_TOKEN, makeHarness, type Harness } from '../harness';
 
 const MOCKUP = readFileSync(new URL('../../../../reference/mockup-backup-v7.json', import.meta.url));

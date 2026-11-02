@@ -11,3 +11,4 @@ export * from './repos/printer-repo';
 export * from './repos/product-repo';
 export * from './repos/sell-repo';
 export * from './repos/workspace-data-repo';
+export * from './migrate-local';
