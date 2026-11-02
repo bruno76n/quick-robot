@@ -1,4 +1,4 @@
-import { timestamp, uuid } from 'drizzle-orm/pg-core';
+import { timestamp, unique, uuid, type PgColumn } from 'drizzle-orm/pg-core';
 
 /** created_at / updated_at on every table (docs/05). */
 export const timestamps = {
@@ -12,3 +12,6 @@ export const softDelete = {
 };
 
 export const pk = () => uuid('id').primaryKey();
+
+/** Target of composite FKs `(workspace_id, id)`, so children can only point to a parent of their own workspace. */
+export const wsIdUnique = (name: string, t: { workspaceId: PgColumn; id: PgColumn }) => unique(name).on(t.workspaceId, t.id);

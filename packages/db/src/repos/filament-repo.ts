@@ -50,10 +50,37 @@ export const filamentRepo = {
     return ex.select().from(spool).where(where).orderBy(asc(spool.purchasedOn), asc(spool.id));
   },
 
-  async getSpool(ex: Executor, ctx: Ctx, id: string): Promise<SpoolRow | undefined> {
+  async getSpool(ex: Executor, ctx: Ctx, id: string, withDeleted = false): Promise<SpoolRow | undefined> {
     const ws = assertCtx(ctx);
-    const [row] = await ex.select().from(spool).where(and(liveSpools(ws), eq(spool.id, id)));
+    const [row] = await ex.select().from(spool).where(and(withDeleted ? eq(spool.workspaceId, ws) : liveSpools(ws), eq(spool.id, id)));
     return row;
+  },
+
+  async updateSpool(
+    ex: Executor,
+    ctx: Ctx,
+    id: string,
+    data: Partial<Pick<SpoolRow, 'filamentId' | 'brand' | 'costCents' | 'shippingCents' | 'grams' | 'purchasedOn' | 'supplierId'>>,
+  ): Promise<number> {
+    const ws = assertCtx(ctx);
+    const r = await ex.update(spool).set({ ...data, updatedAt: new Date() }).where(and(liveSpools(ws), eq(spool.id, id))).returning({ id: spool.id });
+    return r.length;
+  },
+
+  /** Soft delete / restore ("Deshacer"). The ledger rows stay. */
+  async setSpoolDeleted(ex: Executor, ctx: Ctx, id: string, deleted: boolean): Promise<number> {
+    const ws = assertCtx(ctx);
+    const r = await ex
+      .update(spool)
+      .set({ deletedAt: deleted ? new Date() : null, updatedAt: new Date() })
+      .where(and(eq(spool.workspaceId, ws), eq(spool.id, id)))
+      .returning({ id: spool.id });
+    return r.length;
+  },
+
+  async setFilamentDeleted(ex: Executor, ctx: Ctx, id: string, deleted: boolean): Promise<void> {
+    const ws = assertCtx(ctx);
+    await ex.update(filament).set({ deletedAt: deleted ? new Date() : null, updatedAt: new Date() }).where(and(eq(filament.workspaceId, ws), eq(filament.id, id)));
   },
 
   async insertSpool(

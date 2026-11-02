@@ -4,3 +4,5 @@ export * from './catalog';
 export * from './costs';
 export * from './pricing';
 export * from './printers';
+export * from './supplies';
+export * from './defaults';
