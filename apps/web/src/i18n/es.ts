@@ -38,6 +38,22 @@ export const es = {
   confirm,
   screens: {
     fatal,
+    // Desktop shell (apps/desktop): native menu, dialogs and the fatal page. Emitted as desktop-texts.json by the web build.
+    desktop: {
+      menu: {
+        about: 'Acerca de {app}', hide: 'Ocultar {app}', hideOthers: 'Ocultar otros', showAll: 'Mostrar todo', quit: 'Salir de {app}',
+        openAtLogin: 'Abrir al iniciar sesión',
+        edit: 'Edición', undo: 'Deshacer', redo: 'Rehacer', cut: 'Cortar', copy: 'Copiar', paste: 'Pegar', selectAll: 'Seleccionar todo',
+        view: 'Ver', reload: 'Recargar', resetZoom: 'Tamaño real', zoomIn: 'Acercar', zoomOut: 'Alejar', fullScreen: 'Pantalla completa',
+        devTools: 'Herramientas de desarrollo', window: 'Ventana', minimize: 'Minimizar', zoom: 'Zoom', close: 'Cerrar ventana', front: 'Traer todo al frente',
+      },
+      dialogs: { save: 'Guardar', open: 'Abrir', chooseBackup: 'Elegir otra copia', backupFiles: 'Copia de seguridad', files: 'Archivos' },
+      fatal: {
+        title: 'Algo salió mal', backupsTitle: 'Copias automáticas', backupOn: 'Copia del {date}', sizeKb: '{size} KB', restore: 'Restaurar',
+        noBackups: 'Todavía no hay copias automáticas.', working: 'Abriendo…', restoreFailed: 'No se pudo restaurar esa copia. Elegir otra.',
+        quit: 'Salir',
+      },
+    },
     sales: {
       title: 'Ventas', sub: 'Últimos 60 días.', register: 'Registrar venta', registerFirst: 'Registrar la primera venta',
       allChannels: 'Todos los canales', channelGroup: 'Canal', colDate: 'Fecha', colItems: 'Artículos', colTotal: 'Total', colProfit: 'Ganancia',
@@ -500,6 +516,32 @@ export const es = {
       phone: 'Teléfono', phonePlaceholder: '33 0000 0000', email: 'Correo', emailPlaceholder: 'contacto@ejemplo.com', city: 'Ciudad',
       validity: 'Vigencia de la cotización', days: 'días', footer: 'Texto al pie de la cotización', footerHint: 'Condiciones de pago, tiempos, garantía',
       exportTitle: 'Exportar a Excel', exportHint: 'Archivos CSV que abren Excel y Google Sheets.', exportDownload: 'Descargar', exportWhich: 'Qué copiar', exportCopy: 'Copiar tabla',
+    },
+    backup: {
+      title: 'Copia de seguridad', hint: 'Una copia en otro lugar (USB, nube) protege si falla el disco.',
+      warning: 'Esta copia contiene todos los datos del negocio. Guárdala en un lugar seguro.',
+      never: 'Aún no hay una copia descargada', today: 'Copia descargada hoy', daysAgo: 'Última copia hace {days} {days|día|días}', lastOn: 'Última descarga: {date}',
+      download: 'Descargar copia', restoreFile: 'Restaurar desde archivo', showLogs: 'Mostrar archivo de registro',
+      autoTitle: 'Copias automáticas', autoSub: 'una por día, las últimas 7', autoEmpty: 'Todavía no hay copias automáticas.', sizeKb: '{size} KB',
+      restore: 'Restaurar', backupNow: 'Hacer copia ahora', backupMade: 'Copia automática guardada.', autoOrigin: 'Copia del {date}',
+      confirmTitle: 'Restaurar copia', confirmCounts: '{origin}: {products} piezas, {customers} clientes, {orders} pedidos y {sales} ventas.',
+      confirmNote: 'Reemplaza todos los datos actuales. Antes se guarda una copia de seguridad de lo que hay ahora.',
+      noChange: 'No se cambió ningún dato.', readFailed: 'No se pudo leer el archivo.',
+      doneTitle: 'Copia restaurada', doneLead: 'Quedó así:', previousSaved: 'Antes se guardó una copia de lo que había ({date}); está en Copias automáticas.',
+      noDifferences: 'Sin diferencias: los totales coinciden con la copia.', differencesTitle: 'Diferencias con la copia',
+      counts: {
+        spool: 'Rollos', filament: 'Filamentos', product: 'Piezas', collection: 'Colecciones', printer: 'Impresoras', supply: 'Insumos',
+        customer: 'Clientes', sale: 'Ventas', order: 'Pedidos', expense: 'Gastos', print_run: 'Registros de producción', sales_channel: 'Canales de venta',
+      },
+      diff: {
+        spool: 'Rollos de {name}: {expectedGrams} en la copia, {foundGrams} aquí.', stock: 'Existencias de {name}: {expected} en la copia, {found} aquí.',
+        income: 'Ventas: {expectedCents} en la copia, {foundCents} aquí.', profit: 'Ganancia: {expectedCents} en la copia, {foundCents} aquí.', owed: 'Por cobrar: {expectedCents} en la copia, {foundCents} aquí.',
+      },
+      notes: {
+        channel: 'Se creó el canal “{name}” con 0 % de comisión.', nameless: 'Las ventas y pedidos sin cliente quedaron con el cliente “Sin nombre”.',
+        productPhoto: '{count} {count|foto de pieza no se importó|fotos de piezas no se importaron}.', customerLogo: '{count} {count|imagen de cliente no se importó|imágenes de clientes no se importaron}.',
+      },
+      clearTitle: 'Datos', clearHint: 'Antes se guarda una copia de lo que hay ahora.', clear: 'Vaciar negocio',
     },
     spoolDialog: {
       titleNew: 'Agregar rollo', titleEdit: 'Editar rollo', submitNew: 'Agregar rollo', submitEdit: 'Guardar rollo',
