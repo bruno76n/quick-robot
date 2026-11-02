@@ -2,6 +2,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from '../components/Toast';
 import { es } from '../i18n/es';
+import { ApiError } from './api';
 import { errorText } from './errors';
 import { invalidate, type keys } from './queries';
 
@@ -18,6 +19,11 @@ export function useWrite<I, O>(fn: (input: I) => Promise<{ data: O }>, opts: { t
       if (text) toast(text, undo);
       opts.onDone?.(out, input);
     },
-    onError: (e) => { if (opts.onError?.(e) === true) return; toast(errorText(e).text); },
+    onError: (e) => {
+      // The state changed while the person was looking: reload what the screen shows (docs/15 §5).
+      if (e instanceof ApiError && e.code === 'ORDER_INVALID_STATE') void invalidate(qc, ...opts.touches);
+      if (opts.onError?.(e) === true) return;
+      toast(errorText(e).text);
+    },
   });
 }
