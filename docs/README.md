@@ -14,8 +14,9 @@ Sistema para negocios de impresión 3D. Un solo producto: web con suscripción; 
 | [08 · Backend](08-backend.md) | Capas, casos de uso, API, interfaces inyectadas, seguridad |
 | [09 · Hoja de ruta](09-hoja-de-ruta.md) | Fases, pruebas de riesgo primero, criterios de terminado |
 | [10 · Plan de construcción](10-plan-de-construccion.md) | **Qué se hace en cada fase, paso a paso, y qué archivos se crean** |
+| [11 · Seguridad](11-seguridad.md) | OWASP Top 10:2025 aplicado; el chequeo `pnpm security` |
 
-| [decisiones](decisiones.md) · [progreso](progreso.md) | Registro de decisiones tomadas al construir y estado de cada pantalla (los llena Claude Code) |
+| [decisiones](decisiones.md) · [progreso](progreso.md) · [amenazas](amenazas.md) | Registro de decisiones tomadas al construir y estado de cada pantalla (los llena Claude Code) |
 
 Además, `CLAUDE.md` en la raíz del proyecto resume las reglas para quien programe.
 

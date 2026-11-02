@@ -35,3 +35,18 @@ Estados: `no iniciada` · `en curso` · `igual al mockup` · `verificada con dat
 | 3 | no iniciada | |
 | 4 | no iniciada | |
 | 5 | no iniciada | |
+
+## Seguridad (`11-seguridad.md`)
+
+| Categoría | Estado | Prueba |
+|---|---|---|
+| A01 Control de acceso | aplicado (roles completos en fase 5) | `routes-tenancy`, `http-hardening`, `tenancy*` |
+| A02 Configuración | aplicado (Electron en fase 4, hosting en 5) | `http-hardening`, `logging-config` |
+| A03 Cadena de suministro | aplicado | `pnpm audit` en `pnpm security` y CI |
+| A04 Criptografía | secretos y secreto local aplicados; el resto en fase 5 | escaneo de secretos |
+| A05 Inyección | aplicado | lint + `inputs-abuse` + `csv` |
+| A06 Diseño inseguro | aplicado | `inputs-abuse`, `concurrency-postgres`, `amenazas.md` |
+| A07 Autenticación | local aplicado; cuentas en fase 5 | `logging-config` |
+| A08 Integridad | aplicado (importar copias en fase 4) | lint (`eval`), CSP, recursos locales |
+| A09 Registro | aplicado (alertas en fase 5) | `logging-config` |
+| A10 Condiciones excepcionales | aplicado | `failure-injection`, `logging-config`, límite de errores en la interfaz |

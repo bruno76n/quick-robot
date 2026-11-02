@@ -213,6 +213,7 @@ Orden interno (cada paso depende del anterior). Cada uno: reglas en `core` con p
 4. Cada pantalla se compara contra el mockup antes de marcarse "igual".
 5. Nada fuera del alcance de `01`; lo nuevo se anota en "Después" de `09`.
 6. Los textos de interfaz solo en `i18n/es.ts`.
+7. **Seguridad (`11`)**: `pnpm security` en verde; cada ruta con `guard(acción)` y en las pruebas de `packages/server/test/security/`; cada caso de uso en la prueba de fallo a mitad de operación; cada funcionalidad nueva con sus 3 renglones en `docs/amenazas.md`. Fase 4: Electron endurecido (`contextIsolation`, `sandbox`, sin `nodeIntegration`, navegación solo a su dirección, secreto por arranque) e importación de copias validada como archivo no confiable. Fase 5: A04 y A07 completos (cuentas, Argon2id, cookies, CSRF, HSTS, respaldos, revisión externa).
 
 ---
 

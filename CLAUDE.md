@@ -14,6 +14,7 @@ Sistema para negocios de impresión 3D: costeo, ventas, pedidos, producción, in
 8. **Cada pantalla funciona sin funciones nativas.** Lo nativo (`window.desktop`) mejora; nunca habilita.
 9. **Inventarios = libros de movimientos** (filamento, piezas terminadas, insumos). Nunca se escribe "hay 7": se suma.
 10. **Los artículos vendidos guardan la foto del momento** (precio, lista, costo). Cambiar un precio hoy no reescribe el historial.
+11. **Seguridad: OWASP Top 10:2025** (`docs/11-seguridad.md`). Cada ruta declara su acción con `guard(...)`; un id ajeno responde 404; nada de `dangerouslySetInnerHTML`, `eval` ni SQL en cadenas; toda entrada con tope; ningún secreto en el repositorio. Ningún paso se cierra si `pnpm security` falla.
 
 ## Stack (decidido)
 
@@ -60,7 +61,7 @@ La construcción la hace Claude Code **sin pedir aprobación paso a paso**. Todo
 **Mientras trabaja**
 1. Un paso a la vez, en el orden del plan: regla con su prueba → tablas → caso de uso con su prueba → ruta → pantalla.
 2. **Un commit por paso**, con mensaje en inglés (`feat(core): filament cost per gram`).
-3. Un paso **no está terminado** hasta que pasan: pruebas con los números de `docs/04`, las reglas de dependencias entre paquetes (lint), el typecheck y, si hay pantalla, su comparación visual.
+3. Un paso **no está terminado** hasta que pasan: pruebas con los números de `docs/04`, las reglas de dependencias entre paquetes (lint), el typecheck, `pnpm security` y, si hay pantalla, su comparación visual. Cada ruta nueva entra en las pruebas de `packages/server/test/security/` (la de acceso entre negocios falla sola si una ruta con id no está en su tabla) y cada funcionalidad nueva anota en 3 renglones qué podría salir mal en `docs/amenazas.md`.
 4. **Comparación visual:** abrir el mockup (`reference/`) y la pantalla nueva con Playwright en tres anchos (escritorio 1440, tableta 820, móvil 390), tomar capturas, verlas y corregir diferencias de estructura, textos, colores y comportamiento antes de marcar la fila de `docs/progreso.md` como "igual al mockup".
 5. **Valores del mockup:** los costos y precios deben coincidir con `packages/core/test/golden/mockup-values.json` (tolerancia ±0.01).
 
@@ -98,7 +99,8 @@ pnpm dev:file     # igual, con los datos en .data/pgdata
 pnpm start        # compila la web y la sirve el servidor local con archivo → http://127.0.0.1:8787
 pnpm typecheck    # TypeScript en todos los paquetes
 pnpm test         # core, db, server
-pnpm lint         # incluye las fronteras entre paquetes
+pnpm lint         # incluye las fronteras entre paquetes y las reglas de seguridad
+pnpm security     # lint + pnpm audit (altas/críticas) + escaneo de secretos + pruebas de seguridad
 pnpm e2e          # flujos con Playwright
 pnpm desktop:dev  # Electron (desde la fase 4)
 pnpm desktop:dist # genera el .dmg (desde la fase 4)
