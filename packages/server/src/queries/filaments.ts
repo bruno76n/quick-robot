@@ -85,7 +85,7 @@ export async function listFilaments(ex: Executor, ctx: Ctx): Promise<FilamentLis
 
 export async function getFilamentDetail(ex: Executor, ctx: Ctx, filamentId: string, movementLimit = 14): Promise<FilamentDetail> {
   const f = await filamentRepo.get(ex, ctx, filamentId);
-  if (!f) throw new BusinessError('FILAMENT_NOT_FOUND', `Filament ${filamentId} not found`);
+  if (!f) throw new BusinessError('FILAMENT_NOT_FOUND', 'Filament not found');
   const [spoolRows, remaining] = await Promise.all([filamentRepo.listSpools(ex, ctx, [f.id]), filamentRepo.remainingBySpool(ex, ctx)]);
   const spools = toCoreSpools(spoolRows, remaining);
   const movements = await filamentRepo.listMovements(ex, ctx, spoolRows.map((s) => s.id), movementLimit);

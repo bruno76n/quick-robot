@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { Id, IsoDate, Name, NonNegativeMoney } from './common';
+import { Id, IsoDate, Name, NonNegativeMoney, Qty as QtyBase } from './common';
 
-const Qty = z.number().finite();
+const Qty = QtyBase;
 const Note = z.string().trim().max(300).default('');
 
 export const Supplier = z.object({ id: Id, name: z.string(), phone: z.string(), brands: z.string(), note: z.string() });

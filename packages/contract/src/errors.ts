@@ -25,13 +25,16 @@ export const ErrorCode = {
   COLLECTION_NEEDS_PART: 'COLLECTION_NEEDS_PART',
   UNSUPPORTED_FILE: 'UNSUPPORTED_FILE',
   FILE_TOO_LARGE: 'FILE_TOO_LARGE',
+  UNSUPPORTED_MEDIA_TYPE: 'UNSUPPORTED_MEDIA_TYPE',
+  PAYLOAD_TOO_LARGE: 'PAYLOAD_TOO_LARGE',
+  RATE_LIMITED: 'RATE_LIMITED',
   CONFLICT: 'CONFLICT',
   INTERNAL: 'INTERNAL',
 } as const;
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
 /** HTTP status for each code (docs/08 › Forma de la API). */
-export const errorHttpStatus: Record<ErrorCode, 400 | 401 | 403 | 404 | 409 | 413 | 415 | 422 | 500> = {
+export const errorHttpStatus: Record<ErrorCode, 400 | 401 | 403 | 404 | 409 | 413 | 415 | 422 | 429 | 500> = {
   VALIDATION_FAILED: 422,
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
@@ -57,6 +60,9 @@ export const errorHttpStatus: Record<ErrorCode, 400 | 401 | 403 | 404 | 409 | 41
   COLLECTION_NEEDS_PART: 422,
   UNSUPPORTED_FILE: 415,
   FILE_TOO_LARGE: 413,
+  UNSUPPORTED_MEDIA_TYPE: 415,
+  PAYLOAD_TOO_LARGE: 413,
+  RATE_LIMITED: 429,
   CONFLICT: 409,
   INTERNAL: 500,
 };

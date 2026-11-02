@@ -6,9 +6,20 @@ import type { AppDeps } from '../deps';
 export const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 const IMAGE_TYPES: Record<string, string> = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif' };
 
+/** What the bytes really are (magic numbers), regardless of what the request says. */
+export function sniffImage(b: Uint8Array): string | null {
+  const at = (i: number, ...xs: number[]) => xs.every((x, k) => b[i + k] === x);
+  if (at(0, 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)) return 'image/png';
+  if (at(0, 0xff, 0xd8, 0xff)) return 'image/jpeg';
+  if (at(0, 0x47, 0x49, 0x46, 0x38)) return 'image/gif';
+  if (at(0, 0x52, 0x49, 0x46, 0x46) && at(8, 0x57, 0x45, 0x42, 0x50)) return 'image/webp';
+  return null;
+}
+
+/** Only real PNG/JPEG/WebP/GIF images up to 2 MB; the declared type must match the bytes (docs/11 · A05). */
 export async function uploadImage(deps: AppDeps, ctx: Ctx, file: { mime: string; bytes: Uint8Array }): Promise<{ id: string; url: string }> {
   const ext = IMAGE_TYPES[file.mime];
-  if (!ext) throw new BusinessError('UNSUPPORTED_FILE');
+  if (!ext || sniffImage(file.bytes) !== file.mime) throw new BusinessError('UNSUPPORTED_FILE');
   if (file.bytes.byteLength > MAX_IMAGE_BYTES) throw new BusinessError('FILE_TOO_LARGE', 'Max 2 MB', { maxBytes: MAX_IMAGE_BYTES });
   await deps.entitlements.assert(ctx, 'files.upload', file.bytes.byteLength);
   const ref = await deps.files.put(ctx, { name: `photo${ext}`, mime: file.mime, bytes: file.bytes });

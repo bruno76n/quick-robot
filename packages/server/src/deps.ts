@@ -1,4 +1,6 @@
 import type { Ctx, Database } from '@app/db';
+import type { Logger } from './logging';
+import type { SecurityOptions } from './middleware/security';
 
 /** Who is calling. Local mode: fixed session. Cloud: cookie sessions (phase 5). */
 export interface Session extends Ctx {
@@ -47,6 +49,9 @@ export interface AppDeps {
   clock: Clock;
   /** Diagnostics only — never used to decide rules (docs/02 §7.6). */
   mode: 'local' | 'cloud';
+  logger: Logger;
+  /** HTTP hardening; defaults are safe for local use (the cloud turns HSTS on). */
+  security?: Partial<SecurityOptions>;
   /** Folder with the built web app to serve (local mode). */
   webDist?: string;
 }

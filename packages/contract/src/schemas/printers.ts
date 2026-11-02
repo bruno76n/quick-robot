@@ -43,15 +43,15 @@ export type PrinterList = z.infer<typeof PrinterList>;
 export const PrinterInput = z.object({
   name: Name,
   costCents: NonNegativeMoney,
-  lifeHours: z.number().min(1).default(5000),
+  lifeHours: z.number().min(1).max(1_000_000).default(5000),
   maintenanceCentsPerHour: NonNegativeMoney.default(0),
   kw: z.number().min(0).max(10).default(0),
-  hours: z.number().min(0).default(0),
+  hours: z.number().min(0).max(1_000_000).default(0),
   purchasedOn: IsoDate.nullable().default(null),
 });
 export type PrinterInput = z.input<typeof PrinterInput>;
 
-export const MaintenanceTaskInput = z.object({ task: Name, everyHours: z.number().min(1) });
+export const MaintenanceTaskInput = z.object({ task: Name, everyHours: z.number().min(1).max(1_000_000) });
 export type MaintenanceTaskInput = z.input<typeof MaintenanceTaskInput>;
 export const CompleteMaintenanceInput = z.object({ on: IsoDate, costCents: NonNegativeMoney.default(0) });
 export type CompleteMaintenanceInput = z.input<typeof CompleteMaintenanceInput>;

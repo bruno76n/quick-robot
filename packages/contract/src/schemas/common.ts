@@ -4,14 +4,30 @@ import { z } from 'zod';
 export const Id = z.uuid();
 export type Id = z.infer<typeof Id>;
 
+/**
+ * Upper bounds on every amount (docs/11 · A06): a workshop never needs more, and it keeps sums far from
+ * overflow. $10,000,000 per amount, 1,000 kg per spool, a million units of anything.
+ */
+export const MAX_CENTS = 1_000_000_000;
+export const MAX_GRAMS = 1_000_000;
+export const MAX_QTY = 1_000_000;
+
 /** Money stored and transported as integer cents. */
-export const Money = z.number().int();
+export const Money = z.number().int().min(-MAX_CENTS).max(MAX_CENTS);
 export type Money = z.infer<typeof Money>;
 export const PositiveMoney = Money.positive();
 export const NonNegativeMoney = Money.nonnegative();
 
 /** Grams with one decimal (numeric(10,1) in the database). */
-export const Grams = z.number().finite().refine((g) => Math.abs(Math.round(g * 10) - g * 10) < 1e-6, 'At most one decimal');
+export const Grams = z
+  .number()
+  .finite()
+  .min(-MAX_GRAMS)
+  .max(MAX_GRAMS)
+  .refine((g) => Math.abs(Math.round(g * 10) - g * 10) < 1e-6, 'At most one decimal');
+
+/** A quantity of units (supplies, parts). */
+export const Qty = z.number().finite().min(-MAX_QTY).max(MAX_QTY);
 
 /** Calendar date YYYY-MM-DD. */
 export const IsoDate = z.iso.date();

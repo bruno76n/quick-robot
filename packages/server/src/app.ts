@@ -1,10 +1,11 @@
 import { Hono } from 'hono';
-import { randomUUID } from 'node:crypto';
 import { BusinessError } from '@app/contract';
 import type { AppDeps } from './deps';
 import type { AppEnv } from './env';
 import { errorHandler } from './middleware/errors';
 import { sessionMiddleware } from './middleware/session';
+import { requestLog } from './middleware/request-log';
+import { defaultSecurity, jsonBodyLimit, rateLimit, sameOriginWrites, securityHeaders } from './middleware/security';
 import { filamentRoutes } from './routes/filament';
 import { workspaceRoutes } from './routes/workspace';
 import { settingsRoutes } from './routes/settings';
@@ -16,16 +17,18 @@ import { mountStatic } from './static';
 
 /** The whole API. It does not know whether it runs inside Electron or on a host: it gets its deps. */
 export function createApp(deps: AppDeps) {
+  const security = { ...defaultSecurity, ...deps.security };
   const app = new Hono<AppEnv>();
-  app.use('*', async (c, next) => {
-    c.set('requestId', randomUUID());
-    await next();
-  });
-  app.onError(errorHandler);
+  app.use('*', requestLog(deps.logger));
+  app.use('*', securityHeaders(security));
+  app.onError(errorHandler(deps.logger));
 
   const api = new Hono<AppEnv>();
-  api.get('/health', (c) => c.json({ ok: true, mode: deps.mode }));
+  api.use('*', sameOriginWrites(security));
+  api.use('*', async (c, next) => (c.req.path.endsWith('/files') && c.req.method === 'POST' ? next() : jsonBodyLimit(c, next)));
+  api.get('/health', (c) => c.json({ ok: true }));
   api.use('*', sessionMiddleware(deps.auth));
+  api.use('*', rateLimit(security));
   api.route('/workspace', workspaceRoutes(deps));
   api.route('/filaments', filamentRoutes(deps));
   api.route('/settings', settingsRoutes(deps));

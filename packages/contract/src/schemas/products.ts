@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Id, Name, NonNegativeMoney } from './common';
+import { Id, MAX_GRAMS, MAX_QTY, Name, NonNegativeMoney } from './common';
 
 export const PriceMode = z.enum(['value', 'formula']);
 export const PrintSpec = z.object({
@@ -30,8 +30,8 @@ export const ProductInput = z.object({
   tags: Tags,
   note: z.string().max(2000).default(''),
   spec: PrintSpec.nullable().default(null),
-  filaments: z.array(z.object({ filamentId: Id, grams: z.number().min(0) })).max(20),
-  supplies: z.array(z.object({ supplyId: Id, qty: z.number().min(0) })).max(20).default([]),
+  filaments: z.array(z.object({ filamentId: Id, grams: z.number().min(0).max(MAX_GRAMS) })).max(20),
+  supplies: z.array(z.object({ supplyId: Id, qty: z.number().min(0).max(MAX_QTY) })).max(20).default([]),
   /** Uploaded photo: undefined keeps the current one (a variant inherits its parent's), null removes it. */
   photoFileId: Id.nullable().optional(),
 });
