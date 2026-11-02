@@ -134,3 +134,10 @@ Claude Code leyó la v2 completa: confirmó que las 9 contradicciones estaban re
 - **Registro "para existencias" de una pieza sin existencias** activa "llevar existencias" y suma las piezas (como el mockup y `04 §8`); antes se perdían.
 - **Compras · "Últimas compras":** el primer movimiento de cada insumo se toma como su existencia inicial, no como compra. **Marcado para revisión.**
 - **Compras ordenadas por urgencia** dentro de cada proveedor, y los proveedores en el orden en que se agregaron (sin proveedor al final), como el mockup.
+- **Gastos:** se queda el resumen de 30 días, categorías y punto de equilibrio del mockup; el filtro de periodo de `06` (7/30/90/Todo, por omisión Todo) va solo en "Todos los gastos". La fecha final solo aplica a gastos mensuales; en uno único se descarta, como el mockup.
+- **Reportes** agrega el bloque "Inversión recuperada" (lo pide `06`, el mockup no lo tiene) con el texto de Impresoras; `report()` devuelve además taller, inventario y pedidos en curso para los bloques del mockup.
+- **Atajos:** ⌘/Ctrl+Z ejecuta el "Deshacer" del aviso visible; "Rehacer" queda fuera (`06 §1`). La paleta busca también colecciones e insumos.
+- **CSV:** celdas protegidas contra fórmulas (= + - @), archivo nombrado con el nombre del negocio de Ajustes, estado del pedido con su texto en español.
+- **Búsqueda en la dirección:** los parámetros son texto plano (`?periodo=30`), sin comillas JSON.
+- **Pedidos:** la lista de pedidos devuelve también `items[]` y `jobs[]` (tarjetas del tablero) y el cliente trae `hasLogo`/`logoUrl`; `12 §7` actualizado. En "Datos", entrega, canal y nota se cambian con "Editar" (no hay edición en línea: `PUT /orders/:id` volvería a tomar la foto de los artículos).
+- **Documentos:** la columna es "Total" y no "Importe" (vocabulario fijo de `13`).

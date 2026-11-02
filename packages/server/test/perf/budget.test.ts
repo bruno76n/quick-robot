@@ -19,6 +19,7 @@ beforeAll(async () => {
 }, 900_000);
 afterAll(async () => {
   if (!RUN) return;
+  // eslint-disable-next-line no-console -- the phase report copies this table
   console.table(results.map((r) => ({ ...r, ratio: Math.round((r.p95 / r.budget) * 100) / 100 })));
   await h.close();
 });
@@ -85,6 +86,7 @@ describe.runIf(RUN)('EXPLAIN of the heavy queries', () => {
       ['30-day report', sql`select * from sale where workspace_id = ${ws} and deleted_at is null and "on" >= '2026-10-03' and "on" <= '2026-11-01'`],
       ['home: active orders', sql`select * from "order" where workspace_id = ${ws} and deleted_at is null and status in ('quoted', 'accepted', 'in_production', 'ready')`],
     ];
-    for (const [name, q] of queries) { const p = await plan(q); console.log(`-- ${name}\n${p}`); expect.soft(p, name).not.toMatch(BIG); }
+    for (const [name, q] of queries) { const p = await plan(q); console.log( // eslint-disable-line no-console
+      `-- ${name}\n${p}`); expect.soft(p, name).not.toMatch(BIG); }
   });
 });

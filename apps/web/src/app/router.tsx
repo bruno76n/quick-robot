@@ -1,5 +1,5 @@
 // One screen = one route (docs/07). Spanish paths are what the person sees in the address bar.
-import { createRootRoute, createRoute, createRouter, redirect, type AnyRoute } from '@tanstack/react-router';
+import { createRootRoute, createRoute, createRouter, parseSearchWith, redirect, stringifySearchWith, type AnyRoute } from '@tanstack/react-router';
 import { NAV } from '../components/AppShell';
 import { FilamentList } from '../features/filament/FilamentList';
 import { PrintersPage } from '../features/printers/PrintersPage';
@@ -57,6 +57,8 @@ const extra = [
 const index = createRoute({ getParentRoute: () => rootRoute, path: '/', beforeLoad: () => { throw redirect({ href: '/inicio' }); } });
 const later = NAV.flatMap(([, items]) => items).filter((i) => !BUILT[i.to]).map((i) => route(i.to, () => <NotYet title={i.label} />));
 
-export const router = createRouter({ routeTree: rootRoute.addChildren([index, ...Object.values(BUILT), ...extra, ...later]), defaultPreload: false });
+export const router = createRouter({ routeTree: rootRoute.addChildren([index, ...Object.values(BUILT), ...extra, ...later]), defaultPreload: false,
+  // Every search value is a plain string (?periodo=30, ?id=…): no JSON quoting in the address bar.
+  parseSearch: parseSearchWith((v) => v), stringifySearch: stringifySearchWith((v) => String(v)) });
 
 setNavigator((href, replace) => router.navigate({ href, replace }));

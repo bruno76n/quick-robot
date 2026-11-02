@@ -210,7 +210,7 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 
 | Operación | Entrada | Salida | Errores |
 |---|---|---|---|
-| `GET /orders` | `status` (uno o varios), `view` (`board` \| `list` \| `calendar`), `month` (`2026-11`), `q`, `page`. En `board` devuelve todos los activos y los 3 entregados más recientes | Página de `{ id, number, customer, status, dueOn, itemsText, totalCents, owedCents, profitCents, origins[], queueProgress? }` | — |
+| `GET /orders` | `status` (uno o varios), `view` (`board` \| `list` \| `calendar`), `month` (`2026-11`), `q`, `page`. En `board` devuelve todos los activos y los 3 entregados más recientes | Página de `{ id, number, customer, status, dueOn, itemsText, items[], jobs[], totalCents, owedCents, profitCents, origins[], queueProgress? }` | — |
 | `GET /orders/:id` | — | Pedido con `items[]` (desglose y origen de cada pieza), `payments[]`, `totals`, `queue[]` (por impresora, con avance), `material { needs[], shortfall[] }`, `nextStep` | — |
 | `createOrder` · `POST /orders` | `{ customerId, channelId, createdOn, dueOn, accepted: bool, note?, items: LineItemInput[], depositCents? }`. `accepted = false` crea un **cotizado**; `true` crea y ejecuta `acceptOrder`. El anticipo crea un pago | Pedido (folio asignado por el servidor) + `warnings` (`STOCK_SHORT`) | `CUSTOMER_REQUIRED`, `LINE_ITEMS_REQUIRED` |
 | `updateOrder` · `PUT /orders/:id` | Igual que `createOrder` (sin `accepted`). Solo en Cotizado o Aceptado | Pedido | `ORDER_NOT_ACTIVE`, `CUSTOMER_REQUIRED`, `LINE_ITEMS_REQUIRED` |

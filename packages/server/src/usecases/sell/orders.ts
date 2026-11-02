@@ -89,7 +89,7 @@ export async function orderDetail(deps: Deps, ex: Executor, ctx: Ctx, id: string
   const mat = materialOf(ch.items(id), products);
   const warn = o.status === 'accepted' || o.status === 'quoted' ? await shortfall(ex, ctx, mat) : null;
   return {
-    id: o.id, number: o.number, status: o.status, customerId: o.customerId, customer: customer ? { id: customer.id, name: customer.name, phone: customer.phone, type: customer.type } : null,
+    id: o.id, number: o.number, status: o.status, customerId: o.customerId, customer: customer ? { id: customer.id, name: customer.name, phone: customer.phone, type: customer.type, hasLogo: customer.hasLogo, logoUrl: customer.logoFileId ? `/api/v1/files/${customer.logoFileId}` : null } : null,
     channelId: o.channelId, channel: channels.find((c) => c.id === o.channelId)?.name ?? '', commissionPct: d.commissionPct, note: o.note,
     createdOn: o.createdOn, dueOn: o.dueOn, productionOn: o.productionOn, readyOn: o.readyOn, deliveredOn: o.deliveredOn,
     filamentDeducted: o.filamentDeducted, runsLogged: o.runsLogged, stockReserved: o.stockReserved, cancellation: o.cancellation,

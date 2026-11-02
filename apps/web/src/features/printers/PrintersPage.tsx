@@ -12,6 +12,7 @@ import { t } from '../../i18n/t';
 import { centsTotal, date, money, number1, pct, queueDuration } from '../../lib/format';
 import { usePrinters, useSettings } from '../../lib/queries';
 import { DoneDialog, PrinterDialog, TaskDialog } from './PrinterDialogs';
+import { QueueFinishButton, QueueList, QueueOrderLink } from './PrinterQueue';
 
 const L = es.screens.printers;
 const TONE = { ok: 'good', soon: 'warn', due: 'bad' } as const;
@@ -59,10 +60,11 @@ function PrinterCard({ p, kwh, open }: { p: PrinterView; kwh: number; open: (d: 
     <article className={`pc2${busy ? ' on' : ''}`} data-testid="printer-card">
       <header><div><h2>{p.name}</h2><small>{centsTotal(p.costCents)}{p.purchasedOn ? ` · ${t('screens.printers.bought', { date: date(p.purchasedOn) })}` : ''}</small></div><Pill tone={busy ? 'info' : 'good'}>{busy ? L.printing : L.idle}</Pill></header>
       {job ? (
-        <div className="bay2"><span className="lay sm s0 printing" style={{ ['--p' as string]: `${job.progress}%` }} /><div className="bay-m"><div className="bay-t"><b>{job.text}</b><span className="num">{job.progress}%</span></div><div className="prog soft"><i style={{ width: `${job.progress}%` }} /></div><small>{t('screens.printers.left', { time: queueDuration(job.remainingMinutes) })}</small></div></div>
+        <div className="bay2"><span className="lay sm s0 printing" style={{ ['--p' as string]: `${job.progress}%` }} /><div className="bay-m"><div className="bay-t"><b>{job.text}</b><span className="num">{job.progress}%</span></div><div className="prog soft"><i style={{ width: `${job.progress}%` }} /></div><small>{t('screens.printers.left', { time: queueDuration(job.remainingMinutes) })} · <QueueOrderLink orderId={job.orderId} folio={job.orderNumber} /></small></div></div>
       ) : (
         <div className="bay2 idle"><span className="lay sm s0 empty" /><div><b>{L.free}</b><small>{L.freeHint}</small></div></div>
       )}
+      <QueueList printer={p} />
       <div className="pc-sec">
         <div className="pc-h"><b>{L.investment}</b><span className={`num${p.roi.pct >= 100 ? ' pos' : ''}`}>{pct(p.roi.pct)}</span></div>
         <div className="rk-b"><i style={{ width: `${Math.max(1.5, p.roi.pct)}%` }} /></div>
@@ -86,7 +88,7 @@ function PrinterCard({ p, kwh, open }: { p: PrinterView; kwh: number; open: (d: 
         <div><dt>{L.costPerHour}</dt><dd className="num">{money(machine + power)} <small>{t('screens.printers.costSplit', { machine: money(machine), power: money(power) })}</small></dd></div>
         <div><dt>{L.lifeUsed}</dt><dd className="num">{pct(life)} <small>{t('screens.printers.ofHours', { hours: number1(p.lifeHours) })}</small></dd></div>
       </dl>
-      <footer><Button size="sm" onClick={() => open({ kind: 'printer', printer: p })}>{L.editCosts}</Button></footer>
+      <footer>{job ? <QueueFinishButton printer={p} /> : null}<Button size="sm" onClick={() => open({ kind: 'printer', printer: p })}>{L.editCosts}</Button></footer>
     </article>
   );
 }

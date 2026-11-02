@@ -5,6 +5,8 @@ import { useEffect } from 'react';
 import { AppShell } from '../components/AppShell';
 import { Banner } from '../components/Banner';
 import { ErrorBoundary } from '../components/ErrorBoundary';
+import { openPalette } from '../components/CommandPalette';
+import { CommandLayer } from '../components/Shortcuts';
 import { ToastViewport } from '../components/Toast';
 import { es } from '../i18n/es';
 import { api, ApiError } from '../lib/api';
@@ -28,12 +30,13 @@ export function Root() {
   ) : null;
   return (
     <>
-      <AppShell businessName={business?.name || me.data?.workspace.name || ''} trade={business?.trade ?? ''} banner={banner} onNewPiece={() => void go('/productos/pieza')}>
+      <AppShell businessName={business?.name || me.data?.workspace.name || ''} trade={business?.trade ?? ''} banner={banner} onNewPiece={() => void go('/productos/pieza')} onSearch={openPalette}>
         <ErrorBoundary resetKey={path} onHome={() => void go('/inicio')}>
           <Outlet />
         </ErrorBoundary>
       </AppShell>
       <ToastViewport />
+      <CommandLayer />
     </>
   );
 }

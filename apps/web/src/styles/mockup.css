@@ -1179,3 +1179,7 @@ dialog.pal { width: min(620px, calc(100vw - 32px)); margin-top: 12vh; padding: 0
 .keys.two { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
 @media (max-width: 560px) { .keys.two { grid-template-columns: minmax(0, 1fr); } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+/* Gastos (agent D): period filter next to "Todos los gastos" (the mockup lists every expense; docs/06 §13 asks for a period). */
+.exp-h { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; }
+.exp-h h2.gap { margin-bottom: 8px; }
+.exp-h .seg { margin-bottom: 8px; }
