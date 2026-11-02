@@ -17,7 +17,13 @@ import { createSupply } from './usecases/supplies';
 // eslint-disable-next-line max-lines-per-function
 export async function applyDevelopmentSeed(deps: Deps, ctx: Ctx, path?: string): Promise<boolean> {
   if ((await listFilaments(deps.db, ctx, { page: 1, pageSize: 1 })).total > 0) return false;
-  const b = loadMockupBackup(path);
+  await applyMockupBackup(deps, ctx, loadMockupBackup(path));
+  return true;
+}
+
+/** Loads a mockup v7 backup into an empty workspace with the product's use cases (seed and importer, docs/05). */
+// eslint-disable-next-line max-lines-per-function
+export async function applyMockupBackup(deps: Deps, ctx: Ctx, b: MockupBackup, hooks: MockupHooks = {}) {
   const refs = new Map<string, string>([...b.imps, ...b.pedidos, ...b.ventas].map((x) => [x.id, deps.ids.next()]));
   const n = b.config.negocio;
   await setWorkspaceName(deps.db, ctx, n.nombre);
@@ -91,9 +97,20 @@ export async function applyDevelopmentSeed(deps: Deps, ctx: Ctx, path?: string):
   const collectionIds = new Map<string, string>();
   const cols = await listCollections(deps.db, ctx);
   for (const c of b.colecciones) { const row = cols.find((x) => x.name === c.nombre); if (row) collectionIds.set(c.id, row.id); }
-  await seedSellData(deps, ctx, b as MockupBackup, { refs, productIds, collectionIds, printerIds, filamentIds });
-  return true;
+  await seedSellData(deps, ctx, b, { refs, productIds, collectionIds, printerIds, filamentIds, customerLogo: hooks.image ? (dataUrl) => hooks.image!(dataUrl, 'customer_logo') : undefined, notes: hooks.notes ?? [] });
+  if (hooks.image) {
+    for (const p of b.productos) {
+      const foto = (p as { foto?: string }).foto;
+      const id = productIds.get(p.id);
+      if (!foto || !id) continue;
+      const fileId = await hooks.image(foto, 'product_photo');
+      if (fileId) await transaction(deps.db, (tx) => updateProduct(tx, ctx, id, { photoFileId: fileId }));
+    }
+  }
+  return { productIds, filamentIds, printerIds, collectionIds, refs };
 }
+
+export interface MockupHooks { image?: (dataUrl: string, kind: 'product_photo' | 'customer_logo') => Promise<string | null>; notes?: string[] }
 
 async function setParents(deps: Deps, ctx: Ctx, pairs: readonly (readonly [string, string])[]) {
   await transaction(deps.db, async (tx) => { for (const [id, parentId] of pairs) await updateProduct(tx, ctx, id, { parentId }); });

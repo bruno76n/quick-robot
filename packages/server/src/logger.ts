@@ -20,7 +20,11 @@ export function redact(value: unknown, depth = 0): unknown {
   if (depth > MAX_DEPTH) return '[depth]';
   if (typeof value === 'string') return value.replace(BEARER, '$1 [redacted]').slice(0, 2000);
   if (Array.isArray(value)) return value.slice(0, 50).map((v) => redact(v, depth + 1));
-  if (value instanceof Error) return { name: value.name, message: redact(value.message, depth + 1), stack: value.stack?.split('\n').slice(0, 8).join('\n') };
+  // Query errors carry their parameters (business data, notes): the log keeps the query, never the values (docs/11 A09).
+  if (value instanceof Error) {
+    const cause = (value as { cause?: { message?: string; code?: string } }).cause;
+    return { name: value.name, message: redact(stripParams(value.message), depth + 1), stack: stripParams(value.stack ?? '').split('\n').slice(0, 8).join('\n'), ...(cause ? { cause: { message: stripParams(String(cause.message ?? '')), code: cause.code } } : {}) };
+  }
   if (value && typeof value === 'object') {
     const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(value)) out[k] = SENSITIVE.test(k) ? '[redacted]' : redact(v, depth + 1);
@@ -42,6 +46,9 @@ export function createLogger(sink: Sink, opts: { now?: () => Date; minLevel?: Le
 }
 
 /** A logger that keeps records in memory (tests). */
+/** Removes the `params: …` line drizzle appends to a failed query. */
+export const stripParams = (s: string) => s.replace(/\nparams: [^\n]*/g, '\nparams: [redacted]');
+
 export function memoryLogger(): Logger & { lines: string[]; records: () => LogRecord[] } {
   const lines: string[] = [];
   const l = createLogger((s) => lines.push(s), { minLevel: 'debug' });

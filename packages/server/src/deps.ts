@@ -47,6 +47,8 @@ export interface Ids {
 
 export interface Deps {
   db: Db;
+  /** Largest backup file that can be imported (docs/15 §4: 100 MB local, 50 MB in the cloud). */
+  importLimitMb: number;
   auth: AuthProvider;
   files: FileStore;
   entitlements: Entitlements;

@@ -16,6 +16,7 @@ import { printerRoutes } from './routes/printers';
 import { productRoutes } from './routes/products';
 import { fileRoutes } from './routes/files';
 import { sellRoutes } from './routes/sell';
+import { workspaceRoutes } from './routes/workspace';
 import './usecases/sell/wire';
 import { serveWeb } from './static';
 
@@ -44,7 +45,7 @@ export function createApp(deps: Deps, opts: AppOptions = {}) {
 
   app.get('/api/v1/health', (c) => c.json({ data: { ok: true, version: deps.version, schemaVersion: schemaVersion() } }));
 
-  app.use('/api/*', sameOriginWrites(deps.allowedOrigins), bodyLimit(JSON_LIMIT_BYTES, MULTIPART_LIMIT_BYTES), session());
+  app.use('/api/*', sameOriginWrites(deps.allowedOrigins), bodyLimit(JSON_LIMIT_BYTES, MULTIPART_LIMIT_BYTES, { '/api/v1/workspace/import': deps.importLimitMb * 1024 * 1024 }), session());
   const r = makeRouter(app, routes);
   systemRoutes(r);
   filamentRoutes(r);
@@ -54,6 +55,7 @@ export function createApp(deps: Deps, opts: AppOptions = {}) {
   productRoutes(r);
   fileRoutes(r);
   sellRoutes(r);
+  workspaceRoutes(r);
 
   app.all('/api/*', () => { throw new BusinessError('NOT_FOUND', { entity: 'route' }, 'Route not found'); });
   if (opts.webRoot) serveWeb(app, opts.webRoot);

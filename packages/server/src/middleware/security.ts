@@ -63,16 +63,18 @@ export function sameOriginWrites(allowed: readonly string[] = []): MiddlewareHan
 }
 
 /** Request body limit (docs/15 §4): 1 MB for JSON. Checked on the declared and on the real size. */
-export function bodyLimit(maxBytes: number, multipartMaxBytes: number): MiddlewareHandler<AppEnv> {
+export function bodyLimit(maxBytes: number, multipartMaxBytes: number, bigUploads: Readonly<Record<string, number>> = {}): MiddlewareHandler<AppEnv> {
   return async (c, next) => {
     if (!WRITE.has(c.req.method)) return next();
     const multipart = (c.req.header('content-type') ?? '').startsWith('multipart/form-data');
-    const limit = multipart ? multipartMaxBytes : maxBytes;
+    // Some routes take a whole backup (docs/15 §4: import ≤ 100 MB local); every other upload keeps its own limit.
+    const limit = multipart ? bigUploads[c.req.path] ?? multipartMaxBytes : maxBytes;
     const declared = Number(c.req.header('content-length') ?? 0);
-    if (declared > limit) throw new BusinessError('PAYLOAD_TOO_LARGE', { maxBytes: limit }, 'Body too large');
+    const tooBig = () => (multipart && bigUploads[c.req.path] ? new BusinessError('FILE_TOO_LARGE', { maxMb: Math.round(limit / 1048576) }) : new BusinessError('PAYLOAD_TOO_LARGE', { maxBytes: limit }, 'Body too large'));
+    if (declared > limit) throw tooBig();
     if (c.req.raw.body) {
       const buf = await c.req.raw.clone().arrayBuffer();
-      if (buf.byteLength > limit) throw new BusinessError('PAYLOAD_TOO_LARGE', { maxBytes: limit }, 'Body too large');
+      if (buf.byteLength > limit) throw tooBig();
     }
     return next();
   };

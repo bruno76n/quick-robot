@@ -16,7 +16,8 @@
     "e2e": "playwright test",
     "security": "node scripts/security.mjs",
     "size": "node scripts/size-check.mjs",
-    "perf": "cross-env PERF=1 vitest run packages/server/test/perf"
+    "perf": "cross-env PERF=1 vitest run packages/server/test/perf",
+    "import:mockup": "tsx tools/import-mockup.ts"
   },
   "devDependencies": {
     "@app/db": "workspace:*",

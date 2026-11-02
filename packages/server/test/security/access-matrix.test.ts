@@ -6,7 +6,7 @@ import { B_TOKEN } from '../harness';
 import { first, seededHarness, type Seeded } from '../seeded';
 
 let s: Seeded;
-beforeAll(async () => { s = await seededHarness(); }, 120_000);
+beforeAll(async () => { s = await seededHarness(); await s.h.call('POST', '/api/v1/backups', { token: B_TOKEN }); }, 120_000);
 afterAll(() => s.h.close());
 
 const spool = { filament: { material: 'PLA', color: 'Negro' }, brand: '', costCents: 100, shippingCents: 0, grams: 10, purchasedOn: '2026-11-01' };
@@ -82,6 +82,8 @@ const SAMPLES: Record<string, { path: () => string; body?: () => unknown }> = {
   'PATCH /api/v1/expenses/:id': { path: () => `/api/v1/expenses/${s.b.expense}`, body: () => ({ on: '2026-11-01', concept: 'x', category: 'Otros', amountCents: 1, recurring: false }) },
   'DELETE /api/v1/expenses/:id': { path: () => `/api/v1/expenses/${s.b.expense}` },
   'POST /api/v1/expenses/:id/restore': { path: () => `/api/v1/expenses/${s.b.expense}/restore` },
+  // Backups are per business: B has today's backup (made in beforeAll), A asking for it gets 404.
+  'POST /api/v1/backups/:id/restore': { path: () => '/api/v1/backups/2026-11-01/restore', body: () => ({ confirm: true }) },
 };
 
 /** Writes of A that point to entities of B through the body must also fail (404) and leave B intact. */

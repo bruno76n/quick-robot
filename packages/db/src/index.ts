@@ -10,3 +10,4 @@ export * from './repos/supply-repo';
 export * from './repos/printer-repo';
 export * from './repos/product-repo';
 export * from './repos/sell-repo';
+export * from './repos/workspace-data-repo';

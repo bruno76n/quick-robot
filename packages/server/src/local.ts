@@ -1,5 +1,7 @@
 // Local composition helpers shared by the dev runner and apps/desktop: build the local deps.
+import { LIMITS } from '@app/contract';
 import { connectPglite, ensureWorkspace } from '@app/db';
+import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { systemClock, uuidV7Ids } from './clock';
 import type { Deps } from './deps';
@@ -17,6 +19,7 @@ export const LOCAL_CTX = { workspaceId: LOCAL_WORKSPACE_ID, userId: LOCAL_USER_I
 
 export async function localDeps(cfg: LocalConfig, opts: { version: string; sink?: Sink; workspaceName?: string }) {
   const clock = systemClock(cfg.timeZone);
+  if (cfg.dataDir) mkdirSync(cfg.dataDir, { recursive: true, mode: 0o700 });
   const conn = await connectPglite(cfg.dataDir ? { dataDir: join(cfg.dataDir, 'pgdata') } : {});
   await ensureWorkspace(conn.db, LOCAL_CTX, { name: opts.workspaceName ?? '', email: 'local@localhost', userName: '' });
   const sink = opts.sink ?? (cfg.dataDir ? rotatingFileSink(join(cfg.dataDir, 'logs')) : stdoutSink);
@@ -31,6 +34,7 @@ export async function localDeps(cfg: LocalConfig, opts: { version: string; sink?
     ids: uuidV7Ids,
     logger: createLogger(sink),
     mode: 'local',
+    importLimitMb: LIMITS.importMbLocal,
     version: opts.version,
     allowedOrigins: cfg.allowedOrigins,
   };

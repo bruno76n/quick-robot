@@ -35,7 +35,7 @@ export async function makeHarness(over: Partial<Deps> = {}, given?: Awaited<Retu
   };
   const deps: Deps = {
     db: conn.db, auth: tokenAuth(sessions), files: memoryFileStore(), entitlements: unlimitedEntitlements, mailer: nullMailer,
-    backups: memoryBackupStore(clock), clock, ids: uuidV7Ids, logger, mode: 'local', version: 'test', ...over,
+    backups: memoryBackupStore(clock), clock, ids: uuidV7Ids, logger, mode: 'local', version: 'test', importLimitMb: 100, ...over,
   };
   await ensureWorkspaceDefaults(deps, A);
   await ensureWorkspaceDefaults(deps, B);

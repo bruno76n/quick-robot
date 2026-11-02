@@ -13,3 +13,6 @@ export * from './providers/local/mailer';
 export * from './providers/local/log-file';
 export { addSpool } from './usecases/add-spool';
 export { applyDevelopmentSeed } from './dev-seed';
+export { applyMockupBackup } from './dev-seed';
+export { clearWorkspace, createBackup, ensureDailyBackup, exportData, exportWorkspace, importWorkspace, restoreBackup, type ImportResult } from './usecases/workspace-data';
+export { mockupSums } from './usecases/import-mockup';

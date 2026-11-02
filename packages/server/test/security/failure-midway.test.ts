@@ -23,6 +23,8 @@ import { deletePrintRun, finishQueueEntry, logPrintRun } from '../../src/usecase
 import { createExpense, deleteExpense, restoreExpense, updateExpenseUc } from '../../src/usecases/sell/reports';
 import { createSale, deleteSale, deleteSalePayment, recordSalePayment, restoreSale, returnSale, updateSaleUc } from '../../src/usecases/sell/sales';
 import { adjustStock, enableStockTracking } from '../../src/usecases/sell/stock';
+import { clearWorkspace, createBackup, exportData, importWorkspace, restoreBackup } from '../../src/usecases/workspace-data';
+import { readFileSync } from 'node:fs';
 import { failOnWrite, validSpool } from '../harness';
 import { first, seededHarness, type Seeded } from '../seeded';
 
@@ -31,7 +33,7 @@ beforeAll(async () => { s = await seededHarness(); }, 120_000);
 afterAll(() => s.h.close());
 
 type Run = (d: Deps, c: Ctx, target: string) => Promise<unknown>;
-interface Case { setup?: (c: Ctx) => Promise<string>; run: Run }
+interface Case { setup?: (c: Ctx) => Promise<string>; run: Run; readOnly?: boolean; maxN?: number }
 const product = (name: string) => ({ name, tags: [], mode: 'value' as const, priceCents: 100, hours: 1, batchSize: 1, extrasCents: 0, tracksStock: false, filaments: [{ filamentId: first(s.a.filament), grams: 10 }], supplies: [{ supplyId: first(s.a.supply), qty: 1 }], note: '' });
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
 const d0 = () => s.h.deps;
@@ -145,7 +147,14 @@ const WRITE_ROUTES: Record<string, Case> = {
   'PATCH /api/v1/expenses/:id': { setup: newExpense, run: (d, c, t) => updateExpenseUc(d, c, t, { ...expense, amountCents: 2000 }) },
   'DELETE /api/v1/expenses/:id': { setup: newExpense, run: (d, c, t) => deleteExpense(d, c, t) },
   'POST /api/v1/expenses/:id/restore': { setup: deleted(newExpense, deleteExpense), run: (d, c, t) => restoreExpense(d, c, t) },
+  'POST /api/v1/workspace/import': { run: async (d, c) => importWorkspace(d, c, new TextEncoder().encode(JSON.stringify(await exportData(d0(), c))), { confirm: true, backupFirst: false }) },
+  'POST /api/v1/workspace/clear': { run: (d, c) => clearWorkspace(d, c, { confirm: true }) },
+  // A backup only reads the database and writes a file: nothing in the business can be left half-written.
+  'POST /api/v1/backups': { run: (d, c) => createBackup(d, c), readOnly: true },
+  'POST /api/v1/backups/:id/restore': { setup: async (c) => (await createBackup(d0(), c)).id, run: (d, c, t) => restoreBackup(d, c, t, { confirm: true }) },
 };
+const MOCKUP = readFileSync(new URL('../../../../reference/mockup-backup-v7.json', import.meta.url));
+WRITE_ROUTES['POST /api/v1/workspace/import (mockup v7)'] = { run: (d, c) => importWorkspace(d, c, MOCKUP, { confirm: true, backupFirst: false }), maxN: 12 };
 
 /** Every row of workspace A in every table (the whole state of the business). */
 async function snapshot(ctx: Ctx) {
@@ -166,11 +175,11 @@ describe('failure midway', () => {
     expect(writes.filter((w) => !WRITE_ROUTES[w])).toEqual([]);
   });
 
-  it.each(Object.keys(WRITE_ROUTES))('%s: any injected failure → nothing written', async (name) => {
+  it.each(Object.keys(WRITE_ROUTES))('%s: any injected failure → nothing written', { timeout: 120_000 }, async (name) => {
     const kase = WRITE_ROUTES[name]!;
     const target = kase.setup ? await kase.setup(s.h.A) : '';
     let failures = 0;
-    for (let n = 1; n <= 40; n++) {
+    for (let n = 1; n <= (kase.maxN ?? 40); n++) {
       const before = await snapshot(s.h.A);
       let failed = false;
       try { await kase.run({ ...s.h.deps, db: failOnWrite(s.h.db, n) }, s.h.A, target); } catch (e) {
@@ -181,7 +190,8 @@ describe('failure midway', () => {
       failures += 1;
       expect(await snapshot(s.h.A), `${name} write #${n}`).toBe(before);
     }
-    expect(failures, `${name} wrote nothing`).toBeGreaterThan(0);
+    if (kase.readOnly) expect(failures).toBe(0);
+    else expect(failures, `${name} wrote nothing`).toBeGreaterThan(0);
   });
 
   it('an unexpected error over HTTP → 500 with a generic message and errorId, never the trace', async () => {

@@ -3,12 +3,12 @@
 import { normalizeName, toCents } from '@app/core';
 import {
   insertCustomer, insertExpense, insertLineItems, insertOrder, insertPayments, insertPrintRun, insertPrintRunFilaments, insertQueueEntries, insertSale,
-  insertStockMovements, listChannels, transaction, type Ctx, type Executor,
+  insertChannel, insertStockMovements, listChannels, transaction, type Ctx, type Executor,
 } from '@app/db';
 import { ORDER_STATUS, PRINT_REASON, STOCK_MOVEMENT_KIND, type MockItem, type MockupBackup } from '@app/db/seed';
 import type { Deps } from './deps';
 
-interface Maps { refs: Map<string, string>; productIds: Map<string, string>; collectionIds: Map<string, string>; printerIds: Map<string, string>; filamentIds: Map<string, string> }
+interface Maps { refs: Map<string, string>; productIds: Map<string, string>; collectionIds: Map<string, string>; printerIds: Map<string, string>; filamentIds: Map<string, string>; customerLogo?: ((dataUrl: string) => Promise<string | null>) | undefined; notes?: string[] }
 
 function items(deps: Deps, ctx: Ctx, list: readonly MockItem[], parentKind: 'order' | 'sale', parentId: string, m: Maps) {
   return list.map((it, position) => ({
@@ -24,15 +24,36 @@ function items(deps: Deps, ctx: Ctx, list: readonly MockItem[], parentKind: 'ord
 export async function seedSellData(deps: Deps, ctx: Ctx, b: MockupBackup, m: Maps) {
   await transaction(deps.db, async (tx: Executor) => {
     const channels = await listChannels(tx, ctx);
-    const channel = (name: string) => (channels.find((c) => c.nameKey === normalizeName(name)) ?? channels[0]!).id;
+    // A channel that is no longer in the list is created with 0 % commission and noted in the summary (docs/05).
+    const channel = async (name: string) => {
+      const found = channels.find((c) => c.nameKey === normalizeName(name || ''));
+      if (found) return found.id;
+      if (!name) return channels[0]!.id;
+      const row = await insertChannel(tx, ctx, { id: deps.ids.next(), name, nameKey: normalizeName(name), commissionPct: 0, position: channels.length });
+      channels.push(row);
+      m.notes?.push(`channel:${name}`);
+      return row.id;
+    };
+    let nameless: string | null = null;
+    const customerOf = async (id: string) => {
+      const c = customers.get(id);
+      if (c) return c;
+      if (!nameless) {
+        nameless = (await insertCustomer(tx, ctx, { id: deps.ids.next(), name: 'Sin nombre', nameKey: normalizeName('Sin nombre'), type: 'Otro', createdOn: '2000-01-01' })).id;
+        m.notes?.push('customer:Sin nombre');
+      }
+      return nameless;
+    };
     const customers = new Map<string, string>();
     for (const c of b.clientes) {
-      customers.set(c.id, (await insertCustomer(tx, ctx, { id: deps.ids.next(), name: c.nombre, nameKey: normalizeName(c.nombre), type: c.tipo, phone: c.tel, hasLogo: c.logo, note: c.nota, createdOn: c.creado })).id);
+      const img = (c as { logoImg?: string }).logoImg;
+      const logoFileId = img && m.customerLogo ? await m.customerLogo(img) : null;
+      customers.set(c.id, (await insertCustomer(tx, ctx, { id: deps.ids.next(), name: c.nombre, nameKey: normalizeName(c.nombre), type: c.tipo || 'Otro', phone: c.tel ?? '', hasLogo: Boolean(c.logo || logoFileId), logoFileId, note: c.nota ?? '', createdOn: c.creado || '2000-01-01' })).id);
     }
     for (const o of b.pedidos) {
       const id = m.refs.get(o.id)!;
       await insertOrder(tx, ctx, {
-        id, number: o.folio, customerId: customers.get(o.cliente)!, status: ORDER_STATUS[o.estado] ?? 'quoted', channelId: channel(o.canal), note: o.nota,
+        id, number: o.folio, customerId: await customerOf(o.cliente), status: ORDER_STATUS[o.estado] ?? 'quoted', channelId: await channel(o.canal), note: o.nota,
         createdOn: o.creado, dueOn: o.entrega, readyOn: o.listo ?? null, deliveredOn: o.entregado ?? null, productionOn: o.estado === 'produccion' ? o.creado : null,
         filamentDeducted: !!o.descontado, runsLogged: !!o.logueado,
         stockReserved: o.stk ? Object.fromEntries(Object.entries(o.stk).map(([k, v]) => [m.productIds.get(k) ?? k, v])) : null,
@@ -44,7 +65,7 @@ export async function seedSellData(deps: Deps, ctx: Ctx, b: MockupBackup, m: Map
     for (const v of b.ventas) {
       const id = m.refs.get(v.id)!;
       await insertSale(tx, ctx, {
-        id, on: v.fecha, channelId: channel(v.canal), customerId: v.cliente ? customers.get(v.cliente) ?? null : null, orderId: v.pedido ? m.refs.get(v.pedido) ?? null : null,
+        id, on: v.fecha, channelId: await channel(v.canal), customerId: v.cliente ? customers.get(v.cliente) ?? null : null, orderId: v.pedido ? m.refs.get(v.pedido) ?? null : null,
         note: v.nota, tracksPayments: !!v.pagos, return: v.dev ? { on: v.dev.fecha, restock: v.dev.repone, refundCents: toCents(v.dev.reembolso), note: v.dev.nota } : null,
       });
       await insertLineItems(tx, ctx, items(deps, ctx, v.items, 'sale', id, m));
