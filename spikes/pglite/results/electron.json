@@ -1,0 +1,10 @@
+{
+  "electron": "38.8.6",
+  "pglite": "0.5.10",
+  "packaging": "electron-builder 26.17.0, linux dir target, asar: true",
+  "runs": [
+    { "run": 1, "ok": true, "rows": 1, "ms": 8598, "note": "first open creates the database (initdb inside WASM)" },
+    { "run": 2, "ok": true, "rows": 2, "ms": 736, "note": "second open re-reads the data written by run 1" }
+  ],
+  "macos": "not tested: no macOS machine in this environment"
+}

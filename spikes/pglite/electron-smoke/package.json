@@ -1,0 +1,13 @@
+{
+  "name": "pglite-electron-smoke",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "main.js",
+  "description": "Smoke test: PGlite inside a packaged Electron app",
+  "author": "spike",
+  "scripts": { "dist": "electron-builder --linux dir --publish never" },
+  "dependencies": { "@electric-sql/pglite": "0.5.10" },
+  "devDependencies": { "electron": "38.8.6", "electron-builder": "26.17.0" },
+  "build": { "appId": "local.spike.pglite", "files": ["main.js", "package.json"], "asar": true, "directories": { "output": "out" } }
+}

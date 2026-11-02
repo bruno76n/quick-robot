@@ -48,3 +48,15 @@ Claude Code leyó la v2 completa: confirmó que las 9 contradicciones estaban re
 - **Unidad repetida:** `SPOOL_INSUFFICIENT` escribía “g” después de `{availableGrams}`, que ya se formatea con su unidad. Regla nueva en `13 §2`: la unidad nunca va en el texto; `i18n.test.ts` lo comprueba.
 - **Sintaxis de `t()`:** había plurales sin nombre (`{count} {pieza|piezas}`) y elecciones sin definir (`{entregado|cancelado}`). Ahora hay tres formas explícitas (valor, plural, elección) y todos los textos se reescribieron con ellas.
 - **Referencia:** el límite de 100 MB de las copias está en `15 §4`, no en `§3` (corregido en `12` y `07`).
+
+## 2026-11-02 · Fase 1 · Paso 1.0 · Comprobación de PGlite: pasa
+- Situación: `02 §4` pide comprobar PGlite antes de construir (5 criterios). Carpeta `spikes/pglite/`, resultados en `spikes/pglite/results/`.
+- Entorno: Linux x64, 4 CPU, Node 22.23. PGlite 0.5.10; Postgres 16 nativo para comparar.
+- Resultados (p95, archivo en disco):
+  1. Mismas migraciones en PGlite y Postgres 16: **pasa** (la misma carpeta generada por drizzle-kit se aplica en los dos sin cambios).
+  2. Ventas por pieza, 12 meses, 5 000 ventas: **17.7 ms** (< 200 ms). "Todo" con 25 000 ventas / 48 973 artículos: **53.5 ms** (< 1.5 s). Al reabrir: 38.6 ms. Postgres nativo: 23.5 / 40.4 ms. **Pasa.**
+  3. Cierre forzado: 8 rondas de `kill -9` en medio de transacciones de 100 filas (hasta 56 100 filas): 0 lotes a medias, todo lo confirmado está, conteo por índice = conteo por tabla. **Pasa.**
+  4. PGlite dentro de Electron 38 empaquetado (electron-builder, asar): abre, crea, escribe; la segunda apertura relee los datos (1 → 2 filas). Primera apertura 8.6 s (crea la base), segunda 0.7 s. **Pasa en Linux**; el empaquetado para Mac no se puede probar aquí (sin macOS) y queda para la fase 4.
+  5. RLS con `FORCE ROW LEVEL SECURITY`, rol sin privilegios y `set_config('app.workspace_id')`: A no ve, no modifica ni inserta en B; sin el ajuste no ve nada. **Pasa** en PGlite y en Postgres.
+- Decisión: se mantiene Postgres en los dos modos (PGlite en local). No hace falta el plan B. El filtro por `workspace_id` en los repositorios es la barrera principal; RLS queda viable como segunda barrera y se activa en la fase 5 (en local hay un solo negocio).
+- Impacto: crear la base por primera vez tarda 4–8 s (initdb en WASM): la fase 4 debe mostrar "Preparando datos…" o partir de una base creada.

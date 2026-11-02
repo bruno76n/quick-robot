@@ -1,0 +1,66 @@
+[
+  {
+    "round": 1,
+    "committedReported": 0,
+    "batchesFound": 0,
+    "partial": 0,
+    "rows": 0,
+    "ok": true
+  },
+  {
+    "round": 2,
+    "committedReported": 21,
+    "batchesFound": 21,
+    "partial": 0,
+    "rows": 2100,
+    "ok": true
+  },
+  {
+    "round": 3,
+    "committedReported": 80,
+    "batchesFound": 80,
+    "partial": 0,
+    "rows": 8000,
+    "ok": true
+  },
+  {
+    "round": 4,
+    "committedReported": 159,
+    "batchesFound": 159,
+    "partial": 0,
+    "rows": 15900,
+    "ok": true
+  },
+  {
+    "round": 5,
+    "committedReported": 237,
+    "batchesFound": 237,
+    "partial": 0,
+    "rows": 23700,
+    "ok": true
+  },
+  {
+    "round": 6,
+    "committedReported": 329,
+    "batchesFound": 329,
+    "partial": 0,
+    "rows": 32900,
+    "ok": true
+  },
+  {
+    "round": 7,
+    "committedReported": 433,
+    "batchesFound": 433,
+    "partial": 0,
+    "rows": 43300,
+    "ok": true
+  },
+  {
+    "round": 8,
+    "committedReported": 561,
+    "batchesFound": 561,
+    "partial": 0,
+    "rows": 56100,
+    "ok": true
+  }
+]

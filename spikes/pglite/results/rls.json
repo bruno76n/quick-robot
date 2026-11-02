@@ -1,0 +1,22 @@
+{
+  "pglite": {
+    "aSees": [
+      "a1",
+      "a2"
+    ],
+    "aUpdatesB": 0,
+    "aInsertsB": "rejected",
+    "noSettingSees": 0,
+    "pass": true
+  },
+  "postgres": {
+    "aSees": [
+      "a1",
+      "a2"
+    ],
+    "aUpdatesB": 0,
+    "aInsertsB": "rejected",
+    "noSettingSees": 0,
+    "pass": true
+  }
+}
