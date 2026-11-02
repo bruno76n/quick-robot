@@ -41,7 +41,7 @@ Crea la rama fase-1. Un commit por paso, mensaje en inglés. Un paso solo se da 
 cuando pasan pruebas, lint, typecheck y pnpm security (docs/14 §6).
 
 La fase termina cuando: agrego un rollo de filamento en el navegador y queda guardado en el
-archivo local; los casos 1.1 y 1.2 de docs/04 pasan; la prueba de aislamiento entre negocios pasa;
+archivo local; los casos 1.1, 1.2 y 1.3 de docs/04 pasan; la prueba de aislamiento entre negocios pasa;
 y el lint rechaza una frontera rota.
 
 No hagas nada fuera de la fase 1. No me hagas preguntas salvo los casos de parada de CLAUDE.md.
