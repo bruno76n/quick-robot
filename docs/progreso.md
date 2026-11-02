@@ -12,7 +12,7 @@ Estados: `no iniciada` · `en curso` · `igual al mockup` · `verificada con dat
 | Armador de venta o pedido | 3 | no iniciada | |
 | Pedidos (tablero, lista y calendario) | 3 | no iniciada | El tablero es la vista por defecto |
 | Pedido (página) | 3 | no iniciada | |
-| Filamentos | 1–2 | no iniciada | |
+| Filamentos | 1–2 | en curso | Lista, cajón y "Agregar rollo" iguales al mockup en 1440/820/390. Faltan editar/eliminar rollo y movimientos (fase 2) |
 | Insumos | 2 | no iniciada | |
 | Impresoras | 2 | no iniciada | |
 | Producción | 3 | no iniciada | |
@@ -32,7 +32,7 @@ Estados: `no iniciada` · `en curso` · `igual al mockup` · `verificada con dat
 
 | Fase | Estado | Informe |
 |---|---|---|
-| 1 | no iniciada | `docs/informe-fase-1.md` |
+| 1 | terminada | `docs/informe-fase-1.md` |
 | 2 | no iniciada | `docs/informe-fase-2.md` |
 | 3 | no iniciada | `docs/informe-fase-3.md` |
 | 4 | no iniciada | `docs/informe-fase-4.md` |
