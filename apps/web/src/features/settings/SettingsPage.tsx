@@ -15,6 +15,7 @@ import { errorText } from '../../lib/errors';
 import { money2d } from '../../lib/format';
 import { parseNumber } from '../../lib/input';
 import { invalidate, usePrinters, useSettings } from '../../lib/queries';
+import { BackupSection, ClearSection } from './BackupSection';
 import { CsvExport } from './CsvExport';
 
 const L = es.screens.settings;
@@ -84,7 +85,9 @@ export function SettingsPage() {
           </div>
           <div className="mt"><Field label={L.footer} hint={L.footerHint}><textarea rows={2} defaultValue={s.business.footer} key={`f-${s.business.footer}`} onBlur={(e) => { if (e.target.value !== s.business.footer) void run(api.settings.update({ business: { footer: e.target.value } }), ['settings']); }} /></Field></div>
         </section>
+        <BackupSection />
         <CsvExport />
+        <ClearSection />
       </div>
     </>
   );

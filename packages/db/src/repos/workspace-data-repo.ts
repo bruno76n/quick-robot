@@ -1,6 +1,6 @@
 // Whole-business data for export, import, restore and "Vaciar negocio" (docs/12 §10). Every table of the business,
 // parents before children; rows keep their ids and drop workspace_id (the importer sets it from ctx).
-import { asc, eq, getTableColumns, getTableName } from 'drizzle-orm';
+import { asc, eq, getTableColumns, getTableName, sql } from 'drizzle-orm';
 import type { PgColumn, PgTable } from 'drizzle-orm/pg-core';
 import type { Ctx } from '../ctx';
 import type { Executor } from '../db';
@@ -42,6 +42,8 @@ export async function wipeWorkspace(ex: Executor, ctx: Ctx) {
   }
 }
 
+const DEFAULT = Symbol('default');
+
 /** Inserts the rows of each table (already validated), parents first; pieces with a parent go after their parent. */
 export async function loadWorkspace(ex: Executor, ctx: Ctx, tables: Readonly<Record<string, readonly Record<string, unknown>[]>>) {
   inWorkspace(wsColumn(s.product), ctx);
@@ -50,9 +52,17 @@ export async function loadWorkspace(ex: Executor, ctx: Ctx, tables: Readonly<Rec
     const name = getTableName(t);
     let rows = [...(tables[name] ?? [])];
     if (t === s.product) rows = [...rows.filter((r) => !r.parentId), ...rows.filter((r) => r.parentId)];
-    for (let i = 0; i < rows.length; i += 500) {
-      const part = rows.slice(i, i + 500).map((r) => ({ ...r, workspaceId: ctx.workspaceId }));
-      if (part.length) await ex.insert(t).values(part as never);
+    // One statement per chunk: the rows travel as a single JSON parameter and Postgres builds them with the table's own
+    // types (json_populate_recordset). 330 000 rows load in seconds instead of minutes (docs/15 §2: ≤ 30 s).
+    const cols = Object.entries(getTableColumns(t) as Record<string, PgColumn>);
+    for (let i = 0; i < rows.length; i += 5000) {
+      const part = rows.slice(i, i + 5000).map((r) => Object.fromEntries(cols.map(([k, c]) => {
+        const v = k === 'workspaceId' ? ctx.workspaceId : r[k];
+        return [c.name, v instanceof Date ? v.toISOString() : v === undefined ? (c.hasDefault ? DEFAULT : null) : v];
+      })));
+      if (!part.length) continue;
+      if (part.some((r) => Object.values(r).includes(DEFAULT))) { await ex.insert(t).values(rows.slice(i, i + 5000).map((r) => ({ ...r, workspaceId: ctx.workspaceId })) as never); continue; }
+      await ex.execute(sql`insert into ${t} select * from json_populate_recordset(null::${t}, ${JSON.stringify(part)}::json)`);
     }
     counts[name] = rows.length;
   }

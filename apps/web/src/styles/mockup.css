@@ -1183,3 +1183,11 @@ dialog.pal { width: min(620px, calc(100vw - 32px)); margin-top: 12vh; padding: 0
 .exp-h { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; }
 .exp-h h2.gap { margin-bottom: 8px; }
 .exp-h .seg { margin-bottom: 8px; }
+/* Ajustes › Copia de seguridad (agent F): date of the last download next to the status, the "Importando…" screen lock and the summary. */
+.dat-st { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+dialog.bak-busy { width: min(360px, calc(100vw - 32px)); padding: 22px 24px; text-align: center; font-weight: 500; }
+dialog.bak-busy p { margin: 0; }
+.bak-sum { display: grid; gap: 10px; }
+.bak-sum p, .bak-sum h3 { margin: 0; }
+.bak-sum .effects { margin: 0; }
+.bak-sum .bak-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; }

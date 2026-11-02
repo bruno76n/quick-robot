@@ -17,11 +17,11 @@ import { ensureWorkspaceDefaults } from './usecases/settings';
 
 export const LOCAL_CTX = { workspaceId: LOCAL_WORKSPACE_ID, userId: LOCAL_USER_ID };
 
-export async function localDeps(cfg: LocalConfig, opts: { version: string; sink?: Sink; workspaceName?: string }) {
+export async function localDeps(cfg: LocalConfig, opts: { version: string; sink?: Sink; workspaceName?: string; migrationsFolder?: string }) {
   const clock = systemClock(cfg.timeZone);
   if (cfg.dataDir) mkdirSync(cfg.dataDir, { recursive: true, mode: 0o700 });
   // With a data folder: copy before migrating and put the copy back if a migration fails (docs/02 §6).
-  const opened = cfg.dataDir ? await openLocalDatabase(cfg.dataDir) : null;
+  const opened = cfg.dataDir ? await openLocalDatabase(cfg.dataDir, opts.migrationsFolder ? { migrationsFolder: opts.migrationsFolder } : {}) : null;
   const conn = opened?.conn ?? await connectPglite({});
   await ensureWorkspace(conn.db, LOCAL_CTX, { name: opts.workspaceName ?? '', email: 'local@localhost', userName: '' });
   const sink = opts.sink ?? (cfg.dataDir ? rotatingFileSink(join(cfg.dataDir, 'logs')) : stdoutSink);

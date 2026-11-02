@@ -329,7 +329,7 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 | `POST /files` | `multipart/form-data`: `kind` (`product_photo` \| `customer_logo` \| `print_photo`) + `file` | `{ fileId, url }` | `FILE_TOO_LARGE`, `UNSUPPORTED_IMAGE` |
 | `GET /files/:id` | — | El archivo, con `Content-Type` de la lista permitida, `X-Content-Type-Options: nosniff` y `Content-Disposition: inline` | — |
 | `exportWorkspace` · `GET /workspace/export` | — | Archivo `.json` con `schemaVersion`, fecha y todas las tablas del negocio; actualiza `lastBackupOn` | — |
-| `importWorkspace` · `POST /workspace/import` | `multipart`: `file` + `confirm: true`. **Primero** guarda una copia automática de lo actual; valida todo el archivo con Zod y lo aplica en **una transacción** | `{ counts { tabla: filas }, differences[] }` | `CONFIRMATION_REQUIRED`, `IMPORT_INVALID_FILE`, `IMPORT_UNSUPPORTED_VERSION`, `FILE_TOO_LARGE` |
+| `importWorkspace` · `POST /workspace/import` | `multipart`: `file` + `confirm: true`. Acepta la exportación de la app **o la copia del mockup v7**. **Primero** guarda una copia automática de lo actual; valida todo el archivo y lo aplica en **una transacción** (ids nuevos, referencias reescritas) | `{ format, counts { tabla: filas }, differences[], notes[], backupId }` | `CONFIRMATION_REQUIRED`, `IMPORT_INVALID_FILE`, `IMPORT_UNSUPPORTED_VERSION`, `FILE_TOO_LARGE` |
 | `clearWorkspace` · `POST /workspace/clear` | `{ confirm: true }`. Guarda una copia antes | `{ backupId }` | `CONFIRMATION_REQUIRED` |
 | `GET /backups` | — | Copias automáticas: `{ id, on, sizeKb }` (una por día, se conservan las últimas 7) | — |
 | `POST /backups` | — | Crea una copia ahora | — |

@@ -60,6 +60,12 @@ describe.runIf(RUN)(`budgets of docs/15 §2 with ${LOAD.sales} sales`, () => {
     await measure('GET /home', 400, get('/home'));
     await measure('GET /search?q=spider', 200, get('/search?q=spider'));
   });
+  it('importing a copy with 25 000 sales ≤ 30 s (docs/15 §2)', async () => {
+    const { exportData, importWorkspace } = await import('../../src/usecases/workspace-data');
+    const bytes = new TextEncoder().encode(JSON.stringify(await exportData(h.deps, h.A)));
+    await measure('import 25 000 sales', 30_000, () => importWorkspace(h.deps, h.B, bytes, { confirm: true, backupFirst: false }), 1);
+  }, 600_000);
+
   it('writes ≤ 500 ms; the heaviest ≤ 800 ms', async () => {
     const products = ((await get('/products')()).data as J).items as J[];
     const channel = (((await get('/settings')()).data as J).channels as J[])[0]!.id;
