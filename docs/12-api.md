@@ -239,7 +239,7 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 
 | Operación | Entrada | Salida | Errores |
 |---|---|---|---|
-| `GET /filaments` | `q`, `page` | Página de `{ id, material, color, hex, remainingGrams, spools, costPerGram, status (`no_spools` \| `out` \| `ending` \| `low` \| `new` \| `ok`) }` | — |
+| `GET /filaments` | `q`, `page` | Página de `{ id, material, color, hex, remainingGrams, spools, costPerGram, status (`no_spools` \| `out` \| `ending` \| `low` \| `new` \| `ok`), activeSpools, brands[], capacityGrams, valueCents }` (rollos con material, sus marcas y capacidad para la barra, y el valor de lo que queda) | — |
 | `GET /filaments/:id` | — | Filamento con `spools[]` (restante y `status` de cada uno: `empty` \| `new` \| `in_use`) y `movements[]` | — |
 | `addSpool` · `POST /spools` | `{ filamentId? \| { material, color, hex? }, brand, costCents, shippingCents, grams, purchasedOn, supplierId? }`. Si el filamento no existe, se crea. Registra el movimiento `purchase` | Rollo + filamento | — |
 | `updateSpool` · `PATCH /spools/:id` | Los mismos campos | Rollo | — |

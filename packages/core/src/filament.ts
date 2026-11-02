@@ -1,5 +1,6 @@
 // Filament rules (docs/04 §1). A filament is material + color; a spool is one purchase of it.
 // Everything is computed from data passed in: remaining grams come from the spool ledger.
+import { normalizeName } from './catalog';
 import { round1 } from './money';
 
 export interface SpoolInput {
@@ -24,10 +25,9 @@ export const ENDING_GRAMS = 150;
 export const LOW_GRAMS = 300;
 export const NEW_RATIO = 0.95;
 
-/** Same filament no matter spacing or case: "PLA  negro" = "pla Negro". */
+/** Same filament no matter spacing, case or accents: "PLA  negro" = "pla Negro" (docs/04 §1). */
 export function filamentKey(material: string, color: string): string {
-  const norm = (s: string) => s.trim().replace(/\s+/g, ' ').toLocaleLowerCase('es');
-  return `${norm(material)}|${norm(color)}`;
+  return `${normalizeName(material)}|${normalizeName(color)}`;
 }
 
 export function spoolCostPerGram(s: Pick<SpoolInput, 'costPesos' | 'shippingPesos' | 'grams'>): number {

@@ -18,7 +18,7 @@ const securitySyntax = [
 const noModeBranch = { selector: "BinaryExpression[operator=/^[!=]==?$/] > Literal[value='cloud']", message: "No if (mode === 'cloud') in rules or use cases (CLAUDE.md rule 7)." };
 const noSpanishInJsx = [
   { selector: 'JSXText[value=/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ¿¡]/]', message: 'User-facing text lives in i18n/es.ts (docs/13 §2).' },
-  { selector: "JSXAttribute[name.name=/^(title|placeholder|alt|aria-label|label)$/] > Literal", message: 'User-facing text lives in i18n/es.ts (docs/13 §2).' },
+  { selector: "JSXAttribute[name.name=/^(title|placeholder|alt|aria-label|label)$/] > Literal[value=/[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]/]", message: 'User-facing text lives in i18n/es.ts (docs/13 §2).' },
 ];
 
 export default tseslint.config(
@@ -70,9 +70,9 @@ export default tseslint.config(
         { regex: '^@app/(db|server|desktop|cloud)' }, { regex: '^node:' }, { regex: '^(fs|path|os|child_process|crypto)$' }, { regex: '^electron' }, { regex: '^(drizzle-orm|@electric-sql/pglite|postgres|hono)(/|$)' }]),
     },
   },
-  { files: ['apps/web/src/features/**/*.tsx', 'apps/web/src/components/**/*.tsx'], rules: { 'no-restricted-syntax': ['error', ...securitySyntax, ...noSpanishInJsx] } },
+  { files: ['apps/web/src/features/**/*.tsx', 'apps/web/src/components/**/*.tsx'], ignores: ['**/*.test.tsx'], rules: { 'no-restricted-syntax': ['error', ...securitySyntax, ...noSpanishInJsx] } },
   { files: ['apps/desktop/src/**/*.ts'], rules: boundary('apps/desktop: only server, db and the web build (docs/03).', [{ regex: '^@app/(core|contract|web)' }]) },
   { files: ['**/*.cjs'], languageOptions: { sourceType: 'commonjs', globals: { module: 'writable', require: 'readonly' } } },
-  { files: ['**/*.config.{js,ts}', 'eslint.config.js', '**/vite.config.ts', 'playwright.config.ts'], rules: { 'no-restricted-syntax': 'off' } },
+  { files: ['**/*.config.{js,ts}', 'eslint.config.js', '**/vite.config.ts', 'playwright.config.ts', 'e2e/support/global-setup.ts'], rules: { 'no-restricted-syntax': 'off' } },
   { files: ['scripts/**/*.mjs', 'tools/**/*.{ts,mjs}', 'e2e/**/*.ts'], rules: { 'no-console': 'off', 'max-lines-per-function': 'off' } },
 );

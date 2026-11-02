@@ -1,6 +1,6 @@
 // Build the API shapes of docs/12 §8 from repository rows, with the rules of core.
 import type { FilamentDetail, FilamentListItem, Spool, SpoolMovement } from '@app/contract';
-import { filamentCostPerGram, filamentRemaining, filamentStatus, round1, spoolCostPerGram, spoolStatus, spoolUseOrder, type SpoolInput } from '@app/core';
+import { EMPTY_GRAMS, filamentCostPerGram, filamentRemaining, filamentStatus, round1, toCents, spoolCostPerGram, spoolStatus, spoolUseOrder, type SpoolInput } from '@app/core';
 import type { Executor, FilamentRow, SpoolMovementRow, SpoolRow } from '@app/db';
 import { listSpools, type Ctx } from '@app/db';
 
@@ -21,11 +21,17 @@ export function spoolView(s: SpoolRow): Spool {
 
 export function filamentListView(f: FilamentRow, spools: readonly SpoolRow[]): FilamentListItem {
   const inputs = spools.map(toSpoolInput);
+  const active = spools.filter((s) => s.remainingGrams > EMPTY_GRAMS);
+  const value = inputs.reduce((a, s) => a + Math.max(0, s.remaining) * spoolCostPerGram(s), 0);
   return {
     id: f.id, material: f.material, color: f.color, hex: f.hex,
     remainingGrams: filamentRemaining(inputs), spools: spools.length,
     costPerGram: Math.round(filamentCostPerGram(inputs) * COST_DECIMALS) / COST_DECIMALS,
     status: filamentStatus(inputs),
+    activeSpools: active.length,
+    brands: [...new Set(active.map((s) => s.brand).filter(Boolean))],
+    capacityGrams: active.reduce((a, s) => a + s.grams, 0),
+    valueCents: toCents(value),
   };
 }
 

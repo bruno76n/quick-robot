@@ -15,6 +15,11 @@ export const filamentListItem = z.object({
   spools: z.number().int(),
   costPerGram: z.number(),
   status: filamentStatus,
+  /** Spools with material left (> 0.5 g), their brands and capacity (for the bar), and the value of what is left. */
+  activeSpools: z.number().int(),
+  brands: z.array(z.string()),
+  capacityGrams: z.number(),
+  valueCents: z.number().int(),
 });
 
 export const spool = z.object({
