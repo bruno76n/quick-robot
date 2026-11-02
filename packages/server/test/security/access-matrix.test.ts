@@ -49,6 +49,39 @@ const SAMPLES: Record<string, { path: () => string; body?: () => unknown }> = {
   'DELETE /api/v1/collections/:id': { path: () => `/api/v1/collections/${first(s.b.collection)}` },
   'POST /api/v1/collections/:id/restore': { path: () => `/api/v1/collections/${first(s.b.collection)}/restore` },
   'GET /api/v1/files/:id': { path: () => `/api/v1/files/${s.b.file}` },
+  'GET /api/v1/stock/:productId': { path: () => `/api/v1/stock/${first(s.b.product)}` },
+  'POST /api/v1/stock/:productId/enable': { path: () => `/api/v1/stock/${first(s.b.product)}/enable`, body: () => ({ initialCount: 3 }) },
+  'POST /api/v1/stock/:productId/adjust': { path: () => `/api/v1/stock/${first(s.b.product)}/adjust`, body: () => ({ mode: 'delta', value: 1 }) },
+  'GET /api/v1/customers/:id': { path: () => `/api/v1/customers/${first(s.b.customer)}` },
+  'PATCH /api/v1/customers/:id': { path: () => `/api/v1/customers/${first(s.b.customer)}`, body: () => ({ note: 'x' }) },
+  'DELETE /api/v1/customers/:id/logo': { path: () => `/api/v1/customers/${first(s.b.customer)}/logo` },
+  'DELETE /api/v1/customers/:id': { path: () => `/api/v1/customers/${first(s.b.customer)}` },
+  'POST /api/v1/customers/:id/restore': { path: () => `/api/v1/customers/${first(s.b.customer)}/restore` },
+  'GET /api/v1/sales/:id': { path: () => `/api/v1/sales/${s.b.sale}` },
+  'PATCH /api/v1/sales/:id': { path: () => `/api/v1/sales/${s.b.sale}`, body: () => ({ note: 'x' }) },
+  'DELETE /api/v1/sales/:id': { path: () => `/api/v1/sales/${s.b.sale}` },
+  'POST /api/v1/sales/:id/restore': { path: () => `/api/v1/sales/${s.b.sale}/restore` },
+  'POST /api/v1/sales/:id/payments': { path: () => `/api/v1/sales/${s.b.saleWithPayment}/payments`, body: () => ({ on: '2026-11-01', amountCents: 100 }) },
+  'DELETE /api/v1/sales/:id/payments/:paymentId': { path: () => `/api/v1/sales/${s.b.saleWithPayment}/payments/${s.b.salePayment}` },
+  'POST /api/v1/sales/:id/return': { path: () => `/api/v1/sales/${s.b.sale}/return`, body: () => ({ on: '2026-11-01', restock: true }) },
+  'GET /api/v1/orders/:id': { path: () => `/api/v1/orders/${s.b.order[6]}` },
+  'PUT /api/v1/orders/:id': { path: () => `/api/v1/orders/${s.b.order[6]}`, body: () => ({ customerId: first(s.a.customer), channelId: first(s.a.channel), createdOn: '2026-11-01', dueOn: '2026-11-05', items: [{ kind: 'piece', productId: first(s.a.product), qty: 1, priceCents: 100 }] }) },
+  'DELETE /api/v1/orders/:id': { path: () => `/api/v1/orders/${s.b.order[6]}` },
+  'POST /api/v1/orders/:id/restore': { path: () => `/api/v1/orders/${s.b.order[6]}/restore` },
+  'POST /api/v1/orders/:id/accept': { path: () => `/api/v1/orders/${s.b.order[6]}/accept` },
+  'POST /api/v1/orders/:id/start-production': { path: () => `/api/v1/orders/${s.b.order[5]}/start-production`, body: () => ({ assignments: [], deductFilament: false }) },
+  'POST /api/v1/orders/:id/reassign-printers': { path: () => `/api/v1/orders/${s.b.order[3]}/reassign-printers`, body: () => ({ assignments: [] }) },
+  'POST /api/v1/orders/:id/ready': { path: () => `/api/v1/orders/${s.b.order[3]}/ready` },
+  'POST /api/v1/orders/:id/deliver': { path: () => `/api/v1/orders/${s.b.order[2]}/deliver`, body: () => ({ on: '2026-11-01' }) },
+  'POST /api/v1/orders/:id/cancel': { path: () => `/api/v1/orders/${s.b.order[6]}/cancel`, body: () => ({ reason: 'x' }) },
+  'POST /api/v1/orders/:id/payments': { path: () => `/api/v1/orders/${s.b.order[6]}/payments`, body: () => ({ on: '2026-11-01', amountCents: 100 }) },
+  'DELETE /api/v1/orders/:id/payments/:paymentId': { path: () => `/api/v1/orders/${s.b.orderWithPayment}/payments/${s.b.orderPayment}` },
+  'POST /api/v1/printers/:id/queue/:entryId/finish': { path: () => `/api/v1/printers/${s.b.queue.printerId}/queue/${s.b.queue.entryId}/finish` },
+  'GET /api/v1/print-runs/:id': { path: () => `/api/v1/print-runs/${s.b.printRun}` },
+  'DELETE /api/v1/print-runs/:id': { path: () => `/api/v1/print-runs/${s.b.printRun}` },
+  'PATCH /api/v1/expenses/:id': { path: () => `/api/v1/expenses/${s.b.expense}`, body: () => ({ on: '2026-11-01', concept: 'x', category: 'Otros', amountCents: 1, recurring: false }) },
+  'DELETE /api/v1/expenses/:id': { path: () => `/api/v1/expenses/${s.b.expense}` },
+  'POST /api/v1/expenses/:id/restore': { path: () => `/api/v1/expenses/${s.b.expense}/restore` },
 };
 
 /** Writes of A that point to entities of B through the body must also fail (404) and leave B intact. */
@@ -60,11 +93,21 @@ const BODY_REFS: { method: string; path: () => string; body: () => unknown }[] =
   { method: 'POST', path: () => '/api/v1/products', body: () => ({ ...product(), supplies: [{ supplyId: first(s.b.supply), qty: 1 }] }) },
   { method: 'POST', path: () => '/api/v1/products', body: () => ({ ...product(), photoFileId: s.b.file }) },
   { method: 'POST', path: () => '/api/v1/collections', body: () => ({ name: 'x', parts: [{ productId: first(s.b.product), qty: 1 }] }) },
+  { method: 'POST', path: () => '/api/v1/sales', body: () => ({ on: '2026-11-01', channelId: first(s.b.channel), items: [{ kind: 'piece', productId: first(s.a.product), qty: 1, priceCents: 1 }] }) },
+  { method: 'POST', path: () => '/api/v1/sales', body: () => ({ on: '2026-11-01', channelId: first(s.a.channel), customerId: first(s.b.customer), items: [{ kind: 'piece', productId: first(s.a.product), qty: 1, priceCents: 1 }] }) },
+  { method: 'POST', path: () => '/api/v1/sales', body: () => ({ on: '2026-11-01', channelId: first(s.a.channel), items: [{ kind: 'piece', productId: first(s.b.product), qty: 1, priceCents: 1 }] }) },
+  { method: 'POST', path: () => '/api/v1/sales', body: () => ({ on: '2026-11-01', channelId: first(s.a.channel), items: [{ kind: 'set', collectionId: first(s.b.collection), qty: 1, priceCents: 1 }] }) },
+  { method: 'POST', path: () => '/api/v1/orders', body: () => ({ customerId: first(s.b.customer), channelId: first(s.a.channel), createdOn: '2026-11-01', dueOn: '2026-11-02', accepted: false, items: [{ kind: 'piece', productId: first(s.a.product), qty: 1, priceCents: 1 }] }) },
+  { method: 'POST', path: () => '/api/v1/print-runs', body: () => ({ on: '2026-11-01', productId: first(s.b.product), qty: 1, result: 'ok', hours: 1, reason: 'stock', filaments: [] }) },
+  { method: 'POST', path: () => '/api/v1/print-runs', body: () => ({ on: '2026-11-01', productId: first(s.a.product), qty: 1, printerId: first(s.b.printer), result: 'ok', hours: 1, reason: 'stock', filaments: [] }) },
+  { method: 'POST', path: () => '/api/v1/print-runs', body: () => ({ on: '2026-11-01', text: 'x', qty: 1, result: 'ok', hours: 1, reason: 'test', filaments: [{ filamentId: first(s.b.filament), grams: 1 }] }) },
+  { method: 'POST', path: () => `/api/v1/orders/${s.a.order[5]}/start-production`, body: () => ({ assignments: [{ lineItemId: s.a.sale, printerId: first(s.b.printer) }], deductFilament: false }) },
 ];
 
 const snapshotB = async () => {
   const paths = ['/api/v1/filaments?pageSize=200', '/api/v1/supplies', '/api/v1/suppliers', '/api/v1/printers', '/api/v1/products', '/api/v1/collections', '/api/v1/settings',
-    `/api/v1/filaments/${first(s.b.filament)}`, `/api/v1/supplies/${first(s.b.supply)}`, `/api/v1/products/${first(s.b.product)}`];
+    `/api/v1/filaments/${first(s.b.filament)}`, `/api/v1/supplies/${first(s.b.supply)}`, `/api/v1/products/${first(s.b.product)}`,
+    '/api/v1/stock', '/api/v1/customers', '/api/v1/orders?pageSize=200', '/api/v1/sales?pageSize=200', '/api/v1/print-runs', '/api/v1/expenses', '/api/v1/reports?period=all'];
   return JSON.stringify(await Promise.all(paths.map(async (p) => (await s.h.call('GET', p, { token: B_TOKEN })).json.data)));
 };
 const allB = () => [...Object.values(s.b).flatMap((v) => (typeof v === 'string' ? [v] : Object.values(v)))];

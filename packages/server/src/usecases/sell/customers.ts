@@ -1,6 +1,6 @@
 // Clientes (docs/04 §12, docs/06 §12, docs/12 §9).
 import { BusinessError, type CustomerInput, type CustomerPatch } from '@app/contract';
-import { customerStats, normalizeName, orderOwed, orderTotal, saleIncome, saleOwed, saleProfit, tidyName, type OrderStatus } from '@app/core';
+import { customerStats, normalizeName, orderOwed, orderTotal, saleGross, saleIncome, saleOwed, saleProfit, tidyName, type OrderStatus } from '@app/core';
 import {
   findCustomerByKey, getCustomer, insertCustomer, listChannels, listCustomers, listOrders, listSales, setCustomerDeleted, transaction, updateCustomer,
   usageOf, type Ctx, type CustomerRow, type Executor,
@@ -37,7 +37,7 @@ export async function customerDetail(_deps: Deps, ex: Executor, ctx: Ctx, id: st
   const { of, od, sd, oc, sc } = await statsOf(ex, ctx, id);
   const history = [
     ...od.map(({ row, data }) => ({ kind: 'order' as const, id: row.id, number: row.number, on: row.createdOn, dueOn: row.dueOn, status: row.status as OrderStatus, itemsText: itemsText(oc.items(row.id)), totalCents: cents(orderTotal(data)), owedCents: cents(orderOwed({ ...data })) })),
-    ...sd.map(({ row, data }) => ({ kind: 'sale' as const, id: row.id, on: row.on, itemsText: itemsText(sc.items(row.id)), totalCents: cents(saleIncome(data)), profitCents: cents(saleProfit(data)), owedCents: cents(saleOwed(data)), returned: !!row.return, orderId: row.orderId })),
+    ...sd.map(({ row, data }) => ({ kind: 'sale' as const, id: row.id, on: row.on, itemsText: itemsText(sc.items(row.id)), totalCents: cents(saleIncome(data)), grossCents: cents(saleGross(data)), profitCents: cents(saleProfit(data)), owedCents: cents(saleOwed(data)), returned: !!row.return, orderId: row.orderId })),
   ].sort((a, b) => b.on.localeCompare(a.on));
   return { ...view(c), totals: totalsView(of(id)), history };
 }

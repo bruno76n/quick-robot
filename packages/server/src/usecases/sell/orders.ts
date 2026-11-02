@@ -55,9 +55,10 @@ export async function orderList(deps: Deps, ex: Executor, ctx: Ctx, f: { statuse
   const needle = f.q?.trim().toLocaleLowerCase('es');
   if (needle) rows = rows.filter((o) => [`#${o.number}`, String(o.number), o.note, customers.get(o.customerId) ?? '', itemsText(ch.items(o.id))].some((t) => t.toLocaleLowerCase('es').includes(needle)));
   const queues = await queueViews(ex, ctx, {}, deps.clock.now());
+  const printerNames = new Map((await listPrinters(ex, ctx)).map((p) => [p.id, p.name]));
   const all = rows.map((o) => {
     const d = orderData(o, ch.items(o.id), ch.payments(o.id), commissionOf(channels, o.channelId));
-    const jobs = [...queues.values()].flat().filter((q) => q.orderId === o.id);
+    const jobs = [...queues].flatMap(([printerId, list]) => list.filter((q) => q.orderId === o.id).map((q) => ({ ...q, printerId, printerName: printerNames.get(printerId) ?? '' })));
     const toPrint = d.items.reduce((a, it) => a + itemToPrintCount(it), 0);
     const pieces = d.items.reduce((a, it) => a + (it.kind === 'set' ? (it.parts ?? []).reduce((x, p) => x + p.qty, 0) * it.qty : it.qty), 0);
     return {
@@ -66,6 +67,9 @@ export async function orderList(deps: Deps, ex: Executor, ctx: Ctx, f: { statuse
       totalCents: cents(orderTotal(d)), paidCents: cents(orderPaid(d)), owedCents: cents(orderOwed(d)), profitCents: cents(orderProfit(d)),
       origins: { fromStock: pieces - toPrint, toPrint }, queueProgress: jobs.length ? Math.round(jobs.reduce((a, j) => a + j.progress, 0) / jobs.length) : null,
       queueRemainingMinutes: jobs.length ? Math.max(...jobs.map((j) => j.waitMinutes + j.remainingMinutes)) : null, nextStep: nextStep(d),
+      // Board cards show each item and where its pieces are (docs/06 §5).
+      items: ch.items(o.id).map((r) => ({ kind: r.kind, productId: r.productId, name: r.name, qty: r.qty, totalCents: r.qty * r.priceCents, parts: (r.parts ?? []).map((p) => ({ productId: p.productId, name: p.name, qty: p.qty })), fromStock: r.fromStock ?? {}, printerId: r.printerId })),
+      jobs: jobs.map((j) => ({ printerId: j.printerId, printerName: j.printerName, progress: j.progress, remainingMinutes: j.remainingMinutes, waitMinutes: j.waitMinutes, position: j.position })),
     };
   });
   return { items: all.slice((f.page - 1) * f.pageSize, f.page * f.pageSize), page: f.page, pageSize: f.pageSize, total: all.length };

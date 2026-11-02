@@ -3,7 +3,7 @@ import { BusinessError, type PrintRunInput, type Warning } from '@app/contract';
 import { printRunEffects, printRunLock } from '@app/core';
 import {
   addPrinterHours, deleteLedgerRowsOfPrintRun, getOrder, listQueue, deletePrintRun as deleteRun, getFile, getPrinter, getProduct, getPrintRun, insertPrintRun, insertPrintRunFilaments,
-  insertStockMovements, listAllFilaments, listPrinters, listPrintRunFilaments, listPrintRuns, listProducts, listSpools, stockMovementsByRef, transaction,
+  insertStockMovements, listAllFilaments, listOrders, listPrinters, listSpoolMovements, listPrintRunFilaments, listPrintRuns, listProducts, listSpools, stockMovementsByRef, transaction, updateProduct,
   type Ctx, type Executor,
 } from '@app/db';
 import type { Deps } from '../../deps';
@@ -19,11 +19,13 @@ export async function printRunList(_deps: Deps, ex: Executor, ctx: Ctx, f: { rea
   const products = new Map((await listProducts(ex, ctx, { withDeleted: true })).map((p) => [p.id, p.name]));
   const printers = new Map((await listPrinters(ex, ctx)).map((p) => [p.id, p.name]));
   const fils = new Map((await listAllFilaments(ex, ctx)).map((x) => [x.id, x]));
+  const orderIds = [...new Set(runs.map((r) => r.orderId).filter((x): x is string => !!x))];
+  const orders = new Map((orderIds.length ? await listOrders(ex, ctx, { ids: orderIds }) : []).map((o) => [o.id, o.number]));
   const all = runs.map((r) => {
     const fs = fil.filter((x) => x.printRunId === r.id);
     return {
       id: r.id, on: r.on, productId: r.productId, name: r.productId ? products.get(r.productId) ?? '' : r.text, text: r.text, qty: r.qty, printerId: r.printerId,
-      printerName: r.printerId ? printers.get(r.printerId) ?? null : null, result: r.result, hours: r.hours, reason: r.reason, orderId: r.orderId,
+      printerName: r.printerId ? printers.get(r.printerId) ?? null : null, result: r.result, hours: r.hours, reason: r.reason, orderId: r.orderId, orderNumber: r.orderId ? orders.get(r.orderId) ?? null : null,
       photoUrl: r.photoFileId ? `/api/v1/files/${r.photoFileId}` : null, grams: Math.round(fs.reduce((a, x) => a + x.grams, 0) * 10) / 10,
       filaments: fs.map((x) => ({ filamentId: x.filamentId, name: fils.get(x.filamentId) ? `${fils.get(x.filamentId)!.material} ${fils.get(x.filamentId)!.color}` : '', hex: fils.get(x.filamentId)?.hex ?? '#c9c9d1', grams: x.grams })),
     };
@@ -35,7 +37,14 @@ export async function printRunList(_deps: Deps, ex: Executor, ctx: Ctx, f: { rea
 export async function printRunDetail(deps: Deps, ex: Executor, ctx: Ctx, id: string) {
   const r = await getPrintRun(ex, ctx, id);
   if (!r) throw notFound('print_run');
-  return (await printRunList(deps, ex, ctx, { page: 1, pageSize: 100_000 })).items.find((x) => x.id === id)!;
+  const view = (await printRunList(deps, ex, ctx, { page: 1, pageSize: 100_000 })).items.find((x) => x.id === id)!;
+  // What undoing it would do (mockup prodDlg): pieces it added, filament it gives back, or why it is locked.
+  const piecesAdded = (await stockMovementsByRef(ex, ctx, id)).filter((m) => m.kind === 'print').reduce((a, m) => a + m.qty, 0);
+  const free = r.productId ? (await loadStock(ex, ctx)).free(r.productId) : 0;
+  const lock = printRunLock({ reason: r.reason as 'stock' | 'order' | 'test', piecesAdded }, free);
+  let returnGrams = 0;
+  for (const f of view.filaments) returnGrams += (await listSpoolMovements(ex, ctx, f.filamentId)).filter((m) => m.refId === id).reduce((a, m) => a + Math.abs(m.grams), 0);
+  return { ...view, piecesAdded, returnGrams: Math.round(returnGrams * 10) / 10, lock };
 }
 
 /** A run deducts its filament (with purge), adds pieces when it is for stock, uses supplies unless it is a test. */
@@ -63,7 +72,10 @@ export async function logPrintRun(deps: Deps, ctx: Ctx, input: PrintRunInput) {
     const note = p ? `${input.qty} × ${p.name}` : input.text?.trim() || 'Prueba';
     await deductFilament(tx, ctx, grams, { on: input.on, note, refId: id, nextId: () => deps.ids.next() });
     if (p) {
-      const fx = printRunEffects({ result: input.result, reason, qty: input.qty, tracksStock: p.tracksStock }, p.supplies.map((s) => ({ supplyId: s.supplyId, qty: s.qty })));
+      // Mockup printDlg + docs/04 §8: good pieces printed for stock enter Existencias; a piece that did not track stock starts tracking it.
+      const startsTracking = !p.tracksStock && input.result === 'ok' && reason === 'stock';
+      if (startsTracking) await updateProduct(tx, ctx, p.id, { tracksStock: true });
+      const fx = printRunEffects({ result: input.result, reason, qty: input.qty, tracksStock: p.tracksStock || startsTracking }, p.supplies.map((s) => ({ supplyId: s.supplyId, qty: s.qty })));
       if (fx.stockQty) await insertStockMovements(tx, ctx, [{ id: deps.ids.next(), productId: p.id, on: input.on, kind: 'print', qty: fx.stockQty, note: 'Impresión para existencias', refId: id }]);
       await useSupplies(tx, ctx, fx.supplyUse, { on: input.on, note, refId: id, nextId: () => deps.ids.next() });
     }

@@ -90,12 +90,13 @@ describe('saveProduct and friends', () => {
     const orig = { ...productHooks };
     productHooks.activeOrderFolios = async () => [3, 6];
     expect((await s.h.call('DELETE', `/api/v1/products/${id}`)).json).toMatchObject({ code: 'PRODUCT_IN_ACTIVE_ORDERS', details: { count: 2, folios: ['#3', '#6'] } });
-    productHooks.activeOrderFolios = orig.activeOrderFolios;
+    productHooks.activeOrderFolios = async () => [];
     productHooks.stock = async (_t, _c, ids) => new Map(ids.map((x) => [x, { physical: 4, reserved: 0, free: 4 }]));
     expect((await s.h.call('DELETE', `/api/v1/products/${id}`)).json).toMatchObject({ code: 'PRODUCT_HAS_STOCK', details: { onHand: 4 } });
     const d = productDetail.parse(data(await s.h.call('GET', `/api/v1/products/${id}`)));
     expect((await s.h.call('PUT', `/api/v1/products/${id}`, { body: { ...d, tracksStock: false } })).json).toMatchObject({ code: 'STOCK_TRACKING_HAS_STOCK', details: { onHand: 4 } });
     productHooks.stock = orig.stock;
+    productHooks.activeOrderFolios = orig.activeOrderFolios;
   });
 
   it('collections: empty, no products, save with typed price and restore', async () => {

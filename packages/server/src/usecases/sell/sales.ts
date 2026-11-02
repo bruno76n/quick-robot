@@ -3,7 +3,7 @@ import { BusinessError, type PaymentInput, type ReturnSaleInput, type SaleInput,
 import { itemTotal, saleCommission, saleCost, saleGross, saleIncome, saleOwed, salePaid, saleProfit } from '@app/core';
 import {
   deletePayment, getChannel, getCustomer, getSale, insertLineItems, insertPayments, insertSale, insertStockMovements, listChannels, listCustomers,
-  listProducts, listSales, setSaleDeleted, stockMovementsByRef, transaction, updateSale, type Ctx, type Executor, type SaleFilter, type SaleRow,
+  listOrders, listProducts, listSales, setSaleDeleted, stockMovementsByRef, transaction, updateSale, type Ctx, type Executor, type SaleFilter, type SaleRow,
 } from '@app/db';
 import type { Deps } from '../../deps';
 import { notFound } from '../../http';
@@ -12,12 +12,17 @@ import { assertStock, buildItems, cents, childrenOf, commissionOf, itemsText, li
 async function context(ex: Executor, ctx: Ctx) {
   const channels = await listChannels(ex, ctx);
   const customers = new Map((await listCustomers(ex, ctx, { withDeleted: true })).map((c) => [c.id, c.name]));
-  return { channels, customers, channelName: (id: string) => channels.find((c) => c.id === id)?.name ?? '' };
+  const numbers = async (ids: readonly (string | null)[]) => {
+    const want = ids.filter((x): x is string => !!x);
+    return new Map((await listOrders(ex, ctx, { ids: want })).map((o) => [o.id, o.number]));
+  };
+  return { channels, customers, numbers, channelName: (id: string) => channels.find((c) => c.id === id)?.name ?? '' };
 }
 
 export async function saleList(_deps: Deps, ex: Executor, ctx: Ctx, f: SaleFilter & { q?: string | undefined; page: number; pageSize: number }) {
-  const { channels, customers, channelName } = await context(ex, ctx);
+  const { channels, customers, numbers, channelName } = await context(ex, ctx);
   let rows = await listSales(ex, ctx, f);
+  const folios = await numbers(rows.map((s) => s.orderId));
   const ch = await childrenOf(ex, ctx, 'sale', rows.map((s) => s.id));
   const needle = f.q?.trim().toLocaleLowerCase('es');
   if (needle) rows = rows.filter((s) => [s.note, customers.get(s.customerId ?? '') ?? '', itemsText(ch.items(s.id))].some((t) => t.toLocaleLowerCase('es').includes(needle)));
@@ -26,8 +31,10 @@ export async function saleList(_deps: Deps, ex: Executor, ctx: Ctx, f: SaleFilte
     return {
       id: s.id, on: s.on, channelId: s.channelId, channel: channelName(s.channelId), customerId: s.customerId, customer: s.customerId ? customers.get(s.customerId) ?? '' : '',
       itemsText: itemsText(ch.items(s.id)), note: s.note, totalCents: cents(saleGross(d)), incomeCents: cents(saleIncome(d)), costCents: cents(saleCost(d)),
-      commissionCents: cents(saleCommission(d)), profitCents: cents(saleProfit(d)), owedCents: cents(saleOwed(d)), returned: !!s.return, orderId: s.orderId,
+      commissionCents: cents(saleCommission(d)), profitCents: cents(saleProfit(d)), owedCents: cents(saleOwed(d)), returned: !!s.return, orderId: s.orderId, orderNumber: s.orderId ? folios.get(s.orderId) ?? null : null,
       pieces: d.items.reduce((a, it) => a + (it.kind === 'set' ? (it.parts ?? []).reduce((x, p) => x + p.qty, 0) * it.qty : it.qty), 0),
+      listCents: cents(d.items.reduce((a, it) => a + it.qty * it.list, 0)),
+      items: d.items.map((it) => ({ kind: it.kind, name: it.name, qty: it.qty, parts: (it.parts ?? []).map((p) => ({ name: p.name, qty: p.qty })) })),
     };
   });
   const totals = {
@@ -40,12 +47,13 @@ export async function saleList(_deps: Deps, ex: Executor, ctx: Ctx, f: SaleFilte
 export async function saleDetail(_deps: Deps, ex: Executor, ctx: Ctx, id: string, opts: { deleted?: boolean } = {}) {
   const s = await getSale(ex, ctx, id, opts);
   if (!s) throw notFound('sale');
-  const { channels, customers, channelName } = await context(ex, ctx);
+  const { channels, customers, numbers, channelName } = await context(ex, ctx);
+  const folios = await numbers([s.orderId]);
   const ch = await childrenOf(ex, ctx, 'sale', [id]);
   const d = saleData(s, ch.items(id), ch.payments(id), commissionOf(channels, s.channelId));
   return {
     id: s.id, on: s.on, channelId: s.channelId, channel: channelName(s.channelId), commissionPct: d.commissionPct, customerId: s.customerId,
-    customer: s.customerId ? customers.get(s.customerId) ?? '' : '', orderId: s.orderId, note: s.note, tracksPayments: s.tracksPayments,
+    customer: s.customerId ? customers.get(s.customerId) ?? '' : '', orderId: s.orderId, orderNumber: s.orderId ? folios.get(s.orderId) ?? null : null, note: s.note, tracksPayments: s.tracksPayments,
     return: s.return,
     items: ch.items(id).map((r) => ({
       id: r.id, kind: r.kind, productId: r.productId, collectionId: r.collectionId, name: r.name, qty: r.qty, priceCents: r.priceCents, listCents: r.listCents,
