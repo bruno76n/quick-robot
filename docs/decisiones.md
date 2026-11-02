@@ -39,3 +39,8 @@ Ver `01-vision-y-decisiones.md` (D1–D19).
 - Situación: el stack está fijado por nombre, no por versión.
 - Decisión: versiones exactas (sin `^`), elegidas entre las publicadas hace más de dos semanas y con API conocida: TypeScript 5.9, Vite 7, Vitest 3, ESLint 9, React 19.1, Tailwind 4, Zod 4, Hono 4, Drizzle 0.45, PGlite 0.5.10, Electron 38 (solo en el spike). Regla más simple que respeta CLAUDE.md (no cambia herramientas).
 - Impacto: `package.json` de cada paquete.
+
+## 2026-11-02 · Fase 1 · Paso 1.1 · Nombres de paquetes, Vitest y prueba negativa
+- Situación: `10` pide `vitest.workspace.ts`; en Vitest 3.2 ese archivo está obsoleto y se reemplaza por `test.projects`. Los paquetes necesitan un alcance (`@…/core`) y el nombre comercial está abierto (O7).
+- Decisión: (a) `vitest.config.ts` en la raíz con `projects: ['packages/*', 'tools']` (mismo efecto, sin aviso de obsoleto). (b) Alcance neutro `@app/*` (`@app/core`, `@app/contract`, `@app/db`, `@app/server`, `@app/web`), para no meter "Quick Robot" en el código (regla 6). (c) La prueba negativa vive en `tools/boundaries/`: archivos de ejemplo que rompen cada flecha se pasan por ESLint "como si" estuvieran en el paquete prohibido, y un archivo sonda se pasa por dependency-cruiser; ambas pruebas exigen el error. Corre dentro de `pnpm test`. (d) Además de las flechas, el lint prohíbe en `core` y en `usecases` comparar contra `'cloud'`/`'local'`, en `core` usar `Date`/`crypto` globales, en `server` importar `drizzle-orm`/`pg`/PGlite (solo `db` escribe SQL) y en `apps/web` texto suelto en JSX (va en `i18n/es.ts`).
+- Impacto: `eslint.config.js`, `.dependency-cruiser.cjs`, `vitest.config.ts`, `tools/boundaries/`.
