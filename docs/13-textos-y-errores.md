@@ -258,6 +258,9 @@ Los que traen **Deshacer** (`undo: true`) llaman a `restore<Entidad>` (`12`). En
 | `copy.failed` | No se pudo copiar. Selecciona el texto y cópialo. | |
 | `print.hint` | En la ventana de impresión, elegir “Guardar como PDF”. | |
 | `undo.done` | Cambio deshecho. | |
+| `screens.backup.backupMade` *(fase 4)* | Copia automática guardada. | |
+
+**Resumen de una restauración** (fase 4, `es.screens.backup`): "Copia restaurada", "Quedó así:", filas por tabla, "Sin diferencias: los totales coinciden con la copia." o la lista "Diferencias con la copia" (rollos, existencias, ventas, ganancia, por cobrar: "{x} en la copia, {y} aquí"), notas (canal creado, cliente "Sin nombre", imagen no importada) y "Antes se guardó una copia de lo que había ({date}); está en Copias automáticas." Durante la importación: "Importando… No cerrar la aplicación."
 
 **Fuera del producto** (solo existían por ser maqueta): "Datos de ejemplo restaurados", "No se pudieron actualizar los datos anteriores…", "Copiar respaldo como texto" y "Restaurar pegando texto". La carga de ejemplo es solo de desarrollo (`06 §15`).
 
