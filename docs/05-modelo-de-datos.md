@@ -66,8 +66,8 @@ Punto de partida: el estado del mockup (esquema v7). Aquí se traduce a tablas. 
 |---|---|---|
 | `customer` | `workspace_id`, `name`, `type` (`Restaurante` \| `Empresa` \| `Persona` \| `Otro`), `phone`, `has_logo`, `logo_file_id?`, `note`, `created_on` | El tipo es un catálogo por negocio |
 | `order` | `workspace_id`, `number` (folio por negocio, correlativo), `customer_id` (obligatorio), `status`, `channel_id`, `note`, `created_on`, `due_on`, `ready_on?`, `delivered_on?`, `production_on?`, `filament_deducted` (bool), `runs_logged` (bool), `stock_reserved` (jsonb: pieza → cantidad apartada al quedar listo), `cancellation` (jsonb: fecha, motivo, reembolso) | `status`: `quoted`, `accepted`, `in_production`, `ready`, `delivered`, `cancelled` |
-| `sale` | `workspace_id`, `on`, `channel_id`, `customer_id?`, `order_id?`, `note`, `return` (jsonb: fecha, repone, reembolso, nota) | Una venta nace de una venta directa o al **entregar** un pedido |
-| `line_item` | `workspace_id`, `parent_kind` (`order` \| `sale`), `parent_id`, `kind` (`piece` \| `set`), `product_id?`, `collection_id?`, `name`, `qty`, `price_cents`, `list_cents`, `cost_cents`, `extras_cents`, `parts` (jsonb, congelado), `printer_id?`, `from_stock` (jsonb: pieza → cantidad de existencias) | `price/list/cost` son la foto del momento |
+| `sale` | `workspace_id`, `on`, `channel_id`, `customer_id?`, `order_id?`, `note`, `tracks_payments` (bool: sin lista de pagos = pagada completa), `return` (jsonb: fecha, repone, reembolso, nota) | Una venta nace de una venta directa o al **entregar** un pedido |
+| `line_item` | `workspace_id`, `parent_kind` (`order` \| `sale`), `parent_id`, `kind` (`piece` \| `set`), `product_id?`, `collection_id?`, `name`, `qty`, `price_cents`, `list_cents`, `cost_cents` (numeric(14,4): costo unitario con precisión completa), `extras_cents`, `parts` (jsonb, congelado), `printer_id?`, `from_stock` (jsonb: pieza → cantidad de existencias) | `price/list/cost` son la foto del momento |
 | `payment` | `workspace_id`, `parent_kind` (`order` \| `sale`), `parent_id`, `on`, `amount_cents` (negativo = reembolso), `note` | |
 
 El folio del pedido (`order.number`) se asigna con un contador por negocio dentro de la transacción de creación.
@@ -80,6 +80,7 @@ El folio del pedido (`order.number`) se asigna con un contador por negocio dentr
 |---|---|
 | `print_run` | `workspace_id`, `on`, `product_id?`, `qty`, `printer_id?`, `result` (`ok` \| `fail`), `hours`, `reason` (`stock` \| `order` \| `test`), `text`, `order_id?`, `photo_file_id?` |
 | `print_run_filament` | `workspace_id`, `print_run_id`, `filament_id`, `grams` |
+| `print_queue_entry` | `workspace_id`, `printer_id`, `order_id`, `text`, `minutes`, `position`, `started_at?` (una entrada por impresora y pedido en producción) |
 
 ## Gastos
 

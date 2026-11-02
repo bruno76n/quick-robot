@@ -15,7 +15,8 @@
     "typecheck": "node scripts/typecheck.mjs",
     "e2e": "playwright test",
     "security": "node scripts/security.mjs",
-    "size": "node scripts/size-check.mjs"
+    "size": "node scripts/size-check.mjs",
+    "perf": "cross-env PERF=1 vitest run packages/server/test/perf"
   },
   "devDependencies": {
     "@app/db": "workspace:*",

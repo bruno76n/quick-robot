@@ -213,7 +213,7 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 | `GET /orders` | `status` (uno o varios), `view` (`board` \| `list` \| `calendar`), `month` (`2026-11`), `q`, `page`. En `board` devuelve todos los activos y los 3 entregados más recientes | Página de `{ id, number, customer, status, dueOn, itemsText, totalCents, owedCents, profitCents, origins[], queueProgress? }` | — |
 | `GET /orders/:id` | — | Pedido con `items[]` (desglose y origen de cada pieza), `payments[]`, `totals`, `queue[]` (por impresora, con avance), `material { needs[], shortfall[] }`, `nextStep` | — |
 | `createOrder` · `POST /orders` | `{ customerId, channelId, createdOn, dueOn, accepted: bool, note?, items: LineItemInput[], depositCents? }`. `accepted = false` crea un **cotizado**; `true` crea y ejecuta `acceptOrder`. El anticipo crea un pago | Pedido (folio asignado por el servidor) + `warnings` (`STOCK_SHORT`) | `CUSTOMER_REQUIRED`, `LINE_ITEMS_REQUIRED` |
-| `updateOrder` · `PUT /orders/:id` | Igual que `createOrder` (sin `accepted`). Solo si está activo | Pedido | `ORDER_NOT_ACTIVE`, `CUSTOMER_REQUIRED`, `LINE_ITEMS_REQUIRED` |
+| `updateOrder` · `PUT /orders/:id` | Igual que `createOrder` (sin `accepted`). Solo en Cotizado o Aceptado | Pedido | `ORDER_NOT_ACTIVE`, `CUSTOMER_REQUIRED`, `LINE_ITEMS_REQUIRED` |
 | `deleteOrder` · `DELETE /orders/:id` | — | 204. Sale de colas; las piezas apartadas se liberan | — |
 | `restoreOrder` · `POST /orders/:id/restore` | — | Pedido | `RESTORE_CONFLICT` |
 | `acceptOrder` · `POST /orders/:id/accept` | — | Pedido en `accepted`; aparta lo planeado de existencias | `ORDER_INVALID_STATE` · aviso `STOCK_SHORT` |
@@ -286,12 +286,12 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 |---|---|---|---|
 | `GET /print-runs` | `reason` (`stock` \| `order` \| `test`), `page` | Página + totales (piezas, horas, gramos) | — |
 | `GET /print-runs/:id` | — | Registro con filamento por rollo y foto | — |
-| `logPrintRun` · `POST /print-runs` | `{ on, productId? (o `text` si es prueba), qty, printerId?, result ('ok' \| 'fail'), hours, reason, filaments[{ spoolId, grams }], photoFileId? }` | Registro. `ok` + `stock` suma piezas a existencias; `ok` que no sea prueba gasta los insumos de la pieza | `NO_SPOOLS` · aviso `FILAMENT_SHORTFALL` |
+| `logPrintRun` · `POST /print-runs` | `{ on, productId? (o `text` si es prueba), qty, printerId?, result ('ok' \| 'fail'), hours, reason, filaments[{ filamentId, grams }], photoFileId? }` | Registro. El filamento se descuenta rollo por rollo con la purga. `ok` + `stock` suma piezas a existencias; `ok` que no sea prueba gasta los insumos de la pieza | `NO_SPOOLS` · aviso `FILAMENT_SHORTFALL` |
 | `deletePrintRun` · `DELETE /print-runs/:id` | — | 204. Devuelve filamento e insumos, quita las piezas que sumó, resta las horas | `PRINT_RUN_LOCKED` · aviso `FILAMENT_NOT_RETURNED` |
 | `GET /stock` | `q`, `page` | Página de `{ productId, name, physical, reserved, free, buildableSets, status (`out` \| `all_reserved` \| `few` \| `ok`) }` | — |
 | `GET /stock/:productId` | — | Pieza con `movements[]` | — |
 | `enableStockTracking` · `POST /stock/:productId/enable` | `{ initialCount ≥ 0 }` | Pieza | — |
-| `adjustStock` · `POST /stock/:productId/adjust` | `{ mode ('count' \| 'delta'), value, note }` | Pieza | `COUNT_UNCHANGED` |
+| `adjustStock` · `POST /stock/:productId/adjust` | `{ mode ('count' \| 'delta'), value, note }`. El conteo no baja de lo apartado; una salida no pasa de las libres | Pieza | `COUNT_UNCHANGED`, `INSUFFICIENT_STOCK`, `VALIDATION_ERROR` (`value` < apartadas) |
 | `GET /purchases` | — | Lista calculada de compras agrupada por proveedor: filamento e insumos con cantidad, costo estimado y motivo (`04 §9`) | — |
 
 **Invalidan:** `filaments`, `supplies`, `suppliers`, `printers`, `printRuns`, `stock`, `purchases`, `home`, y `expenses` (mantenimiento con costo).

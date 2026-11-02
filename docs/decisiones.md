@@ -115,3 +115,19 @@ Claude Code leyó la v2 completa: confirmó que las 9 contradicciones estaban re
 - **Fotos:** el navegador las reduce a 1 600 px en JPEG antes de subir; el servidor revisa la firma binaria y las sirve con `nosniff` y `CSP: sandbox`.
 - **Textos con cifras en negritas** (`tb()`), como los resúmenes del mockup.
 - **Textos del mockup que no estaban en `13`:** "Rollo guardado" / "Rollo guardado en {filamento}." al editar un rollo (el mockup manda; `13` no lo contradice).
+
+## 2026-11-02 · Fase 3 · Pasos 3.1–3.8 · Vender y producir (servidor)
+- **Golden de la fase 3:** `core/test/golden-sell.test.ts` compara ventas, totales, ranking, pedidos, clientes, existencias, fijos por mes e inversión con `mockup-values.json` (±0.01); `server/test/dev-seed-sell.test.ts` repite la comparación a través de la API con la semilla.
+- **Costo unitario de un artículo con precisión completa** (`line_item.cost_cents` es `numeric(14,4)` en centavos, igual que las partes congeladas): con centavos enteros la suma de 33 llaveros se movía más de un centavo frente al mockup. Lo cobrado (`price_cents`, `list_cents`, pagos) sigue en centavos enteros. `05` actualizado.
+- **`sale.tracks_payments`:** distingue "sin lista de pagos = pagada completa" (`04 §6`) de "con abonos"; sin esta columna, borrar el último abono convertía una venta a crédito en pagada. `05` actualizado.
+- **Cola de impresión en tabla propia** (`print_queue_entry`: impresora, pedido, texto, minutos, posición, inicio), como en `04 §7`; `05` actualizado.
+- **Editar un pedido** solo en Cotizado o Aceptado (el mockup solo muestra "Editar" ahí); en otro estado responde `ORDER_NOT_ACTIVE` con el estado.
+- **Ajustar existencias:** el conteo no puede quedar por debajo de lo apartado (`VALIDATION_ERROR` en `value`, regla `too_small` con `min`), y una salida no puede ser mayor que las libres (`INSUFFICIENT_STOCK`), como el diálogo del mockup. El motivo va en la nota ("Regalo o muestra: …"). `12 §8` actualizado.
+- **Registro de producción con `filamentId`** (no `spoolId`): el mockup registra gramos por filamento y el servidor descuenta rollo por rollo con la purga (`planDeduction`). `12 §8` actualizado.
+- **Borrar una venta** devuelve a existencias lo que salió por ella (movimiento `return` con nota "Venta eliminada"); restaurarla lo vuelve a sacar y falla con `INSUFFICIENT_STOCK` si ya no hay.
+- **Borrar un pedido** lo saca de las colas; restaurarlo vuelve a apartar lo planeado y, si estaba en producción, lo regresa a las colas de las impresoras que tenía cada artículo.
+- **Entrega:** la venta creada copia los artículos sin impresora ni origen y se considera pagada (el cobro vive en el pedido), igual que el mockup.
+- **Ganchos de la fase 2 conectados** en `server/src/usecases/sell/wire.ts`: existencias, folios activos, vendidas, colas, ganancia/gastos y uso de canales ya son reales.
+- **Semilla de la fase 3:** clientes, pedidos, ventas, libro de existencias, registros de producción, gastos y colas se copian de la copia del mockup tal cual (con su foto del momento), directo a los repositorios; los movimientos de rollo e insumo conservan su referencia al registro que los creó.
+- **Puertos de `pnpm dev` configurables** (`WEB_PORT`, `API_PORT`) y carpeta de compilación de las E2E (`E2E_WEB_DIST`), para correr varias instancias a la vez.
+- **Pruebas de rendimiento aparte** (`pnpm perf`, `PERF=1`): generar el conjunto de `15 §1` tarda minutos, así que no corren en cada `pnpm test`.

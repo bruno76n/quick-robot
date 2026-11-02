@@ -17,7 +17,7 @@ export interface LocalServer { url: string; dataDir: string; stop(): Promise<voi
 export async function startServer(opts: { dataDir?: string; seed?: boolean } = {}): Promise<LocalServer> {
   const dataDir = opts.dataDir ?? mkdtempSync(join(tmpdir(), 'e2e-data-'));
   const port = await freePort();
-  const child: ChildProcess = spawn('pnpm', ['exec', 'tsx', 'scripts/local-server.ts', '--data', dataDir, '--port', String(port), '--web', 'apps/web/dist', ...(opts.seed === false ? [] : ['--seed'])], { stdio: ['ignore', 'pipe', 'inherit'] });
+  const child: ChildProcess = spawn('pnpm', ['exec', 'tsx', 'scripts/local-server.ts', '--data', dataDir, '--port', String(port), '--web', process.env.E2E_WEB_DIST ?? 'apps/web/dist', ...(opts.seed === false ? [] : ['--seed'])], { stdio: ['ignore', 'pipe', 'inherit'] });
   const url = `http://127.0.0.1:${port}`;
   await new Promise<void>((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('server did not start')), 60_000);

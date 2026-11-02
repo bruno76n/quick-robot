@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts", "./testing": "./src/testing.ts", "./seed": "./seed/quick-robot.ts" },
+  "exports": { ".": "./src/index.ts", "./testing": "./src/testing.ts", "./seed": "./seed/quick-robot.ts", "./load-test": "./seed/load-test.ts" },
   "description": "Schema, migrations and repositories. The only package that writes SQL (docs/08).",
   "scripts": { "generate": "drizzle-kit generate" },
   "dependencies": {
