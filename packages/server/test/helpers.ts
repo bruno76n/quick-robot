@@ -2,6 +2,8 @@ import { connectPglite, ensureWorkspace, type Ctx, type Database } from '@app/db
 import { createApp } from '../src/app';
 import { localDeps } from '../src/local-deps';
 import type { AppDeps } from '../src/deps';
+import type { UseCaseDeps } from '../src/usecases/deps';
+import { localEntitlements } from '../src/providers/local/entitlements';
 
 export const WS_A = '0190a000-0000-7000-8000-00000000000a';
 export const WS_B = '0190a000-0000-7000-8000-00000000000b';
@@ -32,3 +34,5 @@ export const spoolInput = (o: Record<string, unknown> = {}) => ({
   purchasedOn: '2026-10-01',
   ...o,
 });
+
+export const useCaseDeps = (database: Database, today = '2026-11-02'): UseCaseDeps => ({ database, entitlements: localEntitlements, clock: { today: () => today } });

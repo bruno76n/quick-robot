@@ -19,6 +19,7 @@ export interface FileRef {
 }
 export interface FileStore {
   put(ctx: Ctx, file: Upload): Promise<FileRef>;
+  read(ctx: Ctx, ref: FileRef): Promise<Uint8Array>;
   url(ctx: Ctx, ref: FileRef): Promise<string>;
   delete(ctx: Ctx, ref: FileRef): Promise<void>;
 }

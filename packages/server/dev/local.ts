@@ -17,6 +17,7 @@ import { createApp } from '../src/app';
 import { LOCAL_USER_ID, LOCAL_WORKSPACE_ID, localDeps } from '../src/local-deps';
 import { systemClock } from '../src/providers/local/clock';
 import { applySeed } from './seed';
+import { ensureWorkspaceDefaults } from '../src/usecases/settings';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 const dataDir = process.env.DATA_DIR ? resolve(process.env.DATA_DIR) : undefined;
@@ -29,7 +30,8 @@ const t0 = Date.now();
 const database = await connectPglite(dataDir ? { dataDir } : {});
 const seed = process.env.SEED === 'none' ? null : quickRobotSeed(systemClock.today());
 await ensureWorkspace(database.db, { workspaceId: LOCAL_WORKSPACE_ID, workspaceName: seed?.workspaceName ?? 'Local', userId: LOCAL_USER_ID, userEmail: 'local@localhost', userName: 'Local' });
-if (seed && (await filamentRepo.list(database.db, ctx)).length === 0) await applySeed(database, ctx, seed);
+if (seed && (await filamentRepo.list(database.db, ctx)).length === 0) await applySeed(database, ctx, seed, systemClock.today());
+else await database.transaction((tx) => ensureWorkspaceDefaults(tx, ctx));
 
 const app = createApp(
   localDeps({ database, workspaceId: LOCAL_WORKSPACE_ID, userId: LOCAL_USER_ID, filesDir: dataDir ? `${dataDir}/../files` : `${root}/.data/dev-files`, ...(existsSync(`${webDist}/index.html`) ? { webDist } : {}) }),

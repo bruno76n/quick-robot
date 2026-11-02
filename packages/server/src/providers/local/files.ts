@@ -1,4 +1,4 @@
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join, resolve, sep } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import type { FileStore } from '../../deps';
@@ -18,6 +18,9 @@ export function createLocalFiles(root: string): FileStore {
       await mkdir(join(base, ctx.workspaceId), { recursive: true });
       await writeFile(pathOf(ctx.workspaceId, key), file.bytes);
       return { key };
+    },
+    async read(ctx, ref) {
+      return new Uint8Array(await readFile(pathOf(ctx.workspaceId, ref.key)));
     },
     async url(_ctx, ref) {
       return `/api/v1/files/${encodeURIComponent(ref.key)}`;

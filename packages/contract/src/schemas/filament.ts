@@ -98,3 +98,20 @@ export const AddSpoolResult = z.object({
   spoolId: Id,
 });
 export type AddSpoolResult = z.infer<typeof AddSpoolResult>;
+
+/** PUT /filaments/spools/:id — updateSpool. Same fields as addSpool; may move the spool to another filament. */
+export const UpdateSpoolInput = AddSpoolInput;
+export type UpdateSpoolInput = z.input<typeof UpdateSpoolInput>;
+
+/** POST /filaments/spools/:id/movements — recordSpoolMovement. `adjustment` may add or take out. */
+export const SpoolMovementInput = z.object({
+  kind: z.enum(['consumption', 'failure', 'waste', 'adjustment']),
+  /** Signed for adjustment (+ adds, − takes out); positive grams for the others. */
+  grams: Grams.refine((g) => g !== 0, 'Must not be zero'),
+  note: z.string().trim().max(300).default(''),
+  on: IsoDate,
+});
+export type SpoolMovementInput = z.input<typeof SpoolMovementInput>;
+
+export const SpoolResult = z.object({ filament: FilamentDetail, spoolId: Id });
+export type SpoolResult = z.infer<typeof SpoolResult>;
