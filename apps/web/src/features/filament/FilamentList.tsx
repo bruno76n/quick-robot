@@ -1,6 +1,7 @@
 // Filamentos (docs/06 §6): wide list with what is left, spools, cost per gram and status; a row opens the drawer.
 import type { FilamentListItem } from '@app/contract';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useSearch } from '@tanstack/react-router';
+import { go } from '../../lib/nav';
 import { useState } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
@@ -20,10 +21,9 @@ const L = es.screens.filaments;
 export function FilamentList() {
   const { data, isLoading } = useFilaments();
   const search = useSearch({ strict: false }) as { f?: string };
-  const navigate = useNavigate();
-  const [dialog, setDialog] = useState<{ filamentId?: string } | null>(null);
+  const [dialog, setDialog] = useState<{ filamentId?: string; spoolId?: string } | null>(null);
   const selected = search.f ?? null;
-  const select = (id: string | null) => navigate({ to: '/filamentos', search: id ? { f: id } : {}, replace: true });
+  const select = (id: string | null) => go(id ? `/filamentos?f=${id}` : '/filamentos', true);
   const items = [...(data?.items ?? [])].sort((a, b) => a.material.localeCompare(b.material, 'es') || a.color.localeCompare(b.color, 'es'));
   const totalGrams = items.reduce((a, f) => a + f.remainingGrams, 0);
   const spools = items.reduce((a, f) => a + f.spools, 0);
@@ -49,8 +49,8 @@ export function FilamentList() {
           </tr>
         ))}
       </Table>
-      <FilamentDrawer id={selected} onClose={() => select(null)} onAddSpool={(filamentId) => setDialog({ filamentId })} />
-      {dialog ? <SpoolDialog filamentId={dialog.filamentId} filaments={items} onClose={() => setDialog(null)} onAdded={(id) => { setDialog(null); select(id); }} /> : null}
+      <FilamentDrawer id={selected} onClose={() => select(null)} onAddSpool={(filamentId) => setDialog({ filamentId })} onEditSpool={(spoolId) => setDialog({ ...(selected ? { filamentId: selected } : {}), spoolId })} />
+      {dialog ? <SpoolDialog filamentId={dialog.filamentId} spoolId={dialog.spoolId} filaments={items} onClose={() => setDialog(null)} onAdded={(id) => { setDialog(null); select(id); }} onDeleted={() => setDialog(null)} /> : null}
     </>
   );
 }

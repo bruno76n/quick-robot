@@ -12,6 +12,8 @@ import {
 import { getSuppliesByIds } from '@app/db';
 import { toSpoolInput } from './filament-view';
 
+export interface ProductExtras { photoUrl: string | null; free: number; physical: number; reserved: number; sold: number; printerName: string | null; parentName: string | null; collections: { id: string; name: string }[] }
+
 export interface CostingContext {
   settings: CostSettings & { minMarginPct: number; formulaMarginPct: number };
   printers: Map<string, PrinterCost>;
@@ -66,22 +68,23 @@ export function breakdownOf(b: ReturnType<typeof costOf>): Breakdown {
 
 const hexesOf = (p: ProductFull, c: CostingContext) => p.filaments.map((f) => c.filaments.get(f.filamentId)?.hex ?? '#c9c9d1');
 
-export function productListView(p: ProductFull, c: CostingContext, opts: { photoUrl: string | null; free: number }): ProductListItem {
+export function productListView(p: ProductFull, c: CostingContext, opts: ProductExtras): ProductListItem {
   const cost = costOf(p, c);
   return {
     id: p.id, name: p.name, tags: p.tags, parentId: p.parentId, photoUrl: opts.photoUrl, costCents: toCents(cost.total), listCents: toCents(priceOf(p, c, cost.total)),
     floorCents: toCents(floorPrice(cost.total, c.settings.minMarginPct)), tracksStock: p.tracksStock, free: opts.free,
     technical: p.filaments.some((f) => isTechnicalMaterial(c.filaments.get(f.filamentId)?.material ?? '')), mode: p.mode as 'value' | 'formula',
     hexes: hexesOf(p, c), hours: p.hours, printerId: p.printerId,
+    printerName: opts.printerName, parentName: opts.parentName, collections: opts.collections, sold: opts.sold, physical: opts.physical, reserved: opts.reserved,
   };
 }
 
-export function productDetailView(p: ProductFull, c: CostingContext, opts: { photoUrl: string | null; stock: { physical: number; reserved: number; free: number } }): ProductDetail {
+export function productDetailView(p: ProductFull, c: CostingContext, opts: ProductExtras): ProductDetail {
   const cost = costOf(p, c);
   const list = priceOf(p, c, cost.total);
   const margin = effectiveMargin(p.marginPct, c.settings.formulaMarginPct);
   return {
-    ...productListView(p, c, { photoUrl: opts.photoUrl, free: opts.stock.free }),
+    ...productListView(p, c, opts),
     marginPct: p.marginPct, priceCents: p.priceCents, batchSize: p.batchSize, extrasCents: p.extrasCents, note: p.note, spec: p.spec ?? null, photoFileId: p.photoFileId,
     filaments: p.filaments.map((f) => ({ filamentId: f.filamentId, grams: f.grams })), supplies: p.supplies.map((s) => ({ supplyId: s.supplyId, qty: s.qty })),
     breakdown: breakdownOf(cost), suggestedCents: toCents(suggestedPrice(cost.total, Math.min(95, margin))),
@@ -89,7 +92,7 @@ export function productDetailView(p: ProductFull, c: CostingContext, opts: { pho
       channelId: ch.id, name: ch.name, commissionPct: ch.commissionPct,
       suggestedCents: toCents(suggestedPrice(cost.total, Math.min(95, margin), ch.commissionPct)), profitCents: toCents(profitAt(list, cost.total, ch.commissionPct).profit),
     })),
-    stock: opts.stock,
+    stock: { physical: opts.physical, reserved: opts.reserved, free: opts.free },
   };
 }
 
@@ -102,12 +105,14 @@ export function setPartsOf(col: CollectionFull, products: ReadonlyMap<string, Pr
   });
 }
 
-export function collectionListView(col: CollectionFull, products: ReadonlyMap<string, ProductFull>, c: CostingContext, buildableSets: number): CollectionListItem {
+export function collectionListView(col: CollectionFull, products: ReadonlyMap<string, ProductFull>, c: CostingContext, buildableSets: number, sold = 0): CollectionListItem {
   const parts = setPartsOf(col, products, c);
   return {
     id: col.id, name: col.name, tags: col.tags, listCents: toCents(setPrice(col.priceCents === null ? null : col.priceCents / 100, parts)),
     costCents: toCents(setCost(parts, col.extrasCents / 100)), looseCents: toCents(looseSum(parts)), buildableSets,
-    pieces: parts.reduce((a, p) => a + p.qty, 0), hexes: parts.flatMap((p) => hexesOf(products.get(p.productId)!, c)).slice(0, 6),
+    pieces: parts.reduce((a, p) => a + p.qty, 0), hexes: [...new Set(parts.flatMap((p) => hexesOf(products.get(p.productId)!, c)))],
+    partNames: parts.map((p) => p.name), typedPrice: Boolean(col.priceCents && col.priceCents > 0), sold,
+    partHexes: parts.map((p) => hexesOf(products.get(p.productId)!, c)),
   };
 }
 

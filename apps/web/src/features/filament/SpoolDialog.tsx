@@ -1,6 +1,6 @@
 // "Agregar rollo" (docs/06 §6, reference/mockup-textos.md › Diálogo · rollo nuevo). Material and color are picked
 // from lists so the spool always joins the same filament; the server decides and recalculates.
-import type { FieldError, FilamentListItem } from '@app/contract';
+import type { FieldError, FilamentListItem, Spool } from '@app/contract';
 import { canonicalEntry, defaultCatalog, filamentKey, findInCatalog, type CatalogEntry } from '@app/core';
 import { useMemo, useState, type ReactNode } from 'react';
 import { Dialog } from '../../components/Dialog';
@@ -14,7 +14,12 @@ import { t } from '../../i18n/t';
 import { errorText, fieldErrors, fieldText } from '../../lib/errors';
 import { grams as fmtGrams, money2d } from '../../lib/format';
 import { parseNumber, todayLocal } from '../../lib/input';
-import { useAddSpool } from './api';
+import { useAddSpool, useFilament } from './api';
+import { useQueryClient } from '@tanstack/react-query';
+import { ConfirmButton } from '../../components/ConfirmButton';
+import { api } from '../../lib/api';
+import { useWrite } from '../../lib/mutate';
+import { invalidate } from '../../lib/queries';
 
 const L = es.screens.spoolDialog;
 const OTHER = '__other';
@@ -41,7 +46,14 @@ function Bold({ text, bold }: { text: string; bold: string[] }) {
   return <>{parts}</>;
 }
 
-export function SpoolDialog({ filamentId, filaments, onClose, onAdded }: { filamentId?: string | undefined; filaments: FilamentListItem[]; onClose: () => void; onAdded: (filamentId: string) => void }) {
+export function SpoolDialog({ filamentId, spoolId, filaments, onClose, onAdded, onDeleted }: { filamentId?: string | undefined; spoolId?: string | undefined; filaments: FilamentListItem[]; onClose: () => void; onAdded: (filamentId: string) => void; onDeleted?: () => void }) {
+  const detail = useFilament(spoolId ? filamentId ?? null : null).data;
+  const editing = spoolId ? detail?.spools.find((x) => x.id === spoolId) : undefined;
+  if (spoolId && !editing) return null;
+  return <SpoolForm key={spoolId ?? 'new'} filamentId={filamentId} editing={editing} filaments={filaments} onClose={onClose} onAdded={onAdded} onDeleted={onDeleted} />;
+}
+
+function SpoolForm({ filamentId, editing, filaments, onClose, onAdded, onDeleted }: { filamentId?: string | undefined; editing: Spool | undefined; filaments: FilamentListItem[]; onClose: () => void; onAdded: (filamentId: string) => void; onDeleted?: (() => void) | undefined }) {
   const preset = filaments.find((f) => f.id === filamentId);
   const catalog = useMemo(() => {
     const c = defaultCatalog();
@@ -57,14 +69,20 @@ export function SpoolDialog({ filamentId, filaments, onClose, onAdded }: { filam
   const [color, setColor] = useState(preset?.color ?? '');
   const [colorNew, setColorNew] = useState('');
   const [hex, setHex] = useState('#6b3fd4');
-  const [brand, setBrand] = useState('');
+  const [brand, setBrand] = useState(editing?.brand ?? '');
   const [brandNew, setBrandNew] = useState('');
-  const [cost, setCost] = useState('');
-  const [shipping, setShipping] = useState('0');
-  const [weight, setWeight] = useState('1000');
-  const [on, setOn] = useState(todayLocal());
+  const [cost, setCost] = useState(editing ? String(editing.costCents / 100) : '');
+  const [shipping, setShipping] = useState(editing ? String(editing.shippingCents / 100) : '0');
+  const [weight, setWeight] = useState(editing ? String(editing.grams) : '1000');
+  const [on, setOn] = useState(editing?.purchasedOn ?? todayLocal());
   const [errs, setErrs] = useState<FieldError[]>([]);
   const add = useAddSpool();
+  const qc = useQueryClient();
+  const del = useWrite(() => api.spools.remove(editing!.id), {
+    touches: ['filaments', 'products', 'collections'], ok: (out) => (out.movements > 1 ? `${es.toast['spool.deleted']} ${t('toast.spool.deleted.withMovements', { count: out.movements })}` : es.toast['spool.deleted']),
+    undo: () => () => api.spools.restore(editing!.id),
+    onDone: () => onDeleted?.(),
+  });
 
   const M = canonicalEntry('material', catalog.material, material === OTHER ? materialNew : material);
   const C = canonicalEntry('color', catalog.color, color === OTHER ? colorNew : color, hex);
@@ -79,7 +97,12 @@ export function SpoolDialog({ filamentId, filaments, onClose, onAdded }: { filam
   let linkOk = false;
   if (M.name && C.name) {
     const name = `${M.name} ${C.name}`;
-    if (existing && existing.activeSpools) {
+    if (editing && existing) {
+      linkOk = true;
+      const others = Math.max(0, existing.spools - (existing.id === filamentId ? 1 : 0));
+      const without = existing.id === filamentId ? existing.remainingGrams - editing.remainingGrams : existing.remainingGrams;
+      link = <Bold text={others ? t('screens.spoolDialog.belongsWith', { name, count: others, grams: fmtGrams(Math.max(0, without)) }) : t('screens.spoolDialog.belongsOnly', { name })} bold={[name]} />;
+    } else if (existing && existing.activeSpools) {
       linkOk = true;
       const text = t('screens.spoolDialog.linkJoins', { name, grams: fmtGrams(existing.remainingGrams), count: existing.activeSpools, totalGrams: fmtGrams(existing.remainingGrams + g) });
       link = <Bold text={text} bold={[name, fmtGrams(existing.remainingGrams + g)]} />;
@@ -95,6 +118,18 @@ export function SpoolDialog({ filamentId, filaments, onClose, onAdded }: { filam
     if (!M.name || !C.name) { toast(es.fields['spool.filament.required']); setOpen(true); return; }
     if (parseNumber(cost) <= 0) { toast(es.fields['spool.cost.required']); return; }
     setErrs([]);
+    if (editing) {
+      const input = {
+        ...(existing ? { filamentId: existing.id } : { filament: { material: M.name, color: C.name, ...(C.hex ? { hex: C.hex } : {}) } }),
+        brand: B.name, costCents: Math.round(parseNumber(cost) * 100), shippingCents: Math.round(parseNumber(shipping) * 100), grams: Math.max(1, Math.round(g * 10) / 10), purchasedOn: on || todayLocal(),
+      };
+      void api.spools.update(editing.id, input).then(async (r) => {
+        await invalidate(qc, 'filaments', 'products', 'collections');
+        toast(r.data.filament.id !== filamentId ? t('screens.spoolDialog.savedIn', { filament: `${r.data.filament.material} ${r.data.filament.color}` }) : L.saved);
+        onAdded(r.data.filament.id);
+      }).catch((e) => { setErrs(fieldErrors(e)); toast(errorText(e).text); });
+      return;
+    }
     add.mutate({
       ...(existing ? { filamentId: existing.id } : { filament: { material: M.name, color: C.name, ...(C.hex ? { hex: C.hex } : {}) } }),
       brand: B.name, costCents: Math.round(parseNumber(cost) * 100), shippingCents: Math.round(parseNumber(shipping) * 100),
@@ -110,7 +145,7 @@ export function SpoolDialog({ filamentId, filaments, onClose, onAdded }: { filam
 
   const options = (list: CatalogEntry[]) => list.map((x) => <option key={x.name} value={x.name}>{x.name}</option>);
   return (
-    <Dialog open title={L.titleNew} wide onClose={onClose} onSubmit={submit} submitLabel={L.submitNew} busy={add.isPending}>
+    <Dialog open title={editing ? L.titleEdit : L.titleNew} wide onClose={onClose} onSubmit={submit} submitLabel={editing ? L.submitEdit : L.submitNew} busy={add.isPending}>
       <details className="fbar" open={open} onToggle={(e) => setOpen((e.target as HTMLDetailsElement).open)}>
         <summary>
           <Swatch hex={swatch} large />
@@ -142,6 +177,7 @@ export function SpoolDialog({ filamentId, filaments, onClose, onAdded }: { filam
         <Field label={L.weight} error={err('grams')}><UnitInput unit="g" name="gramos" inputMode="numeric" value={weight} onChange={(e) => setWeight(e.target.value)} /></Field>
         <Field label={L.date} error={err('purchasedOn')}><input name="fecha" type="date" value={on} onChange={(e) => setOn(e.target.value)} /></Field>
       </div>
+      {editing ? <ConfirmButton variant="ghost" danger confirmText={es.confirm.tapAgainDelete} onConfirm={() => del.mutate(undefined)}>{L.deleteSpool}</ConfirmButton> : null}
       <p className="note">{pay > 0 && g > 0 ? <Bold text={t('screens.spoolDialog.perGramPreview', { perGram: money2d(pay / g) })} bold={[money2d(pay / g)]} /> : L.perGramHint}</p>
     </Dialog>
   );

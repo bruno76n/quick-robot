@@ -42,7 +42,7 @@ export async function listSupplies(ex: Executor, ctx: Ctx, opts: { q?: string | 
   const [total] = await ex.select({ n: count() }).from(supply).where(where);
   const rows = await ex.select(supplyWithStock).from(supply)
     .innerJoin(supplyLevels, and(eq(supplyLevels.workspaceId, supply.workspaceId), eq(supplyLevels.supplyId, supply.id)))
-    .where(where).orderBy(asc(supply.name), asc(supply.id)).limit(opts.pageSize).offset((opts.page - 1) * opts.pageSize);
+    .where(where).orderBy(asc(supply.createdAt), asc(supply.id)).limit(opts.pageSize).offset((opts.page - 1) * opts.pageSize);
   return { items: rows.map((r) => ({ ...r.s, stock: Number(r.stock) })), total: total?.n ?? 0 };
 }
 

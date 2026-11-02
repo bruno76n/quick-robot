@@ -18,7 +18,7 @@ type NewRow<T extends { $inferInsert: object }> = Omit<T['$inferInsert'], 'works
 export async function listProducts(ex: Executor, ctx: Ctx, opts: { ids?: readonly string[]; withDeleted?: boolean } = {}): Promise<ProductFull[]> {
   const rows = await ex.select().from(product)
     .where(and(inWorkspace(product.workspaceId, ctx), opts.withDeleted ? undefined : isNull(product.deletedAt), opts.ids ? inArray(product.id, [...opts.ids]) : undefined))
-    .orderBy(asc(product.name), asc(product.id));
+    .orderBy(asc(product.createdAt), asc(product.id));
   if (!rows.length) return [];
   const ids = rows.map((r) => r.id);
   const fil = await ex.select().from(productFilament).where(and(inWorkspace(productFilament.workspaceId, ctx), inArray(productFilament.productId, ids))).orderBy(asc(productFilament.position));
@@ -61,7 +61,7 @@ export async function setProductDeleted(ex: Executor, ctx: Ctx, id: string, dele
 }
 
 export async function listCollections(ex: Executor, ctx: Ctx, opts: { ids?: readonly string[] } = {}): Promise<CollectionFull[]> {
-  const rows = await ex.select().from(collection).where(and(inWorkspace(collection.workspaceId, ctx), isNull(collection.deletedAt), opts.ids ? inArray(collection.id, [...opts.ids]) : undefined)).orderBy(asc(collection.name), asc(collection.id));
+  const rows = await ex.select().from(collection).where(and(inWorkspace(collection.workspaceId, ctx), isNull(collection.deletedAt), opts.ids ? inArray(collection.id, [...opts.ids]) : undefined)).orderBy(asc(collection.createdAt), asc(collection.id));
   if (!rows.length) return [];
   const parts = await ex.select().from(collectionPart).where(and(inWorkspace(collectionPart.workspaceId, ctx), inArray(collectionPart.collectionId, rows.map((r) => r.id)))).orderBy(asc(collectionPart.position));
   return rows.map((r) => ({ ...r, parts: parts.filter((p) => p.collectionId === r.id) }));

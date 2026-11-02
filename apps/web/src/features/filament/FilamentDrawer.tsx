@@ -7,12 +7,15 @@ import { Table } from '../../components/Table';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { centsTotal, date, grams, money2d, number1 } from '../../lib/format';
+import { useState } from 'react';
 import { useFilament } from './api';
+import { MovementDialog } from './MovementDialog';
 
 const L = es.screens.filaments;
 const MOVE_TONE: Record<SpoolMovement['kind'], Tone> = { purchase: 'info', consumption: '', failure: 'bad', waste: 'warn', adjustment: '' };
 
-export function FilamentDrawer({ id, onClose, onAddSpool }: { id: string | null; onClose: () => void; onAddSpool: (filamentId: string) => void }) {
+export function FilamentDrawer({ id, onClose, onAddSpool, onEditSpool }: { id: string | null; onClose: () => void; onAddSpool: (filamentId: string) => void; onEditSpool: (spoolId: string) => void }) {
+  const [move, setMove] = useState<{ spoolId?: string } | null>(null);
   const { data: f } = useFilament(id);
   const name = f ? `${f.material} ${f.color}` : '';
   const withMaterial = f?.spools.filter((s) => s.status !== 'empty') ?? [];
@@ -30,14 +33,14 @@ export function FilamentDrawer({ id, onClose, onAddSpool }: { id: string | null;
             <div><dt>{L.costPerGram}</dt><dd className="num">{money2d(f.costPerGram)}{many ? <small>{L.averageOfSpools}</small> : null}</dd></div>
             <div><dt>{L.spoolsWithMaterial}</dt><dd className="num">{withMaterial.length}</dd></div>
           </dl>
-          <div className="det-a btnrow"><Button size="sm" variant="primary" onClick={() => onAddSpool(f.id)}>{t('screens.filaments.addSpoolOf', { name })}</Button></div>
+          <div className="det-a btnrow"><Button size="sm" variant="primary" onClick={() => onAddSpool(f.id)}>{t('screens.filaments.addSpoolOf', { name })}</Button>{f.spools.length ? <Button size="sm" onClick={() => setMove({})}>{L.recordMovement}</Button> : null}</div>
           {withMaterial.length > 1 ? <p className="note ok mt">{t('screens.filaments.asOne', { count: withMaterial.length, grams: grams(f.remainingGrams), name })}</p> : null}
           <h3>{L.spools}</h3>
           {f.spools.length ? (
             <ul className="rolls">
               {f.spools.map((s) => (
                 <li className="roll" key={s.id}>
-                  <div className="roll-h"><b>{s.brand || es.common.noBrand}</b>{s.id === first ? <Pill tone="info">{L.usedFirst}</Pill> : s.status === 'empty' ? <Pill tone="plain">{es.status.spool.empty}</Pill> : null}</div>
+                  <div className="roll-h"><b>{s.brand || es.common.noBrand}</b>{s.id === first ? <Pill tone="info">{L.usedFirst}</Pill> : s.status === 'empty' ? <Pill tone="plain">{es.status.spool.empty}</Pill> : null}<span className="rowa"><Button size="sm" variant="ghost" onClick={() => setMove({ spoolId: s.id })}>{L.movement}</Button><Button size="sm" variant="ghost" onClick={() => onEditSpool(s.id)}>{es.common.edit}</Button></span></div>
                   <div className="roll-s"><span className={`stk${s.remainingGrams <= 150 ? ' low' : ''}`}><i style={{ width: `${Math.min(100, (s.remainingGrams / s.grams) * 100)}%` }} /></span><span className="num">{grams(s.remainingGrams)} <small>{t('screens.filaments.spoolOfTotal', { total: grams(s.grams) })}</small></span></div>
                   <small>{t('screens.filaments.spoolLine', { date: date(s.purchasedOn), cost: centsTotal(s.costCents + s.shippingCents), perGram: money2d(s.costPerGram) })}</small>
                 </li>
@@ -63,6 +66,7 @@ export function FilamentDrawer({ id, onClose, onAddSpool }: { id: string | null;
           ) : null}
         </>
       ) : <div className="skel" />}
+      {move && f ? <MovementDialog f={f} spoolId={move.spoolId} onClose={() => setMove(null)} /> : null}
     </Drawer>
   );
 }

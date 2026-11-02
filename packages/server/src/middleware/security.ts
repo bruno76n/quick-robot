@@ -51,7 +51,9 @@ export function sameOriginWrites(allowed: readonly string[] = []): MiddlewareHan
         throw new BusinessError('FORBIDDEN', { capability: 'origin' }, 'Cross-origin write rejected');
       }
       const type = (c.req.header('content-type') ?? '').split(';')[0]!.trim().toLowerCase();
-      const hasBody = c.req.raw.body !== null || Number(c.req.header('content-length') ?? 0) > 0;
+      // Browsers send content-length (0 when empty); the Node adapter gives every non-GET request a body stream.
+      const declared = c.req.header('content-length');
+      const hasBody = declared !== undefined ? Number(declared) > 0 : c.req.header('transfer-encoding') !== undefined || (c.req.raw.body !== null && c.req.method !== 'DELETE');
       if (hasBody && type !== 'application/json' && type !== 'multipart/form-data') {
         throw new BusinessError('VALIDATION_ERROR', { fields: [{ path: '', rule: 'invalid_format' }] }, 'Unsupported content type');
       }

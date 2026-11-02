@@ -23,6 +23,8 @@ export const productListItem = z.object({
   id, name: z.string(), tags: z.array(z.string()), parentId: id.nullable(), photoUrl: z.string().nullable(), costCents: z.number().int(),
   listCents: z.number().int(), floorCents: z.number().int(), tracksStock: z.boolean(), free: z.number(), technical: z.boolean(), mode: z.enum(['value', 'formula']),
   hexes: z.array(z.string()), hours: z.number(), printerId: id.nullable(),
+  printerName: z.string().nullable(), parentName: z.string().nullable(), collections: z.array(z.object({ id, name: z.string() })),
+  sold: z.number(), physical: z.number(), reserved: z.number(),
 });
 export const productDetail = productListItem.extend({
   marginPct: z.number().nullable(), priceCents: z.number().int(), batchSize: z.number().int(), extrasCents: z.number().int(), note: z.string(),
@@ -36,7 +38,7 @@ export const saveCollectionInput = z.object({
   name, tags: z.array(tag).max(LIMITS.tagsPerProduct).default([]), parts: z.array(z.object({ productId: id, qty: z.number().int().min(1).max(LIMITS.qtyPerItem) })).max(LIMITS.partsPerCollection),
   extrasCents: cents(LIMITS.unitPriceCents).default(0), priceCents: cents(LIMITS.unitPriceCents).nullable().optional(), note: note.default(''),
 });
-export const collectionListItem = z.object({ id, name: z.string(), tags: z.array(z.string()), listCents: z.number().int(), costCents: z.number().int(), looseCents: z.number().int(), buildableSets: z.number().int(), pieces: z.number().int(), hexes: z.array(z.string()) });
+export const collectionListItem = z.object({ id, name: z.string(), tags: z.array(z.string()), listCents: z.number().int(), costCents: z.number().int(), looseCents: z.number().int(), buildableSets: z.number().int(), pieces: z.number().int(), hexes: z.array(z.string()), partNames: z.array(z.string()), typedPrice: z.boolean(), sold: z.number(), partHexes: z.array(z.array(z.string())) });
 export const collectionDetail = collectionListItem.extend({
   priceCents: z.number().int().nullable(), extrasCents: z.number().int(), note: z.string(), floorCents: z.number().int(),
   parts: z.array(z.object({ productId: id, name: z.string(), qty: z.number().int(), listCents: z.number().int(), costCents: z.number().int() })),

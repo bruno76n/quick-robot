@@ -4,7 +4,7 @@ import { EMPTY_GRAMS, filamentCostPerGram, filamentRemaining, filamentStatus, ro
 import type { Executor, FilamentRow, SpoolMovementRow, SpoolRow } from '@app/db';
 import { listSpools, type Ctx } from '@app/db';
 
-const COST_DECIMALS = 10_000;
+const COST_DECIMALS = 1e10;
 
 export function toSpoolInput(s: SpoolRow): SpoolInput {
   return { id: s.id, purchasedOn: s.purchasedOn, grams: s.grams, costPesos: s.costCents / 100, shippingPesos: s.shippingCents / 100, remaining: s.remainingGrams };

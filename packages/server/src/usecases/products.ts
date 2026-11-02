@@ -2,31 +2,50 @@
 import { BusinessError, type CollectionDetail, type CollectionListItem, type ProductDetail, type ProductListItem, type SaveCollectionInput, type SaveProductInput } from '@app/contract';
 import { tidyName } from '@app/core';
 import {
-  getCollection, getFile, getFilament, getPrinter, getProduct, getSupply, insertCollection, insertProduct, listCollections, listProducts,
+  getCollection, getFile, getFilament, getPrinter, getProduct, getSupply, insertCollection, insertProduct, listCollections, listPrinters, listProducts,
   replaceCollectionParts, replaceProductParts, setCollectionDeleted, setProductDeleted, transaction, updateCollection, updateProduct,
   type Ctx, type Executor, type ProductFull,
 } from '@app/db';
 import type { Deps } from '../deps';
 import { notFound } from '../http';
-import { collectionDetailView, collectionListView, loadCostingContext, productDetailView, productListView, supplyIdsOf } from '../views/costing';
+import { collectionDetailView, collectionListView, loadCostingContext, productDetailView, productListView, supplyIdsOf, type ProductExtras } from '../views/costing';
 
 /** Stock and order checks live in phase 3; they plug in here (decision 2.3). */
 export interface ProductHooks {
   stock(tx: Executor, ctx: Ctx, productIds: readonly string[]): Promise<Map<string, { physical: number; reserved: number; free: number }>>;
   activeOrderFolios(tx: Executor, ctx: Ctx, productId: string): Promise<number[]>;
+  /** Pieces sold (also inside sets) and sets sold, from phase 3. */
+  sold(tx: Executor, ctx: Ctx): Promise<{ products: Map<string, number>; collections: Map<string, number> }>;
 }
-export const productHooks: ProductHooks = { stock: async () => new Map(), activeOrderFolios: async () => [] };
+export const productHooks: ProductHooks = { stock: async () => new Map(), activeOrderFolios: async () => [], sold: async () => ({ products: new Map(), collections: new Map() }) };
 const NO_STOCK = { physical: 0, reserved: 0, free: 0 };
 
 export async function photoUrl(_deps: Deps, _ctx: Ctx, fileId: string | null): Promise<string | null> {
   return fileId ? `/api/v1/files/${fileId}` : null;
 }
 
+async function extrasFor(deps: Deps, ex: Executor, ctx: Ctx, products: readonly ProductFull[]) {
+  const all = await listProducts(ex, ctx);
+  const names = new Map(all.map((p) => [p.id, p.name]));
+  const printers = new Map((await listPrinters(ex, ctx)).map((p) => [p.id, p.name]));
+  const cols = await listCollections(ex, ctx);
+  const stock = await productHooks.stock(ex, ctx, products.map((p) => p.id));
+  const sold = await productHooks.sold(ex, ctx);
+  return async (p: ProductFull): Promise<ProductExtras> => {
+    const st = stock.get(p.id) ?? NO_STOCK;
+    return {
+      photoUrl: await photoUrl(deps, ctx, p.photoFileId), free: st.free, physical: st.physical, reserved: st.reserved, sold: sold.products.get(p.id) ?? 0,
+      printerName: p.printerId ? printers.get(p.printerId) ?? null : null, parentName: p.parentId ? names.get(p.parentId) ?? null : null,
+      collections: cols.filter((c) => c.parts.some((x) => x.productId === p.id)).map((c) => ({ id: c.id, name: c.name })),
+    };
+  };
+}
+
 export async function productList(deps: Deps, ex: Executor, ctx: Ctx, filter: 'all' | 'technical' | 'variant' = 'all', q?: string): Promise<ProductListItem[]> {
   const products = await listProducts(ex, ctx);
   const c = await loadCostingContext(ex, ctx, supplyIdsOf(products));
-  const stock = await productHooks.stock(ex, ctx, products.map((p) => p.id));
-  const items = await Promise.all(products.map(async (p) => productListView(p, c, { photoUrl: await photoUrl(deps, ctx, p.photoFileId), free: stock.get(p.id)?.free ?? 0 })));
+  const extras = await extrasFor(deps, ex, ctx, products);
+  const items = await Promise.all(products.map(async (p) => productListView(p, c, await extras(p))));
   const needle = q?.trim().toLocaleLowerCase('es');
   return items.filter((p) => (filter === 'technical' ? p.technical : filter === 'variant' ? Boolean(p.parentId) : true) && (!needle || p.name.toLocaleLowerCase('es').includes(needle) || p.tags.some((t) => t.toLocaleLowerCase('es').includes(needle))));
 }
@@ -35,8 +54,7 @@ export async function productDetail(deps: Deps, ex: Executor, ctx: Ctx, id: stri
   const p = await getProduct(ex, ctx, id);
   if (!p) throw notFound('product');
   const c = await loadCostingContext(ex, ctx, supplyIdsOf([p]));
-  const stock = (await productHooks.stock(ex, ctx, [id])).get(id) ?? NO_STOCK;
-  return productDetailView(p, c, { photoUrl: await photoUrl(deps, ctx, p.photoFileId), stock });
+  return productDetailView(p, c, await (await extrasFor(deps, ex, ctx, [p]))(p));
 }
 
 async function checkRefs(tx: Executor, ctx: Ctx, input: SaveProductInput) {
@@ -125,15 +143,16 @@ async function collectionContext(ex: Executor, ctx: Ctx) {
   const c = await loadCostingContext(ex, ctx, supplyIdsOf(products));
   const stock = await productHooks.stock(ex, ctx, products.map((p) => p.id));
   const tracks = new Map(products.map((p) => [p.id, p.tracksStock]));
-  return { map, c, stock, tracks };
+  const sold = (await productHooks.sold(ex, ctx)).collections;
+  return { map, c, stock, tracks, sold };
 }
 
 export async function collectionList(_deps: Deps, ex: Executor, ctx: Ctx, q?: string): Promise<CollectionListItem[]> {
-  const { map, c, stock, tracks } = await collectionContext(ex, ctx);
+  const { map, c, stock, tracks, sold } = await collectionContext(ex, ctx);
   const needle = q?.trim().toLocaleLowerCase('es');
   return (await listCollections(ex, ctx))
     .filter((col) => !needle || col.name.toLocaleLowerCase('es').includes(needle))
-    .map((col) => collectionListView(col, map, c, buildable(col.parts.filter((p) => map.has(p.productId)), stock, tracks)));
+    .map((col) => collectionListView(col, map, c, buildable(col.parts.filter((p) => map.has(p.productId)), stock, tracks), sold.get(col.id) ?? 0));
 }
 
 export async function collectionDetail(_deps: Deps, ex: Executor, ctx: Ctx, id: string): Promise<CollectionDetail> {

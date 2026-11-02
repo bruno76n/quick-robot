@@ -23,6 +23,21 @@ export function AppShell({ businessName, trade, banner, onNewPiece, onSearch, ch
   const navOpen = openAt === path;
   const setNavOpen = (v: boolean) => setOpenAt(v ? path : null);
   useEffect(() => { document.body.classList.toggle('nav-open', navOpen); }, [navOpen]);
+  // Split screens scroll each side on its own (mockup: .pn-s, .pn-e, .pn-p on #main).
+  useEffect(() => {
+    const view = document.getElementById('view');
+    const main = document.getElementById('main');
+    if (!view || !main) return;
+    const mark = () => {
+      main.classList.toggle('pn-s', Boolean(view.querySelector(':scope > .split')));
+      main.classList.toggle('pn-e', Boolean(view.querySelector(':scope > .ed')));
+      main.classList.toggle('pn-p', Boolean(view.querySelector(':scope > .cols2.pd')));
+    };
+    mark();
+    const obs = new MutationObserver(mark);
+    obs.observe(view, { childList: true });
+    return () => obs.disconnect();
+  }, []);
   const section = `/${path.split('/')[1] ?? ''}`;
   return (
     <div className="app" id="app">

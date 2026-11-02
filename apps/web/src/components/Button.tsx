@@ -5,7 +5,7 @@ type Variant = 'default' | 'primary' | 'green' | 'ghost' | 'link';
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: 'sm' | 'md';
-  icon?: string;
+  icon?: string | undefined;
   block?: boolean;
   danger?: boolean;
   busy?: boolean;

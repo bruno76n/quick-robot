@@ -170,13 +170,13 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 
 | Operación | Entrada | Salida | Errores |
 |---|---|---|---|
-| `GET /products` | `q`, `filter` (`all` \| `technical` \| `variant`), `tag`, `page` | Página de `{ id, name, tags, parentId, photoUrl, costCents, listCents, floorCents, tracksStock, free }` | — |
+| `GET /products` | `q`, `filter` (`all` \| `technical` \| `variant`), `tag`, `page` | Página de `{ id, name, tags, parentId, photoUrl, costCents, listCents, floorCents, tracksStock, free }` más lo que pintan las fichas del mockup: `technical`, `mode`, `hexes[]`, `hours`, `printerId`, `printerName`, `parentName`, `collections[]`, `sold`, `physical`, `reserved` | — |
 | `GET /products/:id` | — | Pieza completa + `breakdown`, `suggestedCents`, `floorCents`, `listCents`, `profitByChannel[]`, `stock { physical, reserved, free }` | — |
 | `saveProduct` · `POST /products` y `PUT /products/:id` | `{ name, tags[], mode ('value' \| 'formula'), priceCents?, marginPct?, printerId? (nulo = promedio), hours, batchSize, extrasCents, tracksStock, filaments[{ filamentId, grams }], supplies[{ supplyId, qty }], spec{…}, note, photoFileId? }` | Pieza completa (el costo lo recalcula el servidor) | `STOCK_TRACKING_HAS_STOCK` |
 | `saveProductAsVariant` · `POST /products/:id/variant` | Igual que `saveProduct`; crea una copia con `parentId = :id` | Pieza nueva | — |
 | `deleteProduct` · `DELETE /products/:id` | — | 204 (borrado suave) | `PRODUCT_IN_ACTIVE_ORDERS`, `PRODUCT_HAS_STOCK` |
 | `restoreProduct` · `POST /products/:id/restore` | — | Pieza | `RESTORE_CONFLICT` |
-| `GET /collections` | `q`, `page` | Página de `{ id, name, tags, listCents, costCents, buildableSets }` | — |
+| `GET /collections` | `q`, `page` | Página de `{ id, name, tags, listCents, costCents, buildableSets }` más `looseCents`, `pieces`, `partNames[]`, `typedPrice`, `sold`, `hexes[]`, `partHexes[]` | — |
 | `GET /collections/:id` | — | Colección + partes `{ productId, name, qty }` + costo, precio, ganancia, `looseCents`, `buildableSets` | — |
 | `saveCollection` · `POST /collections` y `PUT /collections/:id` | `{ name, tags[], parts[{ productId, qty }], extrasCents, priceCents? (vacío = suma de sueltas), note }` | Colección completa | `COLLECTION_EMPTY`, `NO_PRODUCTS` |
 | `deleteCollection` · `DELETE /collections/:id` | — | 204 | — |

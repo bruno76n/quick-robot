@@ -63,3 +63,24 @@ describe('startup configuration', () => {
     expect(() => loadLocalConfig(cfg)).toThrow(/Invalid configuration/);
   });
 });
+
+describe('real HTTP server (Node adapter)', () => {
+  it('DELETE and POST without body pass; text/plain with body is rejected', async () => {
+    const { serve } = await import('@hono/node-server');
+    const { createApp } = await import('../../src/app');
+    const app = createApp(h.deps);
+    const server = serve({ fetch: app.fetch, hostname: '127.0.0.1', port: 0 });
+    await new Promise((r) => server.once('listening', r));
+    const port = (server.address() as { port: number }).port;
+    const base = `http://127.0.0.1:${port}/api/v1`;
+    const auth = { authorization: 'Bearer token-a' };
+    try {
+      const created = await (await fetch(`${base}/suppliers`, { method: 'POST', headers: { ...auth, 'content-type': 'application/json' }, body: JSON.stringify({ name: 'Uno' }) })).json() as { data: { id: string } };
+      expect((await fetch(`${base}/suppliers/${created.data.id}`, { method: 'DELETE', headers: auth })).status).toBe(204);
+      expect((await fetch(`${base}/suppliers/${created.data.id}/restore`, { method: 'POST', headers: auth })).status).toBe(200);
+      expect((await fetch(`${base}/suppliers`, { method: 'POST', headers: { ...auth, 'content-type': 'text/plain' }, body: '{"name":"x"}' })).status).toBe(422);
+    } finally {
+      server.close();
+    }
+  });
+});

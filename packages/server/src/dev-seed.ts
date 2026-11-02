@@ -9,7 +9,7 @@ import { normalizeName, toCents } from '@app/core';
 import type { Deps } from './deps';
 import { addSpool } from './usecases/add-spool';
 import { saveCollection, saveProduct } from './usecases/products';
-import { addChannel, ensureWorkspaceDefaults, removeChannel, updateSettings } from './usecases/settings';
+import { addChannel, ensureWorkspaceDefaults, removeChannel, updateChannel, updateSettings } from './usecases/settings';
 import { createSupplier } from './usecases/suppliers';
 import { createSupply } from './usecases/supplies';
 
@@ -27,6 +27,10 @@ export async function applyDevelopmentSeed(deps: Deps, ctx: Ctx, path?: string):
   const before = await listChannels(deps.db, ctx);
   for (const ch of b.config.canales) await addChannel(deps, ctx, { name: ch.n, commissionPct: ch.c }).catch(() => undefined);
   for (const ch of before) if (!b.config.canales.some((x) => normalizeName(x.n) === ch.nameKey)) await removeChannel(deps, ctx, ch.id);
+  for (const ch of await listChannels(deps.db, ctx)) {
+    const position = b.config.canales.findIndex((x) => normalizeName(x.n) === ch.nameKey);
+    if (position >= 0 && position !== ch.position) await updateChannel(deps, ctx, ch.id, { position });
+  }
   await transaction(deps.db, (tx) => addCatalogItems(tx, ctx, [
     ...b.cat.materiales.map((name) => ({ kind: 'material', name })), ...b.cat.colores.map((c) => ({ kind: 'color', name: c.n, hex: c.hex })), ...b.cat.marcas.map((name) => ({ kind: 'brand', name })),
   ].map((x) => ({ id: deps.ids.next(), nameKey: normalizeName(x.name), hex: null, ...x }))));
