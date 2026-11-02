@@ -3,6 +3,24 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/index.ts" },
-  "scripts": { "typecheck": "tsc --noEmit -p tsconfig.json" }
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "dev": "tsx watch --clear-screen=false dev/local.ts",
+    "dev:file": "DATA_DIR=../../.data/pgdata tsx dev/local.ts",
+    "start:local": "NODE_ENV=production DATA_DIR=../../.data/pgdata tsx dev/local.ts"
+  },
+  "dependencies": {
+    "@app/contract": "workspace:*",
+    "@app/core": "workspace:*",
+    "@app/db": "workspace:*",
+    "hono": "4.13.13",
+    "@hono/node-server": "1.19.17"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.5",
+    "tsx": "4.20.6"
+  }
 }

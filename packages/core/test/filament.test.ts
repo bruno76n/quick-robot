@@ -149,3 +149,28 @@ describe('filament identity', () => {
     expect(filamentKey('PLA  negro', ' Café')).toBe(filamentKey('pla Negro', 'cafe'));
   });
 });
+
+import { compareFilaments, spoolsForDisplay } from '../src/filament';
+
+describe('display helpers', () => {
+  it('sorts filaments by material then color (es)', () => {
+    const list = [
+      { material: 'PLA Silk', color: 'Morado' },
+      { material: 'PLA', color: 'Negro' },
+      { material: 'PLA', color: 'Blanco' },
+      { material: 'PETG', color: 'Negro' },
+    ].sort(compareFilaments);
+    expect(list.map((f) => `${f.material} ${f.color}`)).toEqual(['PETG Negro', 'PLA Blanco', 'PLA Negro', 'PLA Silk Morado']);
+  });
+  it('spools for display: consumption order, then empty newest first; flags the one used first', () => {
+    const s = [
+      spool({ id: 'empty-old', purchasedOn: '2025-01-01', remaining: 0 }),
+      spool({ id: 'full', purchasedOn: '2026-01-01', remaining: 1000 }),
+      spool({ id: 'open', purchasedOn: '2026-02-01', remaining: 300 }),
+      spool({ id: 'empty-new', purchasedOn: '2025-06-01', remaining: 0 }),
+    ];
+    const out = spoolsForDisplay(s);
+    expect(out.map((x) => x.id)).toEqual(['open', 'full', 'empty-new', 'empty-old']);
+    expect(out.filter((x) => x.usedFirst).map((x) => x.id)).toEqual(['open']);
+  });
+});

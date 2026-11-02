@@ -252,3 +252,22 @@ export function filamentKey(material: string, color: string): string {
 export function cleanName(s: string): string {
   return s.trim().replace(/\s+/g, ' ');
 }
+
+/** List order of filaments: by material, then color, Spanish collation (mockup `filsOrd`). */
+export function compareFilaments(a: { material: string; color: string }, b: { material: string; color: string }): number {
+  return a.material.localeCompare(b.material, 'es') || a.color.localeCompare(b.color, 'es');
+}
+
+/**
+ * Spools as shown in the drawer: first those with material in consumption order, then the empty ones,
+ * newest first (mockup `filDetalle`). `usedFirst` is set only when more than one spool has material.
+ */
+export function spoolsForDisplay<T extends SpoolWithRemaining>(spools: readonly T[]): (T & { usedFirst: boolean })[] {
+  const order = spoolConsumptionOrder(spools);
+  const empty = spools.filter((s) => !order.includes(s)).sort(byNewestPurchase);
+  const firstId = order.length > 1 ? order[0]!.id : null;
+  return [...order, ...empty].map((s) => ({ ...s, usedFirst: s.id === firstId }));
+}
+
+/** Default swatch when a color has no hex in the catalog (mockup `colorHex`). */
+export const DEFAULT_FILAMENT_HEX = '#9a9aa6';

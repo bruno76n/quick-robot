@@ -55,3 +55,8 @@ Ver `01-vision-y-decisiones.md` (D1–D19).
 - Situación: `05` pide filamento único por (negocio, material, color) "sin importar mayúsculas"; el mockup además ignora acentos y espacios (`norm`). `db` no puede importar `core`.
 - Decisión: columna `name_key` (= `core.filamentKey`, calculada por el caso de uso) con índice único `(workspace_id, name_key)`. Además, las tablas hijas apuntan a su padre con **llave foránea compuesta** `(workspace_id, id)`, así la base misma impide colgar un rollo o un movimiento de un filamento de otro negocio (barrera extra a la del repositorio). `spool.supplier_id` queda sin FK hasta que exista `supplier` (fase 2). Si se vuelve a agregar un filamento borrado (suave), se restaura.
 - Impacto: `packages/db/src/schema/*`, `migrations/0000_init.sql`.
+
+## 2026-11-02 · Fase 1 · Paso 1.5 · Servidor: reloj inyectado, consultas y secreto local
+- Situación: los casos de uso necesitarán "hoy" (fechas de movimientos) y `core` no lee la hora; `08` lista cuatro interfaces inyectadas.
+- Decisión: se agrega una quinta dependencia mínima, `Clock { today() }`, para que tampoco los casos de uso lean la hora directamente (misma idea que `core`). Las lecturas sin escritura viven en `src/queries/` (`listFilaments`, `getFilamentDetail`) y calculan todo con `core`. El `AuthProvider` local acepta un secreto opcional por arranque (cabecera `x-app-secret`) que usará Electron en la fase 4; en desarrollo no se usa. Las tasas (costo por gramo) viajan en pesos sin redondear; los importes guardados, en centavos.
+- Impacto: `packages/server/src/deps.ts`, `src/queries/filaments.ts`, `src/providers/local/*`.
