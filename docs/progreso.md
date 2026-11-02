@@ -22,10 +22,10 @@ Estados: `no iniciada` · `en curso` · `igual al mockup` · `verificada con dat
 | Ficha de cliente | 3 | igual al mockup | Totales, historial y logo |
 | Gastos | 3 | igual al mockup | Más el filtro de periodo de `06` en "Todos los gastos" |
 | Reportes | 3 | igual al mockup | Más el bloque "Inversión recuperada" de `06` |
-| Ajustes | 2–3 | en curso | Exportar a Excel listo; falta Copia de seguridad (fase 4) |
+| Ajustes | 2–4 | igual al mockup | Costos, canales, documentos, Copia de seguridad (descargar, restaurar, copias automáticas, vaciar) y Exportar a Excel |
 | Documentos (cotización y nota) | 3 | igual al mockup | Columna "Total" (vocabulario de `13`) |
 | Buscar y atajos | 3 | igual al mockup | ⌘K, "?", G + letra, ⌘Z |
-| Estados de falla (`15 §5`) | 3–4 | en curso | Web listo y probado (`e2e/failure-states.spec.ts`); pantallas de Electron en la fase 4 |
+| Estados de falla (`15 §5`) | 3–4 | igual al mockup | Web (`e2e/failure-states.spec.ts`) y escritorio: no responde, migración fallida, archivo ilegible (`e2e/desktop.spec.ts`) |
 | Marca: ícono, logo, mascota | 4 | provisional | `assets/`; reemplazable con el arte final de R1 |
 
 ## Fases
@@ -35,5 +35,5 @@ Estados: `no iniciada` · `en curso` · `igual al mockup` · `verificada con dat
 | 1 | terminada | `docs/informe-fase-1.md` |
 | 2 | terminada | `docs/informe-fase-2.md` |
 | 3 | terminada | `docs/informe-fase-3.md` |
-| 4 | no iniciada | `docs/informe-fase-4.md` |
+| 4 | terminada en lo que no requiere la Mac (falta: .dmg en tu Mac y una semana de uso con tus datos) | `docs/informe-fase-4.md` |
 | 5 | planeación pendiente (`16`, `17`, `legal/`) | `docs/informe-fase-5.md` |
