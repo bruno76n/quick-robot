@@ -13,9 +13,10 @@ import { notFound } from '../../http';
 import { costOf, loadCostingContext, setPartsOf, supplyIdsOf } from '../../views/costing';
 import { cents, childrenOf, commissionOf, itemsText, lineItemData, orderData, saleData } from './common';
 import { queueViews } from './queue';
+import { grossProfitAndExpensesFast } from './fast';
 // Reportes › taller y estado actual (agent D).
 import { orderPaid, orderProfit, orderTotal, saleGross } from '@app/core';
-import { listPrintRuns, listSpoolMovements } from '@app/db';
+import { firstSaleOn, listPrintRuns, listSpoolMovements } from '@app/db';
 import { priceOf } from '../../views/costing';
 import { loadStock } from './common';
 
@@ -56,19 +57,15 @@ export async function restoreExpense(deps: Deps, ctx: Ctx, id: string) {
 }
 
 // ---------- Sales data for reports ----------
-async function allSales(ex: Executor, ctx: Ctx) {
+async function allSales(ex: Executor, ctx: Ctx, f: { from?: string; to?: string; owedOnly?: boolean } = {}) {
   const channels = await listChannels(ex, ctx);
-  const rows = await listSales(ex, ctx);
+  const rows = (await listSales(ex, ctx, { from: f.from, to: f.to })).filter((s) => !f.owedOnly || (s.tracksPayments && !s.return));
   const ch = await childrenOf(ex, ctx, 'sale', rows.map((s) => s.id));
   return { channels, rows, data: rows.map((s) => ({ ...saleData(s, ch.items(s.id), ch.payments(s.id), commissionOf(channels, s.channelId)), customerId: s.customerId })) };
 }
 
 /** Gross profit since always and expenses since always to today: the investment of the printers (docs/04 §11). */
-export async function grossProfitAndExpenses(ex: Executor, ctx: Ctx, today: string) {
-  const { data } = await allSales(ex, ctx);
-  const exp = await listExpenses(ex, ctx);
-  return { grossProfit: salesTotals(data).profit, expenses: expensesInRange(exp.map(expenseData), ALL_TIME_FROM, today) };
-}
+export const grossProfitAndExpenses = grossProfitAndExpensesFast;
 
 const totalsView = (t: ReturnType<typeof salesTotals>, extra: { count: number; list: number; discount: number }) => ({
   incomeCents: cents(t.income), commissionCents: cents(t.commission), costCents: cents(t.cost), profitCents: cents(t.profit), pieces: t.pieces,
@@ -133,13 +130,12 @@ async function reportWorkshopAndState(ex: Executor, ctx: Ctx, from: string, to: 
 
 export async function report(deps: Deps, ex: Executor, ctx: Ctx, q: { period?: '7' | '30' | '90' | 'all' | undefined; from?: string | undefined; to?: string | undefined }) {
   const today = deps.clock.today();
-  const { channels, data } = await allSales(ex, ctx);
-  const live = data.filter((s) => !s.returned);
   let from: string; let to = today;
   if (q.from && q.to) { from = q.from; to = q.to; }
-  else if (q.period === 'all') from = live.length ? live.map((s) => s.on).sort()[0]! < today ? live.map((s) => s.on).sort()[0]! : today : addDays(today, -29);
+  else if (q.period === 'all') { const first = await firstSaleOn(ex, ctx); from = first && first < today ? first : first ? today : addDays(today, -29); }
   else from = addDays(today, -(Number(q.period ?? '30') - 1));
   const days = daysBetween(from, to) + 1;
+  const { channels, data } = await allSales(ex, ctx, { from: q.period === 'all' ? from : addDays(from, -days), to });
   const inR = (on: string, a: string, b: string) => on >= a && on <= b;
   const period = data.filter((s) => inR(s.on, from, to));
   const prev = q.period === 'all' ? null : data.filter((s) => inR(s.on, addDays(from, -days), addDays(from, -1)));
@@ -278,11 +274,12 @@ export async function purchases(_deps: Deps, ex: Executor, ctx: Ctx) {
 // ---------- Inicio (docs/06 §2) ----------
 export async function home(deps: Deps, ex: Executor, ctx: Ctx) {
   const today = deps.clock.today();
-  const { data, rows } = await allSales(ex, ctx);
-  const last30 = data.filter((s) => inPeriod(s.on, today, 30));
+  const { data: recent } = await allSales(ex, ctx, { from: addDays(today, -29), to: today });
+  const { data, rows } = await allSales(ex, ctx, { owedOnly: true });
+  const last30 = recent.filter((s) => inPeriod(s.on, today, 30));
   const t = salesTotals(last30);
   const channels = await listChannels(ex, ctx);
-  const orders = await listOrders(ex, ctx);
+  const orders = await listOrders(ex, ctx, { statuses: ['quoted', 'accepted', 'in_production', 'ready'] });
   const oc = await childrenOf(ex, ctx, 'order', orders.map((o) => o.id));
   const customers = new Map((await listCustomers(ex, ctx, { withDeleted: true })).map((c) => [c.id, c.name]));
   const od = orders.map((o) => ({ o, d: orderData(o, oc.items(o.id), oc.payments(o.id), commissionOf(channels, o.channelId)) }));

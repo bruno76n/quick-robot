@@ -367,3 +367,9 @@ export async function soldTotals(ex: Executor, ctx: Ctx) {
   for (const r of [...pieces, ...parts]) if (r.productId) products.set(r.productId, (products.get(r.productId) ?? 0) + Number(r.n));
   return { products, collections: new Map(sets.filter((r) => r.collectionId).map((r) => [r.collectionId!, Number(r.n)])) };
 }
+
+/** Date of the oldest live, not returned sale ("Todo" in Reportes starts there). */
+export async function firstSaleOn(ex: Executor, ctx: Ctx): Promise<string | null> {
+  const [r] = await ex.select({ on: sql<string | null>`min(${sale.on})` }).from(sale).where(and(inWorkspace(sale.workspaceId, ctx), isNull(sale.deletedAt), isNull(sale.return)));
+  return r?.on ?? null;
+}

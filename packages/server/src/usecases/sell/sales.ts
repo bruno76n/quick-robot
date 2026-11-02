@@ -3,11 +3,12 @@ import { BusinessError, type PaymentInput, type ReturnSaleInput, type SaleInput,
 import { itemTotal, saleCommission, saleCost, saleGross, saleIncome, saleOwed, salePaid, saleProfit } from '@app/core';
 import {
   deletePayment, getChannel, getCustomer, getSale, insertLineItems, insertPayments, insertSale, insertStockMovements, listChannels, listCustomers,
-  listOrders, listProducts, listSales, setSaleDeleted, stockMovementsByRef, transaction, updateSale, type Ctx, type Executor, type SaleFilter, type SaleRow,
+  listOrders, listProducts, saleFacts, saleTotals, setSaleDeleted, stockMovementsByRef, transaction, updateSale, type Ctx, type Executor, type SaleFilter, type SaleRow,
 } from '@app/db';
 import type { Deps } from '../../deps';
 import { notFound } from '../../http';
-import { assertStock, buildItems, cents, childrenOf, commissionOf, itemsText, lineItemData, loadStock, needOf, saleData } from './common';
+import { totalsOf } from './fast';
+import { assertStock, buildItems, cents, childrenOf, commissionOf, factSale, lineItemData, loadStock, needOf, saleData } from './common';
 
 async function context(ex: Executor, ctx: Ctx) {
   const channels = await listChannels(ex, ctx);
@@ -19,29 +20,25 @@ async function context(ex: Executor, ctx: Ctx) {
   return { channels, customers, numbers, channelName: (id: string) => channels.find((c) => c.id === id)?.name ?? '' };
 }
 
+/** One page of sales (SQL page and SQL totals over the whole filter: docs/15 §3). */
 export async function saleList(_deps: Deps, ex: Executor, ctx: Ctx, f: SaleFilter & { q?: string | undefined; page: number; pageSize: number }) {
   const { channels, customers, numbers, channelName } = await context(ex, ctx);
-  let rows = await listSales(ex, ctx, f);
+  const rows = await saleFacts(ex, ctx, { ...f, limit: f.pageSize, offset: (f.page - 1) * f.pageSize });
   const folios = await numbers(rows.map((s) => s.orderId));
   const ch = await childrenOf(ex, ctx, 'sale', rows.map((s) => s.id));
-  const needle = f.q?.trim().toLocaleLowerCase('es');
-  if (needle) rows = rows.filter((s) => [s.note, customers.get(s.customerId ?? '') ?? '', itemsText(ch.items(s.id))].some((t) => t.toLocaleLowerCase('es').includes(needle)));
-  const all = rows.map((s) => {
-    const d = saleData(s, ch.items(s.id), ch.payments(s.id), commissionOf(channels, s.channelId));
+  const t = totalsOf((await saleTotals(ex, ctx, f))[0]);
+  const items = rows.map((s) => {
+    const d = factSale(s, commissionOf(channels, s.channelId));
+    const its = ch.items(s.id).map(lineItemData);
     return {
       id: s.id, on: s.on, channelId: s.channelId, channel: channelName(s.channelId), customerId: s.customerId, customer: s.customerId ? customers.get(s.customerId) ?? '' : '',
-      itemsText: itemsText(ch.items(s.id)), note: s.note, totalCents: cents(saleGross(d)), incomeCents: cents(saleIncome(d)), costCents: cents(saleCost(d)),
+      itemsText: s.itemsText, note: s.note, totalCents: Math.round(s.grossCents), incomeCents: cents(saleIncome(d)), costCents: cents(saleCost(d)),
       commissionCents: cents(saleCommission(d)), profitCents: cents(saleProfit(d)), owedCents: cents(saleOwed(d)), returned: !!s.return, orderId: s.orderId, orderNumber: s.orderId ? folios.get(s.orderId) ?? null : null,
-      pieces: d.items.reduce((a, it) => a + (it.kind === 'set' ? (it.parts ?? []).reduce((x, p) => x + p.qty, 0) * it.qty : it.qty), 0),
-      listCents: cents(d.items.reduce((a, it) => a + it.qty * it.list, 0)),
-      items: d.items.map((it) => ({ kind: it.kind, name: it.name, qty: it.qty, parts: (it.parts ?? []).map((p) => ({ name: p.name, qty: p.qty })) })),
+      pieces: s.pieces, listCents: Math.round(s.listCents),
+      items: its.map((it) => ({ kind: it.kind, name: it.name, qty: it.qty, parts: (it.parts ?? []).map((p) => ({ name: p.name, qty: p.qty })) })),
     };
   });
-  const totals = {
-    count: all.length, incomeCents: all.reduce((a, s) => a + s.incomeCents, 0), profitCents: all.reduce((a, s) => a + s.profitCents, 0),
-    costCents: all.reduce((a, s) => a + s.costCents, 0), owedCents: all.reduce((a, s) => a + s.owedCents, 0),
-  };
-  return { items: all.slice((f.page - 1) * f.pageSize, f.page * f.pageSize), page: f.page, pageSize: f.pageSize, total: all.length, totals };
+  return { items, page: f.page, pageSize: f.pageSize, total: t.count, totals: { count: t.count, incomeCents: t.incomeCents, profitCents: t.profitCents, costCents: t.costCents, owedCents: t.owedCents } };
 }
 
 export async function saleDetail(_deps: Deps, ex: Executor, ctx: Ctx, id: string, opts: { deleted?: boolean } = {}) {

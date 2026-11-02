@@ -7,6 +7,7 @@ import {
 } from '@app/db';
 import type { Deps } from '../../deps';
 import { notFound } from '../../http';
+import { customerTotals } from './fast';
 import { childrenOf, cents, commissionOf, itemsText, orderData, saleData } from './common';
 
 const view = (c: CustomerRow) => ({ id: c.id, name: c.name, type: c.type, phone: c.phone, note: c.note, hasLogo: c.hasLogo, logoUrl: c.logoFileId ? `/api/v1/files/${c.logoFileId}` : null, logoFileId: c.logoFileId, createdOn: c.createdOn });
@@ -27,8 +28,8 @@ const totalsView = (s: ReturnType<typeof customerStats>) => ({ orders: s.orders,
 
 export async function customerList(_deps: Deps, ex: Executor, ctx: Ctx, q?: string) {
   const list = await listCustomers(ex, ctx, { q });
-  const { of } = await statsOf(ex, ctx);
-  return list.map((c) => ({ ...view(c), ...totalsView(of(c.id)) }));
+  const of = await customerTotals(ex, ctx);
+  return list.map((c) => ({ ...view(c), ...of(c.id) }));
 }
 
 export async function customerDetail(_deps: Deps, ex: Executor, ctx: Ctx, id: string) {
