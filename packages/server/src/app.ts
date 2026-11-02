@@ -15,6 +15,8 @@ import { supplyRoutes } from './routes/supplies';
 import { printerRoutes } from './routes/printers';
 import { productRoutes } from './routes/products';
 import { fileRoutes } from './routes/files';
+import { sellRoutes } from './routes/sell';
+import './usecases/sell/wire';
 import { serveWeb } from './static';
 
 export const JSON_LIMIT_BYTES = 1_048_576;
@@ -51,6 +53,7 @@ export function createApp(deps: Deps, opts: AppOptions = {}) {
   printerRoutes(r);
   productRoutes(r);
   fileRoutes(r);
+  sellRoutes(r);
 
   app.all('/api/*', () => { throw new BusinessError('NOT_FOUND', { entity: 'route' }, 'Route not found'); });
   if (opts.webRoot) serveWeb(app, opts.webRoot);

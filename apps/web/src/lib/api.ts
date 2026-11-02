@@ -20,7 +20,8 @@ export interface Result<T> { data: T; warnings: Warning[] }
 
 const BASE = '/api/v1';
 
-async function request<T>(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<Result<T>> {
+/** Raw call for feature api.ts files (docs/07): same errors and warnings as `api`. */
+export async function request<T>(method: string, path: string, body?: unknown, signal?: AbortSignal): Promise<Result<T>> {
   let res: Response;
   const form = typeof FormData !== 'undefined' && body instanceof FormData;
   try {
@@ -42,7 +43,7 @@ async function request<T>(method: string, path: string, body?: unknown, signal?:
   return { data: json.data as T, warnings: json.warnings ?? [] };
 }
 
-const qs = (p: Record<string, string | number | undefined>) => {
+export const qs = (p: Record<string, string | number | undefined>) => {
   const s = new URLSearchParams();
   for (const [k, v] of Object.entries(p)) if (v !== undefined && v !== '') s.set(k, String(v));
   const out = s.toString();

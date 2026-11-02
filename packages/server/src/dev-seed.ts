@@ -1,10 +1,11 @@
 // Development seed applied with the same use cases as the product (docs/10 §1.7). Only when the workspace is empty.
 // The example business comes from the mockup's own backup (reference/), never from product code.
 import {
-  addCatalogItems, insertPrinter, insertSpoolMovements, insertSupplyMovements, insertTasks, listChannels, listFilaments, setWorkspaceName,
+  addCatalogItems, insertPrinter, listCollections, insertSpoolMovements, insertSupplyMovements, insertTasks, listChannels, listFilaments, setWorkspaceName,
   transaction, updateProduct, type Ctx,
 } from '@app/db';
-import { loadMockupBackup, SPEC_KEYS, SPOOL_MOVEMENT_KIND, SUPPLY_MOVEMENT_KIND } from '@app/db/seed';
+import { loadMockupBackup, SPEC_KEYS, SPOOL_MOVEMENT_KIND, SUPPLY_MOVEMENT_KIND, type MockupBackup } from '@app/db/seed';
+import { seedSellData } from './dev-seed-sell';
 import { normalizeName, toCents } from '@app/core';
 import type { Deps } from './deps';
 import { addSpool } from './usecases/add-spool';
@@ -17,6 +18,7 @@ import { createSupply } from './usecases/supplies';
 export async function applyDevelopmentSeed(deps: Deps, ctx: Ctx, path?: string): Promise<boolean> {
   if ((await listFilaments(deps.db, ctx, { page: 1, pageSize: 1 })).total > 0) return false;
   const b = loadMockupBackup(path);
+  const refs = new Map<string, string>([...b.imps, ...b.pedidos, ...b.ventas].map((x) => [x.id, deps.ids.next()]));
   const n = b.config.negocio;
   await setWorkspaceName(deps.db, ctx, n.nombre);
   await ensureWorkspaceDefaults(deps, ctx);
@@ -50,7 +52,7 @@ export async function applyDevelopmentSeed(deps: Deps, ctx: Ctx, path?: string):
   }
   const rest = b.movs.filter((m) => m.tipo !== 'compra' && spoolIds.has(m.rollo));
   await transaction(deps.db, (tx) => insertSpoolMovements(tx, ctx, rest.map((m) => ({
-    id: deps.ids.next(), spoolId: spoolIds.get(m.rollo)!, on: m.fecha, kind: SPOOL_MOVEMENT_KIND[m.tipo] ?? 'adjustment', grams: m.g, note: m.nota,
+    id: deps.ids.next(), spoolId: spoolIds.get(m.rollo)!, on: m.fecha, kind: SPOOL_MOVEMENT_KIND[m.tipo] ?? 'adjustment', grams: m.g, note: m.nota, refId: m.ref ? refs.get(m.ref) ?? null : null,
   }))));
 
   const supplyIds = new Map<string, string>();
@@ -58,7 +60,7 @@ export async function applyDevelopmentSeed(deps: Deps, ctx: Ctx, path?: string):
     supplyIds.set(i.id, (await createSupply(deps, ctx, { name: i.nombre, unit: i.unidad, costCents: toCents(i.costo), minimum: i.minimo, note: i.nota, supplierId: supplierIds.get(i.prov) ?? null })).id);
   }
   await transaction(deps.db, (tx) => insertSupplyMovements(tx, ctx, b.imovs.filter((m) => supplyIds.has(m.ins)).map((m) => ({
-    id: deps.ids.next(), supplyId: supplyIds.get(m.ins)!, on: m.fecha, kind: SUPPLY_MOVEMENT_KIND[m.tipo] ?? 'adjustment', qty: m.n, note: m.nota,
+    id: deps.ids.next(), supplyId: supplyIds.get(m.ins)!, on: m.fecha, kind: SUPPLY_MOVEMENT_KIND[m.tipo] ?? 'adjustment', qty: m.n, note: m.nota, refId: m.ref ? refs.get(m.ref) ?? null : null,
   }))));
 
   const printerIds = new Map<string, string>();
@@ -86,6 +88,10 @@ export async function applyDevelopmentSeed(deps: Deps, ctx: Ctx, path?: string):
   for (const c of b.colecciones) {
     await saveCollection(deps, ctx, { name: c.nombre, tags: c.tags, parts: c.partes.filter((x) => productIds.has(x.prod)).map((x) => ({ productId: productIds.get(x.prod)!, qty: x.cant })), extrasCents: toCents(c.extras), priceCents: toCents(c.precio), note: c.nota });
   }
+  const collectionIds = new Map<string, string>();
+  const cols = await listCollections(deps.db, ctx);
+  for (const c of b.colecciones) { const row = cols.find((x) => x.name === c.nombre); if (row) collectionIds.set(c.id, row.id); }
+  await seedSellData(deps, ctx, b as MockupBackup, { refs, productIds, collectionIds, printerIds, filamentIds });
   return true;
 }
 

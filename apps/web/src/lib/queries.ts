@@ -5,6 +5,8 @@ import { api } from './api';
 export const keys = {
   settings: ['settings'] as const, filaments: ['filaments'] as const, supplies: ['supplies'] as const, suppliers: ['suppliers'] as const,
   printers: ['printers'] as const, products: ['products'] as const, collections: ['collections'] as const, me: ['me'] as const,
+  stock: ['stock'] as const, customers: ['customers'] as const, sales: ['sales'] as const, orders: ['orders'] as const, printRuns: ['printRuns'] as const,
+  expenses: ['expenses'] as const, reports: ['reports'] as const, home: ['home'] as const, purchases: ['purchases'] as const, search: ['search'] as const,
 };
 
 export const useSettings = () => useQuery({ queryKey: keys.settings, queryFn: async () => (await api.settings.get()).data });

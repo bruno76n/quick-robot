@@ -18,8 +18,20 @@ export interface MockupBackup {
   impresoras: { id: string; nombre: string; costo: number; vidaH: number; mantoH: number; kw: number; horas: number; compra: string; mant: { id: string; tarea: string; cadaH: number; ultH: number; fecha: string }[] }[];
   productos: { id: string; nombre: string; imp: string; horas: number; lote: number; extras: number; insumos: { ins: string; cant: number }[]; filamentos: { fil: string; g: number }[]; precio: number; modo: string; margen?: number | null; tags: string[]; nota: string; padre: string | null; stock: boolean; ficha?: Record<string, string> | null }[];
   colecciones: { id: string; nombre: string; partes: { prod: string; cant: number }[]; extras: number; precio: number; tags: string[]; nota: string }[];
+  clientes: { id: string; nombre: string; tipo: string; tel: string; logo: boolean; nota: string; creado: string }[];
+  pedidos: { id: string; folio: number; cliente: string; creado: string; entrega: string; entregado?: string; listo?: string; estado: string; canal: string; nota: string; pagos: MockPayment[]; items: MockItem[]; descontado?: boolean; logueado?: boolean; stk?: Record<string, number>; cancelado?: { fecha: string; motivo: string; reembolso: number } }[];
+  ventas: { id: string; fecha: string; canal: string; nota: string; cliente: string; pedido: string | null; items: MockItem[]; pagos?: MockPayment[]; dev?: { fecha: string; repone: boolean; reembolso: number; nota: string } }[];
+  pmovs: { id: string; prod: string; fecha: string; tipo: string; n: number; nota: string; ref?: string }[];
+  imps: { id: string; fecha: string; prod: string; imp: string; res: string; horas: number; cant: number; motivo: string; texto: string; pedido: string; filamentos: { fil: string; g: number }[] }[];
+  gastos: { id: string; fecha: string; concepto: string; cat: string; monto: number; rec: boolean; fin: string }[];
   [k: string]: unknown;
 }
+
+export interface MockPayment { id: string; fecha: string; monto: number; nota: string }
+export interface MockItem { k: 'p' | 'c'; prod?: string; col?: string; nombre: string; cant: number; precio: number; lista: number; costo: number; extras?: number; partes?: { prod: string; nombre: string; cant: number; lista: number; costo: number }[]; imp?: string; uso?: Record<string, number> }
+export const ORDER_STATUS: Record<string, string> = { cotizado: 'quoted', aceptado: 'accepted', produccion: 'in_production', listo: 'ready', entregado: 'delivered', cancelado: 'cancelled' };
+export const STOCK_MOVEMENT_KIND: Record<string, string> = { inicial: 'initial', impresion: 'print', pedido: 'order_print', venta: 'sale', devolucion: 'return', entrega: 'delivery', ajuste: 'adjustment' };
+export const PRINT_REASON: Record<string, string> = { inventario: 'stock', pedido: 'order', prueba: 'test' };
 
 export function loadMockupBackup(path = MOCKUP_BACKUP): MockupBackup {
   return JSON.parse(readFileSync(path, 'utf8')) as MockupBackup;
