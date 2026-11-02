@@ -17,8 +17,7 @@ import { go } from '../../lib/nav';
 import { usePrinters, useProducts } from '../../lib/queries';
 import { ordersApi, ORDER_TOUCHES, useOrder, type OrderDetail, type OrderItem } from './api';
 import { MatRows, Shortfall, useMaterial } from './Material';
-import { warningText } from './OrderSteps';
-import { tbc } from './parts';
+import { tbc, warningText } from './parts';
 
 const L = es.screens.order;
 const fmt = (c: number) => String(Math.round(c) / 100);

@@ -47,3 +47,6 @@ export function Where({ tags }: { tags: readonly Tag[] }) {
     </div>
   ))}</>;
 }
+
+/** Spanish text of a warning that came back with a write. */
+export const warningText = (w: { code: string; details?: Record<string, unknown> }) => t(`warnings.${w.code}`, w.details ?? {});

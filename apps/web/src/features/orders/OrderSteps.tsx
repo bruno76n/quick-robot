@@ -5,12 +5,12 @@ import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { useWrite } from '../../lib/mutate';
 import { ordersApi, ORDER_TOUCHES, type OrderDetail, type OrderStatus, type OrderStep } from './api';
+import { warningText } from './parts';
 import { CancelDialog, DeliverDialog, PaymentDialog, ProductionDialog } from './OrderDialogs';
 
 export type StepDlg = { kind: 'production' | 'reassign' | 'deliver' | 'pay' | 'cancel'; id: string } | null;
 interface OrderRef { id: string; number: number; status: OrderStatus; nextStep: OrderStep | null }
 
-export const warningText = (w: { code: string; details?: Record<string, unknown> }) => t(`warnings.${w.code}`, w.details ?? {});
 const fromStockCount = (o: OrderDetail) => o.items.reduce((a, it) => a + (it.kind === 'set' ? it.parts.reduce((x, p) => x + p.qty, 0) * it.qty : it.qty) - it.toPrint, 0);
 
 export function useStepRunner() {

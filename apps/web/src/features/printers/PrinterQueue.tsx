@@ -7,7 +7,7 @@ import { queueDuration } from '../../lib/format';
 import { useWrite } from '../../lib/mutate';
 import { go } from '../../lib/nav';
 import { ordersApi, ORDER_TOUCHES, useOrderList } from '../orders/api';
-import { warningText } from '../orders/OrderSteps';
+import { warningText } from '../orders/parts';
 
 const L = es.screens.printers;
 
