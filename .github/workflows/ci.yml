@@ -19,7 +19,7 @@ jobs:
     env:
       PG_URL: postgres://qr:qr@127.0.0.1:5432/qr_test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
