@@ -12,3 +12,4 @@ export * from './providers/local/entitlements';
 export * from './providers/local/mailer';
 export * from './providers/local/log-file';
 export { addSpool } from './usecases/add-spool';
+export { applyDevelopmentSeed } from './dev-seed';

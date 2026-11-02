@@ -18,7 +18,10 @@
     "size": "node scripts/size-check.mjs"
   },
   "devDependencies": {
+    "@app/db": "workspace:*",
+    "@app/server": "workspace:*",
     "@eslint/js": "9.39.5",
+    "@hono/node-server": "1.19.17",
     "@playwright/test": "1.63.0",
     "@types/node": "22.20.5",
     "@vitest/coverage-v8": "4.1.12",

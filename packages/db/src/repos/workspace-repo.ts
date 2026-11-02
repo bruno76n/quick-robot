@@ -25,3 +25,8 @@ export async function getRole(ex: Executor, ctx: Ctx): Promise<string | undefine
     .where(and(eq(membership.workspaceId, ctx.workspaceId), eq(membership.userId, ctx.userId)));
   return row?.role;
 }
+
+export async function setWorkspaceName(ex: Executor, ctx: Ctx, name: string) {
+  assertCtx(ctx);
+  await ex.update(workspace).set({ name, updatedAt: new Date() }).where(eq(workspace.id, ctx.workspaceId));
+}
