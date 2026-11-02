@@ -1,5 +1,6 @@
 import { createRootRoute, createRoute, createRouter, redirect } from '@tanstack/react-router';
 import { AppShell } from '../components/AppShell';
+import { ErrorScreen } from '../components/ErrorScreen';
 import { FilamentList } from '../features/filament/FilamentList';
 import { Placeholder } from '../features/placeholder/Placeholder';
 import { PrintersPage } from '../features/printers/PrintersPage';
@@ -76,7 +77,7 @@ const placeholderRoutes = NAV_ITEMS.filter((i) => !i.built).map((i) =>
 
 const routeTree = rootRoute.addChildren([indexRoute, filamentRoute, productsRoute, newPieceRoute, pieceRoute, newCollectionRoute, collectionRoute, suppliesRoute, printersRoute, settingsRoute, ...placeholderRoutes]);
 
-export const router = createRouter({ routeTree, defaultPreload: 'intent' });
+export const router = createRouter({ routeTree, defaultPreload: 'intent', defaultErrorComponent: ({ reset }) => <ErrorScreen onRetry={reset} /> });
 
 declare module '@tanstack/react-router' {
   interface Register {

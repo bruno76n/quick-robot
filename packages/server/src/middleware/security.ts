@@ -56,10 +56,13 @@ export const sameOriginWrites = (o: SecurityOptions) =>
       const self = new URL(c.req.url).origin;
       if (origin !== self && !o.allowedOrigins.includes(origin)) throw new BusinessError('FORBIDDEN', 'Origin not allowed');
     }
+    // A declared type must be JSON (or an image for uploads): text/plain and form posts are what another site
+    // can send without asking. A body with content but no declared type is refused too.
     const type = (c.req.header('content-type') ?? '').split(';')[0]!.trim().toLowerCase();
-    const hasBody = c.req.raw.body !== null || Number(c.req.header('content-length') ?? 0) > 0;
     const upload = c.req.path.endsWith('/files') || c.req.path.endsWith('/files/');
-    if (hasBody && !(upload ? type.startsWith('image/') : type === 'application/json')) throw new BusinessError('UNSUPPORTED_MEDIA_TYPE', 'Unsupported content type');
+    const allowed = upload ? type.startsWith('image/') : type === 'application/json';
+    const declaredLength = Number(c.req.header('content-length') ?? 0);
+    if ((type && !allowed) || (!type && (declaredLength > 0 || c.req.header('transfer-encoding')))) throw new BusinessError('UNSUPPORTED_MEDIA_TYPE', 'Unsupported content type');
     return next();
   });
 

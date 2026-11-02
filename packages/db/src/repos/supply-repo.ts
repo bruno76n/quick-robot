@@ -16,6 +16,11 @@ export const supplyRepo = {
     const [row] = await ex.select().from(supply).where(scope(ctx, supply, eq(supply.id, id)));
     return row;
   },
+  /** Same as get, locking the row until the transaction ends: concurrent movements of one supply run one after the other. */
+  async getForUpdate(ex: Executor, ctx: Ctx, id: string): Promise<SupplyRow | undefined> {
+    const [row] = await ex.select().from(supply).where(scope(ctx, supply, eq(supply.id, id))).for('update');
+    return row;
+  },
   async findByKey(ex: Executor, ctx: Ctx, nameKey: string): Promise<SupplyRow | undefined> {
     const [row] = await ex.select().from(supply).where(scope(ctx, supply, eq(supply.nameKey, nameKey)));
     return row;

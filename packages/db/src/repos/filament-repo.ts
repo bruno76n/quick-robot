@@ -56,6 +56,13 @@ export const filamentRepo = {
     return row;
   },
 
+  /** Locks the spool row until the transaction ends (concurrent movements of one spool run in order). */
+  async getSpoolForUpdate(ex: Executor, ctx: Ctx, id: string): Promise<SpoolRow | undefined> {
+    const ws = assertCtx(ctx);
+    const [row] = await ex.select().from(spool).where(and(liveSpools(ws), eq(spool.id, id))).for('update');
+    return row;
+  },
+
   async updateSpool(
     ex: Executor,
     ctx: Ctx,

@@ -34,7 +34,12 @@ export async function connectPglite(options: { dataDir?: string; migrate?: boole
     kind: 'pglite',
     db: db as unknown as Executor,
     transaction: (fn) => db.transaction((tx) => fn(tx as unknown as Executor)),
-    close: () => client.close(),
+    // PGlite runs one query at a time; closing while queries are still queued (e.g. the rest of a Promise.all
+    // after one failed) can hang. A last trivial query waits for the queue to drain before closing.
+    close: async () => {
+      await client.query('select 1').catch(() => undefined);
+      await client.close();
+    },
   };
 }
 

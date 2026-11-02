@@ -123,3 +123,23 @@ describe('uploads', () => {
     expect(r.status).toBe(404);
   });
 });
+
+describe('real HTTP server (Node): body rules as a browser sends them', () => {
+  it('DELETE without body is fine; text/plain and untyped bodies are refused', async () => {
+    const { serve } = await import('@hono/node-server');
+    const { app } = appAs(database, ctxA);
+    const server = serve({ fetch: app.fetch, hostname: '127.0.0.1', port: 0 });
+    await new Promise((r) => server.once('listening', r));
+    const port = (server.address() as { port: number }).port;
+    const base = `http://127.0.0.1:${port}/api/v1`;
+    try {
+      const sup = (await (await fetch(`${base}/suppliers`, { method: 'POST', body: JSON.stringify({ name: 'Real' }), headers: { 'content-type': 'application/json' } })).json()) as { id: string };
+      expect((await fetch(`${base}/suppliers/${sup.id}`, { method: 'DELETE' })).status).toBe(204);
+      expect((await fetch(`${base}/suppliers/${sup.id}/restore`, { method: 'POST' })).status).toBe(204);
+      expect((await fetch(`${base}/suppliers`, { method: 'POST', body: '{"name":"x"}', headers: { 'content-type': 'text/plain' } })).status).toBe(415);
+      expect((await fetch(`${base}/suppliers`, { method: 'POST', body: new Blob(['{"name":"x"}']) })).status).toBe(415);
+    } finally {
+      server.close();
+    }
+  });
+});

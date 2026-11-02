@@ -16,7 +16,8 @@
     "lint": "eslint . --max-warnings 0 && depcruise packages apps --config .dependency-cruiser.cjs",
     "lint:negative": "vitest run --project tools",
     "typecheck": "tsc --noEmit -p tsconfig.json && pnpm -r --parallel typecheck",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "security": "pnpm lint && pnpm audit --audit-level high && node tools/security/scan-secrets.mjs && vitest run --project tools --project server packages/server/test/security tools"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",

@@ -58,7 +58,7 @@ export async function deleteSpool(deps: UseCaseDeps, ctx: Ctx, spoolId: string, 
 export async function recordSpoolMovement(deps: UseCaseDeps, ctx: Ctx, spoolId: string, raw: unknown): Promise<SpoolResult> {
   const input = SpoolMovementInput.parse(raw);
   return deps.database.transaction(async (tx) => {
-    const spool = await filamentRepo.getSpool(tx, ctx, spoolId);
+    const spool = await filamentRepo.getSpoolForUpdate(tx, ctx, spoolId);
     if (!spool) throw new BusinessError('SPOOL_NOT_FOUND');
     const grams = input.kind === 'adjustment' ? input.grams : -Math.abs(input.grams);
     const remaining = Math.max(0, (await filamentRepo.remainingBySpool(tx, ctx)).get(spoolId) ?? 0);

@@ -30,6 +30,9 @@ export const es = {
     remove: 'Quitar',
     dash: '—',
     copied: 'Copiado',
+    crashTitle: 'Algo salió mal',
+    crashText: 'Esta pantalla no se pudo mostrar. Los datos guardados no se perdieron.',
+    reload: 'Volver a cargar',
   },
   nav: {
     groups: { sell: 'Vender', workshop: 'Taller', business: 'Negocio' },

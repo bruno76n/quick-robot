@@ -76,7 +76,7 @@ export async function deleteSupply(deps: UseCaseDeps, ctx: Ctx, id: string, rest
 export async function recordSupplyPurchase(deps: UseCaseDeps, ctx: Ctx, id: string, raw: unknown): Promise<SupplyDetail> {
   const input = SupplyPurchaseInput.parse(raw);
   return deps.database.transaction(async (tx) => {
-    const s = await supplyRepo.get(tx, ctx, id);
+    const s = await supplyRepo.getForUpdate(tx, ctx, id);
     if (!s) throw new BusinessError('SUPPLY_NOT_FOUND');
     await supplyRepo.insertMovement(tx, ctx, { supplyId: id, on: input.on, kind: 'purchase', qty: input.qty, note: input.note });
     const cost = unitCostAfterPurchase(fromCents(s.costCents), input.qty, input.totalCents == null ? null : fromCents(input.totalCents));
@@ -89,7 +89,7 @@ export async function recordSupplyPurchase(deps: UseCaseDeps, ctx: Ctx, id: stri
 export async function recordSupplyMovement(deps: UseCaseDeps, ctx: Ctx, id: string, raw: unknown): Promise<SupplyDetail> {
   const input = SupplyMovementInput.parse(raw);
   return deps.database.transaction(async (tx) => {
-    if (!(await supplyRepo.get(tx, ctx, id))) throw new BusinessError('SUPPLY_NOT_FOUND');
+    if (!(await supplyRepo.getForUpdate(tx, ctx, id))) throw new BusinessError('SUPPLY_NOT_FOUND');
     const stock = (await supplyRepo.stockBySupply(tx, ctx)).get(id) ?? 0;
     const plan = planSupplyMovement(input.kind, input.qty, stock);
     if (!plan.ok) {

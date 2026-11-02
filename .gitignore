@@ -9,3 +9,7 @@ playwright-report/
 .vite/
 *.tsbuildinfo
 tools/visual/out/
+
+.env
+.env.*
+!.env.example
