@@ -30,7 +30,7 @@ function costOf(p: { imp: string; horas: number; extras: number; filamentos: { f
 const priceOf = (p: { modo: string; precio: number; margen?: number }) => listPrice(p.modo === 'formula' ? 'formula' : 'value', costOf(p as never).total, p.margen ?? b.config.margenFormula, p.precio);
 
 describe('golden: pieces', () => {
-  it.each(golden.productos.map((g: { id: string; nombre: string }) => [g.nombre, g]))('%s', (_n, g) => {
+  it.each(golden.productos.map((g: { id: string; nombre: string }) => [g.nombre, g]) as [string, unknown][])('%s', (_n, g) => {
     const p = b.productos.find((x: { id: string }) => x.id === (g as { id: string }).id);
     const c = costOf(p);
     const e = g as Record<string, number>;
@@ -41,7 +41,7 @@ describe('golden: pieces', () => {
 });
 
 describe('golden: collections', () => {
-  it.each(golden.colecciones.map((g: { nombre: string }) => [g.nombre, g]))('%s', (_n, g) => {
+  it.each(golden.colecciones.map((g: { nombre: string }) => [g.nombre, g]) as [string, unknown][])('%s', (_n, g) => {
     const e = g as { id: string; costo: number; precio: number; sueltas: number; piso: number };
     const c = b.colecciones.find((x: { id: string }) => x.id === e.id);
     const parts: SetPart[] = c.partes.map((r: { prod: string; cant: number }) => {
@@ -56,7 +56,7 @@ describe('golden: collections', () => {
 });
 
 describe('golden: filaments, supplies and maintenance', () => {
-  it.each(golden.filamentos.map((g: { nombre: string }) => [g.nombre, g]))('%s', (_n, g) => {
+  it.each(golden.filamentos.map((g: { nombre: string }) => [g.nombre, g]) as [string, unknown][])('%s', (_n, g) => {
     const e = g as { id: string; restante_g: number; costo_por_g: number };
     close(filamentRemaining(spoolsOf(e.id)), e.restante_g);
     close(filamentCostPerGram(spoolsOf(e.id)), e.costo_por_g);
