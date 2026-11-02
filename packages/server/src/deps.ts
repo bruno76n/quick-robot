@@ -1,6 +1,6 @@
 import type { Ctx, Database } from '@app/db';
 import type { Logger } from './logging';
-import type { SecurityOptions } from './middleware/security';
+import type { SecurityOptions } from './security-options';
 
 /** Who is calling. Local mode: fixed session. Cloud: cookie sessions (phase 5). */
 export interface Session extends Ctx {
