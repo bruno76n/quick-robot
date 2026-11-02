@@ -7,7 +7,7 @@ import { file } from './settings';
 import { supply } from './supply';
 import { workspace } from './workspace';
 
-export interface ProductSpec { layer?: string; infill?: string; walls?: string; supports?: string; nozzle?: string; bed?: string; file?: string; note?: string }
+export interface ProductSpec { layer?: string | undefined; infill?: string | undefined; walls?: string | undefined; supports?: string | undefined; nozzle?: string | undefined; bed?: string | undefined; file?: string | undefined; note?: string | undefined }
 
 export const product = pgTable('product', {
   id: idCol(),

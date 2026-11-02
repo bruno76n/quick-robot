@@ -24,7 +24,7 @@ Punto de partida: el estado del mockup (esquema v7). Aquí se traduce a tablas. 
 | `subscription` *(solo nube)* | `workspace_id`, `plan`, `status`, `current_period_end`, `provider_customer_id` |
 | `workspace_settings` | `workspace_id` (PK), `kwh_price_cents`, `failure_pct`, `purge_pct`, `min_margin_pct`, `formula_margin_pct`, `business` (jsonb: `name`, `trade`, `phone`, `email`, `city`, `quote_valid_days`, `footer`), `last_backup_on` (date, nulo si nunca) |
 | `sales_channel` | `id`, `workspace_id`, `name` (único por negocio, sin importar mayúsculas), `commission_pct`, `position` |
-| `catalog_item` | `workspace_id`, `kind` (`material` \| `color` \| `brand`), `name`, `hex` (solo colores) |
+| `catalog_item` | `workspace_id`, `kind` (`material` \| `color` \| `brand` \| `customer_type` \| `expense_category`), `name`, `name_key` (único por tipo, sin mayúsculas ni acentos), `hex` (solo colores) |
 
 *En modo local* hay exactamente una fila de `workspace`, `user`, `membership`, con ids fijos.
 

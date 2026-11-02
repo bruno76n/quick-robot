@@ -12,6 +12,12 @@ export interface MockupBackup {
   filamentos: { id: string; material: string; color: string; hex: string }[];
   rollos: { id: string; fil: string; marca: string; costo: number; envio: number; gramos: number; fecha: string }[];
   movs: { id: string; rollo: string; fecha: string; tipo: string; g: number; nota: string; ref?: string }[];
+  proveedores: { id: string; nombre: string; tel: string; marcas: string; nota: string }[];
+  insumos: { id: string; nombre: string; unidad: string; costo: number; minimo: number; nota: string; prov: string }[];
+  imovs: { id: string; ins: string; fecha: string; tipo: string; n: number; nota: string; ref?: string }[];
+  impresoras: { id: string; nombre: string; costo: number; vidaH: number; mantoH: number; kw: number; horas: number; compra: string; mant: { id: string; tarea: string; cadaH: number; ultH: number; fecha: string }[] }[];
+  productos: { id: string; nombre: string; imp: string; horas: number; lote: number; extras: number; insumos: { ins: string; cant: number }[]; filamentos: { fil: string; g: number }[]; precio: number; modo: string; margen?: number | null; tags: string[]; nota: string; padre: string | null; stock: boolean; ficha?: Record<string, string> | null }[];
+  colecciones: { id: string; nombre: string; partes: { prod: string; cant: number }[]; extras: number; precio: number; tags: string[]; nota: string }[];
   [k: string]: unknown;
 }
 
@@ -23,3 +29,6 @@ export function loadMockupBackup(path = MOCKUP_BACKUP): MockupBackup {
 export const SPOOL_MOVEMENT_KIND: Record<string, 'purchase' | 'consumption' | 'failure' | 'waste' | 'adjustment'> = {
   compra: 'purchase', consumo: 'consumption', fallo: 'failure', merma: 'waste', ajuste: 'adjustment',
 };
+
+export const SUPPLY_MOVEMENT_KIND: Record<string, 'purchase' | 'use' | 'adjustment' | 'waste'> = { compra: 'purchase', uso: 'use', ajuste: 'adjustment', merma: 'waste' };
+export const SPEC_KEYS: Record<string, string> = { capa: 'layer', relleno: 'infill', paredes: 'walls', soportes: 'supports', boquilla: 'nozzle', cama: 'bed', archivo: 'file', nota: 'note' };

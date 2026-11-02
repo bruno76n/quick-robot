@@ -40,6 +40,6 @@ describe('filament routes', () => {
   it('GET /me and /health', async () => {
     expect((await h.call('GET', '/api/v1/me')).json.data).toMatchObject({ workspace: { name: 'Negocio A' }, role: 'owner' });
     const health = await h.call('GET', '/api/v1/health', { token: null });
-    expect(health.json.data).toMatchObject({ ok: true, version: 'test', schemaVersion: 2 });
+    expect(health.json.data).toMatchObject({ ok: true, version: 'test', schemaVersion: 4 });
   });
 });

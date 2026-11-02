@@ -14,7 +14,7 @@ export const TECHNICAL_MATERIALS = ['PETG', 'ABS', 'ASA', 'TPU', 'Nylon', 'PC', 
 export const UNKNOWN_COLOR_HEX = '#9a9aa6';
 
 export type CatalogKind = 'material' | 'color' | 'brand';
-export interface CatalogEntry { name: string; hex?: string | null }
+export interface CatalogEntry { name: string; hex?: string | null | undefined }
 
 /** Lowercase, without accents and extra spaces: "Café  " = "cafe". */
 export function normalizeName(s: string): string {

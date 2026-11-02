@@ -242,10 +242,10 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 | `GET /filaments` | `q`, `page` | Página de `{ id, material, color, hex, remainingGrams, spools, costPerGram, status (`no_spools` \| `out` \| `ending` \| `low` \| `new` \| `ok`), activeSpools, brands[], capacityGrams, valueCents }` (rollos con material, sus marcas y capacidad para la barra, y el valor de lo que queda) | — |
 | `GET /filaments/:id` | — | Filamento con `spools[]` (restante y `status` de cada uno: `empty` \| `new` \| `in_use`) y `movements[]` | — |
 | `addSpool` · `POST /spools` | `{ filamentId? \| { material, color, hex? }, brand, costCents, shippingCents, grams, purchasedOn, supplierId? }`. Si el filamento no existe, se crea. Registra el movimiento `purchase` | Rollo + filamento | — |
-| `updateSpool` · `PATCH /spools/:id` | Los mismos campos | Rollo | — |
-| `deleteSpool` · `DELETE /spools/:id` | — | 204 (borrado suave; sus movimientos se conservan y dejan de sumar) | — |
+| `updateSpool` · `PATCH /spools/:id` | Los mismos campos | Rollo + filamento. Si cambian los gramos, se registra un movimiento `adjustment` por la diferencia (el libro no se reescribe) | — |
+| `deleteSpool` · `DELETE /spools/:id` | — | `{ movements }` (cuántos tenía, para el aviso). Borrado suave; sus movimientos se conservan y dejan de sumar | — |
 | `restoreSpool` · `POST /spools/:id/restore` | — | Rollo | — |
-| `recordSpoolMovement` · `POST /spools/:id/movements` | `{ kind ('consumption' \| 'failure' \| 'waste' \| 'adjustment'), grams, on, note? }` | Rollo + movimiento | `SPOOL_INSUFFICIENT`, `NO_SPOOL_FOR_FILAMENT` |
+| `recordSpoolMovement` · `POST /spools/:id/movements` | `{ kind ('consumption' \| 'failure' \| 'waste' \| 'adjustment'), grams, on, note? }`. `grams` con signo: negativo saca material (consumo, fallo y merma siempre restan); un ajuste puede sumar o restar | Rollo + filamento | `SPOOL_INSUFFICIENT`, `NO_SPOOL_FOR_FILAMENT` |
 
 ### Insumos y proveedores
 
@@ -257,7 +257,7 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 | `updateSupply` · `PATCH /supplies/:id` | Los mismos campos | Insumo | `SUPPLY_NAME_EXISTS` |
 | `deleteSupply` · `DELETE /supplies/:id` | — | 204 (borrado suave) | `SUPPLY_IN_USE` |
 | `restoreSupply` · `POST /supplies/:id/restore` | — | Insumo | `RESTORE_CONFLICT` |
-| `recordSupplyPurchase` · `POST /supplies/:id/purchases` | `{ qty > 0, on, costCents?, note? }` | Insumo | — |
+| `recordSupplyPurchase` · `POST /supplies/:id/purchases` | `{ qty > 0, on, costCents?, note? }`. `costCents` es el **total pagado**: el costo por unidad pasa a ser total ÷ cantidad (como el mockup) | Insumo | — |
 | `recordSupplyMovement` · `POST /supplies/:id/movements` | `{ kind ('use' \| 'adjustment' \| 'waste'), mode ('delta' \| 'count'), value, on, note? }`. Con `mode = 'count'` se manda el conteo real y el servidor calcula la diferencia | Insumo | `SUPPLY_INSUFFICIENT`, `COUNT_UNCHANGED` |
 | `GET /suppliers` | — | Lista | — |
 | `createSupplier` · `POST /suppliers` | `{ name, phone?, brands?, note? }` | Proveedor | — |

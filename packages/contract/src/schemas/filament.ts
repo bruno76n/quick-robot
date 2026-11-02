@@ -75,3 +75,26 @@ export type Spool = z.infer<typeof spool>;
 export type SpoolMovement = z.infer<typeof spoolMovement>;
 export type AddSpoolInput = z.infer<typeof addSpoolInput>;
 export type AddSpoolOutput = z.infer<typeof addSpoolOutput>;
+
+/** updateSpool · PATCH /spools/:id: the same fields as addSpool (docs/12 §8). */
+export const updateSpoolInput = z.object({
+  filamentId: id.optional(),
+  filament: newFilament.optional(),
+  brand: short.optional(),
+  costCents: cents().optional(),
+  shippingCents: cents().optional(),
+  grams: grams(LIMITS.spoolGrams).refine((g) => g > 0, { message: 'too_small' }).optional(),
+  purchasedOn: calendarDate.optional(),
+  supplierId: id.nullable().optional(),
+});
+
+/** recordSpoolMovement · POST /spools/:id/movements. Grams are signed: negative takes material out. */
+export const spoolMovementInput = z.object({
+  kind: z.enum(['consumption', 'failure', 'waste', 'adjustment']),
+  grams: grams(LIMITS.movementGrams).or(z.number().min(-LIMITS.movementGrams).max(0)).refine((g) => g !== 0, { message: 'required' }),
+  on: calendarDate,
+  note: note.optional(),
+});
+
+export type UpdateSpoolInput = z.infer<typeof updateSpoolInput>;
+export type SpoolMovementInput = z.infer<typeof spoolMovementInput>;

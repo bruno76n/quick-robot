@@ -11,6 +11,7 @@ import { diskFileStore, memoryFileStore } from './providers/local/files';
 import { rotatingFileSink } from './providers/local/log-file';
 import { nullMailer } from './providers/local/mailer';
 import type { LocalConfig } from './config';
+import { ensureWorkspaceDefaults } from './usecases/settings';
 
 export const LOCAL_CTX = { workspaceId: LOCAL_WORKSPACE_ID, userId: LOCAL_USER_ID };
 
@@ -33,5 +34,6 @@ export async function localDeps(cfg: LocalConfig, opts: { version: string; sink?
     version: opts.version,
     allowedOrigins: cfg.allowedOrigins,
   };
+  await ensureWorkspaceDefaults(deps, LOCAL_CTX);
   return { deps, conn };
 }

@@ -9,6 +9,7 @@ import { memoryBackupStore } from '../src/providers/local/backups';
 import { unlimitedEntitlements } from '../src/providers/local/entitlements';
 import { memoryFileStore } from '../src/providers/local/files';
 import { nullMailer } from '../src/providers/local/mailer';
+import { ensureWorkspaceDefaults } from '../src/usecases/settings';
 
 export const A_TOKEN = 'token-a';
 export const B_TOKEN = 'token-b';
@@ -36,6 +37,8 @@ export async function makeHarness(over: Partial<Deps> = {}) {
     db: conn.db, auth: tokenAuth(sessions), files: memoryFileStore(), entitlements: unlimitedEntitlements, mailer: nullMailer,
     backups: memoryBackupStore(clock), clock, ids: uuidV7Ids, logger, mode: 'local', version: 'test', ...over,
   };
+  await ensureWorkspaceDefaults(deps, A);
+  await ensureWorkspaceDefaults(deps, B);
   const app = createApp(deps);
   const call = async (method: string, path: string, opts: { token?: string | null; body?: unknown; headers?: Record<string, string> } = {}) => {
     const headers: Record<string, string> = { ...(opts.token === null ? {} : { authorization: `Bearer ${opts.token ?? A_TOKEN}` }), ...opts.headers };

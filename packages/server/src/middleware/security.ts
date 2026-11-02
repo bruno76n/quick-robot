@@ -51,7 +51,7 @@ export function sameOriginWrites(allowed: readonly string[] = []): MiddlewareHan
         throw new BusinessError('FORBIDDEN', { capability: 'origin' }, 'Cross-origin write rejected');
       }
       const type = (c.req.header('content-type') ?? '').split(';')[0]!.trim().toLowerCase();
-      const hasBody = c.req.method !== 'DELETE' || Number(c.req.header('content-length') ?? 0) > 0;
+      const hasBody = c.req.raw.body !== null || Number(c.req.header('content-length') ?? 0) > 0;
       if (hasBody && type !== 'application/json' && type !== 'multipart/form-data') {
         throw new BusinessError('VALIDATION_ERROR', { fields: [{ path: '', rule: 'invalid_format' }] }, 'Unsupported content type');
       }

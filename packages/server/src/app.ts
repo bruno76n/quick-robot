@@ -10,6 +10,11 @@ import { session } from './middleware/session';
 import { filamentRoutes } from './routes/filament';
 import { makeRouter, type RouteDef } from './routes/router';
 import { systemRoutes } from './routes/system';
+import { settingsRoutes } from './routes/settings';
+import { supplyRoutes } from './routes/supplies';
+import { printerRoutes } from './routes/printers';
+import { productRoutes } from './routes/products';
+import { fileRoutes } from './routes/files';
 import { serveWeb } from './static';
 
 export const JSON_LIMIT_BYTES = 1_048_576;
@@ -41,6 +46,11 @@ export function createApp(deps: Deps, opts: AppOptions = {}) {
   const r = makeRouter(app, routes);
   systemRoutes(r);
   filamentRoutes(r);
+  settingsRoutes(r);
+  supplyRoutes(r);
+  printerRoutes(r);
+  productRoutes(r);
+  fileRoutes(r);
 
   app.all('/api/*', () => { throw new BusinessError('NOT_FOUND', { entity: 'route' }, 'Route not found'); });
   if (opts.webRoot) serveWeb(app, opts.webRoot);
