@@ -1,0 +1,93 @@
+{
+  "pass": true,
+  "rounds": [
+    {
+      "round": 1,
+      "killAfterMs": 1318,
+      "lastCommittedReported": 285,
+      "rows": 28600,
+      "batches": 286,
+      "maxseq": 285,
+      "partial": 0,
+      "viaIndex": 28600,
+      "pass": true
+    },
+    {
+      "round": 2,
+      "killAfterMs": 1242,
+      "lastCommittedReported": 466,
+      "rows": 46700,
+      "batches": 467,
+      "maxseq": 466,
+      "partial": 0,
+      "viaIndex": 46700,
+      "pass": true
+    },
+    {
+      "round": 3,
+      "killAfterMs": 725,
+      "lastCommittedReported": 580,
+      "rows": 58100,
+      "batches": 581,
+      "maxseq": 580,
+      "partial": 0,
+      "viaIndex": 58100,
+      "pass": true
+    },
+    {
+      "round": 4,
+      "killAfterMs": 1180,
+      "lastCommittedReported": 761,
+      "rows": 76200,
+      "batches": 762,
+      "maxseq": 761,
+      "partial": 0,
+      "viaIndex": 76200,
+      "pass": true
+    },
+    {
+      "round": 5,
+      "killAfterMs": 1433,
+      "lastCommittedReported": 987,
+      "rows": 98800,
+      "batches": 988,
+      "maxseq": 987,
+      "partial": 0,
+      "viaIndex": 98800,
+      "pass": true
+    },
+    {
+      "round": 6,
+      "killAfterMs": 1321,
+      "lastCommittedReported": 1236,
+      "rows": 123700,
+      "batches": 1237,
+      "maxseq": 1236,
+      "partial": 0,
+      "viaIndex": 123700,
+      "pass": true
+    },
+    {
+      "round": 7,
+      "killAfterMs": 1162,
+      "lastCommittedReported": 1478,
+      "rows": 147900,
+      "batches": 1479,
+      "maxseq": 1478,
+      "partial": 0,
+      "viaIndex": 147900,
+      "pass": true
+    },
+    {
+      "round": 8,
+      "killAfterMs": 1227,
+      "lastCommittedReported": 1711,
+      "rows": 171200,
+      "batches": 1712,
+      "maxseq": 1711,
+      "partial": 0,
+      "viaIndex": 171200,
+      "pass": true
+    }
+  ]
+}

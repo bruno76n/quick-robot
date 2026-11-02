@@ -1,0 +1,20 @@
+{
+  "pglite": {
+    "totalAsOwner": 1200,
+    "visibleAsA": 1000,
+    "bRowsVisibleAsA": 0,
+    "updateBAsA": 0,
+    "insertIntoBAsA": "rejected",
+    "visibleWithoutSetting": 0,
+    "pass": true
+  },
+  "postgres": {
+    "totalAsOwner": 1200,
+    "visibleAsA": 1000,
+    "bRowsVisibleAsA": 0,
+    "updateBAsA": 0,
+    "insertIntoBAsA": "rejected",
+    "visibleWithoutSetting": 0,
+    "pass": true
+  }
+}
