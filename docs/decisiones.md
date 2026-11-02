@@ -96,3 +96,22 @@ Claude Code leyó la v2 completa: confirmó que las 9 contradicciones estaban re
 - **Fechas:** las de la copia son fijas (hasta el 31 oct). El mockup, abierto hoy, genera las suyas relativas a la fecha actual, así que en las capturas sus fechas salen corridas un día respecto de la app. No es una diferencia de comportamiento.
 - **`pnpm dev`** genera un secreto en cada arranque: el servidor lo exige y el proxy de Vite lo agrega (D29); una llamada directa al puerto del API sin él responde 401. `pnpm dev -- --file` guarda en `.data/`. **`pnpm start`** (compila y sirve en 8787 con los datos en `.data/`) corre sin secreto por ahora: la ventana de Electron lo agregará en la fase 4.
 - **Pruebas E2E:** cada prueba arranca su propio servidor local en un puerto libre con su carpeta de datos, para poder reiniciarlo y comprobar que los datos siguen ahí.
+
+## 2026-11-02 · Fase 2 · Pasos 2.1–2.4 · Taller y catálogo
+- **Golden sin herramienta extra:** `mockup-values.json` ya venía en el repositorio; `golden.test.ts` lo compara contra `core` con los datos de `reference/mockup-backup-v7.json`, y `catalog.test.ts` repite la comparación a través del servidor (costo, lista y piso de las 9 piezas y las 2 colecciones). No hizo falta `tools/export-mockup-golden.mjs`.
+- **Editar un rollo no reescribe el libro:** si cambian los gramos de la compra se registra un `adjustment` por la diferencia (el mockup modificaba el movimiento de compra). `12 §8` actualizado.
+- **Movimiento de rollo con signo:** `grams` negativo saca material; consumo, fallo y merma siempre restan; el ajuste puede sumar o restar. `12 §8` actualizado.
+- **Compra de insumo:** `costCents` es el **total pagado** y el costo por unidad pasa a ser total ÷ cantidad (como el mockup). `12 §8` actualizado.
+- **Borrado suave con referencias:** una pieza que apunta a una impresora borrada se costea con el promedio; los insumos y rollos de un proveedor borrado lo muestran como "sin proveedor" y lo recuperan al restaurar (`12 §8`).
+- **Catálogos por negocio** (`catalog_item`): material, color, marca, tipo de cliente y categoría de gasto; empiezan con valores genéricos (`core/catalog.ts`, `core/defaults.ts`) y crecen solos. `05` actualizado con los dos tipos nuevos.
+- **Valores de arranque genéricos** de un negocio nuevo: kWh $3, fallos 5 %, purga 5 %, piso 30 %, fórmula 50 %, un canal "Efectivo" y las listas iniciales de `13 §8`. **Marcado para revisión:** son ajustes editables, no reglas de dinero, pero conviene confirmarlos.
+- **Tabla `expense` creada en la fase 2** porque "Hecho" con costo registra un gasto; su pantalla y reglas son de la fase 3.
+- **Ganchos para la fase 3:** existencias, ventas, colas y uso de canales se conectan a casos de uso de la fase 2 por funciones intercambiables (`productHooks`, `printerHooks`, `setChannelUsage`) para no escribir esas reglas antes de tiempo; mientras tanto devuelven 0. Las pruebas ya cubren los errores que dependen de ellos (`PRODUCT_IN_ACTIVE_ORDERS`, `PRODUCT_HAS_STOCK`, `STOCK_TRACKING_HAS_STOCK`, `PRINTER_HAS_QUEUE`, `CHANNEL_IN_USE`).
+- **Listas de piezas y colecciones** devuelven además lo que pintan las fichas del mockup (impresora, pieza original, colecciones, vendidas, existencias, colores). `12 §5` actualizado.
+- **Orden de piezas, colecciones e insumos:** el de creación, como el mockup (no alfabético).
+- **Costo por gramo con precisión completa** en la API: redondearlo a 4 decimales movía un centavo en la vista previa de la calculadora.
+- **Escrituras sin cuerpo:** el adaptador de Node da un cuerpo vacío a todo POST/DELETE; la regla "solo JSON" ahora mira `content-length` (el navegador siempre lo manda). Prueba con un servidor HTTP real.
+- **"Deshacer" central** en `useWrite`: restaura, recarga lo que tocó la operación y avisa "Cambio deshecho.".
+- **Fotos:** el navegador las reduce a 1 600 px en JPEG antes de subir; el servidor revisa la firma binaria y las sirve con `nosniff` y `CSP: sandbox`.
+- **Textos con cifras en negritas** (`tb()`), como los resúmenes del mockup.
+- **Textos del mockup que no estaban en `13`:** "Rollo guardado" / "Rollo guardado en {filamento}." al editar un rollo (el mockup manda; `13` no lo contradice).
