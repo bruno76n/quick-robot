@@ -50,3 +50,8 @@ Ver `01-vision-y-decisiones.md` (D1–D19).
 - Decisión: manda el mockup (CLAUDE.md, regla 1 para dudas; `06` dice que es "la descripción escrita de lo que ya hace el mockup"). `filamentStatus()` en `core` reproduce `estFil` con sus umbrales. No es regla de dinero; no se marca para revisión, pero se anota.
 - Otras traducciones fieles del mockup: `planDeduction` reordena los rollos antes de registrar la purga (el mockup llama `ordenRollos` en cada `sacar`); tolerancias 0.05 g (rollo usable), 0.5 g (vacío), 0.01 g (faltante).
 - Impacto: `packages/core/src/filament.ts`, `packages/core/test/filament.test.ts`.
+
+## 2026-11-02 · Fase 1 · Paso 1.4 · Unicidad del filamento y llaves compuestas
+- Situación: `05` pide filamento único por (negocio, material, color) "sin importar mayúsculas"; el mockup además ignora acentos y espacios (`norm`). `db` no puede importar `core`.
+- Decisión: columna `name_key` (= `core.filamentKey`, calculada por el caso de uso) con índice único `(workspace_id, name_key)`. Además, las tablas hijas apuntan a su padre con **llave foránea compuesta** `(workspace_id, id)`, así la base misma impide colgar un rollo o un movimiento de un filamento de otro negocio (barrera extra a la del repositorio). `spool.supplier_id` queda sin FK hasta que exista `supplier` (fase 2). Si se vuelve a agregar un filamento borrado (suave), se restaura.
+- Impacto: `packages/db/src/schema/*`, `migrations/0000_init.sql`.
