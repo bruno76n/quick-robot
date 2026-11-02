@@ -1,0 +1,15 @@
+packages:
+  - packages/*
+  - apps/*
+onlyBuiltDependencies:
+  - electron
+  - esbuild
+overrides:
+  vite: 7.3.7
+  # Electron asks for @types/node 24; one Node types version keeps a single vite instance (docs/decisiones.md › Fase 4).
+  '@types/node': 22.20.5
+auditConfig:
+  # Electron < 42.11.16 (eMudhra intermediate certificates): the pinned 42.11.15 is the newest with two weeks published;
+  # the window only talks to http://127.0.0.1 and external links open in the system browser. Remove when bumping (docs/decisiones.md).
+  ignoreGhsas:
+    - GHSA-jr5w-w6x2-84p9

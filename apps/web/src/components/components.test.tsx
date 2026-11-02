@@ -1,0 +1,110 @@
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Banner } from './Banner';
+import { Button } from './Button';
+import { Dialog } from './Dialog';
+import { Drawer } from './Drawer';
+import { ErrorBoundary } from './ErrorBoundary';
+import { Field } from './Field';
+import { Icon } from './Icon';
+import { Mascot } from './Mascot';
+import { Pill, Swatch } from './Pill';
+import { Segmented } from './Segmented';
+import { Table } from './Table';
+import { toast, ToastViewport, useToast } from './Toast';
+import { UnitInput } from './UnitInput';
+
+afterEach(() => { cleanup(); vi.useRealTimers(); useToast.getState().hide(); });
+
+describe('components', () => {
+  it('Button: variants, icon and busy state disable it with its label', () => {
+    const onClick = vi.fn();
+    const { rerender } = render(<Button variant="primary" size="sm" icon="plus" onClick={onClick}>Ok</Button>);
+    const b = screen.getByRole('button');
+    expect(b.className).toBe('btn primary sm');
+    fireEvent.click(b);
+    expect(onClick).toHaveBeenCalledOnce();
+    rerender(<Button busy busyLabel="…">Ok</Button>);
+    expect((screen.getByRole('button') as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByRole('button').textContent).toBe('…');
+    rerender(<Button variant="link">L</Button>);
+    expect(screen.getByRole('button').className).toBe('link');
+  });
+
+  it('Field shows the error instead of the hint; UnitInput keeps its unit', () => {
+    const { rerender } = render(<Field label="Costo" hint="ayuda"><UnitInput unit="$" defaultValue="3" /></Field>);
+    expect(screen.getByText('ayuda')).toBeTruthy();
+    expect(screen.getByText('$')).toBeTruthy();
+    rerender(<Field label="Costo" hint="ayuda" error="mal"><input /></Field>);
+    expect(screen.getByRole('alert').textContent).toBe('mal');
+    expect(screen.queryByText('ayuda')).toBeNull();
+  });
+
+  it('Pill, Swatch, Icon, Mascot, Table and Banner render', () => {
+    render(<><Pill tone="bad">Agotado</Pill><Swatch hex="#ff0000" large /><Icon name="spool" /><Icon name="nope" /><Mascot size={60} /><Table small head={<th>A</th>}><tr><td>1</td></tr></Table><Banner action={<button type="button">r</button>}>x</Banner></>);
+    expect(screen.getByText('Agotado').className).toBe('chip bad');
+    expect(document.querySelector('.sw.lg')).toBeTruthy();
+    expect(document.querySelectorAll('svg.ic')).toHaveLength(2);
+    expect(document.querySelector('img.mascot')?.getAttribute('height')).toBe('53');
+    expect(document.querySelector('table.tbl.sm')).toBeTruthy();
+    expect(screen.getByRole('alert').textContent).toContain('x');
+  });
+
+  it('Segmented marks the current option', () => {
+    const onChange = vi.fn();
+    render(<Segmented label="Vista" value="a" options={[{ value: 'a', label: 'A', count: 2 }, { value: 'b', label: 'B' }]} onChange={onChange} />);
+    expect(screen.getByRole('button', { name: 'A2' }).className).toBe('on');
+    fireEvent.click(screen.getByRole('button', { name: 'B' }));
+    expect(onChange).toHaveBeenCalledWith('b');
+  });
+
+  it('Dialog: submit, cancel and Esc', () => {
+    const onSubmit = vi.fn();
+    const onClose = vi.fn();
+    const { rerender } = render(<Dialog open title="Agregar" onClose={onClose} onSubmit={onSubmit} submitLabel="Listo"><input name="x" /></Dialog>);
+    fireEvent.click(screen.getByRole('button', { name: 'Listo' }));
+    expect(onSubmit).toHaveBeenCalledOnce();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+    expect(onClose).toHaveBeenCalledOnce();
+    fireEvent(document.querySelector('dialog')!, new Event('cancel', { cancelable: true }));
+    expect(onClose).toHaveBeenCalledTimes(2);
+    rerender(<Dialog open={false} title="Agregar" onClose={onClose}><input /></Dialog>);
+    expect(screen.queryByText('Agregar')).toBeNull();
+  });
+
+  it('Drawer: content only while open, closes with Esc and with the button', () => {
+    const onClose = vi.fn();
+    const { rerender } = render(<Drawer open kind="Filamento" onClose={onClose}><p>dentro</p></Drawer>);
+    expect(screen.getByText('dentro')).toBeTruthy();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    fireEvent.click(screen.getByRole('button', { name: 'Cerrar el detalle' }));
+    expect(onClose).toHaveBeenCalledTimes(2);
+    rerender(<Drawer open={false} kind="Filamento" onClose={onClose}><p>dentro</p></Drawer>);
+    expect(screen.queryByText('dentro')).toBeNull();
+  });
+
+  it('Toast: shows, offers Deshacer and hides by itself', () => {
+    vi.useFakeTimers();
+    const undo = vi.fn();
+    render(<ToastViewport />);
+    act(() => toast('Rollo eliminado', undo));
+    expect(screen.getByRole('status').textContent).toContain('Rollo eliminado');
+    fireEvent.click(screen.getByRole('button', { name: 'Deshacer' }));
+    expect(undo).toHaveBeenCalledOnce();
+    act(() => toast('Guardado'));
+    act(() => { vi.advanceTimersByTime(3300); });
+    expect(screen.getByRole('status').textContent).toBe('');
+  });
+
+  it('ErrorBoundary: a broken screen shows the card with a code, and Volver al Inicio resets', () => {
+    const Boom = () => { throw new Error('boom'); };
+    const onHome = vi.fn();
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    render(<ErrorBoundary onHome={onHome}><Boom /></ErrorBoundary>);
+    expect(screen.getByRole('alert').textContent).toContain('Esta pantalla no se pudo mostrar.');
+    expect(screen.getByText(/Código: /)).toBeTruthy();
+    expect(screen.queryByText('boom')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Volver al Inicio' }));
+    expect(onHome).toHaveBeenCalledOnce();
+  });
+});

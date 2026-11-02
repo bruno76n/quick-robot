@@ -1,0 +1,23 @@
+{
+  "name": "pglite-spike",
+  "private": true,
+  "type": "module",
+  "description": "Disposable PGlite feasibility check (docs/02 §4). Not part of the workspace.",
+  "scripts": {
+    "generate": "drizzle-kit generate --dialect postgresql --schema ./schema.ts --out ./migrations",
+    "bench": "tsx bench.ts",
+    "crash": "tsx crash-test.ts",
+    "rls": "tsx rls-test.ts"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.10",
+    "drizzle-orm": "0.45.4",
+    "postgres": "3.4.9"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.11",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "@types/node": "22.20.5"
+  }
+}

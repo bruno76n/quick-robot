@@ -170,13 +170,13 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 
 | Operación | Entrada | Salida | Errores |
 |---|---|---|---|
-| `GET /products` | `q`, `filter` (`all` \| `technical` \| `variant`), `tag`, `page` | Página de `{ id, name, tags, parentId, photoUrl, costCents, listCents, floorCents, tracksStock, free }` | — |
+| `GET /products` | `q`, `filter` (`all` \| `technical` \| `variant`), `tag`, `page` | Página de `{ id, name, tags, parentId, photoUrl, costCents, listCents, floorCents, tracksStock, free }` más lo que pintan las fichas del mockup: `technical`, `mode`, `hexes[]`, `hours`, `printerId`, `printerName`, `parentName`, `collections[]`, `sold`, `physical`, `reserved` | — |
 | `GET /products/:id` | — | Pieza completa + `breakdown`, `suggestedCents`, `floorCents`, `listCents`, `profitByChannel[]`, `stock { physical, reserved, free }` | — |
 | `saveProduct` · `POST /products` y `PUT /products/:id` | `{ name, tags[], mode ('value' \| 'formula'), priceCents?, marginPct?, printerId? (nulo = promedio), hours, batchSize, extrasCents, tracksStock, filaments[{ filamentId, grams }], supplies[{ supplyId, qty }], spec{…}, note, photoFileId? }` | Pieza completa (el costo lo recalcula el servidor) | `STOCK_TRACKING_HAS_STOCK` |
 | `saveProductAsVariant` · `POST /products/:id/variant` | Igual que `saveProduct`; crea una copia con `parentId = :id` | Pieza nueva | — |
 | `deleteProduct` · `DELETE /products/:id` | — | 204 (borrado suave) | `PRODUCT_IN_ACTIVE_ORDERS`, `PRODUCT_HAS_STOCK` |
 | `restoreProduct` · `POST /products/:id/restore` | — | Pieza | `RESTORE_CONFLICT` |
-| `GET /collections` | `q`, `page` | Página de `{ id, name, tags, listCents, costCents, buildableSets }` | — |
+| `GET /collections` | `q`, `page` | Página de `{ id, name, tags, listCents, costCents, buildableSets }` más `looseCents`, `pieces`, `partNames[]`, `typedPrice`, `sold`, `hexes[]`, `partHexes[]` | — |
 | `GET /collections/:id` | — | Colección + partes `{ productId, name, qty }` + costo, precio, ganancia, `looseCents`, `buildableSets` | — |
 | `saveCollection` · `POST /collections` y `PUT /collections/:id` | `{ name, tags[], parts[{ productId, qty }], extrasCents, priceCents? (vacío = suma de sueltas), note }` | Colección completa | `COLLECTION_EMPTY`, `NO_PRODUCTS` |
 | `deleteCollection` · `DELETE /collections/:id` | — | 204 | — |
@@ -210,10 +210,10 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 
 | Operación | Entrada | Salida | Errores |
 |---|---|---|---|
-| `GET /orders` | `status` (uno o varios), `view` (`board` \| `list` \| `calendar`), `month` (`2026-11`), `q`, `page`. En `board` devuelve todos los activos y los 3 entregados más recientes | Página de `{ id, number, customer, status, dueOn, itemsText, totalCents, owedCents, profitCents, origins[], queueProgress? }` | — |
+| `GET /orders` | `status` (uno o varios), `view` (`board` \| `list` \| `calendar`), `month` (`2026-11`), `q`, `page`. En `board` devuelve todos los activos y los 3 entregados más recientes | Página de `{ id, number, customer, status, dueOn, itemsText, items[], jobs[], totalCents, owedCents, profitCents, origins[], queueProgress? }` | — |
 | `GET /orders/:id` | — | Pedido con `items[]` (desglose y origen de cada pieza), `payments[]`, `totals`, `queue[]` (por impresora, con avance), `material { needs[], shortfall[] }`, `nextStep` | — |
 | `createOrder` · `POST /orders` | `{ customerId, channelId, createdOn, dueOn, accepted: bool, note?, items: LineItemInput[], depositCents? }`. `accepted = false` crea un **cotizado**; `true` crea y ejecuta `acceptOrder`. El anticipo crea un pago | Pedido (folio asignado por el servidor) + `warnings` (`STOCK_SHORT`) | `CUSTOMER_REQUIRED`, `LINE_ITEMS_REQUIRED` |
-| `updateOrder` · `PUT /orders/:id` | Igual que `createOrder` (sin `accepted`). Solo si está activo | Pedido | `ORDER_NOT_ACTIVE`, `CUSTOMER_REQUIRED`, `LINE_ITEMS_REQUIRED` |
+| `updateOrder` · `PUT /orders/:id` | Igual que `createOrder` (sin `accepted`). Solo en Cotizado o Aceptado | Pedido | `ORDER_NOT_ACTIVE`, `CUSTOMER_REQUIRED`, `LINE_ITEMS_REQUIRED` |
 | `deleteOrder` · `DELETE /orders/:id` | — | 204. Sale de colas; las piezas apartadas se liberan | — |
 | `restoreOrder` · `POST /orders/:id/restore` | — | Pedido | `RESTORE_CONFLICT` |
 | `acceptOrder` · `POST /orders/:id/accept` | — | Pedido en `accepted`; aparta lo planeado de existencias | `ORDER_INVALID_STATE` · aviso `STOCK_SHORT` |
@@ -239,13 +239,13 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 
 | Operación | Entrada | Salida | Errores |
 |---|---|---|---|
-| `GET /filaments` | `q`, `page` | Página de `{ id, material, color, hex, remainingGrams, spools, costPerGram, status (`no_spools` \| `out` \| `ending` \| `low` \| `new` \| `ok`) }` | — |
+| `GET /filaments` | `q`, `page` | Página de `{ id, material, color, hex, remainingGrams, spools, costPerGram, status (`no_spools` \| `out` \| `ending` \| `low` \| `new` \| `ok`), activeSpools, brands[], capacityGrams, valueCents }` (rollos con material, sus marcas y capacidad para la barra, y el valor de lo que queda) | — |
 | `GET /filaments/:id` | — | Filamento con `spools[]` (restante y `status` de cada uno: `empty` \| `new` \| `in_use`) y `movements[]` | — |
 | `addSpool` · `POST /spools` | `{ filamentId? \| { material, color, hex? }, brand, costCents, shippingCents, grams, purchasedOn, supplierId? }`. Si el filamento no existe, se crea. Registra el movimiento `purchase` | Rollo + filamento | — |
-| `updateSpool` · `PATCH /spools/:id` | Los mismos campos | Rollo | — |
-| `deleteSpool` · `DELETE /spools/:id` | — | 204 (borrado suave; sus movimientos se conservan y dejan de sumar) | — |
+| `updateSpool` · `PATCH /spools/:id` | Los mismos campos | Rollo + filamento. Si cambian los gramos, se registra un movimiento `adjustment` por la diferencia (el libro no se reescribe) | — |
+| `deleteSpool` · `DELETE /spools/:id` | — | `{ movements }` (cuántos tenía, para el aviso). Borrado suave; sus movimientos se conservan y dejan de sumar | — |
 | `restoreSpool` · `POST /spools/:id/restore` | — | Rollo | — |
-| `recordSpoolMovement` · `POST /spools/:id/movements` | `{ kind ('consumption' \| 'failure' \| 'waste' \| 'adjustment'), grams, on, note? }` | Rollo + movimiento | `SPOOL_INSUFFICIENT`, `NO_SPOOL_FOR_FILAMENT` |
+| `recordSpoolMovement` · `POST /spools/:id/movements` | `{ kind ('consumption' \| 'failure' \| 'waste' \| 'adjustment'), grams, on, note? }`. `grams` con signo: negativo saca material (consumo, fallo y merma siempre restan); un ajuste puede sumar o restar | Rollo + filamento | `SPOOL_INSUFFICIENT`, `NO_SPOOL_FOR_FILAMENT` |
 
 ### Insumos y proveedores
 
@@ -257,7 +257,7 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 | `updateSupply` · `PATCH /supplies/:id` | Los mismos campos | Insumo | `SUPPLY_NAME_EXISTS` |
 | `deleteSupply` · `DELETE /supplies/:id` | — | 204 (borrado suave) | `SUPPLY_IN_USE` |
 | `restoreSupply` · `POST /supplies/:id/restore` | — | Insumo | `RESTORE_CONFLICT` |
-| `recordSupplyPurchase` · `POST /supplies/:id/purchases` | `{ qty > 0, on, costCents?, note? }` | Insumo | — |
+| `recordSupplyPurchase` · `POST /supplies/:id/purchases` | `{ qty > 0, on, costCents?, note? }`. `costCents` es el **total pagado**: el costo por unidad pasa a ser total ÷ cantidad (como el mockup) | Insumo | — |
 | `recordSupplyMovement` · `POST /supplies/:id/movements` | `{ kind ('use' \| 'adjustment' \| 'waste'), mode ('delta' \| 'count'), value, on, note? }`. Con `mode = 'count'` se manda el conteo real y el servidor calcula la diferencia | Insumo | `SUPPLY_INSUFFICIENT`, `COUNT_UNCHANGED` |
 | `GET /suppliers` | — | Lista | — |
 | `createSupplier` · `POST /suppliers` | `{ name, phone?, brands?, note? }` | Proveedor | — |
@@ -286,12 +286,12 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 |---|---|---|---|
 | `GET /print-runs` | `reason` (`stock` \| `order` \| `test`), `page` | Página + totales (piezas, horas, gramos) | — |
 | `GET /print-runs/:id` | — | Registro con filamento por rollo y foto | — |
-| `logPrintRun` · `POST /print-runs` | `{ on, productId? (o `text` si es prueba), qty, printerId?, result ('ok' \| 'fail'), hours, reason, filaments[{ spoolId, grams }], photoFileId? }` | Registro. `ok` + `stock` suma piezas a existencias; `ok` que no sea prueba gasta los insumos de la pieza | `NO_SPOOLS` · aviso `FILAMENT_SHORTFALL` |
+| `logPrintRun` · `POST /print-runs` | `{ on, productId? (o `text` si es prueba), qty, printerId?, result ('ok' \| 'fail'), hours, reason, filaments[{ filamentId, grams }], photoFileId? }` | Registro. El filamento se descuenta rollo por rollo con la purga. `ok` + `stock` suma piezas a existencias; `ok` que no sea prueba gasta los insumos de la pieza | `NO_SPOOLS` · aviso `FILAMENT_SHORTFALL` |
 | `deletePrintRun` · `DELETE /print-runs/:id` | — | 204. Devuelve filamento e insumos, quita las piezas que sumó, resta las horas | `PRINT_RUN_LOCKED` · aviso `FILAMENT_NOT_RETURNED` |
 | `GET /stock` | `q`, `page` | Página de `{ productId, name, physical, reserved, free, buildableSets, status (`out` \| `all_reserved` \| `few` \| `ok`) }` | — |
 | `GET /stock/:productId` | — | Pieza con `movements[]` | — |
 | `enableStockTracking` · `POST /stock/:productId/enable` | `{ initialCount ≥ 0 }` | Pieza | — |
-| `adjustStock` · `POST /stock/:productId/adjust` | `{ mode ('count' \| 'delta'), value, note }` | Pieza | `COUNT_UNCHANGED` |
+| `adjustStock` · `POST /stock/:productId/adjust` | `{ mode ('count' \| 'delta'), value, note }`. El conteo no baja de lo apartado; una salida no pasa de las libres | Pieza | `COUNT_UNCHANGED`, `INSUFFICIENT_STOCK`, `VALIDATION_ERROR` (`value` < apartadas) |
 | `GET /purchases` | — | Lista calculada de compras agrupada por proveedor: filamento e insumos con cantidad, costo estimado y motivo (`04 §9`) | — |
 
 **Invalidan:** `filaments`, `supplies`, `suppliers`, `printers`, `printRuns`, `stock`, `purchases`, `home`, y `expenses` (mantenimiento con costo).
@@ -329,7 +329,7 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 | `POST /files` | `multipart/form-data`: `kind` (`product_photo` \| `customer_logo` \| `print_photo`) + `file` | `{ fileId, url }` | `FILE_TOO_LARGE`, `UNSUPPORTED_IMAGE` |
 | `GET /files/:id` | — | El archivo, con `Content-Type` de la lista permitida, `X-Content-Type-Options: nosniff` y `Content-Disposition: inline` | — |
 | `exportWorkspace` · `GET /workspace/export` | — | Archivo `.json` con `schemaVersion`, fecha y todas las tablas del negocio; actualiza `lastBackupOn` | — |
-| `importWorkspace` · `POST /workspace/import` | `multipart`: `file` + `confirm: true`. **Primero** guarda una copia automática de lo actual; valida todo el archivo con Zod y lo aplica en **una transacción** | `{ counts { tabla: filas }, differences[] }` | `CONFIRMATION_REQUIRED`, `IMPORT_INVALID_FILE`, `IMPORT_UNSUPPORTED_VERSION`, `FILE_TOO_LARGE` |
+| `importWorkspace` · `POST /workspace/import` | `multipart`: `file` + `confirm: true`. Acepta la exportación de la app **o la copia del mockup v7**. **Primero** guarda una copia automática de lo actual; valida todo el archivo y lo aplica en **una transacción** (ids nuevos, referencias reescritas) | `{ format, counts { tabla: filas }, differences[], notes[], backupId }` | `CONFIRMATION_REQUIRED`, `IMPORT_INVALID_FILE`, `IMPORT_UNSUPPORTED_VERSION`, `FILE_TOO_LARGE` |
 | `clearWorkspace` · `POST /workspace/clear` | `{ confirm: true }`. Guarda una copia antes | `{ backupId }` | `CONFIRMATION_REQUIRED` |
 | `GET /backups` | — | Copias automáticas: `{ id, on, sizeKb }` (una por día, se conservan las últimas 7) | — |
 | `POST /backups` | — | Crea una copia ahora | — |

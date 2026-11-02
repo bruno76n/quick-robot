@@ -47,10 +47,10 @@ Prueba de las fronteras: un archivo de ejemplo que viola una regla debe **romper
 ```
 packages/core/package.json, tsconfig.json
 src/money.ts                      centavos ↔ pesos, round2, formato
-src/filament.ts                   costo por gramo, promedio ponderado, orden de rollos, descontar, faltante
+src/filament.ts                   costo por gramo, promedio ponderado, orden de rollos, descontar, faltante, estado del filamento y del rollo
 src/index.ts
 test/money.test.ts
-test/filament.test.ts             casos 1.1 y 1.2 de 04
+test/filament.test.ts             casos 1.1, 1.2 y 1.3 de 04
 ```
 
 ### 1.3 `packages/contract`
@@ -109,7 +109,7 @@ packages/db/seed/quick-robot.ts    datos de ejemplo del mockup (solo desarrollo)
 pnpm dev                           servidor local + web con la semilla
 ```
 
-**Pruebas:** casos 1.1 y 1.2; aislamiento; el lint rechaza una frontera rota; un test de integración "agregar rollo → aparece en la lista"; `i18n.test.ts` y `format.test.ts` (`13 §10`); `access-matrix` con las rutas existentes.
+**Pruebas:** casos 1.1, 1.2 y 1.3; aislamiento; el lint rechaza una frontera rota; un test de integración "agregar rollo → aparece en la lista"; `i18n.test.ts` y `format.test.ts` (`13 §10`); `access-matrix` con las rutas existentes.
 **Terminado cuando:** se agrega un rollo en el navegador y queda guardado en el archivo local; las pruebas de `core` y de aislamiento pasan; el lint rechaza una frontera rota.
 
 ---

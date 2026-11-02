@@ -1,0 +1,45 @@
+{
+  "name": "app-monorepo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "start": "node scripts/start.mjs",
+    "test": "vitest run --coverage",
+    "test:tz": "cross-env TZ=UTC vitest run --project core",
+    "lint": "eslint . --max-warnings=-1 && depcruise packages $(test -d apps && echo apps) --config .dependency-cruiser.cjs",
+    "typecheck": "node scripts/typecheck.mjs",
+    "e2e": "playwright test",
+    "security": "node scripts/security.mjs",
+    "size": "node scripts/size-check.mjs",
+    "perf": "cross-env PERF=1 vitest run packages/server/test/perf",
+    "import:mockup": "tsx tools/import-mockup.ts",
+    "desktop:dev": "pnpm --filter @app/desktop dev",
+    "desktop:dist": "pnpm --filter @app/desktop dist",
+    "desktop:dist:linux": "pnpm --filter @app/desktop dist:linux",
+    "e2e:desktop": "xvfb-run -a playwright test e2e/desktop.spec.ts"
+  },
+  "devDependencies": {
+    "@app/db": "workspace:*",
+    "@app/server": "workspace:*",
+    "@eslint/js": "9.39.5",
+    "@hono/node-server": "1.19.17",
+    "@playwright/test": "1.63.0",
+    "@types/node": "22.20.5",
+    "@vitest/coverage-v8": "4.1.12",
+    "cross-env": "10.1.0",
+    "dependency-cruiser": "17.4.3",
+    "eslint": "9.39.5",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "fast-check": "4.10.2",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.2",
+    "vite": "7.3.7",
+    "vitest": "4.1.12"
+  }
+}
