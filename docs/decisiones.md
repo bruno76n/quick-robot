@@ -71,3 +71,13 @@ Ver `01-vision-y-decisiones.md` (D1–D19).
 - Decisión: `packages/db/seed/quick-robot.ts` solo **describe** los datos (mismo generador del mockup: 7 filamentos, 8 rollos, mismos movimientos y fechas relativas a hoy). El ejecutor local `packages/server/dev/local.ts` los aplica con el **mismo caso de uso** `addSpool` que usa la pantalla, más los movimientos del libro. Resultado verificado: 7 filamentos · 8 rollos · 4.9 kg · valor $2,044, mismos costos por gramo y estados que el mockup. El ejecutor es la misma composición que hará `apps/desktop` en la fase 4 (dependencias locales + `createApp` + `127.0.0.1`). Ids locales fijos en `LOCAL_WORKSPACE_ID`/`LOCAL_USER_ID`.
 - Scripts: `pnpm dev` (PGlite en memoria + semilla, Vite con proxy), `pnpm dev:file` (igual pero con archivo en `.data/pgdata`), `pnpm start` (compila la web y la sirve el mismo servidor desde el archivo local, como lo hará Electron).
 - Impacto: `packages/db/seed/`, `packages/server/dev/`, `package.json`.
+
+## 2026-11-02 · Fase 2 · Paso 2.1 · Exportar valores del mockup sin tocar `reference/`
+- Situación: las funciones de cálculo del mockup viven dentro de una función anónima y no se pueden leer desde fuera; CLAUDE.md prohíbe modificar `reference/`.
+- Decisión: `tools/mockup-page.mjs` sirve con Playwright una **copia en memoria** del mockup con un gancho (`window.__mockup`) añadido al final del script; el archivo en disco no cambia. `tools/export-mockup-golden.mjs` exporta entradas (configuración, rollos con lo que queda, impresoras, insumos, piezas, colecciones) y resultados (M, L, Q, E, F, costo, precio de lista, piso, sugerido por canal; sueltas, precio, costo de cada set). Las fechas se guardan como días relativos para que el archivo no cambie cada día.
+- Impacto: `tools/`, `packages/core/test/golden/mockup-values.json`.
+
+## 2026-11-02 · Fase 2 · Paso 2.2 · Tareas base de mantenimiento en `core`
+- Situación: una impresora nueva trae tres tareas base (`04 §11`) con nombre ("Cambiar la boquilla"…). Son valores genéricos que la persona edita después.
+- Decisión: viven en `core/printers.ts` como datos por defecto (igual que el catálogo genérico), no en `i18n`, porque se guardan como registros del negocio. El servidor los copia al crear la impresora.
+- Impacto: `packages/core/src/printers.ts`.
