@@ -12,7 +12,7 @@ Estados: `no iniciada` · `en curso` · `igual al mockup` · `verificada con dat
 | Armador de venta o pedido | 3 | no iniciada | |
 | Pedidos (lista y calendario) | 3 | no iniciada | |
 | Pedido (página) | 3 | no iniciada | |
-| Filamentos | 1–2 | no iniciada | |
+| Filamentos | 1–2 | en curso | Fase 1: lista, cajón (rollos y movimientos) y "Agregar rollo" comparados con el mockup en 1440/820/390 px: iguales en estructura, textos, colores y cifras. Pendiente fase 2: Editar/Eliminar rollo y Registrar movimiento (hoy deshabilitados). Diferencia aceptada: marca del negocio (inicial en vez de mascota), ver `decisiones.md` |
 | Insumos | 2 | no iniciada | |
 | Impresoras | 2 | no iniciada | |
 | Producción | 3 | no iniciada | |
@@ -30,7 +30,7 @@ Estados: `no iniciada` · `en curso` · `igual al mockup` · `verificada con dat
 
 | Fase | Estado | Informe |
 |---|---|---|
-| 1 | no iniciada | |
+| 1 | terminada (lista para fusionar) | [informe-fase-1.md](informe-fase-1.md) |
 | 2 | no iniciada | |
 | 3 | no iniciada | |
 | 4 | no iniciada | |

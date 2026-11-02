@@ -89,11 +89,14 @@ Anotar siempre la decisión en `docs/decisiones.md` (formato en ese archivo). Nu
 - Pruebas obligatorias: reglas de `core` (casos de `04`), aislamiento entre negocios (`packages/db/test/tenancy.test.ts`), y los flujos A–F de `docs/06 §17` con Playwright.
 - Decisiones abiertas y su resolución: `docs/01-vision-y-decisiones.md`.
 
-## Comandos (se completan al crear el monorepo)
+## Comandos
 
 ```
 pnpm install
-pnpm dev          # servidor local (PGlite en memoria + semilla) y web
+pnpm dev          # servidor local (PGlite en memoria + semilla) y web → http://127.0.0.1:5173
+pnpm dev:file     # igual, con los datos en .data/pgdata
+pnpm start        # compila la web y la sirve el servidor local con archivo → http://127.0.0.1:8787
+pnpm typecheck    # TypeScript en todos los paquetes
 pnpm test         # core, db, server
 pnpm lint         # incluye las fronteras entre paquetes
 pnpm e2e          # flujos con Playwright
