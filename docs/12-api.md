@@ -71,7 +71,7 @@ Los nombres de los casos de uso son los de `06 §16`. Los textos en español de 
 | `PLAN_LIMIT` | 403 | `capability`, `limit` | El plan no permite más (fase 5) |
 | `NOT_FOUND` | 404 | `entity` | No existe o es de otro negocio |
 | `PAYLOAD_TOO_LARGE` | 413 | `maxBytes` | Cuerpo mayor al límite de la ruta |
-| `FILE_TOO_LARGE` | 413 | `maxMb` | Archivo mayor al límite: imágenes 8 MB (logos) o 12 MB (fotos de pieza e impresión); copia de seguridad al importar 100 MB en local y 50 MB en la nube (`15 §3`) |
+| `FILE_TOO_LARGE` | 413 | `maxMb` | Archivo mayor al límite: imágenes 8 MB (logos) o 12 MB (fotos de pieza e impresión); copia de seguridad al importar 100 MB en local y 50 MB en la nube (`15 §4`) |
 | `UNSUPPORTED_IMAGE` | 415 | `accepted[]` | No es JPG, PNG o WebP, o no se puede leer |
 | `RATE_LIMITED` | 429 | `retryAfterSec` | Demasiadas peticiones |
 | `STORAGE_FULL` | 507 | — | No hay espacio en el disco al escribir (solo local); lo anterior queda intacto |

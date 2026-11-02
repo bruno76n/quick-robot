@@ -40,8 +40,12 @@ export const es = {
 };
 ```
 
-- **Parámetros:** `{nombre}`. **Plural:** `{count|pieza|piezas}` (singular si el número es 1). Un solo ayudante, `t(key, params)`, en `apps/web/src/i18n/t.ts`, con prueba.
-- **Los parámetros se llaman igual que el campo de `details` en `12 §2`** y se formatean por su sufijo, según §2.1: `…Cents` → dinero (`$1,250`), `…Grams` → gramos (`535 g`), `…Hours` → horas, `…Pct` → porcentaje; el resto se muestra tal cual. Así `i18n.test.ts` puede comprobar que cada `{x}` existe en `details`.
+- **Sintaxis de los textos** (un solo ayudante, `t(key, params)`, en `apps/web/src/i18n/t.ts`, con prueba). Solo hay tres formas y en todas la primera palabra es el nombre del parámetro:
+  - `{nombre}`: se sustituye por el valor.
+  - `{count|pieza|piezas}`: **plural**; elige según el número `count` (1 → singular; 0 y 2 o más → plural) e imprime solo la palabra. El número se escribe aparte: `{count} {count|pieza|piezas}` → “3 piezas”.
+  - `{status|delivered=entregado|cancelled=cancelado}`: **elección** según el valor de `status`; cada opción es `valor=texto`.
+  - En las tablas de este documento la barra va escrita `\|` solo por el formato de Markdown; en `es.ts` es `|`.
+- **Los parámetros se llaman igual que el campo de `details` en `12 §2`** y se formatean por su sufijo, sin importar mayúsculas, según §2.1: `…Cents` → dinero (`$1,250`), `…Grams` → gramos (`535 g`; la unidad la pone el formato, **nunca** el texto), `…Hours` → horas, `…Pct` → porcentaje; el resto se muestra tal cual. Así `i18n.test.ts` puede comprobar que cada `{x}` existe en `details`.
 - **Búsqueda del texto de un error:** `errors[code]`; si no existe, `errors.INTERNAL_ERROR`. Un código sin texto **rompe la prueba** `i18n.test.ts`, que compara las claves de `errors` y `warnings` con las de `12 §2`.
 - **Búsqueda del texto de un campo inválido:** `fields['<formulario>.<campo>.<regla>']`, luego `fields['<regla>']`, luego `fields.required`.
 - **Ningún texto fuera de `es.ts`.** Un lint (`no-literal-string` en JSX) lo vigila en `apps/web/src/features` y `components`.
@@ -92,8 +96,8 @@ Un renglón por código de `12 §2`. Entre llaves, los parámetros de `details`.
 
 | Código | Texto |
 |---|---|
-| `PRODUCT_IN_ACTIVE_ORDERS` | Esta pieza está en {count} {pedido sin entregar\|pedidos sin entregar} ({folios}). Primero deben entregarse o eliminarse. |
-| `PRODUCT_HAS_STOCK` | No se puede eliminar: quedan {onHand} {pieza\|piezas} en Existencias. Primero ajustar el conteo a 0. |
+| `PRODUCT_IN_ACTIVE_ORDERS` | Esta pieza está en {count} {count\|pedido sin entregar\|pedidos sin entregar} ({folios}). Primero deben entregarse o eliminarse. |
+| `PRODUCT_HAS_STOCK` | No se puede eliminar: quedan {onHand} {onHand\|pieza\|piezas} en Existencias. Primero ajustar el conteo a 0. |
 | `STOCK_TRACKING_HAS_STOCK` | Hay {onHand} en existencias: ajústalas a 0 en Existencias antes de desactivarlo. |
 | `COLLECTION_EMPTY` | La colección necesita al menos una pieza. |
 | `NO_PRODUCTS` | Primero crea una pieza en Productos. |
@@ -109,8 +113,8 @@ Un renglón por código de `12 §2`. Entre llaves, los parámetros de `details`.
 | `REFUND_EXCEEDS_PAID` | El reembolso no puede ser mayor a lo pagado ({paidCents}). |
 | `SALE_ALREADY_RETURNED` | Esta venta ya se devolvió. |
 | `ORDER_INVALID_STATE` | El pedido ya no está en ese paso. Se actualizó la pantalla. |
-| `ORDER_NOT_ACTIVE` | Este pedido ya está {entregado\|cancelado} y no se puede modificar. |
-| `PRINTER_ASSIGNMENT_REQUIRED` | Falta asignar impresora a {count} {artículo\|artículos}. |
+| `ORDER_NOT_ACTIVE` | Este pedido ya está {status\|delivered=entregado\|cancelled=cancelado} y no se puede modificar. |
+| `PRINTER_ASSIGNMENT_REQUIRED` | Falta asignar impresora a {count} {count\|artículo\|artículos}. |
 | `NO_PRINTERS` | Primero registra una impresora. |
 
 ### Taller
@@ -119,14 +123,14 @@ Un renglón por código de `12 §2`. Entre llaves, los parámetros de `details`.
 |---|---|
 | `NO_SPOOL_FOR_FILAMENT` | Primero agrega un rollo de este filamento. |
 | `NO_SPOOLS` | Primero agrega un rollo en Filamentos. |
-| `SPOOL_INSUFFICIENT` | Ese rollo solo tiene {availableGrams} g. |
+| `SPOOL_INSUFFICIENT` | Ese rollo solo tiene {availableGrams}. |
 | `SUPPLY_NAME_EXISTS` | Ya existe “{name}”. |
-| `SUPPLY_IN_USE` | Está en {products} {pieza\|piezas}. Quítalo de ellas primero. |
+| `SUPPLY_IN_USE` | Está en {products} {products\|pieza\|piezas}. Quítalo de ellas primero. |
 | `SUPPLY_INSUFFICIENT` | Solo hay {available} disponibles. |
 | `COUNT_UNCHANGED` | El conteo coincide con el total actual. |
-| `PRINTER_HAS_QUEUE` | No se puede eliminar: {name} tiene {jobs} {trabajo\|trabajos} en cola. Primero terminarlos o reasignarlos. |
+| `PRINTER_HAS_QUEUE` | No se puede eliminar: {name} tiene {jobs} {jobs\|trabajo\|trabajos} en cola. Primero terminarlos o reasignarlos. |
 | `PRINT_RUN_LOCKED` · `order_history` | Este registro se creó solo al terminar un pedido. Se conserva como historial. |
-| `PRINT_RUN_LOCKED` · `pieces_unavailable` | Esta impresión sumó {pieces} {pieza\|piezas} a Existencias y ya no hay {esa pieza libre\|tantas libres}: se vendieron o están apartadas. Primero debe corregirse Existencias. |
+| `PRINT_RUN_LOCKED` · `pieces_unavailable` | Esta impresión sumó {pieces} {pieces\|pieza\|piezas} a Existencias y ya no hay {pieces\|esa pieza libre\|tantas libres}: se vendieron o están apartadas. Primero debe corregirse Existencias. |
 
 ### Negocio y datos
 
@@ -135,7 +139,7 @@ Un renglón por código de `12 §2`. Entre llaves, los parámetros de `details`.
 | `CUSTOMER_NAME_EXISTS` | Ya existe un cliente llamado “{name}”. Cambiar el nombre o editar el cliente existente. |
 | `CUSTOMER_HAS_HISTORY` | Ese cliente tiene pedidos o ventas y no se puede eliminar. |
 | `CHANNEL_NAME_EXISTS` | Ya existe un canal llamado “{name}”. |
-| `CHANNEL_IN_USE` | “{name}” tiene {sales} {venta\|ventas} y {orders} {pedido\|pedidos}. No se puede quitar; se puede renombrar. |
+| `CHANNEL_IN_USE` | “{name}” tiene {sales} {sales\|venta\|ventas} y {orders} {orders\|pedido\|pedidos}. No se puede quitar; se puede renombrar. |
 | `LAST_CHANNEL` | Debe quedar al menos un canal de venta. |
 | `IMPORT_INVALID_FILE` | No se pudo leer la copia. *(si hay `reason`, debajo en gris:)* {reason}. No se cambió ningún dato. |
 | `IMPORT_UNSUPPORTED_VERSION` | Esta copia es de una versión que esta aplicación no entiende ({found}). Actualizar la aplicación e intentar de nuevo. |
@@ -158,7 +162,7 @@ Se muestran cuando la aplicación completa no puede seguir (`15 §5`). Cada una 
 
 | Código | Texto |
 |---|---|
-| `STOCK_SHORT` | Faltaron {missing} {pieza\|piezas} en existencias; esas se imprimen. |
+| `STOCK_SHORT` | Faltaron {missing} {missing\|pieza\|piezas} en existencias; esas se imprimen. |
 | `FILAMENT_SHORTFALL` | Faltaron {missingGrams} de {name}; se descontó lo que había. |
 | `ORDER_WAITING_OTHER_PRINTERS` | Trabajo terminado. El pedido #{orderNumber} aún tiene trabajos en {printerNames}. |
 | `PRODUCTS_MISSING` | Algunas piezas ya no existen en el catálogo y no se cargaron. |
@@ -192,16 +196,16 @@ Los que traen **Deshacer** (`undo: true`) llaman a `restore<Entidad>` (`12`). En
 ### Ventas
 | Clave | Texto | Deshacer |
 |---|---|---|
-| `sale.created` | Venta registrada. {count} {pieza salió\|piezas salieron} de Existencias. | |
+| `sale.created` | Venta registrada. {count} {count\|pieza salió\|piezas salieron} de Existencias. | |
 | `sale.updated` | Venta actualizada. | |
 | `sale.deleted` | Venta eliminada. | ✓ |
 | `sale.paymentRemoved` | Pago quitado de la venta. | |
-| `sale.returned` | Venta devuelta. *(si repone:)* {count} {pieza regresó\|piezas regresaron} a Existencias. |  |
+| `sale.returned` | Venta devuelta. *(si repone:)* {count} {count\|pieza regresó\|piezas regresaron} a Existencias. |  |
 
 ### Pedidos
 | Clave | Texto | Deshacer |
 |---|---|---|
-| `order.created` | Pedido #{folio} creado. Está en Pendientes. *(si aceptado con existencias:)* Se apartaron {count} {pieza\|piezas} de existencias. | |
+| `order.created` | Pedido #{folio} creado. Está en Pendientes. *(si aceptado con existencias:)* Se apartaron {count} {count\|pieza\|piezas} de existencias. | |
 | `order.updated` | Pedido #{folio} actualizado | |
 | `order.accepted` | Pedido #{folio} aceptado. | |
 | `order.readyFromStock` | Pedido #{folio} listo para entregar: todo salió de existencias. | |
@@ -217,7 +221,7 @@ Los que traen **Deshacer** (`undo: true`) llaman a `restore<Entidad>` (`12`). En
 | Clave | Texto | Deshacer |
 |---|---|---|
 | `spool.added` | Rollo agregado a {filament}. Disponible: {available}. | |
-| `spool.deleted` | Rollo eliminado *(si tenía movimientos:)* junto con sus {count} {movimiento\|movimientos}. | ✓ |
+| `spool.deleted` | Rollo eliminado *(si tenía movimientos:)* junto con sus {count} {count\|movimiento\|movimientos}. | ✓ |
 | `spool.movementRecorded` | Movimiento registrado | |
 | `supply.saved` | Insumo guardado | |
 | `supply.deleted` | Insumo eliminado | ✓ |
@@ -231,7 +235,7 @@ Los que traen **Deshacer** (`undo: true`) llaman a `restore<Entidad>` (`12`). En
 | `maintenance.done` | Mantenimiento registrado | |
 | `printRun.recorded` | Impresión registrada. Se descontaron {grams}. | |
 | `printRun.testRecorded` | Prueba registrada. Se descontaron {grams}. | |
-| `printRun.deleted` | Registro eliminado. *(si devolvió filamento:)* Se devolvieron {grams} al inventario de filamento. *(si quitó piezas:)* Se quitaron {count} {pieza\|piezas} de Existencias. | |
+| `printRun.deleted` | Registro eliminado. *(si devolvió filamento:)* Se devolvieron {grams} al inventario de filamento. *(si quitó piezas:)* Se quitaron {count} {count\|pieza\|piezas} de Existencias. | |
 | `stock.trackingEnabled` | {name} ahora lleva existencias | |
 | `stock.summary` | Existencias de {name}: total {physical}. | |
 | `stock.allTracked` | Todas las piezas ya llevan existencias. | |
@@ -244,7 +248,7 @@ Los que traen **Deshacer** (`undo: true`) llaman a `restore<Entidad>` (`12`). En
 | `customer.logoRemoved` | Imagen quitada | |
 | `expense.saved` | Gasto guardado | |
 | `expense.deleted` | Gasto eliminado | ✓ |
-| `channel.renamed` | Canal renombrado. *(si cambió registros:)* Se actualizaron {count} {registro\|registros}. | |
+| `channel.renamed` | Canal renombrado. *(si cambió registros:)* Se actualizaron {count} {count\|registro\|registros}. | |
 | `channel.removed` | Canal “{name}” quitado. | |
 | `data.exported` | Copia lista. Quedó guardada en la carpeta elegida. *(adaptado: el mockup mandaba a "Copiar respaldo")* | |
 | `data.restored` | Copia restaurada. | |
@@ -368,7 +372,7 @@ Texto del botón de cada acción del mockup, para que `es.ts` use los mismos. (E
 | `imp-fin` | Terminó este trabajo | `imp-del` | Eliminar impresora |
 | `mant-new` | Agregar tarea | `mant-hecho` | Hecho |
 | `mant-del` | Quitar tarea | `print-new` | Registrar impresión |
-| `prod-del` | Eliminar registro | `ex-on` | Llevar existencias de {una\|otra} pieza |
+| `prod-del` | Eliminar registro | `ex-on` | Llevar existencias de esta pieza / de otra pieza |
 | `ex-ajuste` | Ajustar | `cli-new` | Nuevo cliente |
 | `cli-edit` | Editar cliente | `cli-ped` | Nuevo pedido |
 | `cli-venta` | Registrar venta | `cli-copy` | Copiar |
@@ -384,8 +388,8 @@ Texto del botón de cada acción del mockup, para que `es.ts` use los mismos. (E
 
 ## 10. Cómo se prueba
 
-- `i18n.test.ts`: cada código de `12 §2` tiene entrada en `errors` y en `warnings`; ninguna clave de `toast`, `errors` o `fields` está vacía; todo parámetro `{x}` del texto existe en `details`.
+- `i18n.test.ts`: cada código de `12 §2` tiene entrada en `errors` y en `warnings`; ninguna clave de `toast`, `errors` o `fields` está vacía; todo parámetro `{x}` del texto existe en `details` (también el primero de cada plural y de cada elección); ningún texto escribe a mano la unidad de un parámetro `…Cents`, `…Grams`, `…Hours` o `…Pct`.
 - `format.test.ts`: los ejemplos de §2.1.
-- `t.test.ts`: plural (1 → singular, 0 y 2+ → plural) y parámetros faltantes (no deben imprimir `{x}` en pantalla: se cae a un texto genérico y se registra).
+- `t.test.ts`: las tres formas (`{nombre}`, plural y elección), formato por sufijo y parámetros faltantes (no deben imprimir `{x}` en pantalla: se cae a un texto genérico y se registra).
 - Lint de textos literales en JSX (§2).
 - Revisión visual (modo autónomo, paso 4): cada pantalla se compara con `reference/mockup-textos.md`.

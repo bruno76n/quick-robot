@@ -92,7 +92,7 @@ La interfaz nunca queda en blanco ni muestra errores técnicos (`15 §5`):
 
 ## Imágenes
 
-Logos y fotos se reducen **en el navegador** (lado mayor ≤ 1 600 px, JPEG o WebP) antes de subirlas con `POST /files`; el servidor solo valida tipo y tamaño (`15 §3`). Los CSV de Ajustes se generan en `lib/csv.ts`, que neutraliza celdas que empiezan con `=`, `+`, `-` o `@`.
+Logos y fotos se reducen **en el navegador** (lado mayor ≤ 1 600 px, JPEG o WebP) antes de subirlas con `POST /files`; el servidor solo valida tipo y tamaño (`15 §4`). Los CSV de Ajustes se generan en `lib/csv.ts`, que neutraliza celdas que empiezan con `=`, `+`, `-` o `@`.
 
 ## Textos, formatos y accesibilidad de textos
 

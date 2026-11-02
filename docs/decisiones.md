@@ -42,3 +42,9 @@ Claude Code leyó el zip entero y encontró contradicciones; todas se verificaro
 - **Estados sin regla:** el mockup calculaba “Se acaba”, “Nuevo”, “Todo apartado”, “Pocas”, etc. solo en código; ahora están en `04` (casos 1.3 y 5.2), `03` y `13 §8`. “Disponible” no es un estado de filamento.
 - **Parámetros de los errores:** `PAYMENT_EXCEEDS_BALANCE`, `REFUND_EXCEEDS_PAID` y `PRINTER_ASSIGNMENT_REQUIRED` usaban parámetros que la API no mandaba; ahora el parámetro se llama igual que el campo de `details` y se formatea por su sufijo (`13 §2`).
 - Menores: `FILE_TOO_LARGE` dice “archivo” (también sirve para copias), paquetes `@app/*`, rol `operator`, y la segunda persona queda como regla única en `13 §1`, `06` y `CLAUDE.md`.
+
+## 2026-11-01 · Planeación · Segunda lectura del paquete v2
+Claude Code leyó la v2 completa: confirmó que las 9 contradicciones estaban resueltas y encontró 3 menores nuevas, que se corrigieron antes de empezar la fase 1:
+- **Unidad repetida:** `SPOOL_INSUFFICIENT` escribía “g” después de `{availableGrams}`, que ya se formatea con su unidad. Regla nueva en `13 §2`: la unidad nunca va en el texto; `i18n.test.ts` lo comprueba.
+- **Sintaxis de `t()`:** había plurales sin nombre (`{count} {pieza|piezas}`) y elecciones sin definir (`{entregado|cancelado}`). Ahora hay tres formas explícitas (valor, plural, elección) y todos los textos se reescribieron con ellas.
+- **Referencia:** el límite de 100 MB de las copias está en `15 §4`, no en `§3` (corregido en `12` y `07`).
