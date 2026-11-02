@@ -1,0 +1,40 @@
+# Packaging of the desktop shell (docs/10 Fase 4). No Apple signing and no auto-update for now (docs/02 §6).
+appId: mx.quickrobot.desktop
+productName: Quick Robot
+directories:
+  output: out
+  buildResources: build-resources
+asar: true
+# Only the bundles, the migrations and package.json; node_modules holds just the production dependency (PGlite).
+files:
+  - dist/app/**
+  - dist/migrations/**
+  - package.json
+  - "!**/*.map"
+# PGlite loads its .wasm and .data with fs from next to its code: keep it outside the asar.
+asarUnpack:
+  - node_modules/@electric-sql/pglite/**
+extraResources:
+  - from: ../web/dist
+    to: web
+    filter: ["**/*"]
+  - from: ../../assets/icon-512.png
+    to: icon-512.png
+npmRebuild: false
+mac:
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+  icon: ../../assets/icon.icns
+  category: public.app-category.business
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false
+dmg:
+  writeUpdateInfo: false
+linux:
+  target: dir
+  executableName: quick-robot
+  icon: ../../assets/icon-512.png
+  category: Office
+publish: null

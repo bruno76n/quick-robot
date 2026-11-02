@@ -1,0 +1,26 @@
+{
+  "name": "@app/desktop",
+  "version": "0.4.0",
+  "private": true,
+  "type": "module",
+  "description": "Electron shell for personal use on a Mac: starts the same server on 127.0.0.1 and opens a window. No screens, no rules.",
+  "author": "Quick Robot",
+  "main": "dist/app/main.mjs",
+  "scripts": {
+    "bundle": "node scripts/bundle.mjs",
+    "dev": "node scripts/dev.mjs",
+    "dist": "node scripts/dist.mjs mac",
+    "dist:linux": "node scripts/dist.mjs linux"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.10"
+  },
+  "devDependencies": {
+    "@app/db": "workspace:*",
+    "@app/server": "workspace:*",
+    "@hono/node-server": "1.19.17",
+    "electron": "42.11.15",
+    "electron-builder": "26.17.0",
+    "esbuild": "0.28.2"
+  }
+}
