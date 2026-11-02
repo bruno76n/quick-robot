@@ -6,6 +6,7 @@ import type { AppEnv } from './env';
 import { errorHandler } from './middleware/errors';
 import { sessionMiddleware } from './middleware/session';
 import { filamentRoutes } from './routes/filament';
+import { workspaceRoutes } from './routes/workspace';
 import { mountStatic } from './static';
 
 /** The whole API. It does not know whether it runs inside Electron or on a host: it gets its deps. */
@@ -20,6 +21,7 @@ export function createApp(deps: AppDeps) {
   const api = new Hono<AppEnv>();
   api.get('/health', (c) => c.json({ ok: true, mode: deps.mode }));
   api.use('*', sessionMiddleware(deps.auth));
+  api.route('/workspace', workspaceRoutes(deps));
   api.route('/filaments', filamentRoutes(deps));
   api.all('*', () => {
     throw new BusinessError('NOT_FOUND', 'Route not found');

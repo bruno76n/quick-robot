@@ -1,5 +1,6 @@
 import { eq } from 'drizzle-orm';
 import type { Executor } from '../connect';
+import { assertCtx, type Ctx } from '../ctx';
 import { membership, user, workspace } from '../schema';
 
 /**
@@ -18,4 +19,11 @@ export async function ensureWorkspace(
 export async function workspaceExists(ex: Executor, workspaceId: string): Promise<boolean> {
   const rows = await ex.select({ id: workspace.id }).from(workspace).where(eq(workspace.id, workspaceId));
   return rows.length > 0;
+}
+
+/** The caller's workspace (ctx-scoped). */
+export async function getWorkspace(ex: Executor, ctx: Ctx): Promise<{ id: string; name: string } | undefined> {
+  const ws = assertCtx(ctx);
+  const [row] = await ex.select({ id: workspace.id, name: workspace.name }).from(workspace).where(eq(workspace.id, ws));
+  return row;
 }

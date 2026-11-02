@@ -52,3 +52,10 @@ describe('filament routes', () => {
     expect((await app.request('/api/v1/filaments', { headers: { 'x-app-secret': 's3cret' } })).status).toBe(200);
   });
 });
+
+describe('workspace route', () => {
+  it('returns the caller business only', async () => {
+    expect(await (await appFor(database, ctxA).request('/api/v1/workspace')).json()).toEqual({ id: ctxA.workspaceId, name: 'A' });
+    expect(await (await appFor(database, ctxB).request('/api/v1/workspace')).json()).toEqual({ id: ctxB.workspaceId, name: 'B' });
+  });
+});
