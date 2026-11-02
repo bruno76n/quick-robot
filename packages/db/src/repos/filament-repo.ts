@@ -1,5 +1,5 @@
 // Filaments, spools and the spool ledger. Every function takes ctx and filters by workspace.
-import { and, asc, count, desc, eq, ilike, inArray, isNull, or, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, ilike, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm';
 import type { Ctx } from '../ctx';
 import type { Executor } from '../db';
 import { filament, spool, spoolLevels, spoolMovement } from '../schema';
@@ -81,4 +81,35 @@ export async function listSpoolMovements(ex: Executor, ctx: Ctx, filamentId: str
     .orderBy(desc(spoolMovement.on), desc(spoolMovement.createdAt), desc(spoolMovement.id))
     .limit(opts.limit ?? 200);
   return rows.map((r) => r.m);
+}
+
+export async function getSpoolAny(ex: Executor, ctx: Ctx, id: string, opts: { deleted: boolean }) {
+  const [row] = await ex.select().from(spool).where(and(inWorkspace(spool.workspaceId, ctx), eq(spool.id, id), opts.deleted ? isNotNull(spool.deletedAt) : isNull(spool.deletedAt)));
+  return row;
+}
+
+export async function updateSpool(ex: Executor, ctx: Ctx, id: string, patch: Partial<NewSpool>) {
+  const [row] = await ex.update(spool).set({ ...patch, updatedAt: new Date() }).where(and(inWorkspace(spool.workspaceId, ctx), eq(spool.id, id), isNull(spool.deletedAt))).returning();
+  return row;
+}
+
+export async function setSpoolDeleted(ex: Executor, ctx: Ctx, id: string, deletedAt: Date | null) {
+  const [row] = await ex.update(spool).set({ deletedAt, updatedAt: new Date() }).where(and(inWorkspace(spool.workspaceId, ctx), eq(spool.id, id), deletedAt ? isNull(spool.deletedAt) : isNotNull(spool.deletedAt))).returning();
+  return row;
+}
+
+export async function countSpoolMovements(ex: Executor, ctx: Ctx, spoolId: string): Promise<number> {
+  const [r] = await ex.select({ n: count() }).from(spoolMovement).where(and(inWorkspace(spoolMovement.workspaceId, ctx), eq(spoolMovement.spoolId, spoolId)));
+  return r?.n ?? 0;
+}
+
+/** Remaining grams of one spool from its ledger (works for any spool, deleted or not). */
+export async function spoolRemainingGrams(ex: Executor, ctx: Ctx, spoolId: string): Promise<number> {
+  const rows = await ex.select({ g: spoolMovement.grams }).from(spoolMovement).where(and(inWorkspace(spoolMovement.workspaceId, ctx), eq(spoolMovement.spoolId, spoolId)));
+  return Math.round(rows.reduce((a, r) => a + Number(r.g), 0) * 10) / 10;
+}
+
+/** All filaments of the workspace (small catalog) with their live spools. */
+export async function listAllFilaments(ex: Executor, ctx: Ctx): Promise<FilamentRow[]> {
+  return ex.select().from(filament).where(inWorkspace(filament.workspaceId, ctx)).orderBy(asc(filament.material), asc(filament.color));
 }

@@ -8,11 +8,15 @@ import {
   listSpoolMovements, listSpools, lockSpoolsOfFilament,
 } from '../src/repos/filament-repo';
 import { getRole, getWorkspace } from '../src/repos/workspace-repo';
+import { deleteTask, getPrinter, getTask, insertTasks, listPrinters, listTasks, updatePrinter, updateTask } from '../src/repos/printer-repo';
+import { getCollection, getProduct, insertProduct, listCollections, listProducts, replaceCollectionParts, replaceProductParts, setProductDeleted, updateCollection } from '../src/repos/product-repo';
+import { deleteChannel, getChannel, getFile, getSettings, listCatalog, listChannels, updateChannel } from '../src/repos/settings-repo';
+import { findSupplyByKey, getSuppliesByIds, getSupplier, getSupply, insertSupply, insertSupplyMovements, listSuppliers, listSupplies, listSupplyMovements, productsUsingSupply, setSupplierDeleted, updateSupply } from '../src/repos/supply-repo';
 import { openTestDb } from '../src/testing';
 import { twoWorkspaces, uid, type WsData } from './fixtures';
 
 /** Tables covered by this file. A new table with workspace_id must be added here (and tested). */
-const COVERED = new Set(['membership', 'filament', 'spool', 'spool_movement']);
+const COVERED = new Set(['membership', 'filament', 'spool', 'spool_movement', 'workspace_settings', 'sales_channel', 'catalog_item', 'file', 'supplier', 'supply', 'supply_movement', 'printer', 'maintenance_task', 'expense', 'product', 'product_filament', 'product_supply', 'collection', 'collection_part']);
 const WITHOUT_WORKSPACE = new Set(['workspace', 'user']);
 
 let conn: Connection;
@@ -55,6 +59,60 @@ describe('reads with ctx A never return B', () => {
   it('sums (spool_levels) only count its own ledger', async () => {
     const [s] = await listSpools(conn.db, A.ctx, [A.filamentId, B.filamentId]);
     expect(s?.remainingGrams).toBe(1000);
+  });
+});
+
+describe('workshop and catalog: reads with ctx A never return B', () => {
+  it('settings, channels, catalog and files', async () => {
+    expect((await getSettings(conn.db, A.ctx))?.business.name).toBe('Negocio A');
+    expect((await listChannels(conn.db, A.ctx)).map((c) => c.id)).toEqual([A.channelId]);
+    expect(await getChannel(conn.db, A.ctx, B.channelId)).toBeUndefined();
+    expect((await listCatalog(conn.db, A.ctx)).every((c) => c.workspaceId === A.ctx.workspaceId)).toBe(true);
+    expect(await getFile(conn.db, A.ctx, B.fileId)).toBeUndefined();
+  });
+  it('suppliers, supplies and their ledger', async () => {
+    expect((await listSuppliers(conn.db, A.ctx)).map((x) => x.id)).toEqual([A.supplierId]);
+    expect(await getSupplier(conn.db, A.ctx, B.supplierId)).toBeUndefined();
+    const l = await listSupplies(conn.db, A.ctx, { page: 1, pageSize: 50 });
+    expect(l.items.map((x) => [x.id, x.stock])).toEqual([[A.supplyId, 100]]);
+    expect(await getSupply(conn.db, A.ctx, B.supplyId)).toBeUndefined();
+    expect(await getSuppliesByIds(conn.db, A.ctx, [B.supplyId])).toEqual([]);
+    expect(await listSupplyMovements(conn.db, A.ctx, B.supplyId)).toEqual([]);
+    expect(await productsUsingSupply(conn.db, A.ctx, B.supplyId)).toEqual([]);
+    expect(await findSupplyByKey(conn.db, A.ctx, 'argolla')).toMatchObject({ id: A.supplyId });
+  });
+  it('printers, tasks, products and collections', async () => {
+    expect((await listPrinters(conn.db, A.ctx)).map((x) => x.id)).toEqual([A.printerId]);
+    expect(await getPrinter(conn.db, A.ctx, B.printerId)).toBeUndefined();
+    expect((await listTasks(conn.db, A.ctx)).map((x) => x.id)).toEqual([A.taskId]);
+    expect(await getTask(conn.db, A.ctx, B.printerId, B.taskId)).toBeUndefined();
+    expect((await listProducts(conn.db, A.ctx)).map((x) => x.id)).toEqual([A.productId]);
+    expect(await getProduct(conn.db, A.ctx, B.productId)).toBeUndefined();
+    expect((await listCollections(conn.db, A.ctx)).map((x) => [x.id, x.parts.length])).toEqual([[A.collectionId, 1]]);
+    expect(await getCollection(conn.db, A.ctx, B.collectionId)).toBeUndefined();
+  });
+  it('updates and deletes with ids of B change nothing', async () => {
+    expect(await updateSupply(conn.db, A.ctx, B.supplyId, { name: 'x' })).toBeUndefined();
+    expect(await setSupplierDeleted(conn.db, A.ctx, B.supplierId, new Date())).toBeUndefined();
+    expect(await updatePrinter(conn.db, A.ctx, B.printerId, { name: 'x' })).toBeUndefined();
+    expect(await updateTask(conn.db, A.ctx, B.taskId, { task: 'x' })).toBeUndefined();
+    expect(await setProductDeleted(conn.db, A.ctx, B.productId, new Date())).toBeUndefined();
+    expect(await updateCollection(conn.db, A.ctx, B.collectionId, { name: 'x' })).toBeUndefined();
+    expect(await updateChannel(conn.db, A.ctx, B.channelId, { name: 'x' })).toBeUndefined();
+    await deleteChannel(conn.db, A.ctx, B.channelId);
+    await deleteTask(conn.db, A.ctx, B.taskId);
+    await replaceProductParts(conn.db, A.ctx, B.productId, [], []);
+    expect((await getProduct(conn.db, B.ctx, B.productId))?.filaments).toHaveLength(1);
+    expect(await getChannel(conn.db, B.ctx, B.channelId)).toBeDefined();
+    expect((await getSupply(conn.db, B.ctx, B.supplyId))?.name).toBe('Argolla');
+  });
+  it('composite keys reject children that point to B', async () => {
+    await expect(insertSupply(conn.db, A.ctx, { id: uid(0xa), name: 'z', nameKey: 'z', costCents: 1, minimum: 1, supplierId: B.supplierId })).rejects.toThrow();
+    await expect(insertProduct(conn.db, A.ctx, { id: uid(0xa), name: 'z', mode: 'value', hours: 1, printerId: B.printerId })).rejects.toThrow();
+    await expect(replaceProductParts(conn.db, A.ctx, A.productId, [{ id: uid(0xa), filamentId: B.filamentId, grams: 1 }], [])).rejects.toThrow();
+    await expect(replaceCollectionParts(conn.db, A.ctx, A.collectionId, [{ id: uid(0xa), productId: B.productId, qty: 1 }])).rejects.toThrow();
+    await expect(insertTasks(conn.db, A.ctx, [{ id: uid(0xa), printerId: B.printerId, task: 'z', everyHours: 1 }])).rejects.toThrow();
+    await expect(insertSupplyMovements(conn.db, A.ctx, [{ id: uid(0xa), supplyId: B.supplyId, on: '2026-11-01', kind: 'use', qty: -1 }])).rejects.toThrow();
   });
 });
 

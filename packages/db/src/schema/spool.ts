@@ -1,6 +1,7 @@
 import { date, foreignKey, index, integer, pgTable, text, unique, uuid } from 'drizzle-orm/pg-core';
 import { deletedAt, gramsCol, idCol, timestamps } from './columns';
 import { filament } from './filament';
+import { supplier } from './supply';
 import { workspace } from './workspace';
 
 /** One spool = one purchase of a filament (docs/05). */
@@ -19,5 +20,6 @@ export const spool = pgTable('spool', {
 }, (t) => [
   unique('spool_ws_id').on(t.workspaceId, t.id),
   foreignKey({ name: 'spool_filament_fk', columns: [t.workspaceId, t.filamentId], foreignColumns: [filament.workspaceId, filament.id] }),
+  foreignKey({ name: 'spool_supplier_fk', columns: [t.workspaceId, t.supplierId], foreignColumns: [supplier.workspaceId, supplier.id] }),
   index('spool_ws_filament').on(t.workspaceId, t.filamentId),
 ]);
