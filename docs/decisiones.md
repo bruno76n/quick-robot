@@ -60,3 +60,12 @@ Claude Code leyó la v2 completa: confirmó que las 9 contradicciones estaban re
   5. RLS con `FORCE ROW LEVEL SECURITY`, rol sin privilegios y `set_config('app.workspace_id')`: A no ve, no modifica ni inserta en B; sin el ajuste no ve nada. **Pasa** en PGlite y en Postgres.
 - Decisión: se mantiene Postgres en los dos modos (PGlite en local). No hace falta el plan B. El filtro por `workspace_id` en los repositorios es la barrera principal; RLS queda viable como segunda barrera y se activa en la fase 5 (en local hay un solo negocio).
 - Impacto: crear la base por primera vez tarda 4–8 s (initdb en WASM): la fase 4 debe mostrar "Preparando datos…" o partir de una base creada.
+
+## 2026-11-02 · Fase 1 · Paso 1.1 · Herramientas del monorepo
+- Situación: `10 §1.1` pide `vitest.workspace.ts`; en Vitest 4 ese archivo ya no existe (se reemplazó por `test.projects`).
+- Decisión: `vitest.config.ts` en la raíz con `projects: ['packages/*', 'apps/*', 'tools']` y los umbrales de cobertura de `14 §4` por carpeta. `pnpm test` corre con cobertura. Regla 3 de "cuando algo no está claro": la opción más simple.
+- Versiones (A03): solo versiones con más de dos semanas publicadas al 2026-11-02, fijadas exactas. TypeScript 5.9.3, Vitest 4.1.12, Vite 7.3.7 (fijado con `overrides` porque Vitest pedía Vite 8, publicado hace menos de dos semanas), ESLint 9.39.5, typescript-eslint 8.71.2, dependency-cruiser 17.4.3, fast-check 4.10.2 (solo pruebas, `14 §5`), cross-env 10.1.0 (para `pnpm test:tz`), tsx 4.23.15. `@playwright/test` 1.63.0 para usar el navegador ya instalado en este entorno.
+- Las pruebas de seguridad del servidor (`packages/server/test/security/`) se crean en el paso 1.5, cuando existe el servidor; `pnpm security` las incluye en cuanto la carpeta existe.
+- Prueba negativa de fronteras: `packages/core/test/fixtures/forbidden-import.ts` (excluido del lint normal) y `tools/test/boundaries.test.ts`, que además comprueba 16 violaciones más (núcleo con Node o reloj, web con db/server/Node, servidor con SQL, `mode === 'cloud'`, `dangerouslySetInnerHTML`, texto en español en JSX, `eval`, `sql.raw`, SQL concatenado, exportación por defecto, `console.log`).
+- `pnpm audit`: 2 avisos **moderados** (`minimatch` dentro de herramientas de desarrollo); ninguno alto ni crítico. Se revisan al actualizar esas herramientas.
+- Impacto: `package.json`, `pnpm-workspace.yaml`, `vitest.config.ts`, `eslint.config.js`, `.dependency-cruiser.cjs`, `scripts/`, `.github/workflows/ci.yml`.

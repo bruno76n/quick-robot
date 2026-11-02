@@ -1,0 +1,8 @@
+{
+  "name": "@app/core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "description": "Pure business rules (docs/04). No I/O, no clock, no ids."
+}
