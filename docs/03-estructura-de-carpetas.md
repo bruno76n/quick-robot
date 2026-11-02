@@ -7,10 +7,15 @@ Monorepo con **pnpm workspaces**. Todo el proyecto en un repositorio.
 ```
 quickrobot/
 ├─ CLAUDE.md                     reglas para quien programe (persona o IA)
-├─ docs/                         estos documentos (+ decisiones.md y progreso.md)
-├─ reference/                    mockup y copia de ejemplo (referencia, no se modifica)
-├─ tools/                        scripts de apoyo (exportar valores del mockup, importar)
-├─ e2e/                          pruebas de flujo (Playwright)
+├─ docs/                         estos documentos (01–15, prompts, decisiones, progreso, informes de fase)
+├─ reference/                    referencia de comportamiento; NO se modifica
+│  ├─ Quick Robot mockup.html      el mockup completo
+│  ├─ mockup-backup-v7.json        su copia de seguridad con datos de ejemplo
+│  └─ mockup-textos.md             texto visible de cada pantalla y diálogo (extraído)
+├─ assets/                       ícono de la app, logo y mascota (provisionales; ver su README)
+├─ tools/                        scripts de apoyo: import-mockup.ts, export-mockup-golden.mjs (opcional)
+├─ scripts/                      security.mjs, size-check.mjs
+├─ e2e/                          pruebas de flujo (Playwright): flows A–F, failure-states, visual/
 ├─ spikes/                       comprobaciones desechables (PGlite); se puede borrar
 ├─ package.json
 ├─ pnpm-workspace.yaml
@@ -35,6 +40,7 @@ quickrobot/
 │  │  │  ├─ reports.ts           totales y rankings por periodo
 │  │  │  └─ index.ts
 │  │  └─ test/                   una prueba por regla, con los casos de 04
+│  │     └─ golden/mockup-values.json   valores esperados del mockup (ya incluido)
 │  │
 │  ├─ contract/                  LO QUE SE DICEN CLIENTE Y SERVIDOR
 │  │  └─ src/
@@ -49,17 +55,19 @@ quickrobot/
 │  │  │  ├─ connect.ts           connectPglite(), connectPostgres()
 │  │  │  └─ index.ts
 │  │  ├─ migrations/             SQL generado; igual para local y nube
+│  │  ├─ seed/                   quick-robot.ts (semilla de desarrollo) y load-test.ts (25 000 ventas)
 │  │  └─ test/
 │  │
 │  └─ server/                    API + CASOS DE USO (biblioteca)
 │     └─ src/
 │        ├─ app.ts               createApp(deps)
-│        ├─ deps.ts              tipos: AuthProvider, FileStore, Entitlements, Mailer
+│        ├─ deps.ts              tipos: AuthProvider, FileStore, Entitlements, Mailer, BackupStore (+ Clock, Ids)
 │        ├─ middleware/          sesión → ctx, errores, registro
 │        ├─ routes/              una carpeta por área (sales, orders, …)
 │        ├─ usecases/            markOrderReady, deliverOrder, cancelOrder, …
 │        ├─ providers/
-│        │  └─ local/            auth fijo, archivos en disco, sin límites
+│        │  └─ local/            auth fijo, archivos en disco, copias automáticas, sin límites
+│        ├─ logger.ts            registro estructurado con redacción
 │        └─ static.ts            sirve apps/web ya compilada (modo local)
 │
 └─ apps/
@@ -71,8 +79,8 @@ quickrobot/
    │     │  ├─ printers/ production/ stock/ purchases/
    │     │  └─ customers/ expenses/ reports/ settings/
    │     ├─ components/          piezas reutilizables (tabla, cajón, diálogo, chips)
-   │     ├─ lib/                 cliente de la API, formato de moneda y fechas
-   │     ├─ i18n/es.ts           todos los textos en español
+   │     ├─ lib/                 api.ts, platform.ts, format.ts (moneda, fechas), csv.ts
+   │     ├─ i18n/                es.ts (todos los textos en español) y t.ts (parámetros y plural)
    │     └─ styles/              tokens de diseño
    │
    ├─ desktop/                   CÁSCARA ELECTRON (removible)
@@ -80,6 +88,7 @@ quickrobot/
    │  │  ├─ main.ts             arranca servidor local y ventana
    │  │  ├─ preload.ts          puente mínimo: window.desktop
    │  │  ├─ local-deps.ts       arma las dependencias del modo local
+   │  │  ├─ fatal.html          pantallas de falla cuando el servidor no responde (docs/15 §5)
    │  │  └─ menu.ts
    │  └─ electron-builder.yml   genera el .dmg
    │
@@ -115,7 +124,7 @@ No debe fallar nada más. Si falla, hay una frontera rota.
 - **Una pantalla = una carpeta en `features/`**, con su ruta, sus componentes y sus llamadas a la API. Lo que se comparte entre dos pantallas sube a `components/` o `lib/`.
 - **Una regla de negocio = una función en `core` con una prueba**. Si una regla aparece escrita en `web` o en `server`, se mueve a `core`.
 - **Casos de uso con nombre de acción en inglés**: `markOrderReady`, `deliverOrder`, `cancelOrder`, `returnSale`, `recordPayment`. El mapa completo con los nombres del mockup está en `06`.
-- **Pruebas junto a lo que prueban**; las de aislamiento entre negocios en `packages/db/test/tenancy.test.ts`.
+- **Pruebas junto a lo que prueban**; las de aislamiento entre negocios en `packages/db/test/tenancy.test.ts`. Convenciones completas de código y pruebas en `14`.
 
 ## Glosario español ↔ inglés
 
@@ -142,9 +151,29 @@ No debe fallar nada más. Si falla, hay una frontera rota.
 | Artículo (de venta o pedido) | `line_item` |
 | Pedido | `order` |
 | Pago / abono | `payment` |
-| Devolución | `sale_return` |
-| Cancelación | `order_cancellation` |
+| Devolución | columna `return` (jsonb) de `sale` |
+| Cancelación | columna `cancellation` (jsonb) de `order` |
 | Gasto | `expense` |
 | Canal de venta | `sales_channel` |
 | Ajustes del negocio | `workspace_settings` |
 | Compras (lista) | `purchases` (vista calculada, no tabla) |
+
+### Valores internos (el mockup los guardaba en español; el producto, en inglés)
+
+| Dónde | Mockup → producto |
+|---|---|
+| Estado de pedido | `cotizado` → `quoted` · `aceptado` → `accepted` · `produccion` → `in_production` · `listo` → `ready` · `entregado` → `delivered` · `cancelado` → `cancelled` |
+| Motivo de producción | `inventario` → `stock` · `pedido` → `order` · `prueba` → `test` |
+| Resultado de impresión | `bien` → `ok` · `fallo` → `fail` |
+| Movimiento de rollo | `compra` → `purchase` · `consumo` → `consumption` · `fallo` → `failure` · `merma` → `waste` · `ajuste` → `adjustment` |
+| Movimiento de insumo | `compra` → `purchase` · `uso` → `use` · `ajuste` → `adjustment` · `merma` → `waste` |
+| Movimiento de existencias | `inicial` → `initial` · `impresion` → `print` · `pedido` → `order_print` · `venta` → `sale` · `devolucion` → `return` · `entrega` → `delivery` · `ajuste` → `adjustment` |
+| Modo de precio | `valor` → `value` · `formula` → `formula` |
+| Tipo de artículo | `p` → `piece` · `c` → `set` |
+| Mantenimiento | `Al corriente` → `ok` · `Pronto` → `soon` · `Toca ya` → `due` |
+| Estado de filamento | `Sin rollos` → `no_spools` · `Agotado` → `out` · `Se acaba` → `ending` · `Poco` → `low` · `Nuevo` → `new` · `Normal` → `ok` |
+| Estado de rollo | `Vacío` → `empty` · `Nuevo` → `new` · `En uso` → `in_use` |
+| Estado de insumo | `Agotado` → `out` · `Poco` → `low` · `Suficiente` → `ok` |
+| Estado de existencias | `Agotada` → `out` · `Todo apartado` → `all_reserved` · `Pocas` → `few` · `Disponible` → `ok` |
+
+Los textos en español de cada valor están en `13 §8`.

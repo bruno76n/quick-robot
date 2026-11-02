@@ -79,6 +79,7 @@ createApp({
   files,         // FileStore
   entitlements,  // límites del plan
   mailer,        // correo (en local: no hace nada)
+  backups,       // BackupStore: copias automáticas (en nube: las hace la plataforma)
   mode,          // 'local' | 'cloud'  (solo para diagnóstico, nunca para decidir reglas)
 });
 ```
@@ -92,7 +93,7 @@ Electron. Su trabajo completo:
 2. Armar las dependencias **locales** y llamar a `createApp`.
 3. Escuchar en `127.0.0.1` en un puerto libre.
 4. Abrir una ventana que carga esa dirección.
-5. Cosas nativas opcionales: menú, diálogos de archivo, copia de seguridad automática, actualizaciones, abrir al iniciar sesión.
+5. Cosas nativas opcionales: menú, diálogos de archivo, abrir al iniciar sesión. Las copias automáticas las hace el servidor (`BackupStore`); Electron solo le da la carpeta. Si el servidor no responde, Electron muestra una pantalla de falla propia (`15 §5`) porque la interfaz no se puede cargar.
 
 No tiene pantallas ni reglas de negocio.
 
@@ -108,7 +109,7 @@ Lo mismo que `apps/desktop`, con las dependencias **de nube**: Postgres administ
 Al empezar la fase 1 se hace una **comprobación de un día**. Criterios de aprobado:
 
 1. Las mismas migraciones de Drizzle corren en PGlite y en un Postgres normal sin cambios.
-2. Una consulta de reportes (ventas por pieza, 12 meses, ~5 000 ventas de prueba) responde en menos de 200 ms.
+2. Una consulta de reportes (ventas por pieza, 12 meses) responde en menos de 200 ms con ~5 000 ventas de prueba, y el periodo "Todo" en menos de 1.5 s con 25 000 (presupuestos de `15 §2`).
 3. Cerrar el proceso a la fuerza y reabrir no corrompe datos.
 4. PGlite funciona dentro de una app de Electron empaquetada (prueba de humo; la app real se arma en la fase 4).
 5. La seguridad por filas (RLS) funciona; si no, se vive con el filtro por `workspace_id` en los repositorios.
@@ -133,7 +134,7 @@ user ──< membership >── workspace ──< (todos los datos del negocio)
 ```
 
 - `workspace` = un negocio. **Todo** dato de negocio lleva `workspace_id`.
-- `membership` = qué usuario entra a qué negocio y con qué rol (`owner` primero; `admin`, `operador` después).
+- `membership` = qué usuario entra a qué negocio y con qué rol (`owner` primero; `admin`, `operator` después).
 - `subscription` = plan, estado, fechas. Solo existe en nube; en local el servicio de planes responde "sin límites".
 
 **En modo local** hay un único usuario y un único negocio con ids fijos; el `AuthProvider` local siempre devuelve esa sesión. No hay pantalla de login. Los mismos repositorios, los mismos filtros.
@@ -145,7 +146,7 @@ user ──< membership >── workspace ──< (todos los datos del negocio)
 El código de negocio nunca pregunta "¿estoy en la nube?". Pregunta al servicio de planes:
 
 ```ts
-await entitlements.assert(ctx, 'impresoras.crear');   // en local: siempre permite
+await entitlements.assert(ctx, 'printers.create');   // en local: siempre permite
 ```
 
 Así los límites (número de impresoras, de pedidos al mes, de usuarios) viven en una tabla de planes y se cambian sin tocar los casos de uso.
@@ -171,7 +172,7 @@ Así los límites (número de impresoras, de pedidos al mes, de usuarios) viven 
 | Sin internet | Funciona completo | No funciona (es web) |
 | Funciones nativas | Menú, diálogos de archivo, abrir al iniciar sesión | Equivalentes del navegador (descargar, elegir archivo) |
 
-**Regla de oro de lo nativo:** toda función de escritorio tiene un equivalente web. La interfaz pregunta `if (window.desktop?.guardarArchivo)` y, si no existe, usa la descarga normal del navegador. **Ninguna pantalla puede depender de Electron para funcionar.**
+**Regla de oro de lo nativo:** toda función de escritorio tiene un equivalente web. La interfaz pregunta `if (window.desktop?.saveFile)` y, si no existe, usa la descarga normal del navegador. **Ninguna pantalla puede depender de Electron para funcionar.**
 
 ### Actualizaciones sin perder datos
 Los datos viven en una carpeta aparte de la app (`userData`), así que reemplazar la app no los toca. Al abrir una versión nueva:
@@ -185,8 +186,9 @@ En la nube, las migraciones corren antes de levantar la versión nueva. Una migr
 ### Seguridad del servidor local
 Aunque escuche solo en `127.0.0.1`, otros programas de la Mac podrían intentar hablarle. Por eso:
 - Puerto aleatorio en cada arranque.
-- Un secreto generado en cada arranque que Electron le pasa a la ventana y que el servidor exige en cada petición.
+- Un secreto generado en cada arranque que Electron agrega como encabezado a cada petición de su ventana y que el servidor exige; el código de la interfaz nunca lo ve.
 - La ventana de Electron con `contextIsolation: true`, sin `nodeIntegration`, y solo permitiendo navegar a su propia dirección.
+- Si el servidor local se cae, Electron intenta reiniciarlo una vez; si no puede, muestra la pantalla de falla (`15 §5`) con la opción de restaurar la copia más reciente.
 
 ### Mover los datos de la Mac a la nube
 Hay un **formato de exportación del negocio** (JSON versionado, el mismo que ya usan las copias de seguridad del mockup, esquema v7 como punto de partida). Es el puente: se exporta desde la app de escritorio y se importa en un negocio de la nube. También sirve para respaldos y para que el mockup actual alimente la primera versión real.

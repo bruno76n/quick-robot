@@ -1,6 +1,8 @@
 # CLAUDE.md — Quick Robot
 
-Sistema para negocios de impresión 3D: costeo, ventas, pedidos, producción, inventarios y reportes. Es **un solo producto**: aplicación web con cuentas y suscripción; la app de escritorio (Electron) es solo una cáscara para uso personal en Mac. Documentación completa en `docs/` (empieza por `docs/README.md`).
+Sistema para negocios de impresión 3D: costeo, ventas, pedidos, producción, inventarios y reportes. Es **un solo producto**: aplicación web con cuentas y suscripción; la app de escritorio (Electron) es solo una cáscara para uso personal en Mac. Documentación completa en `docs/` (empieza por `docs/README.md`). Prompts por fase en `docs/prompts.md`.
+
+**Dónde está cada cosa:** reglas de negocio → `04` · datos → `05` · pantallas y flujos → `06` · contrato de la API (entrada, salida, errores) → `12` · textos y mensajes en español → `13` · convenciones y pruebas → `14` · rendimiento, límites y fallos → `15` · seguridad → `11` · plan por fase → `10`.
 
 ## Lo que no se negocia
 
@@ -10,11 +12,10 @@ Sistema para negocios de impresión 3D: costeo, ventas, pedidos, producción, in
 4. **El servidor es la autoridad.** Recalcula con `core` y guarda su resultado; nunca el que mandó el cliente.
 5. **Una operación de negocio = un caso de uso en una transacción** (`markOrderReady`, `deliverOrder`, …). La interfaz no encadena escrituras sueltas.
 6. **Nada específico de "Quick Robot" en el código.** Nombre, teléfono, canales, comisiones, márgenes y textos de documentos son registros del negocio (`workspace_settings`). Los datos de ejemplo viven solo en la semilla de desarrollo.
-7. **Ningún `if (mode === 'cloud')` en reglas ni casos de uso.** Las diferencias entre local y nube se resuelven eligiendo dependencias (`AuthProvider`, `FileStore`, `Entitlements`, `Mailer`) en `apps/desktop` / `apps/cloud`.
+7. **Ningún `if (mode === 'cloud')` en reglas ni casos de uso.** Las diferencias entre local y nube se resuelven eligiendo dependencias (`AuthProvider`, `FileStore`, `Entitlements`, `Mailer`, `BackupStore`) en `apps/desktop` / `apps/cloud`.
 8. **Cada pantalla funciona sin funciones nativas.** Lo nativo (`window.desktop`) mejora; nunca habilita.
 9. **Inventarios = libros de movimientos** (filamento, piezas terminadas, insumos). Nunca se escribe "hay 7": se suma.
 10. **Los artículos vendidos guardan la foto del momento** (precio, lista, costo). Cambiar un precio hoy no reescribe el historial.
-11. **Seguridad: OWASP Top 10:2025** (`docs/11-seguridad.md`). Cada ruta declara su acción con `guard(...)`; un id ajeno responde 404; nada de `dangerouslySetInnerHTML`, `eval` ni SQL en cadenas; toda entrada con tope; ningún secreto en el repositorio. Ningún paso se cierra si `pnpm security` falla.
 
 ## Stack (decidido)
 
@@ -31,19 +32,31 @@ db, contract, core → (nada del monorepo)
 
 Cualquier otra flecha está prohibida (lo verifica ESLint/dependency-cruiser).
 
+## Seguridad
+
+Estándar: **OWASP Top 10:2025**, aplicado a todo lo web (interfaz y API) desde la fase 1; lo exclusivo de la nube va en la fase 5. Detalle y pruebas en `docs/11-seguridad.md`. Reglas rápidas:
+- Todo acceso a datos con `ctx`; un id de otro negocio responde 404.
+- Toda entrada se valida con Zod en el borde; solo `packages/db` escribe SQL y siempre parametrizado.
+- Prohibido: `dangerouslySetInnerHTML`, `eval`, SQL concatenado, secretos en el repositorio, datos sensibles en logs.
+- Errores al usuario: texto en español por `code` (`docs/13`), o mensaje genérico + `errorId` si es inesperado; nunca la traza. Si algo falla, se niega y se revierte la transacción. Qué se ve en cada falla: `docs/15 §5`.
+- Todo archivo que se importa se trata como no confiable y se valida antes de aplicarlo.
+- Dependencia nueva = anotarla en `docs/decisiones.md`.
+- Decisiones: la app de escritorio no pide contraseña propia (basta macOS/FileVault); la copia de seguridad va sin cifrar con aviso en pantalla.
+
 ## Idioma
 
 - **Código, nombres de archivos, tablas, funciones, comentarios técnicos y mensajes de commit: inglés.**
 - **Todo texto que ve la persona: español**, siempre en `apps/web/src/i18n/es.ts`. Nunca strings sueltos en componentes.
-- Glosario español ↔ inglés en `docs/03-estructura-de-carpetas.md`.
+- Glosario español ↔ inglés y valores internos (`quoted`, `in_production`, …) en `docs/03-estructura-de-carpetas.md`. Convenciones de nombres, commits y estilo en `docs/14-convenciones-y-pruebas.md`.
+- Los textos salen de `docs/13-textos-y-errores.md` y `reference/mockup-textos.md`. Un código de error sin texto en español rompe la prueba `i18n.test.ts`.
 
 ## Vocabulario de la interfaz (fijo)
 
-Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Libres, Apartadas, Artículos. Tuteo evitado en la interfaz ("Registrar venta", no "Registra tu venta"); los documentos para clientes sí pueden hablar directo. Color con significado: **morado = costo, verde = ganancia**.
+Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Libres, Apartadas, Artículos. Botones y títulos sin segunda persona ("Registrar venta", no "Registra tu venta"); los mensajes que heredó del mockup conservan su imperativo ("Agrega al menos un artículo.") y los nuevos van en infinitivo o impersonales (`docs/13 §1`); los documentos para clientes sí pueden hablar directo. Color con significado: **morado = costo, verde = ganancia**.
 
 ## Diseño
 
-Solo modo claro. Solo tipografía Geist. Tokens en `docs/07-frontend.md`. Si algo se ve distinto del mockup (`Quick Robot mockup.html`), el mockup tiene la razón hasta que se decida lo contrario.
+Solo modo claro. Solo tipografía Geist. Tokens en `docs/07-frontend.md`. Si algo se ve distinto del mockup (`reference/Quick Robot mockup.html`), el mockup tiene la razón hasta que se decida lo contrario. Marca (ícono, mascota) en `assets/`. El nombre y el giro que se ven en pantalla y en documentos salen de Ajustes, nunca del código; el logo con el texto “Quick Robot” es solo para uso externo.
 
 ## Datos
 
@@ -56,14 +69,15 @@ Solo modo claro. Solo tipografía Geist. Tokens en `docs/07-frontend.md`. Si alg
 
 La construcción la hace Claude Code **sin pedir aprobación paso a paso**. Todo lo necesario está en estos archivos.
 
-**Antes de empezar una fase:** leer este archivo, la fase en `docs/10-plan-de-construccion.md` y solo los documentos de su lista "Leer". Crear una rama `fase-N`.
+**Antes de empezar una fase:** leer este archivo, el informe de la fase anterior, la fase en `docs/10-plan-de-construccion.md` y solo los documentos de su lista "Leer". Crear una rama `fase-N`. El prompt de cada fase está en `docs/prompts.md`.
 
 **Mientras trabaja**
 1. Un paso a la vez, en el orden del plan: regla con su prueba → tablas → caso de uso con su prueba → ruta → pantalla.
 2. **Un commit por paso**, con mensaje en inglés (`feat(core): filament cost per gram`).
-3. Un paso **no está terminado** hasta que pasan: pruebas con los números de `docs/04`, las reglas de dependencias entre paquetes (lint), el typecheck, `pnpm security` y, si hay pantalla, su comparación visual. Cada ruta nueva entra en las pruebas de `packages/server/test/security/` (la de acceso entre negocios falla sola si una ruta con id no está en su tabla) y cada funcionalidad nueva anota en 3 renglones qué podría salir mal en `docs/amenazas.md`.
+3. Un paso **no está terminado** hasta que pasan: pruebas con los números de `docs/04`, las pruebas de cada operación de `docs/12` (camino feliz, cada error y fallo a la mitad), las reglas de dependencias entre paquetes (lint), el typecheck, **`pnpm security`** (OWASP Top 10:2025, ver `docs/11-seguridad.md`) y, si hay pantalla, su comparación visual. Umbrales de cobertura en `docs/14 §4`.
 4. **Comparación visual:** abrir el mockup (`reference/`) y la pantalla nueva con Playwright en tres anchos (escritorio 1440, tableta 820, móvil 390), tomar capturas, verlas y corregir diferencias de estructura, textos, colores y comportamiento antes de marcar la fila de `docs/progreso.md` como "igual al mockup".
 5. **Valores del mockup:** los costos y precios deben coincidir con `packages/core/test/golden/mockup-values.json` (tolerancia ±0.01).
+6. **Documentos al día:** un cambio de comportamiento actualiza su documento (`04`, `06`, `12` o `13`) en el mismo commit; una operación nueva se agrega a `12` antes de programarse.
 
 **Cuando algo no está claro, NO preguntar. Decidir así:**
 1. Lo que dice el mockup.
@@ -79,7 +93,7 @@ Anotar siempre la decisión en `docs/decisiones.md` (formato en ese archivo). Nu
 
 **Al cerrar cada fase:** escribir `docs/informe-fase-N.md` con lo hecho, qué pasó las pruebas, las decisiones tomadas, lo que quedó bloqueado o dudoso y qué conviene que revise la persona; actualizar `docs/progreso.md`; dejar la rama lista para fusionar. **Ninguna fase se fusiona con pruebas rojas.**
 
-**Nunca:** agregar funciones fuera del alcance de `docs/01`; saltarse una prueba para "avanzar"; cambiar un número esperado de `docs/04` para que la prueba pase; tocar archivos en `reference/`; escribir textos de interfaz fuera de `i18n/es.ts`.
+**Nunca:** agregar funciones fuera del alcance de `docs/01`; saltarse una prueba para "avanzar"; cambiar un número esperado de `docs/04` o de `golden/` para que la prueba pase; tocar archivos en `reference/`; escribir textos de interfaz fuera de `i18n/es.ts`; cambiar o reutilizar un código de error ya publicado en `docs/12`; mostrar al usuario el `message` técnico de un error; tocar datos reales del negocio (las pruebas usan `reference/mockup-backup-v7.json` o datos generados).
 
 ## Cómo trabajar
 
@@ -87,21 +101,21 @@ Anotar siempre la decisión en `docs/decisiones.md` (formato en ese archivo). Nu
 - Primero la regla con su prueba, después el caso de uso, después la pantalla.
 - No agregar funciones fuera del alcance (`docs/01`): sin facturación/IVA, sin etiquetas QR, sin adjuntos 3MF/STL, sin recordatorios de cobro.
 - Antes de decidir algo de producto o de comportamiento, revisar `docs/06-pantallas-y-flujos.md` y el mockup.
-- Pruebas obligatorias: reglas de `core` (casos de `04`), aislamiento entre negocios (`packages/db/test/tenancy.test.ts`), y los flujos A–F de `docs/06 §17` con Playwright.
+- Pruebas obligatorias: reglas de `core` (casos de `04`), aislamiento entre negocios (`packages/db/test/tenancy.test.ts`), matriz de acceso de todas las rutas, estados de falla (`docs/15 §5`) y los flujos A–F de `docs/06 §17` con Playwright. Detalle en `docs/14`.
 - Decisiones abiertas y su resolución: `docs/01-vision-y-decisiones.md`.
 
-## Comandos
+## Comandos (se completan al crear el monorepo)
 
 ```
 pnpm install
-pnpm dev          # servidor local (PGlite en memoria + semilla) y web → http://127.0.0.1:5173
-pnpm dev:file     # igual, con los datos en .data/pgdata
-pnpm start        # compila la web y la sirve el servidor local con archivo → http://127.0.0.1:8787
-pnpm typecheck    # TypeScript en todos los paquetes
-pnpm test         # core, db, server
-pnpm lint         # incluye las fronteras entre paquetes y las reglas de seguridad
-pnpm security     # lint + pnpm audit (altas/críticas) + escaneo de secretos + pruebas de seguridad
-pnpm e2e          # flujos con Playwright
+pnpm dev          # servidor local (PGlite en memoria + semilla) y web
+pnpm test         # core, db, server, web
+pnpm test:tz      # core con TZ=UTC
+pnpm lint         # incluye las fronteras entre paquetes y los textos literales
+pnpm typecheck    # tsc en todo el monorepo
+pnpm e2e          # flujos y estados de falla con Playwright
+pnpm security     # lint de seguridad, audit, secretos, cabeceras, acceso entre negocios
+pnpm size         # JS inicial comprimido ≤ 350 KB
 pnpm desktop:dev  # Electron (desde la fase 4)
 pnpm desktop:dist # genera el .dmg (desde la fase 4)
 ```

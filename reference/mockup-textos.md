@@ -1,0 +1,2535 @@
+# Textos del mockup, por pantalla
+
+> **Archivo generado automáticamente** al abrir `Quick Robot mockup.html` con los datos de ejemplo (escritorio, 1440 px) y copiar el texto visible de cada pantalla, cajón y diálogo. No se edita a mano.
+>
+> - Sirve para **llenar `apps/web/src/i18n/es.ts`** sin inventar redacciones: lo que dice aquí es lo que debe decir el producto.
+> - Las líneas con nombres de personas, folios, fechas o cifras (por ejemplo "Pedido #5", "$1,250") son **datos de ejemplo**; en `es.ts` van como texto con parámetros (`Pedido #{folio}`).
+> - Cada línea es un renglón de texto visible; los renglones repetidos dentro de una misma pantalla se muestran una sola vez.
+> - Los mensajes emergentes y de error no están aquí: están en `docs/13-textos-y-errores.md`.
+
+
+## Pantalla · inicio
+
+- Inicio
+- Nuevo pedido
+- Registrar venta
+- Nueva pieza
+- Se vendieron $6,270 en 13 ventas en los últimos 30 días. Después de costo y comisiones quedaron $5,077 de ganancia, y tras los gastos del negocio $2,370.
+- Ventas ▲ 14.6%
+- Ganancia ▲ 17.6%
+- Gastos ▲ 71.7%
+- contra el periodo anterior
+- De cada $100 vendidos, a dónde se va
+- $43
+- $38
+- Material $545
+- $8.7
+- Luz $42
+- $0.7
+- Máquina $339
+- $5.4
+- Extras $127
+- $2
+- Fallos (reserva) $55
+- $0.9
+- Comisiones $85
+- $1.4
+- Gastos del negocio $2,707
+- Ganancia real $2,370
+- Piezas con más ganancia
+- Spider-Man · salto
+- $1,013
+- 5 vendidas · precio ×5.8 el costo
+- Spider-Man · trepando
+- $792
+- 4 vendidas · precio ×5.9 el costo
+- Hulk · puño
+- $751
+- 4 vendidas · precio ×6.1 el costo
+- Llavero con nombre
+- $700
+- 19 vendidas · precio ×11 el costo
+- Servilletero con logo
+- $666
+- 8 vendidas · precio ×4.1 el costo
+- Filamento
+- Morado
+- PLA Silk · 85 g
+- Negro
+- PLA · 410 g
+- Rojo
+- PLA · 600 g
+- Azul
+- TPU 95A · 300 g
+- PETG · 800 g
+- Blanco
+- PLA · 1,720 g
+- Gris claro
+- PLA · 940 g
+- Atención
+- Pedido #5 de Tacos El Güero: faltan 535 g de PLA Negro (disponible 410 g).
+- Agregar rollo
+- PLA Silk Morado: stock bajo, disponible 85 g.
+- Ver filamento
+- Pedido #2 de Mariana R.: entrega mañana (listo para entregar).
+- Abrir pedido
+- Pedido #3 de Taquería Los Compadres: entrega en 2 días.
+- Venta del 31 oct a Mariana R.: faltan $500 por cobrar.
+- Registrar abono
+- Bambu Lab P1S: lubricar ejes (pasó por 12 h).
+- Ver impresoras
+- Y 3 avisos más.
+- Impresoras
+- 3 × Letrero de taquería
+- 62%
+- Bambu Lab P1S · quedan 6 h 50 min · pedido #3
+- 10 × Servilletero con logo
+- 30%
+- Ender 3 V3 SE · quedan 17 h 30 min · pedido #3 · 1 en cola
+
+## Pantalla · productos
+
+- Productos
+- Piezas con su costo y su precio de lista.
+- Nueva colección
+- Nueva pieza
+- Piezas 9
+- Colecciones 2
+- Buscar
+- Fichas
+- Lista
+- Todas 9
+- Técnicas 1
+- Variantes 1
+- Llavero con nombre
+- Ender 3 V3 SE
+- $50
+- Ganas $46 · ×13.6
+- Costo $3.67
+- 33 vendidas
+- 6 libres · 3 apartadas
+- Vender
+- Variante
+- Servilletero con logo
+- Bambu Lab P1S
+- $120
+- Ganas $93 · ×4.5
+- Costo $26.75
+- 24 vendidas
+- Solo por pedido
+- Pedido
+- Spider-Man · salto
+- $250
+- Ganas $211 · ×6.4
+- Costo $38.96
+- 10 vendidas
+- 1 libre · 2 apartadas
+- Spider-Man · trepando
+- Ganas $214 · ×6.9
+- Costo $36.35
+- 9 vendidas
+- Todo apartado
+- Doctor Doom · busto
+- Ganas $208 · ×6
+- Costo $41.56
+- 6 vendidas
+- Hulk · puño
+- Ganas $212 · ×6.6
+- Costo $37.90
+- 7 vendidas
+- 2 libres · 1 apartada
+- Técnica
+- Soporte de celular PETG
+- $79
+- Ganas $40 · ×2
+- Costo $39.28
+- 3 vendidas
+- 2 libres
+- Letrero de taquería
+- $450
+- Ganas $381 · ×6.5
+- Costo $68.89
+- 2 vendidas
+- Spider-Man · salto (silk morado)
+- Variante de Spider-Man · salto
+- Ganas $207 · ×5.8
+- Costo $43.01
+- 0 vendidas
+- 1 libre
+- La barra muestra la proporción de costo (gris) y ganancia (verde) sobre el precio. “Vendidas” incluye las piezas vendidas dentro de una colección.
+
+## Pantalla · ventas
+
+- Ventas
+- Últimos 60 días.
+- Registrar venta
+- Se vendieron $11,740 en 23 ventas en los últimos 60 días. Después de costo y comisiones quedaron $9,395 de ganancia.
+- De cada $100 vendidos, a dónde se va
+- $9.2
+- $80
+- Material $1,084
+- Luz $80
+- $0.7
+- Máquina $648
+- $5.5
+- Extras $213
+- $1.8
+- Fallos (reserva) $107
+- $0.9
+- Comisiones $214
+- Ganancia $9,395
+- Hay 1 venta con saldo: faltan $500 por cobrar. Se registra con “Registrar abono” al abrir la venta.
+- Todos los canales
+- Facebook
+- WhatsApp
+- Efectivo
+- Mercado Libre
+- Terminal
+- Fecha Artículos Total Ganancia
+- 31 oct
+- Colección Doomsday blanca
+- Colección
+- Spider-Man · salto, Spider-Man · trepando, Doctor Doom · busto, Hulk · puño
+- 2 ×
+- Llavero con nombre
+- Mariana R. · WhatsApp · Colección completa y dos llaveros
+- $1,100
+- Debe $500
+- $913
+- 29 oct
+- Doctor Doom · busto
+- $250 $208
+- 27 oct
+- 3 ×
+- $150 $139
+- 25 oct
+- Letrero de taquería
+- Taquería Los Compadres · WhatsApp · Letrero para la taquería
+- $450 $381
+- 23 oct
+- Spider-Man · salto
+- Spider-Man · trepando
+- Facebook · Dos figuras y un llavero
+- $530
+- −4% vs lista
+- $451
+- 22 oct
+- Hulk · puño
+- $500 $339
+- 20 oct
+- Spider-Man · 2 poses
+- Spider-Man · salto, Spider-Man · trepando
+- $450 $365
+- 19 oct
+- Soporte de celular PETG
+- $240
+- +52% vs lista
+- $161
+- 16 oct
+- Facebook · Regalo de cumpleaños
+- $1,000 $820
+- 13 oct
+- Facebook · Una sola figura de la colección
+- $250 $211
+- 10 oct
+- 8 ×
+- Servilletero con logo
+- Tacos El Güero · Pedido #1 · WhatsApp · Pedido #1
+- $880
+- −8% vs lista
+- $666
+- 7 oct
+- 12 ×
+- WhatsApp · Para un evento
+- $420
+- −30% vs lista
+- $376
+- 4 oct
+- $50 $46
+- 1 oct
+- $400 $353
+- 28 sep
+- $350 $304
+- 26 sep
+- 24 sep
+- 21 sep
+- $260
+- +4% vs lista
+- $174
+- 18 sep
+- $500 $421
+- 15 sep
+- 6 ×
+- Taquería Los Compadres · WhatsApp · Servilleteros para la fonda
+- $660
+- $500
+- 13 sep
+- $500 $337
+- 10 sep
+- 10 ×
+- Tacos El Güero · WhatsApp · Servilleteros para el restaurante
+- $1,050
+- −13% vs lista
+- $783
+- 7 sep
+- 4 ×
+- $300
+- +8% vs lista
+- $246
+
+## Pantalla · pedidos
+
+- Pedidos
+- Nuevo pedido
+- Hay 6 pedidos en curso por $10,610. Faltan $7,610 por cobrar. 5 entregas en los próximos 7 días (1 para hoy o mañana). Si se entregan todos, la ganancia será de $8,678.
+- Cobrado $3,000 de $10,610
+- Tablero
+- Lista
+- Calendario
+- Pendientes
+- 1 cotizado · 2 aceptados
+- 3 · $5,610
+- Tacos El Güero
+- #7 · 4 piezas
+- Aceptado
+- 1 ×
+- Colección Doomsday blanca
+- Colección · 4 piezas por set
+- $950
+- 3
+- Existencias
+- Spider-Man · salto, Doctor Doom · busto, Hulk · puño
+- 1
+- Por imprimir
+- Spider-Man · trepando
+- Entrega en 6 días · 7 nov
+- Total
+- Saldo
+- $450
+- Ganancia
+- $770
+- Poner en producción
+- #5 · 20 piezas
+- 20 ×
+- Servilletero con logo
+- $2,200
+- 20
+- Entrega en 7 días · 8 nov
+- $1,100
+- $1,665
+- Cafetería Alma
+- #6 · 42 piezas
+- Cotizado
+- 30 ×
+- Llavero con nombre
+- $1,200
+- 12 ×
+- $1,260
+- 42
+- Entrega en 12 días · 13 nov
+- $2,460
+- $2,029
+- Cliente aceptó
+- En producción
+- 2 · $4,100
+- Taquería Los Compadres
+- #3 · 13 piezas
+- 3 ×
+- Letrero de taquería
+- $1,350
+- 10 ×
+- $1,000
+- 13
+- Imprimiendo
+- Bambu Lab P1S
+- 62% · quedan 6 h 50 min
+- Ender 3 V3 SE
+- 30% · quedan 17 h 30 min
+- Entrega en 2 días · 3 nov
+- $2,350
+- $1,876
+- Marcar listo
+- #4 · 50 piezas
+- 50 ×
+- $1,750
+- 50
+- En cola
+- En cola · le toca en ~17 h 30 min
+- Entrega en 5 días · 6 nov
+- $1,566
+- Listos para entregar
+- 1 · $900
+- Mariana R.
+- #2 · 6 piezas
+- Listo
+- Spider-Man · salto
+- $250
+- Doctor Doom · busto
+- $150
+- 6
+- Listas
+- Entrega mañana · 2 nov
+- $900
+- $500
+- $772
+- Entregar y cobrar
+- Entregados
+- 1 · $880
+- #1 · 8 piezas
+- Entregado
+- 8 ×
+- $880
+- Entregado el 10 oct
+- Pagado
+- $666
+
+## Pantalla · filamentos
+
+- Filamentos
+- 7 filamentos · 8 rollos · 4.9 kg disponibles · valor $2,044.
+- Agregar rollo
+- Filamento Por gramo Disponible
+- PETG Negro
+- 1 rollo · Sunlu
+- $0.46
+- 800 g Normal
+- PLA Blanco
+- 2 rollos · Bambu Lab, Sunlu
+- $0.38
+- 1,720 g Normal
+- PLA Gris claro
+- 1 rollo · Bambu Lab
+- 940 g Normal
+- PLA Negro
+- 1 rollo · eSUN
+- $0.36
+- 410 g Normal
+- PLA Rojo
+- $0.37
+- 600 g Normal
+- PLA Silk Morado
+- $0.47
+- 85 g Se acaba
+- TPU 95A Azul
+- $0.86
+- 300 g Poco
+
+## Pantalla · insumos
+
+- Insumos
+- 4 insumos · Valor en inventario: $256 · Por reponer: 1.
+- Nuevo insumo
+- Argolla de llavero
+- $0.50 por pza
+- Suficiente
+- 190
+- pza disponibles
+- aviso en 30
+- Caja de regalo
+- $4.50 por pza
+- Poco
+- 3
+- aviso en 5
+- Imán de base
+- $1.50 por pza
+- 57
+- aviso en 10
+- Bolsa de empaque
+- $0.80 por pza
+- 78
+- aviso en 20
+
+## Pantalla · impresoras
+
+- Impresoras
+- Agregar impresora
+- Las 2 impresoras costaron $15,800 y ya recuperaron 34.5% con la ganancia acumulada de $5,450 (ventas menos gastos). Llevan 440 h impresas. Hay 2 tareas de mantenimiento por hacer.
+- Inversión recuperada: 34.5%
+- Bambu Lab P1S
+- $12,000 · comprada el 4 jul
+- Imprimiendo
+- 3 × Letrero de taquería
+- 62%
+- Quedan 6 h 50 min · Pedido #3 · Taquería Los Compadres
+- Inversión recuperada
+- 32.2%
+- $3,865 de $12,000. Es un estimado: la ganancia después de gastos se reparte según las horas que trabajó cada impresora.
+- Mantenimiento
+- 312 h impresas
+- Cambiar la boquilla
+- Cada 300 h · última vez 12 sep
+- Faltan 108 h
+- Hecho
+- Lubricar ejes
+- Cada 200 h · última vez 23 ago
+- Pasó 12 h
+- Limpiar la cama
+- Cada 100 h · última vez 23 oct
+- Faltan 48 h
+- Agregar tarea
+- Costo por hora
+- $3.36
+- $3.00 máquina + $0.36 luz
+- Vida útil gastada
+- 6.2%
+- de 5,000 h
+- Terminó este trabajo
+- Editar costos
+- Ender 3 V3 SE
+- $3,800 · comprada el 24 jul
+- 10 × Servilletero con logo
+- 30%
+- Quedan 17 h 30 min · Pedido #3 · Taquería Los Compadres
+- En cola · 1
+- 50 × Llavero con nombre
+- Pedido #4 · Tacos El Güero
+- inicia en ~17 h 30 min
+- 41.7%
+- $1,585 de $3,800. Es un estimado: la ganancia después de gastos se reparte según las horas que trabajó cada impresora.
+- 128 h impresas
+- Cada 250 h · sin registro
+- Faltan 122 h
+- Nivelar la cama
+- Cada 80 h · última vez 7 oct
+- Pasó 8 h
+- Revisar las correas
+- Cada 300 h · sin registro
+- Faltan 172 h
+- $2.20
+- $1.75 máquina + $0.45 luz
+- 3.2%
+- de 4,000 h
+
+## Pantalla · produccion
+
+- Producción
+- Todo lo que se imprimió: para existencias, pedidos y pruebas.
+- Registrar impresión
+- Imprimiéndose ahora
+- 3 × Letrero de taquería
+- Bambu Lab P1S · Pedido #3 · quedan 6 h 50 min
+- 10 × Servilletero con logo
+- Ender 3 V3 SE · Pedido #3 · quedan 17 h 30 min
+- 50 × Llavero con nombre
+- Ender 3 V3 SE · Pedido #4 · en cola
+- En cola
+- Todo 11
+- Existencias 9
+- Pedidos 1
+- Pruebas 1
+- Se registraron 11 impresiones y se usaron 570 g de filamento. 2 fallaron (18.2%); la reserva en el precio es 5%. 1 fue prueba de material (22 g).
+- Salieron bien
+- 9 impresiones
+- Fallaron
+- 2 impresiones
+- Fecha Detalle Impresora Filamento Gramos Tiempo Resultado
+- 31 oct Doctor Doom · busto
+- Para existencias
+- Bambu Lab P1S
+- 14 g 1.8 h Falló
+- 29 oct Doctor Doom · busto
+- 42 g 5 h Salió bien
+- 27 oct Hulk · puño
+- 40 g 4.2 h Salió bien
+- 26 oct 10 × Llavero con nombre
+- Ender 3 V3 SE
+- 60 g 3 h Salió bien
+- 24 oct Prueba del PLA Silk morado: temperatura y velocidad
+- Prueba de material
+- 22 g 1.1 h Salió bien
+- 23 oct Letrero de taquería
+- 85 g 6 h Salió bien
+- 20 oct Soporte de celular PETG
+- 55 g 3.2 h Salió bien
+- 17 oct Spider-Man · salto
+- 40 g 4.5 h Salió bien
+- 14 oct Servilletero con logo
+- 45 g 2.5 h Salió bien
+- 17 g 0.9 h Falló
+- 6 oct 8 × Servilletero con logo
+- Pedido #1
+- 150 g 6.4 h Salió bien
+
+## Pantalla · existencias
+
+- Existencias
+- Total: 22 unidades de 7 piezas · Libres: 13 · Apartadas: 9.
+- Registrar impresión
+- Llevar existencias de otra pieza
+- Doctor Doom · busto
+- $250 de lista
+- Pocas
+- 1 libre
+- 2 apartadas
+- Total 3
+- Hulk · puño
+- 2 libres
+- 1 apartada
+- Llavero con nombre
+- $50 de lista
+- Disponible
+- 6 libres
+- 3 apartadas
+- Total 9
+- Soporte de celular PETG
+- $79 de lista
+- 0 apartadas
+- Total 2
+- Spider-Man · salto
+- Spider-Man · salto (silk morado)
+- Total 1
+- Spider-Man · trepando
+- Todo apartado
+- 0 libres
+
+## Pantalla · compras
+
+- Compras
+- Nuevo proveedor
+- Hay 4 cosas por comprar, con un costo aproximado de $1,292. 1 es urgente (pedido en espera o agotado).
+- Sunlu Oficial
+- Mercado Libre · Envío en 2 a 3 días. Mejor precio en 4 rollos o más.
+- Copiar lista
+- Editar
+- PLA Silk Morado Sunlu
+- Quedan 85 g.
+- 1 rollo
+- ≈ $470
+- Registrar compra
+- TPU 95A Azul Sunlu
+- Quedan 300 g.
+- ≈ $430
+- eSUN México
+- 33 5555 0101
+- PLA Negro eSUN
+- Pedido #5 necesita 535 g más. Disponible: 410 g.
+- ≈ $360
+- Empaques Guadalajara
+- 33 5555 0123 · Cajas y bolsas.
+- Caja de regalo
+- Quedan 3 pza. Aviso en 5.
+- 7 pza
+- ≈ $32
+- Proveedores
+- Mercado Libre · Marcas: Sunlu
+- Bambu Lab Store
+- tienda en línea · Marcas: Bambu Lab
+- 33 5555 0101 · Marcas: eSUN
+- Tornillería y mercería Centro
+- 33 5555 0188 · 2 insumos
+- 33 5555 0123 · 2 insumos
+- Últimas compras
+- PLA Blanco · Sunlu
+- 26 oct
+- $370
+- PLA Gris claro · Bambu Lab
+- 20 oct
+- $380
+- TPU 95A Azul · Sunlu
+- 10 oct
+- $430
+- PETG Negro · Sunlu
+- 2 oct
+- $460
+- PLA Rojo · eSUN
+- 28 sep
+- PLA Silk Morado · Sunlu
+- 24 sep
+- $470
+
+## Pantalla · clientes
+
+- Clientes
+- 4 clientes · 4 con pedidos en curso
+- Nuevo cliente
+- Han comprado $5,040 en total y quedan $8,110 por cobrar.
+- Cliente Contacto Compras Debe
+- CA
+- Cafetería Alma
+- Restaurante
+- 33 3456 7890 $0 $2,460
+- MR
+- Mariana R.
+- Persona
+- Facebook Marketplace $1,550 $1,000
+- TE
+- Tacos El Güero
+- 33 1234 5678 $1,930 $3,300
+- TL
+- Taquería Los Compadres
+- 33 2345 6789 $1,560 $1,350
+
+## Pantalla · gastos
+
+- Gastos
+- Lo que no va en el costo de cada pieza.
+- Registrar gasto
+- En los últimos 30 días hubo $2,707 en gastos. Las ventas dejaron $5,077 de ganancia, así que la ganancia real fue $2,370. Los gastos fijos suman $1,600 al mes (2 se repiten); para no perder hay que vender $3,343 cada 30 días.
+- $2,707
+- Ganancia real
+- $2,370
+- Por categoría
+- Renta o espacio
+- $1,183
+- Herramientas
+- $450
+- Servicios
+- $394
+- Mantenimiento y refacciones
+- $380
+- Publicidad
+- $300
+- Punto de equilibrio
+- Con gastos de $2,707 y un margen de 81% por venta, hay que vender $3,343 en 30 días para que la ganancia cubra los gastos.
+- Vendido $6,270
+- Meta $3,343
+- Superado: la ganancia ya cubre los gastos
+- Todos los gastos
+- Publicidad en Facebook
+- 18 oct
+- Boquillas y refacciones
+- 12 oct
+- Espátulas, pinzas y lijas
+- 4 oct
+- Renta del espacio de trabajo
+- Cada mes desde 18 ago
+- $1,200
+- al mes
+- Internet
+- $400
+
+## Pantalla · reportes
+
+- Reportes
+- Comparado contra el periodo anterior.
+- Copiar resumen
+- 7 días
+- 30 días
+- 90 días
+- Todo
+- 3 oct al 1 nov · 30 días · comparado con 3 sep al 2 oct
+- Se vendieron $6,270 en 13 ventas. Después de costo y comisiones quedaron $5,077 de ganancia, y tras los gastos del negocio $2,370.
+- Ventas ▲ 14.6%
+- Ganancia ▲ 17.6%
+- Gastos ▲ 71.7%
+- contra el periodo anterior
+- Venta promedio $482
+- 46 piezas (3.5 por venta)
+- Descuentos $280
+- De cada $100 vendidos, a dónde se va
+- $43
+- $38
+- Material $545
+- $8.7
+- Luz $42
+- $0.7
+- Máquina $339
+- $5.4
+- Extras $127
+- $2
+- Fallos (reserva) $55
+- $0.9
+- Comisiones $85
+- $1.4
+- Gastos del negocio $2,707
+- Ganancia real $2,370
+- Costo por concepto estimado con los costos actuales de cada pieza.
+- Ventas por semana
+- Costo
+- Comisión
+- Ganancia
+- $0
+- $500
+- $1,000
+- $1,500
+- $2,000
+- $2,500
+- $50
+- 3 oct
+- $1,300
+- 5 oct
+- $1,250
+- 12 oct
+- $2,170
+- 19 oct
+- 26 oct
+- Ver como tabla
+- Ganancia por pieza
+- Spider-Man · salto
+- 5 vendidas · $1,225 · costo $212 · margen 82.7%
+- $1,013
+- Spider-Man · trepando
+- 4 vendidas · $955 · costo $163 · margen 82.9%
+- $792
+- Hulk · puño
+- 4 vendidas · $1,000 · costo $164 · margen 75.1%
+- $751
+- Llavero con nombre
+- 19 vendidas · $770 · costo $70 · margen 90.9%
+- $700
+- Servilletero con logo
+- 8 vendidas · $880 · costo $214 · margen 75.7%
+- $666
+- Doctor Doom · busto
+- 3 vendidas · $750 · costo $137 · margen 81.7%
+- $613
+- Letrero de taquería
+- 1 vendida · $450 · costo $69 · margen 84.7%
+- $381
+- Soporte de celular PETG
+- 2 vendidas · $240 · costo $79 · margen 67.3%
+- $161
+- Total: 46 vendidas · $6,270 · costo $1,108 · ganancia $5,077 · margen 81%
+- Canales de venta
+- Facebook
+- 7 ventas · $2,680 vendidos · comisión $0
+- $2,241
+- WhatsApp
+- 4 ventas · $2,850 vendidos · comisión $0
+- $2,336
+- Efectivo
+- 1 venta · $240 vendidos · comisión $0
+- Mercado Libre
+- 1 venta · $500 vendidos · comisión $85
+- $339
+- Clientes
+- Sin cliente (mostrador)
+- 10 ventas · ganancia $3,117
+- $3,840
+- Mariana R.
+- 1 venta · ganancia $913 · por cobrar $1,000
+- $1,100
+- Tacos El Güero
+- 1 venta · ganancia $666 · por cobrar $3,300
+- $880
+- Taquería Los Compadres
+- 1 venta · ganancia $381 · por cobrar $1,350
+- $450
+- Colecciones
+- Colección Doomsday blanca
+- 2 sets · $2,000 · margen 82%
+- $1,640
+- Spider-Man · 2 poses
+- 1 set · $450 · margen 81%
+- $365
+- Impresoras
+- Bambu Lab P1S
+- 9 impresiones · 2 fallos (22.2%) · $3.36 por hora
+- 29.2 h
+- Ender 3 V3 SE
+- 2 impresiones · $2.20 por hora
+- 9.4 h
+- Consumo de filamento
+- PLA Silk Morado
+- 549 g
+- PLA Negro
+- 361 g
+- PLA Rojo
+- 240 g
+- PLA Blanco
+- 174 g
+- PETG Negro
+- 120 g
+- TPU 95A Azul
+- PLA Gris claro
+- 36 g
+- Fallos y merma: 24.9% del filamento; 2 de 11 impresiones fallaron. Reserva en el precio: 5%. La reserva es menor a lo real: ajustar en Ajustes.
+- Estado actual
+- No depende del periodo
+- Pedidos en curso
+- Hay 5 pedidos en curso (2 en producción, 1 listo) por $8,150. Ya se cobró $3,000 y quedan $5,150 por cobrar. Ganancia esperada: $6,649.
+- Pagado: 36.8% del total
+- Inventario
+- Hay 22 piezas terminadas (13 libres, 9 apartadas) que valen $546 a costo y $3,358 a precio de lista. Además hay 4.9 kg de filamento en 8 rollos, por $2,044.
+- Piezas terminadas
+- $546
+- Filamento
+- $2,044
+- Total en inventario: $2,590 (piezas a costo + filamento). 1 cotización espera respuesta por $2,460.
+
+## Pantalla · ajustes
+
+- Ajustes
+- Estos valores alimentan todos los costos.
+- Costos del taller
+- Luz (CFE)
+- $/kWh
+- Recibo: total ÷ kWh
+- Reserva para fallos
+- %
+- Se ajusta con el historial real
+- Purga y desperdicio
+- Extra de filamento por pieza
+- Piso de margen
+- Por debajo se muestra una alerta
+- Margen por fórmula
+- Por omisión en piezas por fórmula; cada pieza puede tener el suyo
+- Costo por hora en Bambu Lab P1S: $3.36 ($3.00 de máquina + $0.36 de luz).
+- Canales de venta
+- La comisión se resta de la ganancia en cada venta.
+- Quitar
+- Agregar canal
+- Documentos
+- Salen en las cotizaciones y notas de venta.
+- Nombre del negocio
+- Giro
+- Teléfono
+- Correo
+- Ciudad
+- Vigencia de la cotización
+- días
+- Texto al pie de la cotización
+- Condiciones de pago, tiempos, garantía
+- Copia de seguridad
+- Una copia en otro lugar (USB, nube) protege si falla el disco.
+- Aún no hay una copia descargada
+- Descargar copia
+- Restaurar desde archivo
+- Copiar respaldo como texto
+- Restaurar pegando texto
+- Copias automáticas una por día, las últimas 7
+- 1 nov34 KB
+- Restaurar
+- Exportar a Excel
+- Archivos CSV que abren Excel y Google Sheets.
+- Ventas
+- Descargar
+- Pedidos
+- Clientes
+- Piezas y costos
+- Filamentos y rollos
+- Insumos
+- Gastos
+- Qué copiar
+- Copiar tabla
+- Datos de ejemplo
+- Antes se guarda una copia de lo que hay ahora.
+- Volver a los datos de ejemplo
+
+## Pantalla · productos (colecciones)
+
+- Productos
+- Conjuntos de piezas que se venden juntas.
+- Nueva colección
+- Nueva pieza
+- Piezas 9
+- Colecciones 2
+- Buscar
+- Fichas
+- Lista
+- Colección Doomsday blanca
+- 4 piezas: Spider-Man · salto, Spider-Man · trepando, Doctor Doom · busto, Hulk · puño
+- $1,000
+- Ganas $820
+- Costo $179.78
+- 3 vendidos
+- Igual que la suma de sueltas
+- Ningún set completo
+- Pedido
+- Spider-Man · 2 poses
+- 2 piezas: Spider-Man · salto, Spider-Man · trepando
+- $450
+- Ganas $365
+- Costo $85.31
+- 2 vendidos
+- El set sale $50 más barato que sueltas
+- “Suma de sueltas” es el total de las mismas piezas a su precio de lista. Una venta puede incluir el set completo, algunas piezas o el set junto con otras piezas.
+
+## Pantalla · pedidos (lista)
+
+- Pedidos
+- Nuevo pedido
+- Hay 6 pedidos en curso por $10,610. Faltan $7,610 por cobrar. 5 entregas en los próximos 7 días (1 para hoy o mañana). Si se entregan todos, la ganancia será de $8,678.
+- Cobrado $3,000 de $10,610
+- Tablero
+- Lista
+- Calendario
+- Todos 7
+- Pendientes 3
+- En producción 2
+- Listos 1
+- Entregados 1
+- Cancelados 0
+- Pedido Estado Entrega Total Saldo
+- #1 · Tacos El Güero
+- 8 × Servilletero con logo
+- Entregado 10 oct $880 Pagado
+- #2 · Mariana R.
+- Spider-Man · salto + Spider-Man · trepando + 2 más
+- Listo 2 nov
+- mañana
+- $900 $500
+- #3 · Taquería Los Compadres
+- 3 × Letrero de taquería + 10 × Servilletero con logo
+- En producción 3 nov
+- en 2 días
+- $2,350 $1,350
+- #4 · Tacos El Güero
+- 50 × Llavero con nombre
+- En producción 6 nov
+- en 5 días
+- $1,750 $1,750
+- #7 · Tacos El Güero
+- Colección Doomsday blanca
+- Aceptado 7 nov
+- en 6 días
+- $950 $450
+- #5 · Tacos El Güero
+- 20 × Servilletero con logo
+- Aceptado 8 nov
+- en 7 días
+- $2,200 $1,100
+- #6 · Cafetería Alma
+- 30 × Llavero con nombre + 12 × Servilletero con logo
+- Cotizado 13 nov
+- en 12 días
+- $2,460 $2,460
+
+## Pantalla · pedidos (calendario)
+
+- Pedidos
+- Nuevo pedido
+- Hay 6 pedidos en curso por $10,610. Faltan $7,610 por cobrar. 5 entregas en los próximos 7 días (1 para hoy o mañana). Si se entregan todos, la ganancia será de $8,678.
+- Cobrado $3,000 de $10,610
+- Tablero
+- Lista
+- Calendario
+- Noviembre de 2026
+- 6 entregas pendientes este mes por $10,610.
+- Hoy
+- Lun
+- Mar
+- Mié
+- Jue
+- Vie
+- Sáb
+- Dom
+- 26
+- 27
+- 28
+- 29
+- 30
+- 31
+- 1
+- 2
+- #2 Mariana R.
+- 3
+- #3 Taquería Los Compadres
+- 4
+- 5
+- 6
+- #4 Tacos El Güero
+- 7
+- #7 Tacos El Güero
+- 8
+- #5 Tacos El Güero
+- 9
+- 10
+- 11
+- 12
+- 13
+- #6 Cafetería Alma
+- 14
+- 15
+- 16
+- 17
+- 18
+- 19
+- 20
+- 21
+- 22
+- 23
+- 24
+- 25
+
+## Pantalla · calculadora (pieza)
+
+- Productos
+- /
+- Nueva pieza
+- Nombre
+- Subir foto
+- Sin foto: se muestra la pieza dibujada en capas con el color de su filamento.
+- Impresión
+- Impresora de referencia
+- Bambu Lab P1S
+- Ender 3 V3 SE
+- Cualquiera (promedio de mis impresoras)
+- Solo se usa para calcular el costo. La impresión puede hacerse en cualquier impresora.
+- Tiempo de impresión
+- h
+- min
+- Filamentos
+- Filamento
+- Elige un filamento…
+- PETG Negro
+- PLA Blanco
+- PLA Gris claro
+- PLA Negro
+- PLA Rojo
+- PLA Silk Morado
+- TPU 95A Azul
+- Gramos
+- g
+- $0.00
+- Agregar otro filamento
+- Agregar rollo de otro filamento
+- Se elige material y color, no un rollo. Los gramos salen del laminador; si usa varios colores, una línea por filamento.
+- Insumos
+- Esta pieza no lleva insumos.
+- Agregar insumo
+- Su costo entra en el de la pieza y se descuentan solos al imprimir.
+- Placa y extras
+- Piezas por placa
+- Entran en una placa. Sirve para planear; no cambia el costo
+- Otros extras
+- $
+- Gasto fijo por pieza que no es un insumo
+- Precio de lista
+- Precio libre
+- Costo + margen
+- El precio es libre y no depende del costo. Es el precio de lista: en cada venta se puede cambiar.
+- Regalo
+- Coleccionable
+- Personalizado
+- Edición limitada
+- Negocio
+- Notas
+- Ficha de impresión
+- Ajustes del laminador para repetirla igual. Es solo una nota.
+- Altura de capa
+- mm
+- Relleno
+- %
+- Paredes
+- Soportes
+- —
+- No
+- Sí
+- Árbol
+- Boquilla
+- °C
+- Cama
+- Archivo del modelo
+- Dónde está el archivo en esta computadora
+- Notas de impresión
+- Copiar ficha
+- Existencias
+- Llevar existencias de esta pieza
+- Activar si la pieza se imprime para tenerla lista y venderla al momento (llaveros, figuras). Desactivar si solo se hace por pedido, como un letrero con el nombre del cliente.
+- Costo
+- Ganancia
+- Margen
+- Veces el costo
+- Falta el precio para calcular la ganancia.
+- Material $0.00
+- Luz $0.00
+- Máquina $0.00
+- Extras $0.00
+- Fallos (reserva) $0.00
+- Costo total $0.00
+- Atajos para llenar el precio
+- $0
+- Piso · costo + 30%
+- Fórmula · margen 50%
+- ×3
+- ×5
+- ×10
+- Atajos de precio. El precio se puede escribir libremente arriba.
+- Por cantidad
+- Piezas Placas Impresión Filamento Costo
+- 1 1 0 h 0 g $0.00
+- 2 2 0 h 0 g $0.00
+- 5 5 0 h 0 g $0.00
+- 10 10 0 h 0 g $0.00
+- 25 25 0 h 0 g $0.00
+- 50 50 0 h 0 g $0.00
+- El costo por pieza es el mismo sin importar cuántas se pidan ($0.00). La cantidad solo cambia las placas y las horas de impresión. El precio de lista no cambia solo: en la venta o el pedido se fija el que se necesite.
+- Costo en otra impresora
+- Bambu Lab P1S (referencia) $0.00
+- Ender 3 V3 SE $0.00 +$0.00
+- La impresora de la pieza es solo una referencia de costo. Al poner un pedido en producción se elige cualquier impresora.
+- Guardar en el catálogo
+- Cotizar a cliente
+- Descartar
+
+## Pantalla · colección
+
+- Productos
+- /
+- Colecciones
+- Nueva colección
+- Nombre
+- Piezas del conjunto
+- Pieza
+- Elige una pieza…
+- Llavero con nombre
+- Servilletero con logo
+- Spider-Man · salto
+- Spider-Man · trepando
+- Doctor Doom · busto
+- Hulk · puño
+- Soporte de celular PETG
+- Letrero de taquería
+- Spider-Man · salto (silk morado)
+- Cantidad en el set
+- ×
+- Agregar pieza
+- Cada pieza se sigue vendiendo suelta. Si el set lleva dos de la misma, se sube su cantidad.
+- Caja y empaque
+- Extras del set
+- $
+- Caja, tarjeta, relleno
+- Etiquetas y notas
+- Regalo
+- Coleccionable
+- Personalizado
+- Edición limitada
+- Negocio
+- Notas
+- Costo del set
+- $0.00
+- Precio del set
+- Ganancia
+- —
+- Margen
+- Piezas
+- 0
+- Agrega al menos una pieza para calcular el costo del set.
+- Costo del set $0.00
+- Atajos para llenar el precio
+- $0
+- Igual que las sueltas
+- $1
+- −5%
+- −10%
+- −15%
+- costo + 30%
+- Piso
+- Vacío: vale la suma de las piezas sueltas.
+- Guardar la colección
+- Descartar
+
+## Pantalla · armador de venta
+
+- Ventas
+- /
+- Nueva venta
+- Sale de Existencias. Si falta una pieza, conviene un pedido.
+- Datos de la venta
+- Cliente
+- Sin cliente (venta de mostrador)
+- Cafetería Alma
+- Mariana R.
+- Tacos El Güero
+- Taquería Los Compadres
+- ＋ Cliente nuevo…
+- Venta sin cliente.
+- Fecha
+- Canal
+- Facebook
+- WhatsApp
+- Efectivo
+- Mercado Libre
+- Terminal
+- Cobrado ahora
+- $
+- Vacío: cobrada completa. Si es menos, el resto queda por cobrar.
+- Nota
+- Artículos
+- Buscar pieza o colección
+- Colecciones completas
+- Colección Doomsday blanca
+- Colección
+- 4 piezas
+- No alcanza
+- $1,000
+- Spider-Man · 2 poses
+- 2 piezas · ahorra $50 contra las sueltas
+- $450
+- Piezas sueltas
+- Llavero con nombre
+- Pieza suelta
+- 6 libres
+- $50
+- Servilletero con logo
+- Solo por pedido
+- $120
+- Spider-Man · salto
+- En Colección Doomsday blanca, Spider-Man · 2 poses
+- 1 libre
+- $250
+- Spider-Man · trepando
+- Agotada
+- Doctor Doom · busto
+- En Colección Doomsday blanca
+- Hulk · puño
+- 2 libres
+- Soporte de celular PETG
+- $79
+- Letrero de taquería
+- Spider-Man · salto (silk morado)
+- Si falta alguna pieza en existencias: Convertir en pedido: lo disponible se aparta y el resto se imprime.
+- Sin artículos. Elige piezas o colecciones de la lista de arriba; se pueden combinar.
+- Total a cobrar
+- Descuento a todo
+- %
+- Atajos para el descuento
+- Aparecen cuando agregues algo.
+- Agrega artículos para calcular el costo, el material y la ganancia.
+- Registrar venta
+- Descartar
+
+## Pantalla · armador de pedido
+
+- Pedidos
+- /
+- Nuevo pedido
+- Lo que haya en existencias se aparta; solo se imprime el resto.
+- Datos del pedido
+- Cliente
+- Elige un cliente…
+- Cafetería Alma
+- Mariana R.
+- Tacos El Güero
+- Taquería Los Compadres
+- ＋ Cliente nuevo…
+- El pedido necesita un cliente.
+- Entrega
+- Canal
+- Facebook
+- WhatsApp
+- Efectivo
+- Mercado Libre
+- Terminal
+- Para la venta al entregar
+- Anticipo
+- $
+- Pago recibido al crear el pedido
+- Nota
+- Precio aceptado por el cliente
+- Si no está marcado, el pedido queda como cotización en Pendientes.
+- Artículos
+- Buscar pieza o colección
+- Colecciones completas
+- Colección Doomsday blanca
+- Colección
+- 4 piezas
+- $1,000
+- Spider-Man · 2 poses
+- 2 piezas · ahorra $50 contra las sueltas
+- $450
+- Piezas sueltas
+- Llavero con nombre
+- Pieza suelta
+- 6 libres
+- $50
+- Servilletero con logo
+- $120
+- Spider-Man · salto
+- En Colección Doomsday blanca, Spider-Man · 2 poses
+- 1 libre
+- $250
+- Spider-Man · trepando
+- Sin libres
+- Doctor Doom · busto
+- En Colección Doomsday blanca
+- Hulk · puño
+- 2 libres
+- Soporte de celular PETG
+- $79
+- Letrero de taquería
+- Spider-Man · salto (silk morado)
+- Sin artículos. Elige piezas o colecciones de la lista de arriba; se pueden combinar.
+- Total a cobrar
+- Descuento a todo
+- %
+- Atajos para el descuento
+- Aparecen cuando agregues algo.
+- Agrega artículos para calcular el costo, el material y la ganancia.
+- Crear pedido
+- Descartar
+
+## Pantalla · pedido (pestaña piezas)
+
+- Pedidos
+- /
+- Pedido #7
+- Tacos El Güero
+- Aceptado
+- Pedido #7 · creado el 31 oct
+- Poner en producción
+- Editar
+- Cotización
+- Cotizado
+- En producción
+- Listo
+- Entregado
+- Total
+- $950
+- 4 piezas en 1 artículo
+- Saldo
+- $450
+- pagado $500
+- Entrega
+- 7 nov
+- en 6 días
+- Costo y ganancia
+- Piezas
+- Cobro · debe $450
+- Producción
+- Datos
+- Desglose por pieza
+- 3
+- Existencias
+- 1
+- Por imprimir
+- Pieza Cant. Precio c/u Total Costo Ganancia Dónde está
+- Colección Doomsday blanca Colección
+- 4 piezas · precio del set
+- set
+- −5% vs lista
+- $950 $180 $770
+- 3 existencias · 1 por imprimir
+- Spider-Man · salto 1 $237.50 $237.50 $45 $192
+- apartada
+- Spider-Man · trepando 1 $237.50 $237.50 $43 $195
+- Doctor Doom · busto 1 $237.50 $237.50 $48 $190
+- Hulk · puño 1 $237.50 $237.50 $44 $193
+- Total 4
+- piezas
+- En una colección, el precio del set se reparte entre sus piezas según su precio de lista. Los valores por pieza son una parte del set.
+- 3 piezas están apartadas en Existencias para este pedido: no se pueden vender a otro cliente.
+
+## Pantalla · pedido (pestaña cobro)
+
+- Pedidos
+- /
+- Pedido #7
+- Tacos El Güero
+- Aceptado
+- Pedido #7 · creado el 31 oct
+- Poner en producción
+- Editar
+- Cotización
+- Cotizado
+- En producción
+- Listo
+- Entregado
+- Total
+- $950
+- 4 piezas en 1 artículo
+- Saldo
+- $450
+- pagado $500
+- Entrega
+- 7 nov
+- en 6 días
+- Costo y ganancia
+- Piezas
+- Cobro · debe $450
+- Producción
+- Datos
+- Cobro
+- Pagado
+- $500
+- 31 oct
+- Anticipo
+- Quitar
+- Registrar pago
+
+## Pantalla · pedido (pestaña prod)
+
+- Pedidos
+- /
+- Pedido #7
+- Tacos El Güero
+- Aceptado
+- Pedido #7 · creado el 31 oct
+- Poner en producción
+- Editar
+- Cotización
+- Cotizado
+- En producción
+- Listo
+- Entregado
+- Total
+- $950
+- 4 piezas en 1 artículo
+- Saldo
+- $450
+- pagado $500
+- Entrega
+- 7 nov
+- en 6 días
+- Costo y ganancia
+- Piezas
+- Cobro · debe $450
+- Producción
+- Datos
+- Material y tiempo
+- Material · incluye 5% de purga · solo lo que se imprime
+- PLA Blanco 2 rollos
+- 39.9 g
+- quedan 1,680.1 g
+- Tiempo de impresión
+- 4 h
+- Material suficiente. Se descuenta del inventario al poner el pedido en producción.
+
+## Pantalla · pedido (pestaña datos)
+
+- Pedidos
+- /
+- Pedido #7
+- Tacos El Güero
+- Aceptado
+- Pedido #7 · creado el 31 oct
+- Poner en producción
+- Editar
+- Cotización
+- Cotizado
+- En producción
+- Listo
+- Entregado
+- Total
+- $950
+- 4 piezas en 1 artículo
+- Saldo
+- $450
+- pagado $500
+- Entrega
+- 7 nov
+- en 6 días
+- Costo y ganancia
+- Piezas
+- Cobro · debe $450
+- Producción
+- Datos
+- Entrega y canal
+- Entrega en 6 días · 7 nov
+- Canal
+- Facebook
+- WhatsApp
+- Efectivo
+- Mercado Libre
+- Terminal
+- Cliente
+- TE
+- Restaurante · 33 1234 5678 · con logo
+- Ver ficha
+- Editar cliente
+- Notas
+- Notas del pedido
+- Cancelar pedido
+- Eliminar pedido
+
+## Pantalla · ficha de cliente
+
+- Clientes
+- /
+- Cafetería Alma
+- CA
+- Restaurante · cliente desde el 29 oct
+- Nuevo pedido
+- Registrar venta
+- Editar
+- Ha comprado $0 en 0 ventas y 1 pedido, con una ganancia de $0. Tiene 1 pedido en curso. Debe $2,460.
+- Contacto
+- 33 3456 7890 Copiar
+- Logo
+- Sin logo
+- Falta que manden su logo.
+- No se puede eliminar porque tiene 1 pedido y 0 ventas.
+- Historial
+- Fecha Detalle Estado Total
+- 31 oct Pedido #6
+- 30 × Llavero con nombre + 12 × Servilletero con logo
+- Cotizado $2,460
+
+## Pantalla · calculadora (pieza existente)
+
+- Productos
+- /
+- Editar pieza
+- Nombre
+- Subir foto
+- Sin foto: se muestra la pieza dibujada en capas con el color de su filamento.
+- Impresión
+- Impresora de referencia
+- Bambu Lab P1S
+- Ender 3 V3 SE
+- Cualquiera (promedio de mis impresoras)
+- Solo se usa para calcular el costo. La impresión puede hacerse en cualquier impresora.
+- Tiempo de impresión
+- h
+- min
+- Filamentos
+- Filamento
+- PETG Negro
+- PLA Blanco
+- PLA Gris claro
+- PLA Negro
+- PLA Rojo
+- PLA Silk Morado
+- TPU 95A Azul
+- Gramos
+- g
+- $2.22
+- Disponible: 600 g en 1 rollo · $0.37 por gramo
+- Agregar otro filamento
+- Agregar rollo de otro filamento
+- Se elige material y color, no un rollo. Los gramos salen del laminador; si usa varios colores, una línea por filamento.
+- Insumos
+- Elegir insumo
+- Argolla de llavero
+- Caja de regalo
+- Imán de base
+- Bolsa de empaque
+- pza
+- $0.50
+- Agregar insumo
+- Su costo entra en el de la pieza y se descuentan solos al imprimir.
+- Placa y extras
+- Piezas por placa
+- Entran en una placa. Sirve para planear; no cambia el costo
+- Otros extras
+- $
+- Gasto fijo por pieza que no es un insumo
+- Precio de lista
+- Precio libre
+- Costo + margen
+- El precio es libre y no depende del costo. Es el precio de lista: en cada venta se puede cambiar.
+- Regalo
+- Coleccionable
+- Personalizado
+- Edición limitada
+- Negocio
+- Notas
+- Ficha de impresión
+- Ajustes del laminador para repetirla igual. Es solo una nota.
+- Altura de capa
+- mm
+- Relleno
+- %
+- Paredes
+- Soportes
+- —
+- No
+- Sí
+- Árbol
+- Boquilla
+- °C
+- Cama
+- Archivo del modelo
+- Dónde está el archivo en esta computadora
+- Notas de impresión
+- Copiar ficha
+- Existencias
+- Llevar existencias de esta pieza
+- Activar si la pieza se imprime para tenerla lista y venderla al momento (llaveros, figuras). Desactivar si solo se hace por pedido, como un letrero con el nombre del cliente.
+- Existencias actuales: 9 (6 libres). Se administran en Existencias.
+- Costo
+- $3.67
+- Ganancia
+- $46
+- Margen
+- 92.7%
+- Veces el costo
+- ×13.6
+- Ganancia de $46 por pieza (13.6 veces el costo).
+- Material $2.33 4.7%
+- Luz $0.14 0.3%
+- Máquina $0.53 1.1%
+- Extras $0.50 1%
+- Fallos (reserva) $0.18 0.4%
+- Costo total $3.67
+- Ganancia $46.33 92.7%
+- Atajos para llenar el precio
+- $6
+- Piso · costo + 30%
+- $8
+- Fórmula · margen 50%
+- $12
+- ×3
+- $19
+- ×5
+- $40
+- ×10
+- Atajos de precio. El precio se puede escribir libremente arriba.
+- Por cantidad
+- Piezas Placas Impresión Filamento Costo
+- 1 1 0 h 18 min 6 g $3.67
+- 2 1 0 h 36 min 12 g $7.35
+- 5 1 1 h 30 min 30 g $18.37
+- 10 1 3 h 60 g $36.75
+- 25 3 7 h 30 min 150 g $91.87
+- 50 5 15 h 300 g $183.74
+- El costo por pieza es el mismo sin importar cuántas se pidan ($3.67). La cantidad solo cambia las placas y las horas de impresión. El precio de lista no cambia solo: en la venta o el pedido se fija el que se necesite.
+- Costo en otra impresora
+- Bambu Lab P1S $4.04 +$0.37
+- Ender 3 V3 SE (referencia) $3.67
+- La impresora de la pieza es solo una referencia de costo. Al poner un pedido en producción se elige cualquier impresora.
+- Guardar cambios
+- Guardar como variante nueva
+- Cotizar a cliente
+- Registrar venta
+- Eliminar pieza
+
+## Pantalla · pedido en producción
+
+- Pedidos
+- /
+- Pedido #3
+- Taquería Los Compadres
+- En producción
+- Pedido #3 · creado el 26 oct
+- Marcar listo
+- Cotización
+- Cotizado
+- Aceptado
+- Listo
+- Entregado
+- Total
+- $2,350
+- 13 piezas en 2 artículos
+- Saldo
+- $1,350
+- pagado $1,000
+- Entrega
+- 3 nov
+- en 2 días
+- Costo y ganancia
+- Piezas
+- Cobro · debe $1,350
+- Producción
+- Datos
+- Desglose por pieza
+- 13
+- Imprimiendo
+- Pieza Cant. Precio c/u Total Costo Ganancia Dónde está
+- Letrero de taquería 3 $450 $1,350 $207 $1,143
+- 3
+- Bambu Lab P1S · 62%
+- Servilletero con logo 10 $100
+- −17% vs lista
+- $1,000 $267 $733
+- 10
+- Ender 3 V3 SE · 30%
+- Total 13
+- piezas
+- $2,350 $474 $1,876
+
+## Cajón · insumo
+
+- Insumo
+- Argolla de llavero
+- $0.50 por pza · Paquete de 200
+- Disponible
+- 190 pza
+- Suficiente
+- Aviso cuando queden
+- 30 pza
+- Valor en inventario
+- $95.00
+- Usado en
+- 1 pieza
+- Registrar compra
+- Usar o ajustar
+- Editar
+- Piezas que lo llevan
+- Llavero con nombre
+- 1 pza por pieza
+- Movimientos
+- Las existencias se calculan sumando cada movimiento; no se editan directamente.
+- Fecha Movimiento Cantidad Nota
+- 26 oct Uso -10 Llavero con nombre × 10
+- 17 sep Compra +200 Compra de 200 piezas
+
+## Cajón · filamento
+
+- Filamento
+- PETG Negro
+- 1 rollo registrado
+- Disponible
+- 800 g
+- Valor
+- $368
+- Costo por gramo
+- $0.46
+- Rollos con material
+- 1
+- Agregar rollo de PETG Negro
+- Registrar movimiento
+- Rollos
+- Sunlu
+- Movimiento
+- Editar
+- 800 g de 1,000 g
+- Compra del 2 oct · costo $460 · $0.46 por gramo
+- Movimientos
+- El peso no se edita directamente: se calcula sumando cada movimiento.
+- Fecha Movimiento Gramos Nota
+- 29 oct Consumo -36 Piezas del catálogo
+- 22 oct Merma -8 Purga al cambiar de color
+- 15 oct Fallo -20 Fallo: se despegó de la cama
+- 8 oct Consumo -56 Pedido a un cliente
+- 2 oct Compra +1,000 Compra del rollo
+- 1 oct Consumo -80 Lote de llaveros
+
+## Cajón · existencias
+
+- Existencias
+- Doctor Doom · busto
+- Precio de lista $250 · Costo $41.56
+- Total
+- 3
+- Pocas
+- Libres
+- 1
+- Apartadas
+- 2
+- en pedidos aceptados
+- Valor de lista
+- $750
+- costo $125
+- Registrar impresión
+- Ajustar
+- Vender
+- Apartadas para pedidos
+- Pedido #2 · Mariana R.
+- 1 pieza
+- Listo
+- Pedido #7 · Tacos El Güero
+- Aceptado
+- Siguen en Existencias, pero están reservadas. Salen al entregar el pedido.
+- Movimientos
+- Las existencias se calculan sumando cada movimiento; no se editan directamente.
+- Fecha Movimiento Piezas Nota
+- 31 oct Venta -1 Colección completa y dos llaveros
+- 30 oct Impresa para pedido +1 Pedido #2
+- 29 oct Venta -1 Venta
+- 29 oct Impresa +1 Impresión para existencias
+- 16 oct Venta -1 Regalo de cumpleaños
+- 24 sep Venta -1 Venta
+- 21 sep Venta -1 Venta
+- 18 sep Venta -1 Venta
+- 17 sep Inventario inicial +7 Inventario inicial
+
+## Diálogo · cliente nuevo
+
+- Nuevo cliente
+- Nombre
+- Tipo
+- Restaurante
+- Empresa
+- Persona
+- Otro
+- WhatsApp o contacto
+- Logo
+- Sin imagen
+- Subir imagen
+- PNG, JPG o SVG. Se guarda reducida.
+- Logo recibido
+- Indica que el logo ya se recibió, aunque el archivo se guarde fuera del sistema.
+- Notas
+- Cancelar
+- Guardar cliente
+
+## Diálogo · venta
+
+- Ventas
+- Últimos 60 días.
+- Registrar venta
+- Se vendieron $11,740 en 23 ventas en los últimos 60 días. Después de costo y comisiones quedaron $9,395 de ganancia.
+- De cada $100 vendidos, a dónde se va
+- $9.2
+- $80
+- Material $1,084
+- Luz $80
+- $0.7
+- Máquina $648
+- $5.5
+- Extras $213
+- $1.8
+- Fallos (reserva) $107
+- $0.9
+- Comisiones $214
+- Ganancia $9,395
+- Hay 1 venta con saldo: faltan $500 por cobrar. Se registra con “Registrar abono” al abrir la venta.
+- Todos los canales
+- Facebook
+- WhatsApp
+- Efectivo
+- Mercado Libre
+- Terminal
+- Fecha Artículos Total Ganancia
+- 31 oct
+- Colección Doomsday blanca
+- Colección
+- Spider-Man · salto, Spider-Man · trepando, Doctor Doom · busto, Hulk · puño
+- 2 ×
+- Llavero con nombre
+- Mariana R. · WhatsApp · Colección completa y dos llaveros
+- $1,100
+- Debe $500
+- $913
+- 29 oct
+- Doctor Doom · busto
+- $250 $208
+- 27 oct
+- 3 ×
+- $150 $139
+- 25 oct
+- Letrero de taquería
+- Taquería Los Compadres · WhatsApp · Letrero para la taquería
+- $450 $381
+- 23 oct
+- Spider-Man · salto
+- Spider-Man · trepando
+- Facebook · Dos figuras y un llavero
+- $530
+- −4% vs lista
+- $451
+- 22 oct
+- Hulk · puño
+- $500 $339
+- 20 oct
+- Spider-Man · 2 poses
+- Spider-Man · salto, Spider-Man · trepando
+- $450 $365
+- 19 oct
+- Soporte de celular PETG
+- $240
+- +52% vs lista
+- $161
+- 16 oct
+- Facebook · Regalo de cumpleaños
+- $1,000 $820
+- 13 oct
+- Facebook · Una sola figura de la colección
+- $250 $211
+- 10 oct
+- 8 ×
+- Servilletero con logo
+- Tacos El Güero · Pedido #1 · WhatsApp · Pedido #1
+- $880
+- −8% vs lista
+- $666
+- 7 oct
+- 12 ×
+- WhatsApp · Para un evento
+- $420
+- −30% vs lista
+- $376
+- 4 oct
+- $50 $46
+- 1 oct
+- $400 $353
+- 28 sep
+- $350 $304
+- 26 sep
+- 24 sep
+- 21 sep
+- $260
+- +4% vs lista
+- $174
+- 18 sep
+- $500 $421
+- 15 sep
+- 6 ×
+- Taquería Los Compadres · WhatsApp · Servilleteros para la fonda
+- $660
+- $500
+- 13 sep
+- $500 $337
+- 10 sep
+- 10 ×
+- Tacos El Güero · WhatsApp · Servilleteros para el restaurante
+- $1,050
+- −13% vs lista
+- $783
+- 7 sep
+- 4 ×
+- $300
+- +8% vs lista
+- $246
+
+## Diálogo · rollo nuevo
+
+- Agregar rollo
+- Elige el filamento
+- Sin marca
+- Cerrar
+- Elige de las listas: el rollo se une automáticamente a los del mismo material y color, sin importar la marca.
+- Material
+- Elige…
+- PLA
+- PLA Silk
+- PLA+
+- PETG
+- ABS
+- ASA
+- TPU 95A
+- Nylon
+- Otro material…
+- Color
+- Negro
+- Blanco
+- Gris claro
+- Gris
+- Rojo
+- Azul
+- Verde
+- Amarillo
+- Naranja
+- Morado
+- Rosa
+- Café
+- Transparente
+- Otro color…
+- Marca
+- Bambu Lab
+- eSUN
+- Sunlu
+- Polymaker
+- Overture
+- Elegoo
+- Creality
+- Hatchbox
+- Otra marca…
+- Elige el material y el color: el rollo se une automáticamente a los del mismo filamento.
+- Costo del rollo
+- $
+- Envío
+- Reparte el envío entre los rollos del pedido
+- Peso del filamento
+- g
+- Fecha de compra
+- Con el costo y los gramos del rollo se calcula el costo por gramo.
+- Cancelar
+
+## Diálogo · insumo nuevo
+
+- Nuevo insumo
+- Nombre
+- Unidad
+- Costo por unidad
+- $
+- Avisar cuando queden
+- Cantidad que tienes ahora
+- Se anota como inventario inicial
+- Proveedor
+- Sin proveedor
+- Sunlu Oficial
+- Bambu Lab Store
+- eSUN México
+- Tornillería y mercería Centro
+- Empaques Guadalajara
+- Para ordenar la lista de Compras
+- Nota
+- Cancelar
+- Guardar
+
+## Diálogo · compra de insumo
+
+- Registrar compra · Argolla de llavero
+- Cantidad comprada
+- Total pagado
+- $
+- Con eso se actualiza el costo por unidad
+- Fecha
+- Nota
+- Total disponible después: 190.
+- Cancelar
+- Registrar
+
+## Diálogo · usar o ajustar insumo
+
+- Usar o ajustar · Argolla de llavero
+- Disponible: 190 pza.
+- Motivo
+- Lo usé en algo (sale del inventario)
+- Se perdió o se dañó
+- Conteo real (corregir el total)
+- Cantidad
+- Nota
+- Total disponible después: 190.
+- Cancelar
+- Guardar
+
+## Diálogo · impresora nueva
+
+- Agregar impresora
+- Nombre
+- Costo de la impresora
+- $
+- Vida útil estimada
+- h
+- Referencia: 5,000 h
+- Mantenimiento por hora
+- Boquillas, cama, lubricante
+- Consumo promedio
+- kW
+- 120 W = 0.12 kW
+- Horas impresas
+- Fecha de compra
+- Costo por hora: $0.60 de máquina y $0.36 de luz.
+- Cancelar
+- Guardar
+
+## Diálogo · editar costos de impresora
+
+- Editar impresora
+- Nombre
+- Costo de la impresora
+- $
+- Vida útil estimada
+- h
+- Referencia: 5,000 h
+- Mantenimiento por hora
+- Boquillas, cama, lubricante
+- Consumo promedio
+- kW
+- 120 W = 0.12 kW
+- Horas impresas
+- Fecha de compra
+- Costo por hora: $3.00 de máquina y $0.36 de luz.
+- Eliminar impresora
+- Cancelar
+- Guardar
+
+## Diálogo · tarea de mantenimiento
+
+- Agregar tarea de mantenimiento
+- Bambu Lab P1S · 312 h impresas.
+- Tarea
+- Cada cuántas horas
+- h
+- Cancelar
+- Guardar
+
+## Diálogo · mantenimiento hecho
+
+- Cambiar la boquilla · Bambu Lab P1S
+- Se marca como hecha a las 312 h y vuelve a contar desde cero.
+- Fecha
+- Costo de refacciones
+- $
+- Si compraste algo, se anota en Gastos
+- Cancelar
+- Marcar como hecha
+
+## Diálogo · gasto nuevo
+
+- Registrar gasto
+- Concepto
+- Categoría
+- Renta o espacio
+- Servicios
+- Mantenimiento y refacciones
+- Herramientas
+- Publicidad
+- Envíos
+- Sueldo propio
+- Otros
+- Monto
+- $
+- Fecha
+- Hasta (opcional)
+- Solo si se repite y ya terminó
+- Se repite cada mes
+- Renta, internet, suscripciones. Se cuenta cada mes desde la fecha.
+- Cancelar
+- Guardar
+
+## Diálogo · proveedor nuevo
+
+- Nuevo proveedor
+- Nombre
+- Contacto
+- Marcas de filamento que surte
+- Separadas por coma. Sirve para ordenar la lista de compras.
+- Nota
+- Cancelar
+- Guardar
+
+## Diálogo · registrar impresión
+
+- Registrar impresión
+- Motivo
+- Para existencias
+- Prueba de material
+- Las impresiones de pedidos aparecen solas en Producción al marcar el pedido como listo.
+- Pieza
+- Llavero con nombre
+- Servilletero con logo
+- Spider-Man · salto
+- Spider-Man · trepando
+- Doctor Doom · busto
+- Hulk · puño
+- Soporte de celular PETG
+- Letrero de taquería
+- Spider-Man · salto (silk morado)
+- Cantidad impresa
+- Si salió bien, se suman a Existencias.
+- Impresora
+- Bambu Lab P1S
+- Ender 3 V3 SE
+- Impresora utilizada
+- Tiempo real
+- h
+- Resultado
+- Salió bien
+- Falló
+- Gramos usados
+- PLA Rojo
+- disponible 600 g
+- g
+- Se descuentan del inventario de filamento, empezando por el rollo abierto. Son editables si el consumo fue distinto.
+- Cancelar
+
+## Diálogo · ajustar existencias
+
+- Ajustar existencias · Doctor Doom · busto
+- Total 3 · Libres 1 · Apartadas 2
+- Motivo
+- Regalo o muestra
+- Dañada o defectuosa
+- Piezas sin registrar (sumar)
+- Conteo: total real
+- Cantidad de piezas
+- Nota
+- Total: de 3 a 2 piezas.
+- Cancelar
+- Registrar
+
+## Diálogo · llevar existencias
+
+- Llevar existencias de otra pieza
+- Pieza que hoy se hace solo por pedido. Con existencias se puede tener lista y vender de inmediato.
+- Pieza
+- Servilletero con logo
+- Letrero de taquería
+- Conteo actual
+- Piezas ya impresas que hay hoy.
+- Cancelar
+- Llevar existencias
+
+## Diálogo · registrar pago de pedido
+
+- Registrar pago · Pedido #7
+- Total $950 · pagado $500 · saldo $450
+- Monto
+- $
+- Fecha
+- Nota
+- Cancelar
+- Registrar pago
+
+## Diálogo · cancelar pedido
+
+- Cancelar pedido #7
+- Tacos El Güero · Colección Doomsday blanca · $950
+- El pedido pasa a Cancelados y no cuenta como venta.
+- 3 piezas apartadas pasan a libres en Existencias.
+- Motivo
+- Reembolso al cliente
+- $
+- Pagado hasta ahora: $500. Lo que no se reembolse queda como cobrado.
+- Volver
+- Cancelar pedido
+
+## Diálogo · registrar abono de venta
+
+- Registrar abono
+- Total $1,100 · pagado $600 · saldo $500
+- Monto
+- $
+- Fecha
+- Nota
+- Cancelar
+
+## Diálogo · devolver venta
+
+- Devolver venta
+- Venta del 31 oct por $1,100 · Mariana R.. La venta deja de contar en los reportes y se conserva en el historial.
+- Fecha
+- Reembolso al cliente
+- $
+- Lo que se regresó en efectivo o transferencia
+- Qué pasa con las piezas
+- Regresan a Existencias (6 piezas)
+- No se pueden revender
+- Si no se pueden revender, el costo ya gastado queda registrado en la venta.
+- Motivo
+- Cancelar
+
+## Diálogo · nota de venta
+
+- Nota de venta
+- Quick Robot
+- Impresión 3D
+- Guadalajara, Jalisco
+- 31 de octubre de 2026
+- Cliente
+- Mariana R.
+- Facebook Marketplace
+- Descripción Cant. Precio Importe
+- Colección Doomsday blanca
+- Incluye: Spider-Man · salto, Spider-Man · trepando, Doctor Doom · busto, Hulk · puño
+- 1 $1,000 $1,000
+- Llavero con nombre 2 $50 $100
+- Total
+- $1,100
+- Pagado
+- $600
+- Saldo por pagar
+- $500
+- Notas. Colección completa y dos llaveros
+- Gracias por tu preferencia.
+- Copiar texto
+- Guardar como PDF
+- Los datos del negocio se editan en Ajustes.
+- Cerrar
+
+## Diálogo · restaurar copia
+
+- Restaurar respaldo
+- Respaldo generado con “Copiar respaldo”. Reemplaza todos los datos actuales; antes se guarda una copia de seguridad.
+- Respaldo
+- Sin contenido pegado.
+- Cancelar
+- Restaurar
+
+## Diálogo · atajos
+
+- Atajos del teclado
+- Buscar en todo
+- ⌘K
+- Deshacer el último cambio
+- ⌘Z
+- Rehacer
+- ⇧⌘Z
+- Ver esta lista
+- ?
+- Ir a una pantalla: G y luego una letra
+- Inicio
+- GI
+- Productos
+- GP
+- Ventas
+- GV
+- Pedidos
+- GD
+- Filamentos
+- GF
+- Insumos
+- GN
+- Existencias
+- GE
+- Clientes
+- GC
+- Gastos
+- GG
+- Reportes
+- GR
+- Compras
+- GO
+- Ajustes
+- GA
+- En Windows y Linux, Ctrl en lugar de ⌘. Las teclas de una letra no funcionan mientras se escribe en un campo.
+- Cerrar
+
+## Diálogo · buscar
+
+- Acción
+- Registrar una venta
+- Armar una venta nueva
+- Nuevo pedido
+- Cotizar o apartar un pedido
+- Nueva pieza
+- Abrir la calculadora
+- Registrar un gasto
+- Nuevo proveedor
+- Atajos del teclado
+- Lista de teclas
+- Deshacer el último cambio
+- Cmd/Ctrl + Z
+- Pantalla
+- Inicio
+- Productos
+- Ventas
+- Pedidos
+- Filamentos
+- Insumos
+- Impresoras
+- Producción
+- Existencias
+- Clientes
+- Gastos
+- Compras
+- Reportes
+- Ajustes
+- ↑↓ moverse Enter abrir Esc cerrar
+
+## Diálogo · venta (detalle)
+
+- Venta del 31 oct
+- WhatsApp · Mariana R. · Colección completa y dos llaveros
+- Pieza Cant. Precio c/u Total Costo Ganancia Dónde está
+- Colección Doomsday blanca Colección
+- 4 piezas · precio del set
+- 1
+- set
+- $1,000 $1,000 $180 $820
+- 4 existencias
+- Spider-Man · salto 1 $250 $250 $45 $205
+- Existencias
+- Spider-Man · trepando 1 $250 $250 $43 $207
+- Doctor Doom · busto 1 $250 $250 $48 $202
+- Hulk · puño 1 $250 $250 $44 $206
+- Llavero con nombre 2 $50 $100 $7 $93
+- 2
+- Total 6
+- piezas
+- $1,100 $187 $913
+- En una colección, el precio del set se reparte entre sus piezas según su precio de lista. Los valores por pieza son una parte del set.
+- Total
+- $1,100.00
+- Costo
+- $187.13
+- Ganancia
+- $912.87
+- Margen 83%
+- Cobro
+- $1,100
+- Pagado
+- $600
+- Saldo
+- $500
+- 31 oct
+- Anticipo
+- Quitar
+- Registrar abono
+- Nota de venta
+- Editar datos
+- Devolver venta
+- Eliminar venta
+- Cerrar
+
+## Diálogo · movimiento de rollo
+
+- Movimiento · PETG Negro
+- Tipo de movimiento
+- Consumo (se imprimió algo)
+- Fallo (se tiró la pieza)
+- Merma (purga, secado)
+- Ajuste: suma
+- Ajuste: resta (pesé el rollo)
+- Gramos
+- g
+- Nota
+- Disponible después: 800 g de PETG Negro.
+- Cancelar
+- Registrar
+
+## Diálogo · siguiente paso «Poner en producción»
+
+- Poner en producción · Pedido #5
+- Tacos El Güero · entrega 8 nov (en 7 días)
+- Asignación de impresoras
+- 20 × Servilletero con logo
+- 50 h de impresión · 20 piezas por imprimir
+- Impresora para Servilletero con logo
+- Bambu Lab P1S · libre en 6 h 50 min
+- Ender 3 V3 SE · libre en 32 h 30 min
+- Bambu Lab P1S: 2 d 2 h de impresión, le toca en ~6 h 50 min. Termina hacia el 4 nov.
+- Se propone la distribución más rápida; se puede cambiar.
+- Material · incluye 5% de purga
+- PLA Negro
+- 945 g
+- faltan 535 g
+- Tiempo de impresión
+- 50 h
+- Filamento insuficiente: faltan 535 g de PLA Negro (disponible 410 g). Se puede empezar igual.
+- Agregar rollo de PLA Negro
+- Descontar el filamento del inventario al iniciar
+- Resta 945 g de los rollos, empezando por el que ya está abierto. Al terminar, las impresiones se registran solas en Producción.
+- Cancelar
+- Poner en producción
+
+## Diálogo · siguiente paso «Entregar y cobrar»
+
+- Entregar pedido #3
+- Taquería Los Compadres · 3 × Letrero de taquería + 10 × Servilletero con logo
+- Total del pedido
+- $2,350.00
+- Pagado
+- $1,000.00
+- Saldo
+- $1,350.00
+- Cobro al entregar
+- $
+- Si el cobro es menor, el saldo queda registrado en el pedido.
+- Al entregar se registra la venta con el precio acordado y el costo del pedido.
+- Cancelar
+- Entregar y cobrar
+
+## Diálogo · asignar o cambiar impresoras
+
+- Cambiar impresoras · Pedido #3
+- Taquería Los Compadres · entrega 3 nov (en 2 días)
+- Asignación de impresoras
+- 3 × Letrero de taquería
+- 18 h de impresión · 3 piezas por imprimir
+- Impresora para Letrero de taquería
+- Bambu Lab P1S · libre
+- Ender 3 V3 SE · libre en 15 h
+- 10 × Servilletero con logo
+- 25 h de impresión · 10 piezas por imprimir
+- Impresora para Servilletero con logo
+- Bambu Lab P1S: 18 h de impresión, empieza ya. Termina hacia el 2 nov.
+- Ender 3 V3 SE: 25 h de impresión, le toca en ~15 h. Termina hacia el 3 nov.
+- Se propone la distribución más rápida; se puede cambiar.
+- Cancelar
+- Guardar impresoras
+
+## Diálogo · cotizar a cliente
+
+- Cotizar a cliente
+- Cantidad
+- Precio por pieza
+- $
+- Entrega en
+- días
+- Atiende
+- Mensaje para WhatsApp
+- No incluye costo ni margen: solo lo que ve el cliente.
+- Cancelar
+- Copiar mensaje
+
+## Menú lateral
+
+- Quick Robot
+- Impresión 3D
+- Nueva pieza
+- Buscar
+- ⌘K
+- Inicio
+- Vender
+- Productos
+- Ventas
+- Pedidos
+- Taller
+- Filamentos
+- Insumos
+- Impresoras
+- Producción
+- Existencias
+- Compras
+- Negocio
+- Clientes
+- Gastos
+- Reportes
+- Ajustes
+- Datos de ejemplo guardados en esta computadora. No usa servidor.

@@ -2,6 +2,8 @@
 
 `packages/server` (la API y los casos de uso), `packages/db` (datos) y `packages/contract` (lo que viaja). Se entregan como bibliotecas; quien las arranca es `apps/desktop` o, después, `apps/cloud`.
 
+**El contrato detallado — cada operación con su entrada, salida y errores — está en `12-api.md`.** Este documento explica cómo está organizado el servidor; `12` es la lista completa.
+
 ## Stack
 
 | Necesidad | Elección | Razón |
@@ -48,14 +50,15 @@ async function markOrderReady(ctx: Ctx, orderId: string) {
 
 ## Casos de uso (lista completa)
 
-Mismos nombres que `06 §16`. Agrupados:
+Mismos nombres que `06 §16` y `12`. Agrupados:
 
 - **Productos:** `saveProduct`, `saveProductAsVariant`, `deleteProduct`, `saveCollection`, `deleteCollection`
 - **Ventas:** `createSale`, `updateSale`, `deleteSale`, `recordSalePayment`, `deleteSalePayment`, `returnSale`
 - **Pedidos:** `createOrder`, `updateOrder`, `deleteOrder`, `acceptOrder`, `startProduction`, `reassignPrinters`, `markOrderReady`, `deliverOrder`, `cancelOrder`, `recordOrderPayment`, `deleteOrderPayment`
-- **Taller:** `addSpool`, `updateSpool`, `deleteSpool`, `recordSpoolMovement`, `createSupply`, `updateSupply`, `deleteSupply`, `recordSupplyPurchase`, `recordSupplyMovement`, `createPrinter`, `updatePrinter`, `finishQueueEntry`, maintenance (`create/update/complete/delete`), `logPrintRun`, `deletePrintRun`, `enableStockTracking`, `adjustStock`
-- **Negocio:** `createCustomer`, `updateCustomer`, `deleteCustomer`, `createExpense`, `updateExpense`, `deleteExpense`, `createSupplier`, `updateSupplier`, `deleteSupplier`, `updateSettings`, `addChannel`, `removeChannel`
-- **Datos:** `exportWorkspace`, `importWorkspace`, `clearWorkspace`
+- **Taller:** `addSpool`, `updateSpool`, `deleteSpool`, `recordSpoolMovement`, `createSupply`, `updateSupply`, `deleteSupply`, `recordSupplyPurchase`, `recordSupplyMovement`, `createPrinter`, `updatePrinter`, `deletePrinter`, `finishQueueEntry`, mantenimiento (`createMaintenanceTask`, `updateMaintenanceTask`, `completeMaintenance`, `deleteMaintenanceTask`), `logPrintRun`, `deletePrintRun`, `enableStockTracking`, `adjustStock`
+- **Negocio:** `createCustomer`, `updateCustomer`, `removeCustomerLogo`, `deleteCustomer`, `createExpense`, `updateExpense`, `deleteExpense`, `createSupplier`, `updateSupplier`, `deleteSupplier`, `updateSettings`, `addChannel`, `updateChannel`, `removeChannel`
+- **Deshacer:** `restoreProduct`, `restoreCollection`, `restoreSale`, `restoreOrder`, `restoreCustomer`, `restoreExpense`, `restoreSpool`, `restoreSupply`, `restoreSupplier`, `restorePrinter` (y las demás entidades con borrado suave, `05`)
+- **Datos:** `exportWorkspace`, `importWorkspace`, `clearWorkspace`, `createBackup`, `restoreBackup`
 
 Consultas (sin escritura): listados con filtros y paginación, detalle de pedido/venta con desglose por pieza, brief de Inicio, compras calculadas, reportes por periodo, existencias (físicas/apartadas/libres), recuperación de inversión.
 
@@ -64,8 +67,9 @@ Consultas (sin escritura): listados con filtros y paginación, detalle de pedido
 - REST con JSON, bajo `/api/v1`. Recursos en plural: `/orders`, `/sales`, `/products`, …
 - Operaciones de negocio como **verbos sobre el recurso**: `POST /orders/:id/ready`, `POST /orders/:id/deliver`, `POST /sales/:id/return`.
 - Listas: `?status=…&from=…&to=…&q=…&page=…`.
-- Errores: `{ code: 'ORDER_NOT_ACTIVE', message: '…', details? }` con el estado HTTP que corresponda (400, 403, 404, 409, 422).
-- Todo requiere sesión; el modo local usa la sesión fija más el secreto de arranque.
+- Éxito: `{ data, warnings? }`. Error: `{ code, message, details?, errorId? }` con el estado HTTP que corresponda (401, 403, 404, 409, 413, 415, 422, 429, 500, 503, 507). El `message` es para quien depura (inglés); la persona ve el texto en español que `apps/web` busca por `code` (`13`).
+- Todo requiere sesión (salvo `GET /health`); el modo local usa la sesión fija más el secreto de arranque, que Electron agrega como encabezado a cada petición de la ventana.
+- Formato completo, tipos comunes y catálogo de errores: `12 §1–3`.
 
 ## Interfaces que se inyectan
 
@@ -84,7 +88,14 @@ interface Entitlements {
 interface Mailer {
   send(to: string, template: string, data: unknown): Promise<void>;
 }
+interface BackupStore {
+  list(ctx: Ctx): Promise<BackupInfo[]>;                     // { id, on, sizeKb }
+  create(ctx: Ctx, data: Uint8Array): Promise<BackupInfo>;   // una por día; conserva las últimas 7
+  read(ctx: Ctx, id: string): Promise<Uint8Array>;
+}
 ```
+
+`clock` (`now()`) e `ids` (`next()`) también se reciben en `deps`, pero no cambian entre local y nube: existen para que las pruebas fijen la hora y los ids (`14`).
 
 | | Local | Nube |
 |---|---|---|
@@ -92,6 +103,7 @@ interface Mailer {
 | `FileStore` | Carpeta en `userData` | Almacenamiento de objetos (S3 compatible), URL firmadas |
 | `Entitlements` | Siempre permite | Lee el plan de `subscription` |
 | `Mailer` | No hace nada | Proveedor de correo transaccional |
+| `BackupStore` | Carpeta `backups/` junto a los datos, una copia por día, las últimas 7 | Sin copias propias: el respaldo de la base lo hace la plataforma; la persona puede exportar |
 
 ## Cuentas y suscripción (fase de nube)
 
@@ -101,6 +113,8 @@ interface Mailer {
 - Facturación fiscal (CFDI/IVA) **excluida** de este alcance.
 
 ## Seguridad
+
+El detalle completo (OWASP Top 10:2025, decisiones y pruebas) está en `11-seguridad.md`. Resumen:
 
 - Aislamiento por negocio: filtro en repositorios + RLS si la comprobación de PGlite lo permite + **pruebas de aislamiento** obligatorias.
 - Entradas validadas con Zod en el borde; el servidor recalcula montos con `core`.
@@ -119,4 +133,8 @@ interface Mailer {
 
 ## Observabilidad
 
-Registro estructurado (JSON) con `requestId`, `workspaceId`, `useCase`, duración. En local se guarda en un archivo rotativo para diagnosticar problemas; en nube va a la plataforma de logs. Los errores no esperados llevan un id que la persona puede reportar.
+Registro estructurado (JSON) con `requestId`, `workspaceId`, `useCase`, duración y código de respuesta. En local se guarda en `logs/` junto a los datos (7 archivos rotativos de hasta 5 MB); en nube va a la plataforma de logs. Los errores no esperados llevan un `errorId` que la persona ve en pantalla y que sirve para encontrar la traza (`15 §6`).
+
+## Rendimiento y límites
+
+Paginación, presupuestos de tiempo, límites de entrada y el tratamiento de fallos están en `15`. Las pruebas y la cobertura mínima, en `14`.

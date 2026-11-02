@@ -2,6 +2,8 @@
 
 Todo esto vive en `packages/core` como funciones puras. Es la traducción fiel del mockup (`core.js`). Cada regla trae un **caso de prueba con números**: son las primeras pruebas automáticas que se escriben y los resultados deben coincidir al centavo (tolerancia ±0.01 por el redondeo a centavos).
 
+Los estados, motivos y tipos de movimiento se escriben aquí con los nombres del mockup (en español); en el código y la base llevan los nombres en inglés de `03 › Valores internos`. Qué prueba cubre cada caso: `14 §5`.
+
 Convenciones:
 - `x%` en configuración se guarda como número (5 = 5 %).
 - Los pesos se calculan en decimales y se redondean **al guardar**, nunca a la mitad de una fórmula.
@@ -28,6 +30,12 @@ Convenciones:
 > Se toman 50 g en total: consumo = 50/1.05 = 47.6 g, purga = 2.4 g. El inventario queda en 0. El sistema avisa "faltaron 55 g" y deja continuar.
 
 **Faltante**: antes de producir, para cada filamento `need = g·(1+purga/100)`; si `need > hay`, falta `need − hay`.
+
+**Estado de un filamento** (la etiqueta de color en Filamentos), con `q` = lo que hay en total, evaluado en este orden: sin ningún rollo → `Sin rollos`; `q ≤ 0.5 g` → `Agotado`; `q ≤ 150 g` → `Se acaba`; `q ≤ 300 g` → `Poco`; `q` ≥ 95 % de los gramos de sus rollos con material → `Nuevo`; si no → `Normal`.
+
+**Estado de un rollo**: `Vacío` si le quedan ≤ 0.5 g; `Nuevo` si le queda ≥ 95 % de sus gramos; si no, `En uso`.
+
+> Caso 1.3 — Filamento con un solo rollo de 1000 g. Quedan 960 g → `Nuevo` (960 ≥ 950). 940 g → `Normal`. 301 g → `Normal`. 300 g → `Poco`. 150 g → `Se acaba`. 0.4 g → `Agotado`. Un rollo nuevo de 250 g → `Poco` (se evalúa antes que `Nuevo`).
 
 ---
 
@@ -110,6 +118,10 @@ libres    = max(0, físicas − apartadas)
 
 > Caso 5.1 — Físicas 10. Pedido A (aceptado) con `uso = 3`. Pedido B (listo) con `stk = 2`. Pedido C (cancelado) con `uso = 4`.
 > Apartadas = 3 + 2 = **5** · Libres = **5**.
+
+**Estado de una pieza en Existencias**, en este orden: `físicas = 0` → `Agotada`; `libres = 0` → `Todo apartado`; `libres ≤ 2` → `Pocas`; si no → `Disponible`.
+
+> Caso 5.2 — Físicas 5 y apartadas 5 → `Todo apartado`. Físicas 5 y apartadas 3 (libres 2) → `Pocas`. Físicas 5 y apartadas 2 (libres 3) → `Disponible`. Físicas 0 → `Agotada`.
 
 **Sets armables hoy** = mínimo, entre las piezas del set, de `floor(libres / cantidad requerida)`; si alguna pieza no lleva existencias, 0.
 

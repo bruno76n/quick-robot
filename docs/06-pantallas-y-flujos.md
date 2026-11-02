@@ -4,11 +4,13 @@ Esto **no es un diseño nuevo**: es la descripción escrita de lo que ya hace el
 
 Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso de uso del servidor, nombres en `packages/server/src/usecases`) y a dónde lleva.
 
+**Documentos hermanos:** la entrada, salida y errores de cada caso de uso están en `12`; los textos exactos en `13` y en `reference/mockup-textos.md`; qué se ve cuando algo falla, en `15 §5`.
+
 **Convenciones del mockup que se conservan**
 - Solo modo claro. Solo tipografía Geist.
 - Vocabulario fijo: Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Libres, Apartadas, Artículos.
-- Sin segunda persona en la interfaz ("Registrar venta", no "Registra tu venta"). Los documentos para clientes sí pueden hablar directo.
-- Las acciones destructivas se pueden **deshacer** (en el producto: restaurar el borrado suave) y avisan con un aviso emergente que trae el botón "Deshacer".
+- Botones y títulos sin segunda persona ("Registrar venta", no "Registra tu venta"); los mensajes que explican algo siguen la regla de `13 §1`. Los documentos para clientes sí pueden hablar directo.
+- Las eliminaciones se pueden **deshacer** (en el producto: restaurar el borrado suave) y avisan con un aviso emergente que trae el botón "Deshacer".
 
 ---
 
@@ -16,14 +18,14 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 | Elemento | Qué hace |
 |---|---|
-| **Barra lateral** | Inicio · *Vender*: Productos, Ventas, Pedidos · *Taller*: Filamentos, Insumos, Impresoras, Producción, Existencias, Compras · *Negocio*: Clientes, Gastos, Reportes, Ajustes. En pantallas pequeñas se oculta tras un botón de menú |
+| **Barra lateral** | Arriba: la mascota con el **nombre y el giro del negocio** (datos de Ajustes; el mockup los trae fijos como “Quick Robot · Impresión 3D”). Después: Inicio · *Vender*: Productos, Ventas, Pedidos · *Taller*: Filamentos, Insumos, Impresoras, Producción, Existencias, Compras · *Negocio*: Clientes, Gastos, Reportes, Ajustes. En pantallas pequeñas se oculta tras un botón de menú |
 | **Buscar** (⌘/Ctrl + K) | Paleta de comandos: busca piezas, clientes, pedidos, ventas, filamentos y acciones; Enter abre el resultado |
 | **Atajos** (`?`) | Muestra la lista. `g` + letra navega (ir a pantalla); `⌘/Ctrl+Z` deshace; `⇧⌘Z` rehace |
 | **Cajón lateral** | Detalle de un elemento de una lista ancha (filamento, insumo, pieza de existencias) sin salir de la lista; Esc o clic fuera lo cierra |
 | **Diálogos** | Formularios cortos de alta/edición y confirmaciones; se cierran con Esc |
-| **Aviso emergente** | Confirma lo hecho; si fue una eliminación/cancelación/devolución, trae "Deshacer" |
+| **Aviso emergente** | Confirma lo hecho; si fue una eliminación, trae "Deshacer" (devolver una venta y cancelar un pedido no se deshacen: mueven dinero y existencias, `D32`) |
 
-*Producto:* "Deshacer/Rehacer" por historial de estados no se porta tal cual. En el producto, toda eliminación es suave (`deleted_at`) y el aviso llama a `restore<Entidad>`. El rehacer general queda fuera de la primera versión.
+*Producto:* "Deshacer/Rehacer" por historial de estados no se porta tal cual. En el producto, toda eliminación es suave (`deleted_at`) y el aviso llama a `restore<Entidad>` (`12`). El rehacer general queda fuera de la primera versión. Las eliminaciones y cancelaciones piden **confirmación en dos toques** (el botón cambia a "Toca de nuevo para eliminar", `13 §7`), no un cuadro de diálogo.
 
 ---
 
@@ -52,14 +54,15 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 ## 3. Productos
 
-**Muestra:** catálogo de piezas y colecciones en **cuadrícula o lista**, filtros por categoría (Todas, Técnicas, Variantes, etiquetas) y por tipo; cada pieza muestra precio, costo, ganancia, libres en Existencias.
+**Muestra:** dos pestañas con contador, **Piezas** y **Colecciones**; buscador; forma de ver en **Fichas** o **Lista**; en Piezas, filtros **Todas · Técnicas · Variantes**. Cada pieza muestra precio, costo, ganancia y libres en Existencias.
 
 | Botón | Efecto | Lleva a |
 |---|---|---|
 | Nueva pieza | — | Calculadora |
 | Nueva colección | — | Colección (nueva). Pide que existan piezas |
-| Vista (cuadrícula/lista) | Preferencia de vista | — |
+| Fichas / Lista | Preferencia de vista | — |
 | Vender (en una pieza con libres) | — | Armar venta con esa pieza |
+| Variante (en una pieza) | Abre la calculadora con una **copia** de la pieza (nombre "… (variante)", `parentId` = la original); al Guardar se crea con `saveProduct` | Calculadora |
 | Abrir pieza / colección | — | Calculadora / Colección |
 
 ### 3.1 Calculadora (pieza)
@@ -123,12 +126,18 @@ Desglose por pieza (con dónde está cada una), cobro (pagos), nota de venta.
 
 ## 5. Pedidos
 
-**Muestra:** lista de **5 columnas**: Pedido · Estado · Entrega · Total · Saldo; filtros (Todos, activos, por estado, **Cancelados**); vista **Lista** o **Calendario** (por mes, con los pedidos en su fecha de entrega).
+**Muestra:** franja de resumen (pedidos en curso, por cobrar, entregas próximas, ganancia si se entregan todos) y tres vistas, que se cambian con un selector:
+
+- **Tablero** (la que abre por defecto): cuatro columnas — **Pendientes** (cotizados y aceptados, con su conteo), **En producción**, **Listos para entregar**, **Entregados** (solo los 3 más recientes y el enlace "Ver los N entregados"). Cada tarjeta trae cliente, folio, artículos, dónde está cada pieza (existencias / por imprimir), avance de impresión, fecha de entrega, Total · Saldo o Pagado · Ganancia, y el botón del siguiente paso.
+- **Lista**: **5 columnas** — Pedido · Estado · Entrega · Total · Saldo; filtros **Todos · Pendientes · En producción · Listos · Entregados · Cancelados**, cada uno con su conteo.
+- **Calendario**: por mes, con los pedidos en su fecha de entrega; botón "Hoy".
+
+Tras guardar un pedido nuevo se vuelve al Tablero.
 
 | Botón | Lleva a |
 |---|---|
 | Nuevo pedido | Armar pedido |
-| Lista / Calendario | Cambia la vista |
+| Tablero / Lista / Calendario | Cambia la vista |
 | Abrir pedido | Pedido |
 
 ### 5.1 Pedido
@@ -153,7 +162,7 @@ Desglose por pieza (con dónde está cada una), cobro (pagos), nota de venta.
 
 ## 6. Filamentos
 
-**Muestra:** lista ancha de filamentos (material + color) con lo que queda, rollos, costo por gramo, y estado (Disponible/Poco/Agotado). Seleccionar uno abre el **cajón** con sus rollos y movimientos.
+**Muestra:** lista ancha de filamentos (material + color) con lo que queda, rollos, costo por gramo, y estado (Sin rollos · Agotado · Se acaba · Poco · Nuevo · Normal, `04 §1`). Seleccionar uno abre el **cajón** con sus rollos y movimientos.
 
 | Botón | Caso de uso |
 |---|---|
@@ -192,7 +201,7 @@ Desglose por pieza (con dónde está cada una), cobro (pagos), nota de venta.
 
 ## 9. Producción
 
-**Muestra:** bloque **Imprimiéndose ahora** (cola en vivo por impresora) y la lista de **registros**: todo lo que se imprimió (para existencias, pedidos y pruebas), con filtros (Todo, Existencias, Pedidos, Pruebas, Fallos) y totales de piezas, horas, filamento.
+**Muestra:** bloque **Imprimiéndose ahora** (cola en vivo por impresora) y la lista de **registros**: todo lo que se imprimió (para existencias, pedidos y pruebas), con filtros **Todo · Existencias · Pedidos · Pruebas** (cada uno con su conteo) y totales de piezas, horas, filamento.
 | Botón | Caso de uso |
 |---|---|
 | Registrar impresión | `logPrintRun` (pieza, cantidad, impresora, resultado, horas, filamento por rollo, motivo, foto) |
@@ -253,7 +262,7 @@ Desglose por pieza (con dónde está cada una), cobro (pagos), nota de venta.
 
 ## 14. Documentos (cotización y nota de venta)
 
-Se arman en la interfaz con los datos del pedido o la venta y los **datos del negocio** de Ajustes (nombre, giro, teléfono, correo, ciudad, vigencia, pie de página). **Nada de eso va escrito en el código.**
+Se arman en la interfaz con los datos del pedido o la venta y los **datos del negocio** de Ajustes (nombre, giro, teléfono, correo, ciudad, vigencia, pie de página). **Nada de eso va escrito en el código.** El encabezado de la hoja muestra el nombre y el giro como texto; el logo con texto de `assets/` no se usa aquí.
 | Botón | Efecto |
 |---|---|
 | Copiar texto | Versión en texto plano |
@@ -268,7 +277,8 @@ Se arman en la interfaz con los datos del pedido o la venta y los **datos del ne
 | Costos del taller | kWh, fallos, purga, margen mínimo, margen de fórmula | `updateSettings` |
 | Canales de venta | Lista editable de canales con su comisión | `addChannel` / `removeChannel` |
 | Documentos | Datos del negocio que salen en cotizaciones y notas (nombre, giro, teléfono, correo, ciudad, vigencia, pie de página) | `updateSettings` |
-| Copia de seguridad | Descargar copia (archivo), restaurar desde archivo, lista de copias automáticas con "restaurar" | `exportWorkspace` / `importWorkspace` |
+| Copia de seguridad | Estado ("Aún no hay una copia descargada" / "Última copia hace N días"), descargar copia (archivo), restaurar desde archivo, lista de **copias automáticas** (una por día, las últimas 7) con "Restaurar", y en escritorio "Mostrar archivo de registro". Aviso fijo: *"Esta copia contiene todos los datos del negocio. Guárdala en un lugar seguro."* (`11 › S3`) | `exportWorkspace` / `importWorkspace` / `createBackup` / `restoreBackup` |
+| Exportar a Excel (CSV) | Siete tablas: ventas, pedidos, clientes, piezas y costos, filamentos y rollos, insumos, gastos; descargar o copiar | Solo interfaz (`lib/csv.ts`) |
 | Datos de ejemplo (mockup) | "Volver al ejemplo" / "Vaciar" (antes guarda una copia) | En el producto: **Vaciar negocio** con copia previa; la carga de ejemplo es solo de desarrollo |
 
 Los catálogos (materiales, colores con su tono, marcas) **no tienen pantalla propia**: crecen solos cuando se escribe un valor nuevo en un formulario (`catalog_item`).
@@ -282,7 +292,7 @@ Cada acción del mockup (`ACT` en `init.js`) y dónde cae. Las acciones de **nav
 | Acción del mockup | Tipo | Caso de uso del producto |
 |---|---|---|
 | go, nav-toggle, nav-close, dlg-close, drw-close, buscar, atajos, pal-pick, vista, filtro, cat, cat-col, canal-filtro, ped-vista, ped-filtro, ped-tab, prod-filtro, cal-mes, rep-per, fl-sel, ins-sel, ex-sel, fil-ver, tag | presentación | (solo interfaz) |
-| nueva-pieza, open-prod, save-prod, save-var, del-prod, cancel-edit, modo, fil-add, fil-del, ins-add, foto-quitar, ficha-copy, set-precio | productos | `saveProduct`, `saveProductAsVariant`, `deleteProduct` |
+| nueva-pieza, variante, open-prod, save-prod, save-var, del-prod, cancel-edit, modo, fil-add, fil-del, ins-add, foto-quitar, ficha-copy, set-precio | productos | `saveProduct`, `saveProductAsVariant`, `deleteProduct` |
 | nueva-coleccion, open-col, cparte-add, cparte-del, c-precio, save-col, del-col, cancel-col | colecciones | `saveCollection`, `deleteCollection` |
 | cotizar | cotización rápida | (solo cálculo) |
 | venta-new, ped-new, b-to-ped, b-add, b-del, b-lista, b-sep, b-desc, b-piso, b-save, b-cancel | armador | `createSale`, `createOrder` |
@@ -290,16 +300,16 @@ Cada acción del mockup (`ACT` en `init.js`) y dónde cae. Las acciones de **nav
 | ped-open, ped-next, ped-asignar, ped-pago, pago-del, ped-edit, ped-copy, ped-del, ped-cancelar, ped-lista, cli-ped | pedidos | `acceptOrder`, `startProduction`, `reassignPrinters`, `markOrderReady`, `deliverOrder`, `recordOrderPayment`, `deleteOrderPayment`, `updateOrder`, `deleteOrder`, `cancelOrder` |
 | rollo-new, rollo-edit, rollo-del, mov-new | filamento | `addSpool`, `updateSpool`, `deleteSpool`, `recordSpoolMovement` |
 | ins-new, ins-edit, ins-del, ins-compra, ins-uso, ins-ir | insumos | `createSupply`, `updateSupply`, `deleteSupply`, `recordSupplyPurchase`, `recordSupplyMovement` |
-| imp-new, imp-edit, imp-fin, mant-new, mant-edit, mant-hecho, mant-del | impresoras | `createPrinter`, `updatePrinter`, `finishQueueEntry`, `createMaintenanceTask`, `updateMaintenanceTask`, `completeMaintenance`, `deleteMaintenanceTask` |
+| imp-new, imp-edit, imp-del, imp-fin, mant-new, mant-edit, mant-hecho, mant-del | impresoras | `createPrinter`, `updatePrinter`, `deletePrinter`, `finishQueueEntry`, `createMaintenanceTask`, `updateMaintenanceTask`, `completeMaintenance`, `deleteMaintenanceTask` |
 | print-new, prod-open, prod-del | producción | `logPrintRun`, `deletePrintRun` |
 | ex-on, ex-ajuste | existencias | `enableStockTracking`, `adjustStock` |
 | cli-new, cli-edit, cli-edit-b, cli-open, cli-copy, cli-venta, cli-del, cl-logo-quitar | clientes | `createCustomer`, `updateCustomer`, `deleteCustomer`, `removeCustomerLogo` |
 | gasto-new, gasto-edit, gasto-del | gastos | `createExpense`, `updateExpense`, `deleteExpense` |
 | prov-new, prov-edit, prov-del, compra-copy | compras | `createSupplier`, `updateSupplier`, `deleteSupplier` |
 | doc-open, doc-copy, doc-print | documentos | (solo interfaz) |
-| canal-add, canal-del | ajustes | `addChannel`, `removeChannel` |
-| bak-dl, auto-rest, restaurar, export, exp-csv, exp-copy, rep-copy | datos / exportar | `exportWorkspace`, `importWorkspace`; CSV y copiar son de interfaz |
-| undo, redo | historial | Restaurar borrado suave (deshacer); rehacer queda fuera |
+| canal-add, canal-del, (renombrar o cambiar comisión: evento de cambio del campo, sin acción propia) | ajustes | `addChannel`, `removeChannel`, `updateChannel` |
+| bak-dl, auto-rest, restaurar, export, exp-csv, exp-copy, rep-copy | datos / exportar | `exportWorkspace`, `importWorkspace`, `createBackup`, `restoreBackup`; CSV y copiar son de interfaz. "Copiar respaldo como texto" y "Restaurar pegando texto" eran de la maqueta y no pasan al producto |
+| undo, redo | historial | `restoreProduct`, `restoreCollection`, `restoreSale`, `restoreOrder`, `restoreCustomer`, `restoreExpense`, `restoreSpool`, `restoreSupply`, `restoreSupplier`, `restorePrinter` (deshacer); rehacer queda fuera |
 | demo-reset, demo-clear | datos de ejemplo | `clearWorkspace`; la carga de ejemplo es solo para desarrollo |
 
 ---

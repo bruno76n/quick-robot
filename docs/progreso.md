@@ -5,16 +5,16 @@ Estados: `no iniciada` · `en curso` · `igual al mockup` · `verificada con dat
 | Pantalla | Fase | Estado | Notas |
 |---|---|---|---|
 | Inicio | 3 | no iniciada | |
-| Productos (lista) | 2 | igual al mockup | Fichas y lista, piezas y colecciones, filtros y búsqueda comparados en 1440/820/390 px; costos y precios = golden. Existencias, "vendidas" y Vender/Pedido llegan con la fase 3 |
-| Calculadora | 2 | igual al mockup | Desglose en vivo con `core` (mismo valor que guarda el servidor, probado en e2e), atajos, por cantidad, otra impresora, ficha, foto, cotizar, variante. "Registrar venta" en fase 3 |
-| Colección | 2 | igual al mockup | Sets armables y "Registrar venta del set" en fase 3 |
+| Productos (lista) | 2 | no iniciada | |
+| Calculadora | 2 | no iniciada | |
+| Colección | 2 | no iniciada | |
 | Ventas | 3 | no iniciada | |
 | Armador de venta o pedido | 3 | no iniciada | |
-| Pedidos (lista y calendario) | 3 | no iniciada | |
+| Pedidos (tablero, lista y calendario) | 3 | no iniciada | El tablero es la vista por defecto |
 | Pedido (página) | 3 | no iniciada | |
-| Filamentos | 1–2 | igual al mockup | Lista, cajón, agregar/editar/eliminar rollo (Deshacer) y movimientos. Diferencia aceptada: marca del negocio (ver `decisiones.md`) |
-| Insumos | 2 | igual al mockup | Tarjetas, cajón, alta/edición, compra, uso/ajuste, eliminar con Deshacer |
-| Impresoras | 2 | igual al mockup | Mantenimiento completo (Hecho crea gasto). Cola "Imprimiendo" e inversión con ventas en fase 3 |
+| Filamentos | 1–2 | no iniciada | |
+| Insumos | 2 | no iniciada | |
+| Impresoras | 2 | no iniciada | |
 | Producción | 3 | no iniciada | |
 | Existencias | 3 | no iniciada | |
 | Compras | 3 | no iniciada | |
@@ -22,31 +22,18 @@ Estados: `no iniciada` · `en curso` · `igual al mockup` · `verificada con dat
 | Ficha de cliente | 3 | no iniciada | |
 | Gastos | 3 | no iniciada | |
 | Reportes | 3 | no iniciada | |
-| Ajustes | 2 | igual al mockup | Costos, canales, documentos. Copia de seguridad y datos de ejemplo en fase 4 |
+| Ajustes | 2 | no iniciada | |
 | Documentos (cotización y nota) | 3 | no iniciada | |
 | Buscar y atajos | 3 | no iniciada | |
+| Estados de falla (`15 §5`) | 3–4 | no iniciada | Banner, límite de errores, pantallas de falla de Electron |
+| Marca: ícono, logo, mascota | 4 | provisional | `assets/`; reemplazable con el arte final de R1 |
 
 ## Fases
 
 | Fase | Estado | Informe |
 |---|---|---|
-| 1 | terminada (lista para fusionar) | [informe-fase-1.md](informe-fase-1.md) |
-| 2 | terminada (lista para fusionar) | [informe-fase-2.md](informe-fase-2.md) |
-| 3 | no iniciada | |
-| 4 | no iniciada | |
-| 5 | no iniciada | |
-
-## Seguridad (`11-seguridad.md`)
-
-| Categoría | Estado | Prueba |
-|---|---|---|
-| A01 Control de acceso | aplicado (roles completos en fase 5) | `routes-tenancy`, `http-hardening`, `tenancy*` |
-| A02 Configuración | aplicado (Electron en fase 4, hosting en 5) | `http-hardening`, `logging-config` |
-| A03 Cadena de suministro | aplicado | `pnpm audit` en `pnpm security` y CI |
-| A04 Criptografía | secretos y secreto local aplicados; el resto en fase 5 | escaneo de secretos |
-| A05 Inyección | aplicado | lint + `inputs-abuse` + `csv` |
-| A06 Diseño inseguro | aplicado | `inputs-abuse`, `concurrency-postgres`, `amenazas.md` |
-| A07 Autenticación | local aplicado; cuentas en fase 5 | `logging-config` |
-| A08 Integridad | aplicado (importar copias en fase 4) | lint (`eval`), CSP, recursos locales |
-| A09 Registro | aplicado (alertas en fase 5) | `logging-config` |
-| A10 Condiciones excepcionales | aplicado | `failure-injection`, `logging-config`, límite de errores en la interfaz |
+| 1 | no iniciada | `docs/informe-fase-1.md` |
+| 2 | no iniciada | `docs/informe-fase-2.md` |
+| 3 | no iniciada | `docs/informe-fase-3.md` |
+| 4 | no iniciada | `docs/informe-fase-4.md` |
+| 5 | planeación pendiente (`16`, `17`, `legal/`) | `docs/informe-fase-5.md` |

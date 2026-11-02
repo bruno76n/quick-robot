@@ -1,0 +1,3028 @@
+{
+ "v": 7,
+ "config": {
+  "kwh": 3,
+  "fallos": 5,
+  "purga": 5,
+  "margenMin": 30,
+  "margenFormula": 50,
+  "canales": [
+   {
+    "n": "Facebook",
+    "c": 0
+   },
+   {
+    "n": "WhatsApp",
+    "c": 0
+   },
+   {
+    "n": "Efectivo",
+    "c": 0
+   },
+   {
+    "n": "Mercado Libre",
+    "c": 17
+   },
+   {
+    "n": "Terminal",
+    "c": 3.6
+   }
+  ],
+  "negocio": {
+   "nombre": "Quick Robot",
+   "giro": "Impresión 3D",
+   "tel": "",
+   "email": "",
+   "ciudad": "Guadalajara, Jalisco",
+   "vigencia": 7,
+   "pie": "Se requiere un anticipo del 50% para iniciar la producción. El saldo se paga al entregar."
+  }
+ },
+ "cat": {
+  "materiales": [
+   "PLA",
+   "PLA Silk",
+   "PLA+",
+   "PETG",
+   "ABS",
+   "ASA",
+   "TPU 95A",
+   "Nylon"
+  ],
+  "colores": [
+   {
+    "n": "Negro",
+    "hex": "#26242b"
+   },
+   {
+    "n": "Blanco",
+    "hex": "#f1f1ee"
+   },
+   {
+    "n": "Gris claro",
+    "hex": "#b9b7bf"
+   },
+   {
+    "n": "Gris",
+    "hex": "#8b8b96"
+   },
+   {
+    "n": "Rojo",
+    "hex": "#d8283f"
+   },
+   {
+    "n": "Azul",
+    "hex": "#2f6fd0"
+   },
+   {
+    "n": "Verde",
+    "hex": "#00ae42"
+   },
+   {
+    "n": "Amarillo",
+    "hex": "#f2c230"
+   },
+   {
+    "n": "Naranja",
+    "hex": "#ee7b21"
+   },
+   {
+    "n": "Morado",
+    "hex": "#7b4bd0"
+   },
+   {
+    "n": "Rosa",
+    "hex": "#ec7fb4"
+   },
+   {
+    "n": "Café",
+    "hex": "#7a4a2b"
+   },
+   {
+    "n": "Transparente",
+    "hex": "#dfe6ea"
+   }
+  ],
+  "marcas": [
+   "Bambu Lab",
+   "eSUN",
+   "Sunlu",
+   "Polymaker",
+   "Overture",
+   "Elegoo",
+   "Creality",
+   "Hatchbox"
+  ]
+ },
+ "proveedores": [
+  {
+   "id": "pv1",
+   "nombre": "Sunlu Oficial",
+   "tel": "Mercado Libre",
+   "marcas": "Sunlu",
+   "nota": "Envío en 2 a 3 días. Mejor precio en 4 rollos o más."
+  },
+  {
+   "id": "pv2",
+   "nombre": "Bambu Lab Store",
+   "tel": "tienda en línea",
+   "marcas": "Bambu Lab",
+   "nota": "Rollos con carrete reutilizable."
+  },
+  {
+   "id": "pv3",
+   "nombre": "eSUN México",
+   "tel": "33 5555 0101",
+   "marcas": "eSUN",
+   "nota": ""
+  },
+  {
+   "id": "pv4",
+   "nombre": "Tornillería y mercería Centro",
+   "tel": "33 5555 0188",
+   "marcas": "",
+   "nota": "Argollas, imanes y herrajes."
+  },
+  {
+   "id": "pv5",
+   "nombre": "Empaques Guadalajara",
+   "tel": "33 5555 0123",
+   "marcas": "",
+   "nota": "Cajas y bolsas."
+  }
+ ],
+ "filamentos": [
+  {
+   "id": "f1",
+   "material": "PLA",
+   "color": "Blanco",
+   "hex": "#f1f1ee"
+  },
+  {
+   "id": "f2",
+   "material": "PLA",
+   "color": "Negro",
+   "hex": "#26242b"
+  },
+  {
+   "id": "f3",
+   "material": "PLA",
+   "color": "Gris claro",
+   "hex": "#b9b7bf"
+  },
+  {
+   "id": "f4",
+   "material": "PLA Silk",
+   "color": "Morado",
+   "hex": "#7b4bd0"
+  },
+  {
+   "id": "f5",
+   "material": "PLA",
+   "color": "Rojo",
+   "hex": "#d8283f"
+  },
+  {
+   "id": "f6",
+   "material": "PETG",
+   "color": "Negro",
+   "hex": "#34323a"
+  },
+  {
+   "id": "f7",
+   "material": "TPU 95A",
+   "color": "Azul",
+   "hex": "#2f6fd0"
+  }
+ ],
+ "rollos": [
+  {
+   "id": "r1",
+   "fil": "f1",
+   "marca": "Bambu Lab",
+   "costo": 350,
+   "envio": 40,
+   "gramos": 1000,
+   "fecha": "2026-09-22"
+  },
+  {
+   "id": "r2",
+   "fil": "f2",
+   "marca": "eSUN",
+   "costo": 320,
+   "envio": 40,
+   "gramos": 1000,
+   "fecha": "2026-09-22"
+  },
+  {
+   "id": "r3",
+   "fil": "f3",
+   "marca": "Bambu Lab",
+   "costo": 380,
+   "envio": 0,
+   "gramos": 1000,
+   "fecha": "2026-10-20"
+  },
+  {
+   "id": "r4",
+   "fil": "f4",
+   "marca": "Sunlu",
+   "costo": 430,
+   "envio": 40,
+   "gramos": 1000,
+   "fecha": "2026-09-24"
+  },
+  {
+   "id": "r5",
+   "fil": "f5",
+   "marca": "eSUN",
+   "costo": 330,
+   "envio": 40,
+   "gramos": 1000,
+   "fecha": "2026-09-28"
+  },
+  {
+   "id": "r6",
+   "fil": "f6",
+   "marca": "Sunlu",
+   "costo": 420,
+   "envio": 40,
+   "gramos": 1000,
+   "fecha": "2026-10-02"
+  },
+  {
+   "id": "r7",
+   "fil": "f7",
+   "marca": "Sunlu",
+   "costo": 390,
+   "envio": 40,
+   "gramos": 500,
+   "fecha": "2026-10-10"
+  },
+  {
+   "id": "r8",
+   "fil": "f1",
+   "marca": "Sunlu",
+   "costo": 330,
+   "envio": 40,
+   "gramos": 1000,
+   "fecha": "2026-10-26"
+  }
+ ],
+ "movs": [
+  {
+   "id": "mr1c",
+   "rollo": "r1",
+   "fecha": "2026-09-22",
+   "tipo": "compra",
+   "g": 1000,
+   "nota": "Compra del rollo"
+  },
+  {
+   "id": "mr10",
+   "rollo": "r1",
+   "fecha": "2026-09-26",
+   "tipo": "consumo",
+   "g": -106,
+   "nota": "Lote de llaveros"
+  },
+  {
+   "id": "mr11",
+   "rollo": "r1",
+   "fecha": "2026-10-03",
+   "tipo": "consumo",
+   "g": -74,
+   "nota": "Pedido a un cliente"
+  },
+  {
+   "id": "mr12",
+   "rollo": "r1",
+   "fecha": "2026-10-10",
+   "tipo": "fallo",
+   "g": -27,
+   "nota": "Fallo: se despegó de la cama"
+  },
+  {
+   "id": "mr13",
+   "rollo": "r1",
+   "fecha": "2026-10-17",
+   "tipo": "merma",
+   "g": -11,
+   "nota": "Purga al cambiar de color"
+  },
+  {
+   "id": "mr14",
+   "rollo": "r1",
+   "fecha": "2026-10-24",
+   "tipo": "consumo",
+   "g": -48,
+   "nota": "Piezas del catálogo"
+  },
+  {
+   "id": "mr2c",
+   "rollo": "r2",
+   "fecha": "2026-09-22",
+   "tipo": "compra",
+   "g": 1000,
+   "nota": "Compra del rollo"
+  },
+  {
+   "id": "mr20",
+   "rollo": "r2",
+   "fecha": "2026-09-27",
+   "tipo": "consumo",
+   "g": -229,
+   "nota": "Lote de llaveros"
+  },
+  {
+   "id": "mr21",
+   "rollo": "r2",
+   "fecha": "2026-10-04",
+   "tipo": "consumo",
+   "g": -160,
+   "nota": "Pedido a un cliente"
+  },
+  {
+   "id": "mr22",
+   "rollo": "r2",
+   "fecha": "2026-10-11",
+   "tipo": "fallo",
+   "g": -57,
+   "nota": "Fallo: se despegó de la cama"
+  },
+  {
+   "id": "mr23",
+   "rollo": "r2",
+   "fecha": "2026-10-18",
+   "tipo": "merma",
+   "g": -23,
+   "nota": "Purga al cambiar de color"
+  },
+  {
+   "id": "mr24",
+   "rollo": "r2",
+   "fecha": "2026-10-25",
+   "tipo": "consumo",
+   "g": -104,
+   "nota": "Piezas del catálogo"
+  },
+  {
+   "id": "mr3c",
+   "rollo": "r3",
+   "fecha": "2026-10-20",
+   "tipo": "compra",
+   "g": 1000,
+   "nota": "Compra del rollo"
+  },
+  {
+   "id": "mr30",
+   "rollo": "r3",
+   "fecha": "2026-09-28",
+   "tipo": "consumo",
+   "g": -24,
+   "nota": "Lote de llaveros"
+  },
+  {
+   "id": "mr31",
+   "rollo": "r3",
+   "fecha": "2026-10-05",
+   "tipo": "consumo",
+   "g": -17,
+   "nota": "Pedido a un cliente"
+  },
+  {
+   "id": "mr32",
+   "rollo": "r3",
+   "fecha": "2026-10-12",
+   "tipo": "fallo",
+   "g": -6,
+   "nota": "Fallo: se despegó de la cama"
+  },
+  {
+   "id": "mr33",
+   "rollo": "r3",
+   "fecha": "2026-10-19",
+   "tipo": "merma",
+   "g": -2,
+   "nota": "Purga al cambiar de color"
+  },
+  {
+   "id": "mr34",
+   "rollo": "r3",
+   "fecha": "2026-10-26",
+   "tipo": "consumo",
+   "g": -11,
+   "nota": "Piezas del catálogo"
+  },
+  {
+   "id": "mr4c",
+   "rollo": "r4",
+   "fecha": "2026-09-24",
+   "tipo": "compra",
+   "g": 1000,
+   "nota": "Compra del rollo"
+  },
+  {
+   "id": "mr40",
+   "rollo": "r4",
+   "fecha": "2026-09-29",
+   "tipo": "consumo",
+   "g": -366,
+   "nota": "Lote de llaveros"
+  },
+  {
+   "id": "mr41",
+   "rollo": "r4",
+   "fecha": "2026-10-06",
+   "tipo": "consumo",
+   "g": -256,
+   "nota": "Pedido a un cliente"
+  },
+  {
+   "id": "mr42",
+   "rollo": "r4",
+   "fecha": "2026-10-13",
+   "tipo": "fallo",
+   "g": -92,
+   "nota": "Fallo: se despegó de la cama"
+  },
+  {
+   "id": "mr43",
+   "rollo": "r4",
+   "fecha": "2026-10-20",
+   "tipo": "merma",
+   "g": -37,
+   "nota": "Purga al cambiar de color"
+  },
+  {
+   "id": "mr44",
+   "rollo": "r4",
+   "fecha": "2026-10-27",
+   "tipo": "consumo",
+   "g": -164,
+   "nota": "Piezas del catálogo"
+  },
+  {
+   "id": "mr5c",
+   "rollo": "r5",
+   "fecha": "2026-09-28",
+   "tipo": "compra",
+   "g": 1000,
+   "nota": "Compra del rollo"
+  },
+  {
+   "id": "mr50",
+   "rollo": "r5",
+   "fecha": "2026-09-30",
+   "tipo": "consumo",
+   "g": -160,
+   "nota": "Lote de llaveros"
+  },
+  {
+   "id": "mr51",
+   "rollo": "r5",
+   "fecha": "2026-10-07",
+   "tipo": "consumo",
+   "g": -112,
+   "nota": "Pedido a un cliente"
+  },
+  {
+   "id": "mr52",
+   "rollo": "r5",
+   "fecha": "2026-10-14",
+   "tipo": "fallo",
+   "g": -40,
+   "nota": "Fallo: se despegó de la cama"
+  },
+  {
+   "id": "mr53",
+   "rollo": "r5",
+   "fecha": "2026-10-21",
+   "tipo": "merma",
+   "g": -16,
+   "nota": "Purga al cambiar de color"
+  },
+  {
+   "id": "mr54",
+   "rollo": "r5",
+   "fecha": "2026-10-28",
+   "tipo": "consumo",
+   "g": -72,
+   "nota": "Piezas del catálogo"
+  },
+  {
+   "id": "mr6c",
+   "rollo": "r6",
+   "fecha": "2026-10-02",
+   "tipo": "compra",
+   "g": 1000,
+   "nota": "Compra del rollo"
+  },
+  {
+   "id": "mr60",
+   "rollo": "r6",
+   "fecha": "2026-10-01",
+   "tipo": "consumo",
+   "g": -80,
+   "nota": "Lote de llaveros"
+  },
+  {
+   "id": "mr61",
+   "rollo": "r6",
+   "fecha": "2026-10-08",
+   "tipo": "consumo",
+   "g": -56,
+   "nota": "Pedido a un cliente"
+  },
+  {
+   "id": "mr62",
+   "rollo": "r6",
+   "fecha": "2026-10-15",
+   "tipo": "fallo",
+   "g": -20,
+   "nota": "Fallo: se despegó de la cama"
+  },
+  {
+   "id": "mr63",
+   "rollo": "r6",
+   "fecha": "2026-10-22",
+   "tipo": "merma",
+   "g": -8,
+   "nota": "Purga al cambiar de color"
+  },
+  {
+   "id": "mr64",
+   "rollo": "r6",
+   "fecha": "2026-10-29",
+   "tipo": "consumo",
+   "g": -36,
+   "nota": "Piezas del catálogo"
+  },
+  {
+   "id": "mr7c",
+   "rollo": "r7",
+   "fecha": "2026-10-10",
+   "tipo": "compra",
+   "g": 500,
+   "nota": "Compra del rollo"
+  },
+  {
+   "id": "mr70",
+   "rollo": "r7",
+   "fecha": "2026-10-02",
+   "tipo": "consumo",
+   "g": -80,
+   "nota": "Lote de llaveros"
+  },
+  {
+   "id": "mr71",
+   "rollo": "r7",
+   "fecha": "2026-10-09",
+   "tipo": "consumo",
+   "g": -56,
+   "nota": "Pedido a un cliente"
+  },
+  {
+   "id": "mr72",
+   "rollo": "r7",
+   "fecha": "2026-10-16",
+   "tipo": "fallo",
+   "g": -20,
+   "nota": "Fallo: se despegó de la cama"
+  },
+  {
+   "id": "mr73",
+   "rollo": "r7",
+   "fecha": "2026-10-23",
+   "tipo": "merma",
+   "g": -8,
+   "nota": "Purga al cambiar de color"
+  },
+  {
+   "id": "mr74",
+   "rollo": "r7",
+   "fecha": "2026-10-30",
+   "tipo": "consumo",
+   "g": -36,
+   "nota": "Piezas del catálogo"
+  },
+  {
+   "id": "mr8c",
+   "rollo": "r8",
+   "fecha": "2026-10-26",
+   "tipo": "compra",
+   "g": 1000,
+   "nota": "Compra del rollo"
+  },
+  {
+   "id": "mfa1",
+   "rollo": "r1",
+   "fecha": "2026-10-31",
+   "tipo": "fallo",
+   "g": -14,
+   "nota": "Fallo: Doctor Doom · busto"
+  },
+  {
+   "id": "mfa2",
+   "rollo": "r2",
+   "fecha": "2026-10-14",
+   "tipo": "fallo",
+   "g": -17,
+   "nota": "Fallo: Servilletero con logo"
+  }
+ ],
+ "pmovs": [
+  {
+   "id": "pm1",
+   "prod": "pr5",
+   "fecha": "2026-10-29",
+   "tipo": "impresion",
+   "n": 1,
+   "nota": "Impresión para existencias",
+   "ref": "im1"
+  },
+  {
+   "id": "pm2",
+   "prod": "pr6",
+   "fecha": "2026-10-27",
+   "tipo": "impresion",
+   "n": 1,
+   "nota": "Impresión para existencias",
+   "ref": "im2"
+  },
+  {
+   "id": "pm3",
+   "prod": "pr1",
+   "fecha": "2026-10-26",
+   "tipo": "impresion",
+   "n": 10,
+   "nota": "Impresión para existencias",
+   "ref": "im3"
+  },
+  {
+   "id": "pm4",
+   "prod": "pr8",
+   "fecha": "2026-10-20",
+   "tipo": "impresion",
+   "n": 1,
+   "nota": "Impresión para existencias",
+   "ref": "im5"
+  },
+  {
+   "id": "pm5",
+   "prod": "pr3",
+   "fecha": "2026-10-17",
+   "tipo": "impresion",
+   "n": 1,
+   "nota": "Impresión para existencias",
+   "ref": "im6"
+  },
+  {
+   "id": "pm6",
+   "prod": "pr1",
+   "fecha": "2026-10-04",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v0"
+  },
+  {
+   "id": "pm7",
+   "prod": "pr1",
+   "fecha": "2026-10-07",
+   "tipo": "venta",
+   "n": -12,
+   "nota": "Para un evento",
+   "ref": "v1"
+  },
+  {
+   "id": "pm8",
+   "prod": "pr3",
+   "fecha": "2026-10-13",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Una sola figura de la colección",
+   "ref": "v3"
+  },
+  {
+   "id": "pm9",
+   "prod": "pr3",
+   "fecha": "2026-10-16",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Regalo de cumpleaños",
+   "ref": "v4"
+  },
+  {
+   "id": "pm10",
+   "prod": "pr4",
+   "fecha": "2026-10-16",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Regalo de cumpleaños",
+   "ref": "v4"
+  },
+  {
+   "id": "pm11",
+   "prod": "pr5",
+   "fecha": "2026-10-16",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Regalo de cumpleaños",
+   "ref": "v4"
+  },
+  {
+   "id": "pm12",
+   "prod": "pr6",
+   "fecha": "2026-10-16",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Regalo de cumpleaños",
+   "ref": "v4"
+  },
+  {
+   "id": "pm13",
+   "prod": "pr8",
+   "fecha": "2026-10-19",
+   "tipo": "venta",
+   "n": -2,
+   "nota": "Venta",
+   "ref": "v5"
+  },
+  {
+   "id": "pm14",
+   "prod": "pr3",
+   "fecha": "2026-10-20",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v6"
+  },
+  {
+   "id": "pm15",
+   "prod": "pr4",
+   "fecha": "2026-10-20",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v6"
+  },
+  {
+   "id": "pm16",
+   "prod": "pr6",
+   "fecha": "2026-10-22",
+   "tipo": "venta",
+   "n": -2,
+   "nota": "Venta",
+   "ref": "v7"
+  },
+  {
+   "id": "pm17",
+   "prod": "pr3",
+   "fecha": "2026-10-23",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Dos figuras y un llavero",
+   "ref": "v8"
+  },
+  {
+   "id": "pm18",
+   "prod": "pr4",
+   "fecha": "2026-10-23",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Dos figuras y un llavero",
+   "ref": "v8"
+  },
+  {
+   "id": "pm19",
+   "prod": "pr1",
+   "fecha": "2026-10-23",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Dos figuras y un llavero",
+   "ref": "v8"
+  },
+  {
+   "id": "pm20",
+   "prod": "pr1",
+   "fecha": "2026-10-27",
+   "tipo": "venta",
+   "n": -3,
+   "nota": "Venta",
+   "ref": "v10"
+  },
+  {
+   "id": "pm21",
+   "prod": "pr5",
+   "fecha": "2026-10-29",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v11"
+  },
+  {
+   "id": "pm22",
+   "prod": "pr3",
+   "fecha": "2026-10-31",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Colección completa y dos llaveros",
+   "ref": "v12"
+  },
+  {
+   "id": "pm23",
+   "prod": "pr4",
+   "fecha": "2026-10-31",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Colección completa y dos llaveros",
+   "ref": "v12"
+  },
+  {
+   "id": "pm24",
+   "prod": "pr5",
+   "fecha": "2026-10-31",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Colección completa y dos llaveros",
+   "ref": "v12"
+  },
+  {
+   "id": "pm25",
+   "prod": "pr6",
+   "fecha": "2026-10-31",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Colección completa y dos llaveros",
+   "ref": "v12"
+  },
+  {
+   "id": "pm26",
+   "prod": "pr1",
+   "fecha": "2026-10-31",
+   "tipo": "venta",
+   "n": -2,
+   "nota": "Colección completa y dos llaveros",
+   "ref": "v12"
+  },
+  {
+   "id": "pm27",
+   "prod": "pr4",
+   "fecha": "2026-10-01",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v13"
+  },
+  {
+   "id": "pm28",
+   "prod": "pr1",
+   "fecha": "2026-10-01",
+   "tipo": "venta",
+   "n": -3,
+   "nota": "Venta",
+   "ref": "v13"
+  },
+  {
+   "id": "pm29",
+   "prod": "pr3",
+   "fecha": "2026-09-28",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v14"
+  },
+  {
+   "id": "pm30",
+   "prod": "pr1",
+   "fecha": "2026-09-28",
+   "tipo": "venta",
+   "n": -2,
+   "nota": "Venta",
+   "ref": "v14"
+  },
+  {
+   "id": "pm31",
+   "prod": "pr3",
+   "fecha": "2026-09-24",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v16"
+  },
+  {
+   "id": "pm32",
+   "prod": "pr4",
+   "fecha": "2026-09-24",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v16"
+  },
+  {
+   "id": "pm33",
+   "prod": "pr5",
+   "fecha": "2026-09-24",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v16"
+  },
+  {
+   "id": "pm34",
+   "prod": "pr6",
+   "fecha": "2026-09-24",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v16"
+  },
+  {
+   "id": "pm35",
+   "prod": "pr5",
+   "fecha": "2026-09-21",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v17"
+  },
+  {
+   "id": "pm36",
+   "prod": "pr6",
+   "fecha": "2026-09-18",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v18"
+  },
+  {
+   "id": "pm37",
+   "prod": "pr5",
+   "fecha": "2026-09-18",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v18"
+  },
+  {
+   "id": "pm38",
+   "prod": "pr3",
+   "fecha": "2026-09-13",
+   "tipo": "venta",
+   "n": -2,
+   "nota": "Venta",
+   "ref": "v20"
+  },
+  {
+   "id": "pm39",
+   "prod": "pr8",
+   "fecha": "2026-09-07",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Venta",
+   "ref": "v22"
+  },
+  {
+   "id": "pm40",
+   "prod": "pr1",
+   "fecha": "2026-09-07",
+   "tipo": "venta",
+   "n": -4,
+   "nota": "Venta",
+   "ref": "v22"
+  },
+  {
+   "id": "pm41",
+   "prod": "pr3",
+   "fecha": "2026-08-30",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Para regalo",
+   "ref": "v23"
+  },
+  {
+   "id": "pm42",
+   "prod": "pr4",
+   "fecha": "2026-08-30",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Para regalo",
+   "ref": "v23"
+  },
+  {
+   "id": "pm43",
+   "prod": "pr4",
+   "fecha": "2026-08-15",
+   "tipo": "venta",
+   "n": -2,
+   "nota": "Feria de coleccionables",
+   "ref": "v24"
+  },
+  {
+   "id": "pm44",
+   "prod": "pr6",
+   "fecha": "2026-08-15",
+   "tipo": "venta",
+   "n": -1,
+   "nota": "Feria de coleccionables",
+   "ref": "v24"
+  },
+  {
+   "id": "pm45",
+   "prod": "pr1",
+   "fecha": "2026-08-15",
+   "tipo": "venta",
+   "n": -5,
+   "nota": "Feria de coleccionables",
+   "ref": "v24"
+  },
+  {
+   "id": "pm46",
+   "prod": "pr3",
+   "fecha": "2026-10-30",
+   "tipo": "pedido",
+   "n": 1,
+   "nota": "Pedido #2",
+   "ref": "pe4"
+  },
+  {
+   "id": "pm47",
+   "prod": "pr4",
+   "fecha": "2026-10-30",
+   "tipo": "pedido",
+   "n": 1,
+   "nota": "Pedido #2",
+   "ref": "pe4"
+  },
+  {
+   "id": "pm48",
+   "prod": "pr5",
+   "fecha": "2026-10-30",
+   "tipo": "pedido",
+   "n": 1,
+   "nota": "Pedido #2",
+   "ref": "pe4"
+  },
+  {
+   "id": "pm49",
+   "prod": "pr1",
+   "fecha": "2026-10-30",
+   "tipo": "pedido",
+   "n": 3,
+   "nota": "Pedido #2",
+   "ref": "pe4"
+  },
+  {
+   "id": "pm50",
+   "prod": "pr1",
+   "fecha": "2026-09-17",
+   "tipo": "inicial",
+   "n": 29,
+   "nota": "Inventario inicial",
+   "ref": ""
+  },
+  {
+   "id": "pm51",
+   "prod": "pr3",
+   "fecha": "2026-09-17",
+   "tipo": "inicial",
+   "n": 11,
+   "nota": "Inventario inicial",
+   "ref": ""
+  },
+  {
+   "id": "pm52",
+   "prod": "pr4",
+   "fecha": "2026-09-17",
+   "tipo": "inicial",
+   "n": 9,
+   "nota": "Inventario inicial",
+   "ref": ""
+  },
+  {
+   "id": "pm53",
+   "prod": "pr5",
+   "fecha": "2026-09-17",
+   "tipo": "inicial",
+   "n": 7,
+   "nota": "Inventario inicial",
+   "ref": ""
+  },
+  {
+   "id": "pm54",
+   "prod": "pr6",
+   "fecha": "2026-09-17",
+   "tipo": "inicial",
+   "n": 9,
+   "nota": "Inventario inicial",
+   "ref": ""
+  },
+  {
+   "id": "pm55",
+   "prod": "pr8",
+   "fecha": "2026-09-17",
+   "tipo": "inicial",
+   "n": 4,
+   "nota": "Inventario inicial",
+   "ref": ""
+  },
+  {
+   "id": "pm56",
+   "prod": "pr10",
+   "fecha": "2026-09-17",
+   "tipo": "inicial",
+   "n": 1,
+   "nota": "Inventario inicial",
+   "ref": ""
+  }
+ ],
+ "impresoras": [
+  {
+   "id": "p1",
+   "nombre": "Bambu Lab P1S",
+   "costo": 12000,
+   "vidaH": 5000,
+   "mantoH": 0.6,
+   "kw": 0.12,
+   "horas": 312,
+   "cola": [
+    {
+     "id": "qmvypoic813",
+     "pedido": "pe3",
+     "texto": "3 × Letrero de taquería",
+     "min": 1080,
+     "inicio": 1793550646423
+    }
+   ],
+   "compra": "2026-07-04",
+   "mant": [
+    {
+     "id": "mt1",
+     "tarea": "Cambiar la boquilla",
+     "cadaH": 300,
+     "ultH": 120,
+     "fecha": "2026-09-12"
+    },
+    {
+     "id": "mt2",
+     "tarea": "Lubricar ejes",
+     "cadaH": 200,
+     "ultH": 100,
+     "fecha": "2026-08-23"
+    },
+    {
+     "id": "mt3",
+     "tarea": "Limpiar la cama",
+     "cadaH": 100,
+     "ultH": 260,
+     "fecha": "2026-10-23"
+    }
+   ]
+  },
+  {
+   "id": "p2",
+   "nombre": "Ender 3 V3 SE",
+   "costo": 3800,
+   "vidaH": 4000,
+   "mantoH": 0.8,
+   "kw": 0.15,
+   "horas": 128,
+   "cola": [
+    {
+     "id": "qmvypoic814",
+     "pedido": "pe3",
+     "texto": "10 × Servilletero con logo",
+     "min": 1500,
+     "inicio": 1793563846423
+    },
+    {
+     "id": "qmvypoic815",
+     "pedido": "pe6",
+     "texto": "50 × Llavero con nombre",
+     "min": 900,
+     "inicio": null
+    }
+   ],
+   "compra": "2026-07-24",
+   "mant": [
+    {
+     "id": "mt4",
+     "tarea": "Cambiar la boquilla",
+     "cadaH": 250,
+     "ultH": 0,
+     "fecha": ""
+    },
+    {
+     "id": "mt5",
+     "tarea": "Nivelar la cama",
+     "cadaH": 80,
+     "ultH": 40,
+     "fecha": "2026-10-07"
+    },
+    {
+     "id": "mt6",
+     "tarea": "Revisar las correas",
+     "cadaH": 300,
+     "ultH": 0,
+     "fecha": ""
+    }
+   ]
+  }
+ ],
+ "productos": [
+  {
+   "id": "pr1",
+   "nombre": "Llavero con nombre",
+   "imp": "p2",
+   "horas": 0.3,
+   "prep": 5,
+   "acab": 0.25,
+   "lote": 10,
+   "extras": 0,
+   "insumos": [
+    {
+     "ins": "i1",
+     "cant": 1
+    }
+   ],
+   "filamentos": [
+    {
+     "fil": "f5",
+     "g": 6
+    }
+   ],
+   "precio": 50,
+   "modo": "valor",
+   "tags": [
+    "Regalo"
+   ],
+   "nota": "Un llavero suelto se vende como detalle: $50 es un billete.",
+   "padre": null,
+   "stock": true,
+   "ficha": {
+    "capa": "0.20",
+    "relleno": "15",
+    "paredes": "3",
+    "soportes": "No",
+    "boquilla": "215",
+    "cama": "60",
+    "archivo": "~/Modelos/llavero-nombre.3mf",
+    "nota": "Entran 10 por placa. El nombre va en la cara de arriba."
+   }
+  },
+  {
+   "id": "pr2",
+   "nombre": "Servilletero con logo",
+   "imp": "p1",
+   "horas": 2.5,
+   "prep": 6,
+   "acab": 4,
+   "lote": 1,
+   "extras": 0,
+   "insumos": [],
+   "filamentos": [
+    {
+     "fil": "f2",
+     "g": 45
+    }
+   ],
+   "precio": 120,
+   "modo": "valor",
+   "tags": [
+    "Negocio",
+    "Personalizado"
+   ],
+   "nota": "",
+   "padre": null,
+   "stock": false
+  },
+  {
+   "id": "pr3",
+   "nombre": "Spider-Man · salto",
+   "imp": "p1",
+   "horas": 4.5,
+   "prep": 3,
+   "acab": 2,
+   "lote": 1,
+   "extras": 0,
+   "insumos": [
+    {
+     "ins": "i2",
+     "cant": 1
+    },
+    {
+     "ins": "i3",
+     "cant": 1
+    }
+   ],
+   "filamentos": [
+    {
+     "fil": "f1",
+     "g": 40
+    }
+   ],
+   "precio": 250,
+   "modo": "valor",
+   "tags": [
+    "Coleccionable"
+   ],
+   "nota": "Blanco minimalista para escritorio.",
+   "padre": null,
+   "stock": true,
+   "ficha": {
+    "capa": "0.16",
+    "relleno": "10",
+    "paredes": "2",
+    "soportes": "Árbol",
+    "boquilla": "220",
+    "cama": "55",
+    "archivo": "~/Modelos/spiderman-salto.3mf",
+    "nota": "Imprimir de pie. Quitar los soportes con cuidado en las manos."
+   }
+  },
+  {
+   "id": "pr4",
+   "nombre": "Spider-Man · trepando",
+   "imp": "p1",
+   "horas": 4,
+   "prep": 3,
+   "acab": 2,
+   "lote": 1,
+   "extras": 0,
+   "insumos": [
+    {
+     "ins": "i2",
+     "cant": 1
+    },
+    {
+     "ins": "i3",
+     "cant": 1
+    }
+   ],
+   "filamentos": [
+    {
+     "fil": "f1",
+     "g": 38
+    }
+   ],
+   "precio": 250,
+   "modo": "valor",
+   "tags": [
+    "Coleccionable"
+   ],
+   "nota": "",
+   "padre": null,
+   "stock": true
+  },
+  {
+   "id": "pr5",
+   "nombre": "Doctor Doom · busto",
+   "imp": "p1",
+   "horas": 5,
+   "prep": 3,
+   "acab": 2,
+   "lote": 1,
+   "extras": 0,
+   "insumos": [
+    {
+     "ins": "i2",
+     "cant": 1
+    },
+    {
+     "ins": "i3",
+     "cant": 1
+    }
+   ],
+   "filamentos": [
+    {
+     "fil": "f1",
+     "g": 42
+    }
+   ],
+   "precio": 250,
+   "modo": "valor",
+   "tags": [
+    "Coleccionable"
+   ],
+   "nota": "",
+   "padre": null,
+   "stock": true
+  },
+  {
+   "id": "pr6",
+   "nombre": "Hulk · puño",
+   "imp": "p1",
+   "horas": 4.2,
+   "prep": 3,
+   "acab": 2,
+   "lote": 1,
+   "extras": 0,
+   "insumos": [
+    {
+     "ins": "i2",
+     "cant": 1
+    },
+    {
+     "ins": "i3",
+     "cant": 1
+    }
+   ],
+   "filamentos": [
+    {
+     "fil": "f1",
+     "g": 40
+    }
+   ],
+   "precio": 250,
+   "modo": "valor",
+   "tags": [
+    "Coleccionable"
+   ],
+   "nota": "",
+   "padre": null,
+   "stock": true
+  },
+  {
+   "id": "pr8",
+   "nombre": "Soporte de celular PETG",
+   "imp": "p1",
+   "horas": 3.2,
+   "prep": 4,
+   "acab": 2,
+   "lote": 1,
+   "extras": 0,
+   "insumos": [],
+   "filamentos": [
+    {
+     "fil": "f6",
+     "g": 55
+    }
+   ],
+   "precio": 0,
+   "modo": "formula",
+   "tags": [],
+   "nota": "Material técnico: aquí sí cobro costo + margen.",
+   "padre": null,
+   "stock": true
+  },
+  {
+   "id": "pr9",
+   "nombre": "Letrero de taquería",
+   "imp": "p1",
+   "horas": 6,
+   "prep": 10,
+   "acab": 15,
+   "lote": 1,
+   "extras": 12,
+   "insumos": [],
+   "filamentos": [
+    {
+     "fil": "f5",
+     "g": 55
+    },
+    {
+     "fil": "f1",
+     "g": 30
+    }
+   ],
+   "precio": 450,
+   "modo": "valor",
+   "tags": [
+    "Personalizado",
+    "Negocio"
+   ],
+   "nota": "",
+   "padre": null,
+   "stock": false
+  },
+  {
+   "id": "pr10",
+   "nombre": "Spider-Man · salto (silk morado)",
+   "imp": "p1",
+   "horas": 4.5,
+   "prep": 3,
+   "acab": 2,
+   "lote": 1,
+   "extras": 0,
+   "insumos": [
+    {
+     "ins": "i2",
+     "cant": 1
+    },
+    {
+     "ins": "i3",
+     "cant": 1
+    }
+   ],
+   "filamentos": [
+    {
+     "fil": "f4",
+     "g": 40
+    }
+   ],
+   "precio": 250,
+   "modo": "valor",
+   "tags": [
+    "Coleccionable"
+   ],
+   "nota": "",
+   "padre": "pr3",
+   "stock": true
+  }
+ ],
+ "colecciones": [
+  {
+   "id": "c1",
+   "nombre": "Colección Doomsday blanca",
+   "partes": [
+    {
+     "prod": "pr3",
+     "cant": 1
+    },
+    {
+     "prod": "pr4",
+     "cant": 1
+    },
+    {
+     "prod": "pr5",
+     "cant": 1
+    },
+    {
+     "prod": "pr6",
+     "cant": 1
+    }
+   ],
+   "extras": 25,
+   "precio": 1000,
+   "tags": [
+    "Coleccionable",
+    "Edición limitada"
+   ],
+   "nota": "Las cuatro figuras en caja, como set de oficina. Cada figura también se vende suelta."
+  },
+  {
+   "id": "c2",
+   "nombre": "Spider-Man · 2 poses",
+   "partes": [
+    {
+     "prod": "pr3",
+     "cant": 1
+    },
+    {
+     "prod": "pr4",
+     "cant": 1
+    }
+   ],
+   "extras": 10,
+   "precio": 450,
+   "tags": [
+    "Regalo"
+   ],
+   "nota": "Las dos poses de Spider-Man juntas, con tarjeta."
+  }
+ ],
+ "clientes": [
+  {
+   "id": "cl1",
+   "nombre": "Tacos El Güero",
+   "tipo": "Restaurante",
+   "tel": "33 1234 5678",
+   "logo": true,
+   "logoImg": "",
+   "nota": "Su logo va en la tapa de cada servilletero.",
+   "creado": "2026-09-02"
+  },
+  {
+   "id": "cl2",
+   "nombre": "Taquería Los Compadres",
+   "tipo": "Restaurante",
+   "tel": "33 2345 6789",
+   "logo": true,
+   "logoImg": "",
+   "nota": "Pagan con transferencia.",
+   "creado": "2026-09-22"
+  },
+  {
+   "id": "cl3",
+   "nombre": "Mariana R.",
+   "tipo": "Persona",
+   "tel": "Facebook Marketplace",
+   "logo": false,
+   "logoImg": "",
+   "nota": "Colecciona las figuras de Marvel.",
+   "creado": "2026-10-12"
+  },
+  {
+   "id": "cl4",
+   "nombre": "Cafetería Alma",
+   "tipo": "Restaurante",
+   "tel": "33 3456 7890",
+   "logo": false,
+   "logoImg": "",
+   "nota": "Falta que manden su logo.",
+   "creado": "2026-10-29"
+  }
+ ],
+ "pedidos": [
+  {
+   "id": "pe5",
+   "folio": 1,
+   "cliente": "cl1",
+   "creado": "2026-10-02",
+   "entrega": "2026-10-10",
+   "entregado": "2026-10-10",
+   "estado": "entregado",
+   "canal": "WhatsApp",
+   "nota": "Con su logo en la tapa.",
+   "pagos": [
+    {
+     "id": "pgmvypoic68",
+     "fecha": "2026-10-02",
+     "monto": 880,
+     "nota": "Pago completo"
+    }
+   ],
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr2",
+     "nombre": "Servilletero con logo",
+     "cant": 8,
+     "precio": 110,
+     "lista": 120,
+     "costo": 26.747368421052634,
+     "imp": "p1"
+    }
+   ],
+   "descontado": true,
+   "logueado": true
+  },
+  {
+   "id": "pe4",
+   "folio": 2,
+   "cliente": "cl3",
+   "creado": "2026-10-23",
+   "entrega": "2026-11-02",
+   "estado": "listo",
+   "canal": "Facebook",
+   "nota": "Pasa a recogerlas.",
+   "pagos": [
+    {
+     "id": "pgmvypoic79",
+     "fecha": "2026-10-23",
+     "monto": 400,
+     "nota": "Anticipo"
+    }
+   ],
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr3",
+     "nombre": "Spider-Man · salto",
+     "cant": 1,
+     "precio": 250,
+     "lista": 250,
+     "costo": 38.959608323133416,
+     "imp": "p1"
+    },
+    {
+     "k": "p",
+     "prod": "pr4",
+     "nombre": "Spider-Man · trepando",
+     "cant": 1,
+     "precio": 250,
+     "lista": 250,
+     "costo": 36.35478580171359,
+     "imp": "p1"
+    },
+    {
+     "k": "p",
+     "prod": "pr5",
+     "nombre": "Doctor Doom · busto",
+     "cant": 1,
+     "precio": 250,
+     "lista": 250,
+     "costo": 41.56443084455325,
+     "imp": "p1"
+    },
+    {
+     "k": "p",
+     "prod": "pr1",
+     "nombre": "Llavero con nombre",
+     "cant": 3,
+     "precio": 50,
+     "lista": 50,
+     "costo": 3.6747368421052635,
+     "imp": "p2"
+    }
+   ],
+   "descontado": true,
+   "logueado": true,
+   "listo": "2026-10-30",
+   "stk": {
+    "pr3": 1,
+    "pr4": 1,
+    "pr5": 1,
+    "pr1": 3
+   }
+  },
+  {
+   "id": "pe3",
+   "folio": 3,
+   "cliente": "cl2",
+   "creado": "2026-10-26",
+   "entrega": "2026-11-03",
+   "estado": "produccion",
+   "canal": "WhatsApp",
+   "nota": "Servilleteros con el logo de la taquería.",
+   "pagos": [
+    {
+     "id": "pgmvypoic710",
+     "fecha": "2026-10-26",
+     "monto": 1000,
+     "nota": "Anticipo"
+    }
+   ],
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr9",
+     "nombre": "Letrero de taquería",
+     "cant": 3,
+     "precio": 450,
+     "lista": 450,
+     "costo": 68.89075887392902,
+     "imp": "p1"
+    },
+    {
+     "k": "p",
+     "prod": "pr2",
+     "nombre": "Servilletero con logo",
+     "cant": 10,
+     "precio": 100,
+     "lista": 120,
+     "costo": 26.747368421052634,
+     "imp": "p2"
+    }
+   ],
+   "descontado": true
+  },
+  {
+   "id": "pe6",
+   "folio": 4,
+   "cliente": "cl1",
+   "creado": "2026-10-29",
+   "entrega": "2026-11-06",
+   "estado": "produccion",
+   "canal": "WhatsApp",
+   "nota": "",
+   "pagos": [],
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr1",
+     "nombre": "Llavero con nombre",
+     "cant": 50,
+     "precio": 35,
+     "lista": 50,
+     "costo": 3.6747368421052635,
+     "imp": "p2"
+    }
+   ],
+   "descontado": true
+  },
+  {
+   "id": "pe2",
+   "folio": 5,
+   "cliente": "cl1",
+   "creado": "2026-10-30",
+   "entrega": "2026-11-08",
+   "estado": "aceptado",
+   "canal": "WhatsApp",
+   "nota": "El cliente manda el logo por WhatsApp.",
+   "pagos": [
+    {
+     "id": "pgmvypoic711",
+     "fecha": "2026-10-30",
+     "monto": 1100,
+     "nota": "Anticipo 50%"
+    }
+   ],
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr2",
+     "nombre": "Servilletero con logo",
+     "cant": 20,
+     "precio": 110,
+     "lista": 120,
+     "costo": 26.747368421052634
+    }
+   ],
+   "descontado": false
+  },
+  {
+   "id": "pe1",
+   "folio": 6,
+   "cliente": "cl4",
+   "creado": "2026-10-31",
+   "entrega": "2026-11-13",
+   "estado": "cotizado",
+   "canal": "WhatsApp",
+   "nota": "Esperan confirmar el logo.",
+   "pagos": [],
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr1",
+     "nombre": "Llavero con nombre",
+     "cant": 30,
+     "precio": 40,
+     "lista": 50,
+     "costo": 3.6747368421052635
+    },
+    {
+     "k": "p",
+     "prod": "pr2",
+     "nombre": "Servilletero con logo",
+     "cant": 12,
+     "precio": 105,
+     "lista": 120,
+     "costo": 26.747368421052634
+    }
+   ],
+   "descontado": false
+  },
+  {
+   "id": "pe7",
+   "folio": 7,
+   "cliente": "cl1",
+   "creado": "2026-10-31",
+   "entrega": "2026-11-07",
+   "estado": "aceptado",
+   "canal": "WhatsApp",
+   "nota": "Set para la oficina del gerente.",
+   "pagos": [
+    {
+     "id": "pgmvypoic712",
+     "fecha": "2026-10-31",
+     "monto": 500,
+     "nota": "Anticipo"
+    }
+   ],
+   "items": [
+    {
+     "k": "c",
+     "col": "c1",
+     "nombre": "Colección Doomsday blanca",
+     "cant": 1,
+     "precio": 950,
+     "lista": 1000,
+     "costo": 179.77738066095472,
+     "extras": 25,
+     "partes": [
+      {
+       "prod": "pr3",
+       "nombre": "Spider-Man · salto",
+       "cant": 1,
+       "lista": 250,
+       "costo": 38.959608323133416
+      },
+      {
+       "prod": "pr4",
+       "nombre": "Spider-Man · trepando",
+       "cant": 1,
+       "lista": 250,
+       "costo": 36.35478580171359
+      },
+      {
+       "prod": "pr5",
+       "nombre": "Doctor Doom · busto",
+       "cant": 1,
+       "lista": 250,
+       "costo": 41.56443084455325
+      },
+      {
+       "prod": "pr6",
+       "nombre": "Hulk · puño",
+       "cant": 1,
+       "lista": 250,
+       "costo": 37.89855569155447
+      }
+     ],
+     "uso": {
+      "pr3": 1,
+      "pr5": 1,
+      "pr6": 1
+     }
+    }
+   ],
+   "descontado": false
+  }
+ ],
+ "imps": [
+  {
+   "id": "im0",
+   "fecha": "2026-10-31",
+   "prod": "pr5",
+   "imp": "p1",
+   "res": "fallo",
+   "horas": 1.8,
+   "cant": 1,
+   "motivo": "inventario",
+   "texto": "",
+   "pedido": "",
+   "filamentos": [
+    {
+     "fil": "f1",
+     "g": 14
+    }
+   ]
+  },
+  {
+   "id": "im1",
+   "fecha": "2026-10-29",
+   "prod": "pr5",
+   "imp": "p1",
+   "res": "bien",
+   "horas": 5,
+   "cant": 1,
+   "motivo": "inventario",
+   "texto": "",
+   "pedido": "",
+   "filamentos": [
+    {
+     "fil": "f1",
+     "g": 42
+    }
+   ]
+  },
+  {
+   "id": "im2",
+   "fecha": "2026-10-27",
+   "prod": "pr6",
+   "imp": "p1",
+   "res": "bien",
+   "horas": 4.2,
+   "cant": 1,
+   "motivo": "inventario",
+   "texto": "",
+   "pedido": "",
+   "filamentos": [
+    {
+     "fil": "f1",
+     "g": 40
+    }
+   ]
+  },
+  {
+   "id": "im3",
+   "fecha": "2026-10-26",
+   "prod": "pr1",
+   "imp": "p2",
+   "res": "bien",
+   "horas": 3,
+   "cant": 10,
+   "motivo": "inventario",
+   "texto": "",
+   "pedido": "",
+   "filamentos": [
+    {
+     "fil": "f5",
+     "g": 60
+    }
+   ]
+  },
+  {
+   "id": "im4",
+   "fecha": "2026-10-23",
+   "prod": "pr9",
+   "imp": "p1",
+   "res": "bien",
+   "horas": 6,
+   "cant": 1,
+   "motivo": "inventario",
+   "texto": "",
+   "pedido": "",
+   "filamentos": [
+    {
+     "fil": "f5",
+     "g": 55
+    },
+    {
+     "fil": "f1",
+     "g": 30
+    }
+   ]
+  },
+  {
+   "id": "im5",
+   "fecha": "2026-10-20",
+   "prod": "pr8",
+   "imp": "p1",
+   "res": "bien",
+   "horas": 3.2,
+   "cant": 1,
+   "motivo": "inventario",
+   "texto": "",
+   "pedido": "",
+   "filamentos": [
+    {
+     "fil": "f6",
+     "g": 55
+    }
+   ]
+  },
+  {
+   "id": "im6",
+   "fecha": "2026-10-17",
+   "prod": "pr3",
+   "imp": "p1",
+   "res": "bien",
+   "horas": 4.5,
+   "cant": 1,
+   "motivo": "inventario",
+   "texto": "",
+   "pedido": "",
+   "filamentos": [
+    {
+     "fil": "f1",
+     "g": 40
+    }
+   ]
+  },
+  {
+   "id": "im7",
+   "fecha": "2026-10-14",
+   "prod": "pr2",
+   "imp": "p1",
+   "res": "fallo",
+   "horas": 0.9,
+   "cant": 1,
+   "motivo": "inventario",
+   "texto": "",
+   "pedido": "",
+   "filamentos": [
+    {
+     "fil": "f2",
+     "g": 17
+    }
+   ]
+  },
+  {
+   "id": "im8",
+   "fecha": "2026-10-14",
+   "prod": "pr2",
+   "imp": "p1",
+   "res": "bien",
+   "horas": 2.5,
+   "cant": 1,
+   "motivo": "inventario",
+   "texto": "",
+   "pedido": "",
+   "filamentos": [
+    {
+     "fil": "f2",
+     "g": 45
+    }
+   ]
+  },
+  {
+   "id": "im9",
+   "fecha": "2026-10-24",
+   "prod": "",
+   "imp": "p1",
+   "res": "bien",
+   "horas": 1.1,
+   "cant": 1,
+   "motivo": "prueba",
+   "texto": "Prueba del PLA Silk morado: temperatura y velocidad",
+   "pedido": "",
+   "filamentos": [
+    {
+     "fil": "f4",
+     "g": 22
+    }
+   ]
+  },
+  {
+   "id": "im10",
+   "fecha": "2026-10-06",
+   "prod": "pr2",
+   "imp": "p2",
+   "res": "bien",
+   "horas": 6.4,
+   "cant": 8,
+   "motivo": "pedido",
+   "texto": "",
+   "pedido": "pe5",
+   "filamentos": [
+    {
+     "fil": "f2",
+     "g": 150
+    }
+   ]
+  }
+ ],
+ "ventas": [
+  {
+   "id": "v0",
+   "fecha": "2026-10-04",
+   "canal": "Facebook",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr1",
+     "nombre": "Llavero con nombre",
+     "cant": 1,
+     "precio": 50,
+     "lista": 50,
+     "costo": 3.6747368421052635
+    }
+   ]
+  },
+  {
+   "id": "v1",
+   "fecha": "2026-10-07",
+   "canal": "WhatsApp",
+   "nota": "Para un evento",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr1",
+     "nombre": "Llavero con nombre",
+     "cant": 12,
+     "precio": 35,
+     "lista": 50,
+     "costo": 3.6747368421052635
+    }
+   ]
+  },
+  {
+   "id": "v2",
+   "fecha": "2026-10-10",
+   "canal": "WhatsApp",
+   "nota": "Pedido #1",
+   "cliente": "cl1",
+   "pedido": "pe5",
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr2",
+     "nombre": "Servilletero con logo",
+     "cant": 8,
+     "precio": 110,
+     "lista": 120,
+     "costo": 26.747368421052634
+    }
+   ]
+  },
+  {
+   "id": "v3",
+   "fecha": "2026-10-13",
+   "canal": "Facebook",
+   "nota": "Una sola figura de la colección",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr3",
+     "nombre": "Spider-Man · salto",
+     "cant": 1,
+     "precio": 250,
+     "lista": 250,
+     "costo": 38.959608323133416
+    }
+   ]
+  },
+  {
+   "id": "v4",
+   "fecha": "2026-10-16",
+   "canal": "Facebook",
+   "nota": "Regalo de cumpleaños",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "c",
+     "col": "c1",
+     "nombre": "Colección Doomsday blanca",
+     "cant": 1,
+     "precio": 1000,
+     "lista": 1000,
+     "costo": 179.77738066095472,
+     "extras": 25,
+     "partes": [
+      {
+       "prod": "pr3",
+       "nombre": "Spider-Man · salto",
+       "cant": 1,
+       "lista": 250,
+       "costo": 38.959608323133416
+      },
+      {
+       "prod": "pr4",
+       "nombre": "Spider-Man · trepando",
+       "cant": 1,
+       "lista": 250,
+       "costo": 36.35478580171359
+      },
+      {
+       "prod": "pr5",
+       "nombre": "Doctor Doom · busto",
+       "cant": 1,
+       "lista": 250,
+       "costo": 41.56443084455325
+      },
+      {
+       "prod": "pr6",
+       "nombre": "Hulk · puño",
+       "cant": 1,
+       "lista": 250,
+       "costo": 37.89855569155447
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "v5",
+   "fecha": "2026-10-19",
+   "canal": "Efectivo",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr8",
+     "nombre": "Soporte de celular PETG",
+     "cant": 2,
+     "precio": 120,
+     "lista": 79,
+     "costo": 39.28105263157896
+    }
+   ]
+  },
+  {
+   "id": "v6",
+   "fecha": "2026-10-20",
+   "canal": "Facebook",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "c",
+     "col": "c2",
+     "nombre": "Spider-Man · 2 poses",
+     "cant": 1,
+     "precio": 450,
+     "lista": 450,
+     "costo": 85.31439412484701,
+     "extras": 10,
+     "partes": [
+      {
+       "prod": "pr3",
+       "nombre": "Spider-Man · salto",
+       "cant": 1,
+       "lista": 250,
+       "costo": 38.959608323133416
+      },
+      {
+       "prod": "pr4",
+       "nombre": "Spider-Man · trepando",
+       "cant": 1,
+       "lista": 250,
+       "costo": 36.35478580171359
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "v7",
+   "fecha": "2026-10-22",
+   "canal": "Mercado Libre",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr6",
+     "nombre": "Hulk · puño",
+     "cant": 2,
+     "precio": 250,
+     "lista": 250,
+     "costo": 37.89855569155447
+    }
+   ]
+  },
+  {
+   "id": "v8",
+   "fecha": "2026-10-23",
+   "canal": "Facebook",
+   "nota": "Dos figuras y un llavero",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr3",
+     "nombre": "Spider-Man · salto",
+     "cant": 1,
+     "precio": 250,
+     "lista": 250,
+     "costo": 38.959608323133416
+    },
+    {
+     "k": "p",
+     "prod": "pr4",
+     "nombre": "Spider-Man · trepando",
+     "cant": 1,
+     "precio": 230,
+     "lista": 250,
+     "costo": 36.35478580171359
+    },
+    {
+     "k": "p",
+     "prod": "pr1",
+     "nombre": "Llavero con nombre",
+     "cant": 1,
+     "precio": 50,
+     "lista": 50,
+     "costo": 3.6747368421052635
+    }
+   ]
+  },
+  {
+   "id": "v9",
+   "fecha": "2026-10-25",
+   "canal": "WhatsApp",
+   "nota": "Letrero para la taquería",
+   "cliente": "cl2",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr9",
+     "nombre": "Letrero de taquería",
+     "cant": 1,
+     "precio": 450,
+     "lista": 450,
+     "costo": 68.89075887392902
+    }
+   ]
+  },
+  {
+   "id": "v10",
+   "fecha": "2026-10-27",
+   "canal": "Facebook",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr1",
+     "nombre": "Llavero con nombre",
+     "cant": 3,
+     "precio": 50,
+     "lista": 50,
+     "costo": 3.6747368421052635
+    }
+   ]
+  },
+  {
+   "id": "v11",
+   "fecha": "2026-10-29",
+   "canal": "Facebook",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr5",
+     "nombre": "Doctor Doom · busto",
+     "cant": 1,
+     "precio": 250,
+     "lista": 250,
+     "costo": 41.56443084455325
+    }
+   ]
+  },
+  {
+   "id": "v12",
+   "fecha": "2026-10-31",
+   "canal": "WhatsApp",
+   "nota": "Colección completa y dos llaveros",
+   "cliente": "cl3",
+   "pedido": null,
+   "items": [
+    {
+     "k": "c",
+     "col": "c1",
+     "nombre": "Colección Doomsday blanca",
+     "cant": 1,
+     "precio": 1000,
+     "lista": 1000,
+     "costo": 179.77738066095472,
+     "extras": 25,
+     "partes": [
+      {
+       "prod": "pr3",
+       "nombre": "Spider-Man · salto",
+       "cant": 1,
+       "lista": 250,
+       "costo": 38.959608323133416
+      },
+      {
+       "prod": "pr4",
+       "nombre": "Spider-Man · trepando",
+       "cant": 1,
+       "lista": 250,
+       "costo": 36.35478580171359
+      },
+      {
+       "prod": "pr5",
+       "nombre": "Doctor Doom · busto",
+       "cant": 1,
+       "lista": 250,
+       "costo": 41.56443084455325
+      },
+      {
+       "prod": "pr6",
+       "nombre": "Hulk · puño",
+       "cant": 1,
+       "lista": 250,
+       "costo": 37.89855569155447
+      }
+     ]
+    },
+    {
+     "k": "p",
+     "prod": "pr1",
+     "nombre": "Llavero con nombre",
+     "cant": 2,
+     "precio": 50,
+     "lista": 50,
+     "costo": 3.6747368421052635
+    }
+   ],
+   "pagos": [
+    {
+     "id": "pg-v1",
+     "fecha": "2026-10-31",
+     "monto": 600,
+     "nota": "Anticipo"
+    }
+   ]
+  },
+  {
+   "id": "v13",
+   "fecha": "2026-10-01",
+   "canal": "Facebook",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr4",
+     "nombre": "Spider-Man · trepando",
+     "cant": 1,
+     "precio": 250,
+     "lista": 250,
+     "costo": 36.35478580171359
+    },
+    {
+     "k": "p",
+     "prod": "pr1",
+     "nombre": "Llavero con nombre",
+     "cant": 3,
+     "precio": 50,
+     "lista": 50,
+     "costo": 3.6747368421052635
+    }
+   ]
+  },
+  {
+   "id": "v14",
+   "fecha": "2026-09-28",
+   "canal": "Facebook",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr3",
+     "nombre": "Spider-Man · salto",
+     "cant": 1,
+     "precio": 250,
+     "lista": 250,
+     "costo": 38.959608323133416
+    },
+    {
+     "k": "p",
+     "prod": "pr1",
+     "nombre": "Llavero con nombre",
+     "cant": 2,
+     "precio": 50,
+     "lista": 50,
+     "costo": 3.6747368421052635
+    }
+   ]
+  },
+  {
+   "id": "v15",
+   "fecha": "2026-09-26",
+   "canal": "WhatsApp",
+   "nota": "Letrero para la taquería",
+   "cliente": "cl2",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr9",
+     "nombre": "Letrero de taquería",
+     "cant": 1,
+     "precio": 450,
+     "lista": 450,
+     "costo": 68.89075887392902
+    }
+   ]
+  },
+  {
+   "id": "v16",
+   "fecha": "2026-09-24",
+   "canal": "Facebook",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "c",
+     "col": "c1",
+     "nombre": "Colección Doomsday blanca",
+     "cant": 1,
+     "precio": 1000,
+     "lista": 1000,
+     "costo": 179.77738066095472,
+     "extras": 25,
+     "partes": [
+      {
+       "prod": "pr3",
+       "nombre": "Spider-Man · salto",
+       "cant": 1,
+       "lista": 250,
+       "costo": 38.959608323133416
+      },
+      {
+       "prod": "pr4",
+       "nombre": "Spider-Man · trepando",
+       "cant": 1,
+       "lista": 250,
+       "costo": 36.35478580171359
+      },
+      {
+       "prod": "pr5",
+       "nombre": "Doctor Doom · busto",
+       "cant": 1,
+       "lista": 250,
+       "costo": 41.56443084455325
+      },
+      {
+       "prod": "pr6",
+       "nombre": "Hulk · puño",
+       "cant": 1,
+       "lista": 250,
+       "costo": 37.89855569155447
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "v17",
+   "fecha": "2026-09-21",
+   "canal": "Mercado Libre",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr5",
+     "nombre": "Doctor Doom · busto",
+     "cant": 1,
+     "precio": 260,
+     "lista": 250,
+     "costo": 41.56443084455325
+    }
+   ]
+  },
+  {
+   "id": "v18",
+   "fecha": "2026-09-18",
+   "canal": "Facebook",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr6",
+     "nombre": "Hulk · puño",
+     "cant": 1,
+     "precio": 250,
+     "lista": 250,
+     "costo": 37.89855569155447
+    },
+    {
+     "k": "p",
+     "prod": "pr5",
+     "nombre": "Doctor Doom · busto",
+     "cant": 1,
+     "precio": 250,
+     "lista": 250,
+     "costo": 41.56443084455325
+    }
+   ]
+  },
+  {
+   "id": "v19",
+   "fecha": "2026-09-15",
+   "canal": "WhatsApp",
+   "nota": "Servilleteros para la fonda",
+   "cliente": "cl2",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr2",
+     "nombre": "Servilletero con logo",
+     "cant": 6,
+     "precio": 110,
+     "lista": 120,
+     "costo": 26.747368421052634
+    }
+   ]
+  },
+  {
+   "id": "v20",
+   "fecha": "2026-09-13",
+   "canal": "Mercado Libre",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr3",
+     "nombre": "Spider-Man · salto",
+     "cant": 2,
+     "precio": 250,
+     "lista": 250,
+     "costo": 38.959608323133416
+    }
+   ]
+  },
+  {
+   "id": "v21",
+   "fecha": "2026-09-10",
+   "canal": "WhatsApp",
+   "nota": "Servilleteros para el restaurante",
+   "cliente": "cl1",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr2",
+     "nombre": "Servilletero con logo",
+     "cant": 10,
+     "precio": 105,
+     "lista": 120,
+     "costo": 26.747368421052634
+    }
+   ]
+  },
+  {
+   "id": "v22",
+   "fecha": "2026-09-07",
+   "canal": "Efectivo",
+   "nota": "",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr8",
+     "nombre": "Soporte de celular PETG",
+     "cant": 1,
+     "precio": 120,
+     "lista": 79,
+     "costo": 39.28105263157896
+    },
+    {
+     "k": "p",
+     "prod": "pr1",
+     "nombre": "Llavero con nombre",
+     "cant": 4,
+     "precio": 45,
+     "lista": 50,
+     "costo": 3.6747368421052635
+    }
+   ]
+  },
+  {
+   "id": "v23",
+   "fecha": "2026-08-30",
+   "canal": "Facebook",
+   "nota": "Para regalo",
+   "cliente": "cl3",
+   "pedido": null,
+   "items": [
+    {
+     "k": "c",
+     "col": "c2",
+     "nombre": "Spider-Man · 2 poses",
+     "cant": 1,
+     "precio": 450,
+     "lista": 450,
+     "costo": 85.31439412484701,
+     "extras": 10,
+     "partes": [
+      {
+       "prod": "pr3",
+       "nombre": "Spider-Man · salto",
+       "cant": 1,
+       "lista": 250,
+       "costo": 38.959608323133416
+      },
+      {
+       "prod": "pr4",
+       "nombre": "Spider-Man · trepando",
+       "cant": 1,
+       "lista": 250,
+       "costo": 36.35478580171359
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "v24",
+   "fecha": "2026-08-15",
+   "canal": "Terminal",
+   "nota": "Feria de coleccionables",
+   "cliente": "",
+   "pedido": null,
+   "items": [
+    {
+     "k": "p",
+     "prod": "pr4",
+     "nombre": "Spider-Man · trepando",
+     "cant": 2,
+     "precio": 240,
+     "lista": 250,
+     "costo": 36.35478580171359
+    },
+    {
+     "k": "p",
+     "prod": "pr6",
+     "nombre": "Hulk · puño",
+     "cant": 1,
+     "precio": 250,
+     "lista": 250,
+     "costo": 37.89855569155447
+    },
+    {
+     "k": "p",
+     "prod": "pr1",
+     "nombre": "Llavero con nombre",
+     "cant": 5,
+     "precio": 50,
+     "lista": 50,
+     "costo": 3.6747368421052635
+    }
+   ]
+  }
+ ],
+ "insumos": [
+  {
+   "id": "i1",
+   "nombre": "Argolla de llavero",
+   "unidad": "pza",
+   "costo": 0.5,
+   "minimo": 30,
+   "nota": "Paquete de 200",
+   "prov": "pv4"
+  },
+  {
+   "id": "i2",
+   "nombre": "Caja de regalo",
+   "unidad": "pza",
+   "costo": 4.5,
+   "minimo": 5,
+   "nota": "",
+   "prov": "pv5"
+  },
+  {
+   "id": "i3",
+   "nombre": "Imán de base",
+   "unidad": "pza",
+   "costo": 1.5,
+   "minimo": 10,
+   "nota": "",
+   "prov": "pv4"
+  },
+  {
+   "id": "i4",
+   "nombre": "Bolsa de empaque",
+   "unidad": "pza",
+   "costo": 0.8,
+   "minimo": 20,
+   "nota": "Para envíos y entregas",
+   "prov": "pv5"
+  }
+ ],
+ "imovs": [
+  {
+   "id": "iv1",
+   "ins": "i1",
+   "fecha": "2026-09-17",
+   "tipo": "compra",
+   "n": 200,
+   "nota": "Compra de 200 piezas",
+   "ref": ""
+  },
+  {
+   "id": "iv2",
+   "ins": "i2",
+   "fecha": "2026-09-17",
+   "tipo": "compra",
+   "n": 8,
+   "nota": "Compra de 8 cajas",
+   "ref": ""
+  },
+  {
+   "id": "iv3",
+   "ins": "i3",
+   "fecha": "2026-09-17",
+   "tipo": "compra",
+   "n": 60,
+   "nota": "Compra de 60 imanes",
+   "ref": ""
+  },
+  {
+   "id": "iv4",
+   "ins": "i4",
+   "fecha": "2026-09-22",
+   "tipo": "compra",
+   "n": 100,
+   "nota": "Compra de 100 bolsas",
+   "ref": ""
+  },
+  {
+   "id": "iv5",
+   "ins": "i4",
+   "fecha": "2026-10-22",
+   "tipo": "uso",
+   "n": -22,
+   "nota": "Entregas del mes",
+   "ref": ""
+  },
+  {
+   "id": "iv6",
+   "ins": "i2",
+   "fecha": "2026-10-24",
+   "tipo": "uso",
+   "n": -2,
+   "nota": "Regalo de cumpleaños",
+   "ref": ""
+  },
+  {
+   "id": "ivmvypoic21",
+   "ins": "i2",
+   "fecha": "2026-10-29",
+   "tipo": "uso",
+   "n": -1,
+   "nota": "Doctor Doom · busto",
+   "ref": "im1"
+  },
+  {
+   "id": "ivmvypoic22",
+   "ins": "i3",
+   "fecha": "2026-10-29",
+   "tipo": "uso",
+   "n": -1,
+   "nota": "Doctor Doom · busto",
+   "ref": "im1"
+  },
+  {
+   "id": "ivmvypoic33",
+   "ins": "i2",
+   "fecha": "2026-10-27",
+   "tipo": "uso",
+   "n": -1,
+   "nota": "Hulk · puño",
+   "ref": "im2"
+  },
+  {
+   "id": "ivmvypoic34",
+   "ins": "i3",
+   "fecha": "2026-10-27",
+   "tipo": "uso",
+   "n": -1,
+   "nota": "Hulk · puño",
+   "ref": "im2"
+  },
+  {
+   "id": "ivmvypoic35",
+   "ins": "i1",
+   "fecha": "2026-10-26",
+   "tipo": "uso",
+   "n": -10,
+   "nota": "Llavero con nombre × 10",
+   "ref": "im3"
+  },
+  {
+   "id": "ivmvypoic36",
+   "ins": "i2",
+   "fecha": "2026-10-17",
+   "tipo": "uso",
+   "n": -1,
+   "nota": "Spider-Man · salto",
+   "ref": "im6"
+  },
+  {
+   "id": "ivmvypoic37",
+   "ins": "i3",
+   "fecha": "2026-10-17",
+   "tipo": "uso",
+   "n": -1,
+   "nota": "Spider-Man · salto",
+   "ref": "im6"
+  }
+ ],
+ "gastos": [
+  {
+   "id": "g1",
+   "fecha": "2026-08-18",
+   "concepto": "Renta del espacio de trabajo",
+   "cat": "Renta o espacio",
+   "monto": 1200,
+   "rec": true,
+   "fin": ""
+  },
+  {
+   "id": "g2",
+   "fecha": "2026-08-18",
+   "concepto": "Internet",
+   "cat": "Servicios",
+   "monto": 400,
+   "rec": true,
+   "fin": ""
+  },
+  {
+   "id": "g3",
+   "fecha": "2026-10-12",
+   "concepto": "Boquillas y refacciones",
+   "cat": "Mantenimiento y refacciones",
+   "monto": 380,
+   "rec": false,
+   "fin": ""
+  },
+  {
+   "id": "g4",
+   "fecha": "2026-10-18",
+   "concepto": "Publicidad en Facebook",
+   "cat": "Publicidad",
+   "monto": 300,
+   "rec": false,
+   "fin": ""
+  },
+  {
+   "id": "g5",
+   "fecha": "2026-10-04",
+   "concepto": "Espátulas, pinzas y lijas",
+   "cat": "Herramientas",
+   "monto": 450,
+   "rec": false,
+   "fin": ""
+  }
+ ],
+ "pref": {
+  "esencial": false
+ }
+}

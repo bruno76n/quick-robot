@@ -4,7 +4,8 @@ Punto de partida: el estado del mockup (esquema v7). Aquí se traduce a tablas. 
 
 ## Reglas generales
 
-- **Todas** las tablas de negocio llevan `workspace_id` (FK a `workspace`). Los índices empiezan por `workspace_id`.
+- **Todas** las tablas de negocio llevan `workspace_id` (FK a `workspace`), **también las hijas** (`product_filament`, `product_supply`, `collection_part`, `print_run_filament`…). Los índices empiezan por `workspace_id`. Las únicas tablas sin él son `workspace` (es el negocio) y `user` (una persona puede entrar a varios negocios, por `membership`).
+- En una tabla hija el `workspace_id` es el de su padre y la clave foránea es compuesta, `(workspace_id, padre_id)`, para que una fila no pueda apuntar a un registro de otro negocio.
 - `id`: UUID v7 (ordenable por tiempo) generado por el servidor.
 - `created_at`, `updated_at` en todas; `deleted_at` en las que se pueden borrar desde la interfaz (borrado suave, para "Deshacer").
 - **Dinero**: enteros en **centavos** (`*_cents`). **Gramos**: `numeric(10,1)`. **Horas**: `numeric(8,2)`. **Porcentajes**: `numeric(5,2)`.
@@ -21,8 +22,8 @@ Punto de partida: el estado del mockup (esquema v7). Aquí se traduce a tablas. 
 | `user` | `id`, `email` (único), `name`, `password_hash` (solo nube) |
 | `membership` | `workspace_id`, `user_id`, `role` (`owner` \| `admin` \| `operator`) |
 | `subscription` *(solo nube)* | `workspace_id`, `plan`, `status`, `current_period_end`, `provider_customer_id` |
-| `workspace_settings` | `workspace_id` (PK), `kwh_price_cents`, `failure_pct`, `purge_pct`, `min_margin_pct`, `formula_margin_pct`, `business` (jsonb: `name`, `trade`, `phone`, `email`, `city`, `quote_valid_days`, `footer`) |
-| `sales_channel` | `workspace_id`, `name`, `commission_pct`, `position` |
+| `workspace_settings` | `workspace_id` (PK), `kwh_price_cents`, `failure_pct`, `purge_pct`, `min_margin_pct`, `formula_margin_pct`, `business` (jsonb: `name`, `trade`, `phone`, `email`, `city`, `quote_valid_days`, `footer`), `last_backup_on` (date, nulo si nunca) |
+| `sales_channel` | `id`, `workspace_id`, `name` (único por negocio, sin importar mayúsculas), `commission_pct`, `position` |
 | `catalog_item` | `workspace_id`, `kind` (`material` \| `color` \| `brand`), `name`, `hex` (solo colores) |
 
 *En modo local* hay exactamente una fila de `workspace`, `user`, `membership`, con ids fijos.
@@ -45,11 +46,11 @@ Punto de partida: el estado del mockup (esquema v7). Aquí se traduce a tablas. 
 
 | Tabla | Columnas principales | Notas |
 |---|---|---|
-| `product` | `workspace_id`, `name`, `parent_id?` (variante), `mode` (`value` \| `formula`), `price_cents`, `margin_pct?`, `printer_id?` (nulo = promedio), `hours`, `batch_size`, `extras_cents`, `tracks_stock` (bool), `tags` (text[]), `note`, `spec` (jsonb: capa, relleno, paredes, soportes, boquilla, cama, archivo, nota) | `batch_size` (piezas por placa) es informativo: sirve para planear y no cambia el costo. Los campos `prep` y `acab` del mockup no se usan en ninguna pantalla y no se migran |
-| `product_filament` | `product_id`, `filament_id`, `grams` | Qué filamentos y cuántos gramos lleva |
-| `product_supply` | `product_id`, `supply_id`, `qty` | |
+| `product` | `workspace_id`, `name`, `parent_id?` (variante), `mode` (`value` \| `formula`), `price_cents`, `margin_pct?`, `printer_id?` (nulo = promedio), `hours`, `batch_size`, `extras_cents`, `tracks_stock` (bool), `tags` (text[]), `note`, `photo_file_id?`, `spec` (jsonb: capa, relleno, paredes, soportes, boquilla, cama, archivo, nota) | `batch_size` (piezas por placa) es informativo: sirve para planear y no cambia el costo. Los campos `prep` y `acab` del mockup no se usan en ninguna pantalla y no se migran |
+| `product_filament` | `workspace_id`, `product_id`, `filament_id`, `grams` | Qué filamentos y cuántos gramos lleva |
+| `product_supply` | `workspace_id`, `product_id`, `supply_id`, `qty` | |
 | `collection` | `workspace_id`, `name`, `price_cents?`, `extras_cents`, `tags`, `note` | Precio vacío = suma de sueltas |
-| `collection_part` | `collection_id`, `product_id`, `qty` | |
+| `collection_part` | `workspace_id`, `collection_id`, `product_id`, `qty` | |
 
 ## Existencias
 
@@ -64,19 +65,21 @@ Punto de partida: el estado del mockup (esquema v7). Aquí se traduce a tablas. 
 | Tabla | Columnas principales | Notas |
 |---|---|---|
 | `customer` | `workspace_id`, `name`, `type` (`Restaurante` \| `Empresa` \| `Persona` \| `Otro`), `phone`, `has_logo`, `logo_file_id?`, `note`, `created_on` | El tipo es un catálogo por negocio |
-| `order` | `workspace_id`, `number` (folio por negocio, correlativo), `customer_id?`, `status`, `channel`, `note`, `created_on`, `due_on`, `ready_on?`, `delivered_on?`, `production_on?`, `filament_deducted` (bool), `runs_logged` (bool), `stock_reserved` (jsonb: pieza → cantidad apartada al quedar listo), `cancellation` (jsonb: fecha, motivo, reembolso) | `status`: `quoted`, `accepted`, `in_production`, `ready`, `delivered`, `cancelled` |
-| `sale` | `workspace_id`, `on`, `channel`, `customer_id?`, `order_id?`, `note`, `return` (jsonb: fecha, repone, reembolso, nota) | Una venta nace de una venta directa o al **entregar** un pedido |
+| `order` | `workspace_id`, `number` (folio por negocio, correlativo), `customer_id` (obligatorio), `status`, `channel_id`, `note`, `created_on`, `due_on`, `ready_on?`, `delivered_on?`, `production_on?`, `filament_deducted` (bool), `runs_logged` (bool), `stock_reserved` (jsonb: pieza → cantidad apartada al quedar listo), `cancellation` (jsonb: fecha, motivo, reembolso) | `status`: `quoted`, `accepted`, `in_production`, `ready`, `delivered`, `cancelled` |
+| `sale` | `workspace_id`, `on`, `channel_id`, `customer_id?`, `order_id?`, `note`, `return` (jsonb: fecha, repone, reembolso, nota) | Una venta nace de una venta directa o al **entregar** un pedido |
 | `line_item` | `workspace_id`, `parent_kind` (`order` \| `sale`), `parent_id`, `kind` (`piece` \| `set`), `product_id?`, `collection_id?`, `name`, `qty`, `price_cents`, `list_cents`, `cost_cents`, `extras_cents`, `parts` (jsonb, congelado), `printer_id?`, `from_stock` (jsonb: pieza → cantidad de existencias) | `price/list/cost` son la foto del momento |
 | `payment` | `workspace_id`, `parent_kind` (`order` \| `sale`), `parent_id`, `on`, `amount_cents` (negativo = reembolso), `note` | |
 
 El folio del pedido (`order.number`) se asigna con un contador por negocio dentro de la transacción de creación.
+
+**Canales por id, no por nombre.** El mockup guardaba el nombre del canal en cada venta y pedido y, al renombrarlo, reescribía todos los registros. En el producto cada venta y pedido apunta a `channel_id`, así que renombrar un canal cambia **una** fila. Un canal con ventas o pedidos no se puede quitar (`CHANNEL_IN_USE`). La comisión que se aplica es la **actual** del canal (regla de `04 §6`); cambiarla recalcula las ganancias mostradas, como en el mockup.
 
 ## Producción
 
 | Tabla | Columnas principales |
 |---|---|
 | `print_run` | `workspace_id`, `on`, `product_id?`, `qty`, `printer_id?`, `result` (`ok` \| `fail`), `hours`, `reason` (`stock` \| `order` \| `test`), `text`, `order_id?`, `photo_file_id?` |
-| `print_run_filament` | `print_run_id`, `filament_id`, `grams` |
+| `print_run_filament` | `workspace_id`, `print_run_id`, `filament_id`, `grams` |
 
 ## Gastos
 
@@ -90,9 +93,25 @@ Categorías: Renta o espacio, Servicios, Mantenimiento y refacciones, Herramient
 
 | Tabla | Columnas principales |
 |---|---|
-| `file` | `workspace_id`, `kind`, `mime`, `size`, `storage_key` |
+| `file` | `workspace_id`, `kind` (`product_photo` \| `customer_logo` \| `print_photo`), `mime` (solo JPG, PNG o WebP), `size`, `storage_key` |
 
 En el mockup los logos y fotos son *data URL* dentro del estado. En el producto van a un `FileStore` (disco en local, almacenamiento de objetos en nube) y se referencian por `file_id`.
+
+## Vistas calculadas
+
+Para que listas y saldos no sumen fila por fila en la aplicación (`15 §3`):
+
+| Vista | Qué agrupa |
+|---|---|
+| `spool_levels` | restante por rollo y por filamento (suma de `spool_movement`, sin rollos borrados) |
+| `stock_levels` | físicas por pieza (suma de `stock_movement`); las apartadas salen de los pedidos en cierto estado (`04 §5`) |
+| `supply_levels` | existencia por insumo |
+
+Son vistas de lectura; la fuente de verdad siguen siendo los libros de movimientos.
+
+## Borrado suave
+
+Llevan `deleted_at` (y por tanto "Deshacer" = `restore…`, `12`): `product`, `collection`, `sale`, `order`, `customer`, `expense`, `spool`, `supply`, `supplier`, `printer`. Las filas hijas (artículos, pagos, movimientos) **no** se borran: dejan de contar porque su padre está borrado. Restaurar puede fallar si el nombre ya lo usa otro registro (`RESTORE_CONFLICT`).
 
 ## Índices que importan
 
@@ -113,6 +132,10 @@ En el mockup los logos y fotos son *data URL* dentro del estado. En el producto 
 El importador lee la copia de seguridad del mockup (v7) y la convierte con estas reglas:
 - Los ids del mockup (`f1`, `r1`, …) se reemplazan por UUID y se guarda una tabla temporal de equivalencias.
 - `pagos` vacío en una venta → no se crean pagos (se considera pagada completa).
-- Los *data URL* de logos y fotos se suben al `FileStore`.
+- Los *data URL* de logos y fotos se suben al `FileStore` y se registran en `file`.
+- Los nombres de canal de ventas y pedidos se convierten a `channel_id`; si una venta usa un canal que ya no existe en la lista, se crea ese canal con comisión 0 y se anota en el resumen.
+- Los estados del mockup se traducen con la tabla de valores internos de `03` (`cotizado` → `quoted`, `inventario` → `stock`, …).
+- Un pedido sin cliente (no debería existir) se importa con un cliente "Sin nombre" y se anota en el resumen.
+- `pref.copia` del mockup pasa a `workspace_settings.last_backup_on`.
 - Los movimientos se importan tal cual (conservan fechas); `Existencias` y `Rollos` se verifican comparando sumas antes y después.
 - Al terminar, el importador imprime un resumen: cuántas filas por tabla y las diferencias, si las hay.

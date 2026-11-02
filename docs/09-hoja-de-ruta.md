@@ -2,6 +2,8 @@
 
 Orden de trabajo (el detalle paso a paso y los archivos de cada fase están en `10-plan-de-construccion.md`). No hay fechas porque dependen de cuánto tiempo se le dedique; cada fase tiene un **criterio de terminado** que se puede comprobar.
 
+**Documentos de apoyo:** contrato de la API (`12`), textos y errores (`13`), convenciones y pruebas (`14`), rendimiento y fallos (`15`), prompts por fase (`prompts.md`).
+
 **Orden de la idea:** primero la versión web funcionando en tu computadora con tus datos locales; después se envuelve en Electron para usarla a diario sin internet; al final se abre al público con cuentas y suscripción. Es el mismo producto en las tres etapas.
 
 ## Fase 1 · Cimientos y esqueleto que camina
@@ -22,7 +24,7 @@ Filamentos, Insumos, Impresoras, Productos (Calculadora), Colecciones, Ajustes d
 
 Existencias, Clientes, Ventas, Pedidos, Producción, Gastos, Reportes, Compras, documentos, Inicio, búsqueda y atajos.
 
-**Terminado cuando:** los seis flujos de `06 §17` pasan de punta a punta y los casos 4.1–10.1 de `04` pasan en `core`.
+**Terminado cuando:** los seis flujos de `06 §17` pasan de punta a punta, los casos 4.1–10.1 de `04` pasan en `core` y se cumplen los presupuestos de `15 §2`.
 
 ## Fase 4 · Electron y uso diario
 
@@ -39,10 +41,12 @@ Cuentas, negocios separados, planes y suscripción, correo, archivos en la nube,
 
 **Terminado cuando:** una persona nueva se registra, crea su negocio vacío, paga el plan, completa el flujo B de `06 §17`, y no puede ver nada de otro negocio.
 
+**Antes de empezar:** falta planear `16-nube-cuentas-y-planes.md`, `17-lanzamiento.md` y `legal/` (aviso de privacidad, términos). La fase 5 no arranca sin ellos.
+
 ## Después
 
 Roles y varios usuarios por negocio, catálogo público para clientes, recordatorios de cobro, etiquetas con QR, archivos 3MF/STL adjuntos, aplicación móvil. Nada de esto condiciona las fases anteriores.
 
 ## Cómo medir el avance
 
-`docs/progreso.md`: una línea por pantalla con su estado (*no iniciada · en curso · igual al mockup · verificada*). Cada fase termina cuando sus filas llegan a "igual al mockup" y sus pruebas pasan.
+`docs/progreso.md`: una línea por pantalla con su estado (*no iniciada · en curso · igual al mockup · verificada*). Cada fase termina cuando sus filas llegan a "igual al mockup", sus pruebas pasan y existe su `docs/informe-fase-N.md`.

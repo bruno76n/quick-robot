@@ -15,7 +15,7 @@
 | Estado de interfaz | Zustand (poco) | Solo lo que no es dato: borrador del armador, filtros, vista de lista/cuadrícula |
 | Formularios | react-hook-form + Zod | Los mismos esquemas de `packages/contract` validan en cliente y servidor |
 | Íconos | Un solo juego (los del mockup se redibujan o se reemplazan por uno equivalente) | Coherencia |
-| Pruebas | Vitest + Testing Library; Playwright para flujos | Ver `09` |
+| Pruebas | Vitest + Testing Library; Playwright para flujos | Ver `14` |
 
 ## Principios
 
@@ -77,8 +77,26 @@ features/orders/
 const order = await api.orders.markReady({ orderId });   // POST /orders/:id/ready
 ```
 
-- Errores de negocio llegan con un `code` estable (`INSUFFICIENT_STOCK`, `ORDER_NOT_ACTIVE`, …) y la interfaz los traduce a un texto en español desde `es.ts`.
-- En modo local la dirección base y el secreto de sesión se leen de `window.desktop?.serverInfo` (o de variables de entorno en desarrollo); en la nube es el mismo origen.
+- Errores de negocio llegan con un `code` estable (`INSUFFICIENT_STOCK`, `ORDER_NOT_ACTIVE`, …) y la interfaz los traduce a un texto en español desde `es.ts` (`13 §3`); el `message` técnico del servidor nunca se muestra.
+- Todas las llamadas van al mismo origen (`/api/v1`). En modo local el secreto de sesión **no lo maneja la interfaz**: la ventana de Electron lo agrega como encabezado a cada petición (en desarrollo, lo agrega el proxy de Vite); en la nube viaja la cookie.
+- Contrato completo de operaciones, entradas y errores: `12`.
+
+## Estados de carga y de falla
+
+La interfaz nunca queda en blanco ni muestra errores técnicos (`15 §5`):
+- Un **límite de errores por ruta** muestra la tarjeta "Esta pantalla no se pudo mostrar" sin tumbar el menú.
+- Banner fijo para "la aplicación no responde" (escritorio) o "sin conexión" (nube).
+- Esqueletos de carga a los 300 ms; "Tarda más de lo normal" a los 8 s.
+- Todo botón que escribe se deshabilita mientras la petición está en curso ("Guardando…").
+- Los mensajes de campo salen de `VALIDATION_ERROR.details.fields` y aparecen bajo el campo (`13 §6`).
+
+## Imágenes
+
+Logos y fotos se reducen **en el navegador** (lado mayor ≤ 1 600 px, JPEG o WebP) antes de subirlas con `POST /files`; el servidor solo valida tipo y tamaño (`15 §3`). Los CSV de Ajustes se generan en `lib/csv.ts`, que neutraliza celdas que empiezan con `=`, `+`, `-` o `@`.
+
+## Textos, formatos y accesibilidad de textos
+
+Todo texto sale de `i18n/es.ts` con el ayudante `t()` (parámetros y plural); formatos de moneda, fechas y duraciones en `lib/format.ts` (`13 §1–2`). Un lint prohíbe texto literal en español dentro de los componentes.
 
 ## Desarrollo sin servidor completo
 

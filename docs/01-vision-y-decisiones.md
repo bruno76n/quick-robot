@@ -26,7 +26,8 @@ Nace para **Quick Robot** (Guadalajara) y está pensado desde el inicio para con
 ## Estado actual
 
 - El **diseño y las funciones están completos** en el mockup (`Quick Robot mockup.html`): 14 pantallas en el menú y 5 de detalle (calculadora, colección, armador de venta o pedido, pedido y ficha de cliente).
-- Lo que falta es **arquitectura y construcción**. Las pantallas y los flujos solo se escriben (`06`).
+- La **planeación del producto está completa hasta la fase 4** (documentos 01 al 15, prompts por fase, datos y textos extraídos del mockup, íconos provisionales). Lo que falta planear es la **fase 5** (cuentas, planes y cobro, lanzamiento, legal): documentos `16`, `17` y `legal/`.
+- Lo que falta es **construir**, empezando por el prompt de la fase 1 en `prompts.md`.
 
 ## Decisiones tomadas
 
@@ -51,6 +52,22 @@ Nace para **Quick Robot** (Guadalajara) y está pensado desde el inicio para con
 | D17 | Copia de seguridad: un solo archivo que la app guarda sola | `02 §6` |
 | D18 | Actualizar en la Mac = instalar la versión nueva a mano; sin firma de Apple por ahora; datos en carpeta aparte | `02` |
 | D19 | La construcción es **autónoma** con protocolo, pruebas y rastro (commits por paso, informe por fase) | `CLAUDE.md`, `10` |
+| D20 | OWASP Top 10:2025 como estándar de seguridad para todo lo web, con chequeo `pnpm security` obligatorio | `11` |
+| D21 | La app de escritorio no pide contraseña propia; la copia de seguridad va sin cifrar con aviso en pantalla | `11` |
+| D22 | Contrato de API detallado: éxito `{ data, warnings? }`, error `{ code, message, details?, errorId? }`; códigos estables; el texto en español lo pone la interfaz | `12` |
+| D23 | Todo texto sale de `es.ts`, construido a partir del mockup; las eliminaciones se confirman con un segundo toque en el botón, no con cuadros de diálogo | `13` |
+| D24 | Convenciones de código, Conventional Commits, pruebas por capa, umbrales de cobertura y `fast-check` solo en pruebas | `14` |
+| D25 | Se diseña para cinco años de uso (25 000 ventas); presupuestos de tiempo, límites de entrada, imágenes reducidas en el navegador | `15` |
+| D26 | Nunca pantalla en blanco ni error técnico; pantallas de falla propias de Electron; copias automáticas diarias (últimas 7) mediante `BackupStore` | `15`, `08` |
+| D27 | Ventas y pedidos apuntan al canal por id (renombrar toca una fila); todo pedido tiene cliente | `05` |
+| D28 | Íconos, logo y mascota provisionales, generados de la mascota del mockup; reemplazables sin tocar código | `assets/README.md` |
+| D29 | El secreto del servidor local lo agrega Electron como encabezado a cada petición de su ventana; la interfaz nunca lo maneja | `12 §1`, `11` |
+| D30 | La marca del producto (mascota, íconos) vive en `assets/`; el nombre y el giro que se ven en pantalla y en documentos son datos del negocio (Ajustes). El logo con el texto “Quick Robot” es solo para uso externo | `06 §1` y `§14`, `assets/README.md` |
+| D31 | Toda tabla de negocio, también las hijas, lleva `workspace_id` (clave foránea compuesta con su padre); solo `workspace` y `user` no | `05` |
+| D32 | “Deshacer” existe solo para eliminaciones (borrado suave). Devolver una venta y cancelar un pedido no se deshacen: mueven dinero y existencias | `06 §1`, `12`, `13 §5` |
+| D33 | Segunda persona: nunca en botones ni títulos; los mensajes heredados del mockup conservan su imperativo y los nuevos van en infinitivo o impersonales | `13 §1` |
+| D34 | Los paquetes internos usan el alcance neutral `@app/*` | `14 §1` |
+| D35 | Los estados de filamento, rollo, insumo y pieza en Existencias se definen en `04` con sus valores internos en `03` (el mockup los tenía solo en código) | `04 §1` y `§5`, `03`, `13 §8` |
 
 ## Decisiones abiertas
 
@@ -63,6 +80,8 @@ Nace para **Quick Robot** (Guadalajara) y está pensado desde el inicio para con
 | O5 | Método de acceso: correo + contraseña o enlace mágico | Fase 5 |
 | O6 | Manejo exacto de redondeo de dinero (centavos enteros en base, pesos en `core`) | Primeras pruebas de la fase 1; se fija en `money.ts` |
 | O7 | Nombre comercial y dominio del producto público | Antes de la fase 5 |
+| O8 | Arte final de R1 (la mascota actual sale del mockup) | Opcional, cuando exista; se reemplazan los archivos de `assets/` |
+| O9 | Planeación de la fase 5: cuentas y negocios, planes y cobro, lanzamiento, legal (`16`, `17`, `legal/`) | Antes de empezar la fase 5 |
 
 ## Principios de trabajo
 
