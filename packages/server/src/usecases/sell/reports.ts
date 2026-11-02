@@ -6,11 +6,11 @@ import {
 } from '@app/core';
 import {
   getExpense, getSettings, insertExpense, listAllFilaments, listChannels, listCollections, listCustomers, listExpenses, listOrders, listPrinters, listProducts,
-  listSales, listSpools, listSuppliers, listSupplies, listSupplyMovements, listTasks, setExpenseDeleted, transaction, updateExpense, type Ctx, type Executor, type ExpenseListRow,
+  listSales, listSpools, listSuppliers, listSupplies, listSupplyMovements, listTasks, setExpenseDeleted, transaction, updateExpense, type Ctx, type Executor, type ExpenseListRow, type ProductFull,
 } from '@app/db';
 import type { Deps } from '../../deps';
 import { notFound } from '../../http';
-import { costOf, loadCostingContext, setPartsOf, supplyIdsOf } from '../../views/costing';
+import { costOf, loadCostingContext, type CostingContext, setPartsOf, supplyIdsOf } from '../../views/costing';
 import { cents, childrenOf, commissionOf, factSale, itemsText, lineItemData, orderData, saleData } from './common';
 import { queueViews } from './queue';
 import { grossProfitAndExpensesFast, totalsOf } from './fast';
@@ -69,7 +69,7 @@ export const grossProfitAndExpenses = grossProfitAndExpensesFast;
 
 
 /** Workshop (filament used, print runs, printers) in a range and the current state (inventory, orders in progress) for Reportes. */
-async function reportWorkshopAndState(ex: Executor, ctx: Ctx, from: string, to: string) {
+async function reportWorkshopAndState(ex: Executor, ctx: Ctx, from: string, to: string, given: { all: ProductFull[]; c: CostingContext }) {
   const fils = await listAllFilaments(ex, ctx);
   const spools = await listSpools(ex, ctx, fils.map((f) => f.id));
   const settings = await getSettings(ex, ctx);
@@ -87,9 +87,10 @@ async function reportWorkshopAndState(ex: Executor, ctx: Ctx, from: string, to: 
   const printers = await listPrinters(ex, ctx);
   const kwh = (settings?.kwhPriceCents ?? 0) / 100;
   const round1 = (n: number) => Math.round(n * 10) / 10;
-  const products = await listProducts(ex, ctx);
+  // The report already loaded the catalog and its costs: reused here (docs/15 §2, Reportes 30 días ≤ 400 ms).
+  const products = given.all.filter((p) => !p.deletedAt);
   const st = await loadStock(ex, ctx, products);
-  const c = await loadCostingContext(ex, ctx, supplyIdsOf(products));
+  const { c } = given;
   let pieces = 0; let free = 0; let reserved = 0; let atCost = 0; let atList = 0;
   for (const p of products.filter((x) => x.tracksStock)) {
     const physical = st.physical.get(p.id) ?? 0;
@@ -184,7 +185,7 @@ export async function report(deps: Deps, ex: Executor, ctx: Ctx, q: { period?: '
   const g = await grossProfitAndExpenses(ex, ctx, today);
   const printers = await listPrinters(ex, ctx);
   const inv = investmentRecovered(g.grossProfit, g.expenses, printers.map((p) => ({ id: p.id, costPesos: p.costCents / 100, hours: p.hours })));
-  const W = await reportWorkshopAndState(ex, ctx, from, to);
+  const W = await reportWorkshopAndState(ex, ctx, from, to, { all: products, c });
   const prevExpensesCents = prevRange ? cents(expensesInRange(exps.map(expenseData), addDays(from, -days), addDays(from, -1))) : null;
   return {
     range: { from, to, days, unit, period: q.from && q.to ? 'custom' : q.period ?? '30' },
@@ -337,10 +338,12 @@ export async function search(_deps: Deps, ex: Executor, ctx: Ctx, q: string) {
   const foundProducts = productsAll.filter((p) => hit(p.name, p.note, ...p.tags)).slice(0, 8);
   const foundCols = (await listCollections(ex, ctx)).filter((col) => hit(col.name)).slice(0, 8);
   // Prices are costed only when something matched (the costing context is the heavy part).
-  const c = foundProducts.length || foundCols.length ? await loadCostingContext(ex, ctx, supplyIdsOf(productsAll)) : null;
-  const products = foundProducts.map((p) => ({ id: p.id, name: p.name, listCents: cents(priceOf(p, c!)) }));
+  // A piece with a typed price (mode "value") shows it as is; costs are loaded only for formula prices or sets without a price.
+  const needsCost = foundProducts.some((p) => p.mode === 'formula') || foundCols.some((col) => !col.priceCents);
+  const c = needsCost ? await loadCostingContext(ex, ctx, supplyIdsOf(productsAll)) : null;
+  const products = foundProducts.map((p) => ({ id: p.id, name: p.name, listCents: p.mode === 'formula' ? cents(priceOf(p, c!)) : p.priceCents }));
   const byId = new Map(productsAll.map((p) => [p.id, p]));
-  const collections = foundCols.map((col) => ({ id: col.id, name: col.name, priceCents: cents(setPrice(col.priceCents ? col.priceCents / 100 : null, setPartsOf(col, byId, c!))) }));
+  const collections = foundCols.map((col) => ({ id: col.id, name: col.name, priceCents: col.priceCents ? col.priceCents : cents(setPrice(null, setPartsOf(col, byId, c!))) }));
   const customersAll = await listCustomers(ex, ctx);
   const customers = customersAll.filter((x) => hit(x.name, x.phone, x.note)).slice(0, 8).map((x) => ({ id: x.id, name: x.name, type: x.type, phone: x.phone }));
   const cname = new Map(customersAll.map((x) => [x.id, x.name]));

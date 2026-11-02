@@ -483,3 +483,15 @@ export async function collectionLines(ex: Executor, ctx: Ctx, f: { from?: string
     .groupBy(lineItem.collectionId);
   return rows.filter((r) => r.id).map((r) => ({ id: r.id!, name: r.name, qty: Number(r.qty), incomeCents: Number(r.income), costCents: Number(r.cost), profitCents: Number(r.profit) }));
 }
+
+/** Gross profit of all live sales (income − commission − cost, docs/04 §6) in one lean query: Impresoras and Reportes. */
+export async function grossProfitAllTime(ex: Executor, ctx: Ctx): Promise<number> {
+  inWorkspace(sale.workspaceId, ctx);
+  const res = await ex.execute(sql`
+    select coalesce(sum(case when s.return is null then li.qty * li.price_cents * (1 - coalesce(ch.commission_pct, 0) / 100) else 0 end)
+      - sum(case when (s.return->>'restock')::boolean then 0 else li.qty * li.cost_cents end), 0) as profit
+    from ${lineItem} li join ${sale} s on s.workspace_id = li.workspace_id and s.id = li.parent_id
+    left join ${salesChannel} ch on ch.workspace_id = s.workspace_id and ch.id = s.channel_id
+    where li.workspace_id = ${ctx.workspaceId} and li.parent_kind = 'sale' and s.deleted_at is null`);
+  return Number((res as unknown as { rows: { profit: string }[] }).rows[0]?.profit ?? 0);
+}

@@ -75,6 +75,20 @@ Todo lo que se puede probar sin una Mac está hecho y en verde. Lo que falta nec
 - **Ajustes de prueba solo en desarrollo:** `DESKTOP_USER_DATA` y `DESKTOP_TEST_MIGRATIONS` solo funcionan en compilaciones de prueba. El `.dmg` de entrega los ignora.
 - **El registro de errores** ya no guarda los valores de las consultas.
 
+## Rendimiento de lectura después de la fase 4
+Corrida completa de `pnpm perf` (25 000 ventas, Linux, p95), después de reutilizar catálogo y costos en Reportes, calcular la ganancia histórica con una consulta ligera y no cargar costos en la búsqueda si no hacen falta:
+
+| Acción | p95 | Presupuesto |
+|---|---|---|
+| Ventas (página) / Pedidos (lista, tablero) | 323 / 72 / 263 ms | 300 ms |
+| Clientes / Productos | 526 / 408 ms | 300 ms |
+| Reportes 30 días / Todo | 699 ms / 1.9 s | 400 ms / 1.5 s |
+| Inicio / Búsqueda | 637 / 305 ms | 400 / 200 ms |
+| Importar 25 000 ventas | 43 s | 30 s |
+| Escrituras (todas) | 89–423 ms | 500–800 ms |
+
+Ninguna pasa de 2× (la prueba falla solo ahí). Entre corridas varían ±30 % en este contenedor (medidas aisladas: Reportes 30 días 530 ms, búsqueda 243 ms). En la Mac conviene repetir `pnpm perf`; si alguna sigue arriba de 1×, lo siguiente sería guardar sumas por día en una tabla de resumen.
+
 ## Agregado después del cierre de la fase 3
 - **Esqueleto de carga lenta** (`15 §5`): si la primera carga de una pantalla tarda más de 300 ms aparece un esqueleto gris; a los 8 s, "Tarda más de lo normal" con Reintentar. Probado en `e2e/failure-states.spec.ts` y con una prueba unitaria. El mockup no tiene uno; usa sus colores y radios.
 

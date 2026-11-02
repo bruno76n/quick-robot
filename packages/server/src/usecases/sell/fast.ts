@@ -1,7 +1,7 @@
 // Read paths for big data sets (docs/15 §1–3): sums come from SQL (saleFacts, saleTotals, orderFacts),
 // the app only applies the rules of core on one row per sale or order.
 import { ALL_TIME_FROM, expensesInRange, isActive, orderOwed, saleCommission, saleCost, saleIncome, saleOwed, saleProfit, type OrderStatus } from '@app/core';
-import { listChannels, listCustomers, listExpenses, orderTotalsByCustomer, saleFacts, saleTotals, type Ctx, type Executor, type OrderFact, type SaleFilter, type SaleTotalsRow } from '@app/db';
+import { grossProfitAllTime, listChannels, listCustomers, listExpenses, orderTotalsByCustomer, saleFacts, saleTotals, type Ctx, type Executor, type OrderFact, type SaleFilter, type SaleTotalsRow } from '@app/db';
 import { cents, commissionOf, factSale } from './common';
 
 const pct = (profit: number, income: number) => (income ? Math.round((profit / income) * 1000) / 10 : 0);
@@ -54,7 +54,7 @@ export const activeOwed = (orders: readonly OrderFact[]) => orders.filter((o) =>
 
 /** Gross profit since always (SQL totals) and expenses since always to today (docs/04 §10–11). */
 export async function grossProfitAndExpensesFast(ex: Executor, ctx: Ctx, today: string) {
-  const t = totalsOf((await saleTotals(ex, ctx))[0]);
+  const profitCents = await grossProfitAllTime(ex, ctx);
   const exp = await listExpenses(ex, ctx);
-  return { grossProfit: t.profitCents / 100, expenses: expensesInRange(exp.map((e) => ({ on: e.on, amount: e.amountCents / 100, recurring: e.recurring, endsOn: e.endsOn })), ALL_TIME_FROM, today) };
+  return { grossProfit: Math.round(profitCents) / 100, expenses: expensesInRange(exp.map((e) => ({ on: e.on, amount: e.amountCents / 100, recurring: e.recurring, endsOn: e.endsOn })), ALL_TIME_FROM, today) };
 }
