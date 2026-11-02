@@ -95,3 +95,15 @@ Ver `01-vision-y-decisiones.md` (D1–D19).
 - **Un archivo por área** en `usecases/` (`settings.ts`, `supplies.ts`, `spools.ts`, `printers.ts`, `products.ts`, `files.ts`) en lugar de un archivo por caso de uso: mismos nombres de función que `06 §16`.
 - **Costeo compartido**: `core/costing.ts` (`costProduct`, `costCollection`) es la única función de costeo; el servidor la usa para responder y la calculadora la usa en el navegador con el mismo "contexto de costeo" (`GET /products/costing-context`). Prueba `server/test/golden-server.test.ts`: con la semilla del mockup, el servidor da los mismos M, L, Q, E, F, costo, precio de lista, piso y sugerido de las 9 piezas y las 2 colecciones (±0.01).
 - Impacto: `packages/db/src/schema/*`, `migrations/0001_*.sql`, `packages/server/src/{usecases,queries,routes}/*`, `packages/db/seed/quick-robot.ts`.
+
+## 2026-11-02 · Fase 2 · Paso 2.4 · Pantallas
+- **Colores del costo**: `07` y CLAUDE.md dicen "morado = costo", pero los valores **finales** del mockup (después de sus capas de estilo) pintan el costo en grises (`--c-m #2d2d35`, `--c-l #5a5a65`, `--c-q #8b8b97`, `--c-e #dcdce3`, fallos `#d6a2ab`) y la ganancia en verde. Manda el mockup en lo visual; se actualizaron los tokens. **Conviene revisar** si se quiere volver al morado (es un cambio de tokens, sin tocar componentes).
+- **Pastillas**: el mockup tiene dos estilos: "chip" con punto de color (tablas, cajones) y "pill" sin punto (fichas, tarjetas de insumo, mantenimiento). `Pill` acepta `dot={false}`.
+- **Lo que depende de la fase 3 se ve pero no actúa**: "Vender/Pedido" en fichas, "Registrar venta" en calculadora y colección (deshabilitados); existencias de piezas ("Sin existencias"/"Solo por pedido"), "0 vendidas", "Ningún set completo", impresoras "Libre" e inversión recuperada 0 % hasta que existan ventas y colas.
+- **Ajustes** guarda cada campo al salir de él (el mockup guarda mientras se escribe). Las secciones "Copia de seguridad" y "Datos de ejemplo" son de la fase 4 y no se muestran todavía.
+- **Proveedores**: se eligen en el diálogo de insumo; su alta y edición viven en Compras (fase 3).
+- **La foto** se sube primero (`POST /files`) y se guarda junto con la pieza en la misma operación (`photoFileId` en `saveProduct`), para no encadenar escrituras sueltas.
+- **Vista de fichas/lista** es una preferencia de interfaz en Zustand (no se guarda en el servidor).
+- **El diálogo de rollo** se usa desde Filamentos y desde la calculadora ("Agregar rollo de otro filamento"); se importa de `features/filament` en lugar de moverlo a `components/` (lo comparten dos pantallas de la misma área).
+- **Silueta de la pieza dibujada**: el mockup la elige con su id (`pr1`…); los ids reales son UUID, así que la silueta de cada pieza puede diferir de la del mockup. Es decorativa.
+- Impacto: `apps/web/src/**`.
