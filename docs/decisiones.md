@@ -69,3 +69,12 @@ Claude Code leyó la v2 completa: confirmó que las 9 contradicciones estaban re
 - Prueba negativa de fronteras: `packages/core/test/fixtures/forbidden-import.ts` (excluido del lint normal) y `tools/test/boundaries.test.ts`, que además comprueba 16 violaciones más (núcleo con Node o reloj, web con db/server/Node, servidor con SQL, `mode === 'cloud'`, `dangerouslySetInnerHTML`, texto en español en JSX, `eval`, `sql.raw`, SQL concatenado, exportación por defecto, `console.log`).
 - `pnpm audit`: 2 avisos **moderados** (`minimatch` dentro de herramientas de desarrollo); ninguno alto ni crítico. Se revisan al actualizar esas herramientas.
 - Impacto: `package.json`, `pnpm-workspace.yaml`, `vitest.config.ts`, `eslint.config.js`, `.dependency-cruiser.cjs`, `scripts/`, `.github/workflows/ci.yml`.
+
+## 2026-11-02 · Fase 1 · Paso 1.5 · Servidor
+- **Pruebas de seguridad desde la fase 1** (`packages/server/test/security/`): `access-matrix` (recorre todas las rutas registradas: ids de otro negocio → 404, sin sesión → 401, rol desconocido → 403; una ruta con id que no esté en su tabla rompe la prueba), `headers`, `injection`, `import-untrusted` y `failure-midway` (una ruta de escritura sin caso rompe la prueba), más `logging`. `import-untrusted` cubre por ahora entradas no confiables (JSON roto, cuerpos grandes, escrituras de otro sitio, campos de más, configuración insegura); la importación de copias se suma en la fase 4.
+- **Escrituras solo del mismo origen y en JSON:** el servidor local escucha en `127.0.0.1` y una página de otro sitio podría intentar escribirle. Se rechazan las escrituras con `Origin` ajeno o `Sec-Fetch-Site: cross-site` (403 `FORBIDDEN`) y las que no son `application/json` ni `multipart/form-data` (422). Respaldo: `11 › A01, A05`.
+- **Ids que no son UUID → 404** antes de tocar la base (`12 §1`: "no existe").
+- **Fallo a la mitad:** se prueba con un envoltorio de la conexión que hace fallar la escritura número N dentro de la transacción (`failOnWrite`), para cada N de cada caso de uso.
+- **Pruebas rápidas:** cada archivo de pruebas carga una copia de una base PGlite ya migrada (0.6 s en lugar de 5 s de crearla).
+- **Rol en local:** `owner`. `can()` niega por omisión; `admin` y `operator` quedan definidos de forma mínima hasta la fase 5.
+- Dependencias nuevas: `hono` 4.13.13, `@hono/node-server` 1.19.17, `uuidv7` 1.2.1 (ids v7 de `05`), `zod` 4.6.7 (también en `contract`), `drizzle-orm` 0.45.4, `drizzle-kit` 0.31.11, `@electric-sql/pglite` 0.5.10, `postgres` 3.4.9.

@@ -5,10 +5,20 @@ import { migrate as migratePglite } from 'drizzle-orm/pglite/migrator';
 import { drizzle as drizzlePostgres } from 'drizzle-orm/postgres-js';
 import { migrate as migratePostgres } from 'drizzle-orm/postgres-js/migrator';
 import postgres from 'postgres';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { Db } from './db';
 
 export const DEFAULT_MIGRATIONS = fileURLToPath(new URL('../migrations', import.meta.url));
+
+/** Number of applied migrations this build expects (reported by GET /health). */
+export function schemaVersion(folder = DEFAULT_MIGRATIONS): number {
+  try {
+    return (JSON.parse(readFileSync(`${folder}/meta/_journal.json`, 'utf8')) as { entries: unknown[] }).entries.length;
+  } catch {
+    return 0;
+  }
+}
 
 export interface Connection {
   db: Db;
