@@ -45,6 +45,7 @@ async function measure(name: string, budget: number, fn: () => Promise<unknown>,
   for (let i = 0; i < runs; i++) { const t = performance.now(); await fn(); times.push(performance.now() - t); }
   const p95 = Math.round(times.sort((a, b) => a - b)[Math.min(times.length - 1, Math.ceil(times.length * 0.95) - 1)]!);
   results.push({ name, p95, budget });
+  process.stderr.write(`PERF ${name}: p95 ${p95} ms (budget ${budget} ms)\n`);
   expect.soft(p95, `${name}: p95 ${p95} ms, budget ${budget} ms`).toBeLessThanOrEqual(budget * 2);
 }
 const get = (p: string) => async () => { const r = await h.call('GET', `/api/v1${p}`); if (r.status !== 200) throw new Error(`${p} → ${r.status}`); return r.json as J; };
