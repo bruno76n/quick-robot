@@ -53,7 +53,8 @@ function row(input: CustomerPatch) {
 
 export async function createCustomer(deps: Deps, ctx: Ctx, input: CustomerInput) {
   const id = await transaction(deps.db, async (tx) => {
-    if (await findCustomerByKey(tx, ctx, normalizeName(input.name))) throw new BusinessError('CUSTOMER_NAME_EXISTS', { name: tidyName(input.name) });
+    const dup = await findCustomerByKey(tx, ctx, normalizeName(input.name));
+    if (dup) throw new BusinessError('CUSTOMER_NAME_EXISTS', { name: dup.name });
     const r = row(input);
     return (await insertCustomer(tx, ctx, { id: deps.ids.next(), name: r.name!, nameKey: r.nameKey!, type: r.type!, ...r, createdOn: deps.clock.today() })).id;
   });
@@ -63,7 +64,8 @@ export async function createCustomer(deps: Deps, ctx: Ctx, input: CustomerInput)
 export async function updateCustomerUc(deps: Deps, ctx: Ctx, id: string, input: CustomerPatch) {
   await transaction(deps.db, async (tx) => {
     if (!(await getCustomer(tx, ctx, id))) throw notFound('customer');
-    if (input.name !== undefined && await findCustomerByKey(tx, ctx, normalizeName(input.name), id)) throw new BusinessError('CUSTOMER_NAME_EXISTS', { name: tidyName(input.name) });
+    const dup = input.name !== undefined ? await findCustomerByKey(tx, ctx, normalizeName(input.name), id) : null;
+    if (dup) throw new BusinessError('CUSTOMER_NAME_EXISTS', { name: dup.name });
     await updateCustomer(tx, ctx, id, row(input));
   });
   return customerDetail(deps, deps.db, ctx, id);

@@ -141,3 +141,6 @@ Claude Code leyó la v2 completa: confirmó que las 9 contradicciones estaban re
 - **Búsqueda en la dirección:** los parámetros son texto plano (`?periodo=30`), sin comillas JSON.
 - **Pedidos:** la lista de pedidos devuelve también `items[]` y `jobs[]` (tarjetas del tablero) y el cliente trae `hasLogo`/`logoUrl`; `12 §7` actualizado. En "Datos", entrega, canal y nota se cambian con "Editar" (no hay edición en línea: `PUT /orders/:id` volvería a tomar la foto de los artículos).
 - **Documentos:** la columna es "Total" y no "Importe" (vocabulario fijo de `13`).
+- **Armador al editar un pedido:** sin "Precio aceptado" ni anticipo (`PUT /orders/:id` no los lleva); se acepta en la página del pedido. Un pedido nuevo toma el primer canal (el mockup fijaba "WhatsApp", que sería un dato del negocio en el código).
+- **`CUSTOMER_NAME_EXISTS`** devuelve el nombre del cliente que ya existe, como el mockup.
+- **`#root` a altura completa** para que solo `.main` haga scroll (paneles divididos y barra fija del armador), igual que el mockup.

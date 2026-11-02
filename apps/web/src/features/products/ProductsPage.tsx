@@ -98,7 +98,7 @@ function ProductTile({ p }: { p: ProductListItem }) {
         <div className="pt-st">{stockPill(p)}</div>
       </div>
       <div className="pt-a" onClick={(e) => e.stopPropagation()}>
-        <Button size="sm" disabled>{p.free > 0 ? L.sell : L.order}</Button>
+        <Button size="sm" onClick={() => go(`/armar?modo=${p.free > 0 ? 'venta' : 'pedido'}&pieza=${p.id}`)}>{p.free > 0 ? L.sell : L.order}</Button>
         <Button size="sm" variant="ghost" onClick={() => go(`/productos/pieza?de=${p.id}`)}>{L.variant}</Button>
       </div>
     </article>
@@ -122,7 +122,7 @@ function ProductTable({ items, total }: { items: ProductListItem[]; total: numbe
               <td className={`r num ${gain >= 0 ? 'pos' : 'neg'}`}>{centsTotal(gain)}</td>
               <td className="r num">{ratio(p.listCents, p.costCents)}</td>
               <td className="r num">{number1(p.sold)}</td>
-              <td className="r" onClick={(e) => e.stopPropagation()}><span className="rowa"><Button size="sm" disabled>{p.free > 0 ? L.sell : L.order}</Button><Button size="sm" variant="ghost" onClick={() => go(`/productos/pieza?de=${p.id}`)}>{L.variant}</Button></span></td>
+              <td className="r" onClick={(e) => e.stopPropagation()}><span className="rowa"><Button size="sm" onClick={() => go(`/armar?modo=${p.free > 0 ? 'venta' : 'pedido'}&pieza=${p.id}`)}>{p.free > 0 ? L.sell : L.order}</Button><Button size="sm" variant="ghost" onClick={() => go(`/productos/pieza?de=${p.id}`)}>{L.variant}</Button></span></td>
             </tr>
           );
         })}
@@ -151,7 +151,7 @@ function CollectionTile({ c }: { c: CollectionListItem }) {
         <small className="pt-s">{diffText(c, true)}</small>
         <div className="pt-st">{c.buildableSets > 0 ? <span className="pill good">{t('screens.products.setsReady', { count: c.buildableSets })}</span> : <span className="pill">{L.noFullSet}</span>}</div>
       </div>
-      <div className="pt-a" onClick={(e) => e.stopPropagation()}><Button size="sm" disabled>{c.buildableSets > 0 ? L.sell : L.order}</Button></div>
+      <div className="pt-a" onClick={(e) => e.stopPropagation()}><Button size="sm" onClick={() => go(`/armar?modo=${c.buildableSets > 0 ? 'venta' : 'pedido'}&coleccion=${c.id}`)}>{c.buildableSets > 0 ? L.sell : L.order}</Button></div>
     </article>
   );
 }
@@ -171,7 +171,7 @@ function CollectionTable({ items, total, onNew }: { items: CollectionListItem[];
               <td className="bar-td"><MarginBar cost={c.costCents} price={c.listCents} /></td>
               <td className={`r num ${gain >= 0 ? 'pos' : 'neg'}`}>{centsTotal(gain)}</td>
               <td className="r num">{c.sold}</td>
-              <td className="r" onClick={(e) => e.stopPropagation()}><span className="rowa"><Button size="sm" disabled>{c.buildableSets > 0 ? L.sell : L.order}</Button></span></td>
+              <td className="r" onClick={(e) => e.stopPropagation()}><span className="rowa"><Button size="sm" onClick={() => go(`/armar?modo=${c.buildableSets > 0 ? 'venta' : 'pedido'}&coleccion=${c.id}`)}>{c.buildableSets > 0 ? L.sell : L.order}</Button></span></td>
             </tr>
           );
         })}
