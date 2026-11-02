@@ -12,7 +12,7 @@ Las 9 piezas y las 2 colecciones de ejemplo dan el mismo costo y precio que el m
 | Paso | Estado | Commit | Notas |
 |---|---|---|---|
 | 2.1 Golden | hecho | `a5ba7bf` | `golden.test.ts` con `mockup-values.json` (ya incluido) y la copia del mockup |
-| 2.2 `core` | hecho | `09d60dd`, `5d3b0c8` | `costs.ts`, `pricing.ts`, `printers.ts`, `supplies.ts`, `catalog.ts`, `defaults.ts` |
+| 2.2 `core` | hecho | `09d60dd`, `9b42df8` | `costs.ts`, `pricing.ts`, `printers.ts`, `supplies.ts`, `catalog.ts`, `defaults.ts` |
 | 2.3 Datos | hecho | `3fd8bcf` | 15 tablas nuevas con `workspace_id` y llaves compuestas, vista `supply_levels`, aislamiento por tabla |
 | 2.3 Servidor | hecho | `8435215` | Casos de uso, rutas, archivos y pruebas por área |
 | 2.4 Pantallas | hecho | `e384447` | Productos, Calculadora, Colección, Insumos, Impresoras, Ajustes, Filamentos completo |
