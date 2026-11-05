@@ -73,6 +73,7 @@ test('printer: new one brings 3 tasks; "Hecho" with a cost', async ({ page }) =>
 
 test('collection: new set with its price; spool: movement, edit and delete with undo', async ({ page }) => {
   await page.goto(`${server.url}/productos?tab=colecciones`);
+  await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: 'Nueva colección' }).click();
   await page.getByPlaceholder('Nombre de la colección, por ejemplo: Colección Doomsday blanca').fill('Dúo arácnido');
   await page.locator('.cparte select').first().selectOption({ label: 'Spider-Man · salto' });

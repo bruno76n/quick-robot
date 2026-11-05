@@ -175,3 +175,6 @@ Claude Code leyó la v2 completa: confirmó que las 9 contradicciones estaban re
 ## 2026-11-05 · E2E con reloj congelado
 - **Problema:** la semilla del mockup está fijada al 2026-11-01 y las E2E usaban el reloj real; al pasar los días, la ventana de 30 días dejaba fuera ventas y fallaban Inicio, Reportes y Gastos.
 - **Decisión:** `scripts/local-server.ts` usa `fixedClock()` si existe `E2E_FIXED_CLOCK` (lo pone `e2e/support/server.ts`); los specs importan `test` de `e2e/support/test.ts`, que congela también el reloj del navegador (`page.clock.setFixedTime`). `desktop.spec.ts` no cambia (app empaquetada, reloj real). Sin cambios en producción.
+
+## 2026-11-05 · Ajustes guarda con botón
+- **Decisión de Bruno:** Ajustes deja de guardar campo por campo al salir; los cambios se acumulan en un formulario y se guardan juntos con **Guardar cambios** (deshabilitado sin cambios; "Hay cambios sin guardar." mientras hay). Cubre costos, nombre y comisión de canales y datos del negocio. Agregar y quitar canal siguen siendo acciones inmediatas. Es un cambio respecto al mockup, pedido por la persona. Usa `updateSettings` y `updateChannel` existentes; sin cambios en `12`.
