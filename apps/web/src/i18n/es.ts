@@ -505,7 +505,7 @@ export const es = {
       after: 'Disponible después: {grams} de {name}', inSpool: '({grams} en el rollo {brand}).',
     },
     settings: {
-      title: 'Ajustes', sub: 'Estos valores alimentan todos los costos.',
+      title: 'Ajustes', sub: 'Estos valores alimentan todos los costos.', autosaved: 'Cambios guardados.',
       costs: 'Costos del taller', kwh: 'Luz (CFE)', kwhUnit: '$/kWh', kwhHint: 'Recibo: total ÷ kWh', failures: 'Reserva para fallos', failuresHint: 'Se ajusta con el historial real',
       purge: 'Purga y desperdicio', purgeHint: 'Extra de filamento por pieza', minMargin: 'Piso de margen', minMarginHint: 'Por debajo se muestra una alerta',
       formulaMargin: 'Margen por fórmula', formulaMarginHint: 'Por omisión en piezas por fórmula; cada pieza puede tener el suyo',

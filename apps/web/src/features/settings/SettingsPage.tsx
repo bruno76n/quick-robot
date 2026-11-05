@@ -26,7 +26,7 @@ export function SettingsPage() {
   const printers = usePrinters().data?.items ?? [];
   const qc = useQueryClient();
   const run = async (p: Promise<unknown>, touches: ('settings' | 'products' | 'collections' | 'printers')[], ok?: string) => {
-    try { await p; await invalidate(qc, ...touches, 'me'); if (ok) toast(ok); } catch (e) { toast(errorText(e).text); await invalidate(qc, 'settings'); }
+    try { await p; await invalidate(qc, ...touches, 'me'); toast(ok ?? L.autosaved); } catch (e) { toast(errorText(e).text); await invalidate(qc, 'settings'); }
   };
   if (!data) return <PageHead title={L.title} sub={L.sub} />;
   const s = data.settings;
