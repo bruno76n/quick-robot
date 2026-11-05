@@ -1,6 +1,6 @@
 // Phase 2 flows: the costs of the mockup, the calculator saves the cost it shows, supplies, printers,
 // collections, spools; and every phase 2 screen in three widths without console errors.
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 
 let server: LocalServer;

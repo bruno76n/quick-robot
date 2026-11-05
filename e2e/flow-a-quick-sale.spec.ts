@@ -1,6 +1,6 @@
 // Flow A (docs/06 §17): Productos → Vender → builder with one piece in stock, "Cobrado ahora" = total → Registrar venta.
 // The sale appears in Ventas and the piece has one free piece less in Existencias.
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 
 let server: LocalServer;

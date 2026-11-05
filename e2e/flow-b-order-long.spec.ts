@@ -1,6 +1,6 @@
 // Flow B (docs/06 §17): an order with pieces to print — Cliente aceptó → Poner en producción (filament deducted)
 // → Impresoras "Terminó este trabajo" until it is ready → Entregar y cobrar → the sale exists and the order is delivered.
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 import { api, createOrder, seed } from './support/order-helpers';
 

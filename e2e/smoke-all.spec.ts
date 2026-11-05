@@ -1,6 +1,6 @@
 // The 14 screens of the menu and the 5 detail screens load in three widths (1440, 820, 390) with the mockup
 // business: no console errors, no blank screen, no horizontal scroll of the page (docs/10 §3, docs/15 §5).
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 
 let server: LocalServer;

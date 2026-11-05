@@ -1,6 +1,6 @@
 // Flow E (docs/06 §17): Ventas → open a sale → Devolver, with and without "regresan a Existencias".
 // Income becomes 0; with restock the pieces come back (+n) and the cost is 0; without, the cost is lost.
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 
 let server: LocalServer;
@@ -18,7 +18,7 @@ async function sellOne(page: Page, note: string) {
   const products = await api<{ items: { id: string; name: string; listCents: number }[] }>(page, 'GET', '/products');
   const settings = await api<{ channels: { id: string }[] }>(page, 'GET', '/settings');
   const p = products.items.find((x) => x.name === 'Llavero con nombre')!;
-  const today = new Intl.DateTimeFormat('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const today = '2026-11-01'; // the frozen "today" of the seed (support/test.ts)
   return api<{ id: string }>(page, 'POST', '/sales', { on: today, channelId: settings.channels[0]!.id, note, items: [{ kind: 'piece', productId: p.id, qty: 1, priceCents: p.listCents }] });
 }
 

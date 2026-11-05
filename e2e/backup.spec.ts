@@ -1,6 +1,6 @@
 // Phase 4 · Ajustes › Copia de seguridad (docs/06 §15, docs/12 §10, docs/15 §5): download, Vaciar negocio, restore the
 // downloaded copy, import the mockup v7 backup, an invalid file and the automatic backups. One business, in order.
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { mkdtempSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';

@@ -171,3 +171,7 @@ Claude Code leyó la v2 completa: confirmó que las 9 contradicciones estaban re
 - **Permisos de la ventana:** solo se conceden `clipboard-sanitized-write` y `fullscreen`; todo lo demás se niega. Navegación solo a su origen; `window.open` se niega y los enlaces http(s) externos abren en el navegador del sistema; `<webview>` bloqueado. Los manejadores IPC revisan qué página llama (la app en su origen o el `fatal.html` del paquete).
 - **Esqueleto de carga lenta** (`15 §5`): genérico en el marco de la app (`components/LoadingSkeleton.tsx`), solo para cargas iniciales que pasan de 300 ms; el mockup no tiene uno.
 - **Lecturas más rápidas:** Reportes reutiliza catálogo y costos ya cargados; la ganancia "desde siempre" (inversión recuperada) usa una consulta ligera (`grossProfitAllTime`); la búsqueda solo carga costos si alguna pieza encontrada tiene precio por fórmula o un set no tiene precio.
+
+## 2026-11-05 · E2E con reloj congelado
+- **Problema:** la semilla del mockup está fijada al 2026-11-01 y las E2E usaban el reloj real; al pasar los días, la ventana de 30 días dejaba fuera ventas y fallaban Inicio, Reportes y Gastos.
+- **Decisión:** `scripts/local-server.ts` usa `fixedClock()` si existe `E2E_FIXED_CLOCK` (lo pone `e2e/support/server.ts`); los specs importan `test` de `e2e/support/test.ts`, que congela también el reloj del navegador (`page.clock.setFixedTime`). `desktop.spec.ts` no cambia (app empaquetada, reloj real). Sin cambios en producción.

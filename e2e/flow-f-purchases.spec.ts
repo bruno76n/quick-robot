@@ -1,6 +1,6 @@
 // Flow F (docs/06 §17): Compras shows the calculated list, "Copiar lista" per supplier, then registering the
 // supply purchase in Insumos makes it leave the list.
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 
 let server: LocalServer;

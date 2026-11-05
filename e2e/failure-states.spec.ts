@@ -1,6 +1,6 @@
 // What the person sees when something fails (docs/15 §5): never a blank screen, never a technical error,
 // and always whether something was saved. Server failures are simulated by intercepting the API.
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { createOrder, seed } from './support/order-helpers';
 import { startServer, type LocalServer } from './support/server';
 
