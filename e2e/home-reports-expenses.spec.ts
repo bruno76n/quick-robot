@@ -1,5 +1,5 @@
 // Phase 3 · Inicio, Reportes, Gastos, Buscar en todo and Exportar a Excel against the development seed (mockup business).
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { readFile } from 'node:fs/promises';
 import { startServer, type LocalServer } from './support/server';
 

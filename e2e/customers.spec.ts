@@ -1,6 +1,6 @@
 // Clientes (docs/06 §12): create, edit, duplicate name refused, a customer with history cannot be deleted,
 // delete and "Deshacer"; and the sale payment and delete + "Deshacer" of Ventas (docs/06 §4.1).
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 
 let server: LocalServer;

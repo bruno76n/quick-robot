@@ -1,6 +1,6 @@
 // Phase 2 flows: the costs of the mockup, the calculator saves the cost it shows, supplies, printers,
 // collections, spools; and every phase 2 screen in three widths without console errors.
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 
 let server: LocalServer;
@@ -73,6 +73,7 @@ test('printer: new one brings 3 tasks; "Hecho" with a cost', async ({ page }) =>
 
 test('collection: new set with its price; spool: movement, edit and delete with undo', async ({ page }) => {
   await page.goto(`${server.url}/productos?tab=colecciones`);
+  await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: 'Nueva colección' }).click();
   await page.getByPlaceholder('Nombre de la colección, por ejemplo: Colección Doomsday blanca').fill('Dúo arácnido');
   await page.locator('.cparte select').first().selectOption({ label: 'Spider-Man · salto' });

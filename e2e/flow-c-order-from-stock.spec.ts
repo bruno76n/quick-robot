@@ -1,5 +1,5 @@
 // Flow C (docs/06 §17): an accepted order that comes fully from stock → "Marcar listo" directly → Entregar y cobrar.
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 import { api, createOrder, seed } from './support/order-helpers';
 

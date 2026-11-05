@@ -1,6 +1,6 @@
 // Flow D (docs/06 §17): cancel an order with reason and refund → paid 0, owed 0, Cancelado, reserved pieces freed.
 // Also: the quote document shows the business name from Ajustes, not from the code (docs/06 §14).
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 import { api, createOrder, seed } from './support/order-helpers';
 

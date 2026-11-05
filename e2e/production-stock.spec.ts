@@ -1,6 +1,6 @@
 // Phase 3: Producción and Existencias (docs/06 §9–10, docs/04 §8). A run for stock adds pieces and deducts filament,
 // undoing it gives both back; a run whose pieces were sold is locked; Ajustar with a count; enable stock for a piece.
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 
 let server: LocalServer;

@@ -1,5 +1,5 @@
 // Phase 1 flow: add a spool in the browser and it stays saved in the local data file after a restart.
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/test';
 import { startServer } from './support/server';
 
 test('add spool → appears in the list → survives a restart', async ({ page }) => {
