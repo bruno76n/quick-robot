@@ -1,5 +1,6 @@
 // Typed client written by hand from packages/contract (docs/07). Same origin (/api/v1); in local mode the
 // launch secret is added by Electron or the Vite proxy, never by this code.
+import { VARIANT_LABEL_FALLBACK } from '@app/core';
 import type {
   AddChannelInput, AddSpoolInput, AddSpoolOutput, ChannelView, CollectionDetail, CollectionListItem, CompleteMaintenanceInput, CreateSupplyInput, ErrorCode,
   FilamentDetail, FilamentListItem, MaintenanceTaskInput, MaintenanceView, Page, PrinterInput, PrintersOutput, PrinterView, ProductDetail, ProductFamilyFilter, ProductFamilyPage, ProductOptions,
@@ -107,7 +108,8 @@ export const api = {
     get: (id: string) => request<ProductDetail>('GET', `/products/${id}`),
     create: (input: SaveProductInput) => request<ProductDetail>('POST', '/products', input),
     update: (id: string, input: SaveProductInput) => request<ProductDetail>('PUT', `/products/${id}`, input),
-    variant: (id: string, input: SaveProductInput) => request<ProductDetail>('POST', `/products/${id}/variant`, input),
+    /** The label is required by the server; until the calculator asks for it (ronda 2, B3), a missing one is the generic label. */
+    variant: (id: string, input: SaveProductInput) => request<ProductDetail>('POST', `/products/${id}/variant`, { ...input, variantLabel: input.variantLabel || VARIANT_LABEL_FALLBACK }),
     remove: (id: string) => request<void>('DELETE', `/products/${id}`),
     restore: (id: string) => request<ProductDetail>('POST', `/products/${id}/restore`),
   },

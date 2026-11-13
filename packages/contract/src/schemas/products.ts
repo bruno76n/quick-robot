@@ -16,9 +16,11 @@ export const saveProductInput = z.object({
   filaments: z.array(z.object({ filamentId: id, grams: grams(LIMITS.movementGrams) })).max(LIMITS.filamentsPerProduct).default([]),
   supplies: z.array(z.object({ supplyId: id, qty: z.number().min(0).max(LIMITS.qtyPerItem) })).max(LIMITS.suppliesPerProduct).default([]),
   spec: productSpec.nullable().optional(), note: note.default(''), photoFileId: id.nullable().optional(),
+  /** Only for a variant (PUT): its label. Ignored for an original. */
+  variantLabel: z.string().trim().min(1).max(60).nullable().optional(),
 });
 
-/** A variant label: 1–60 letters (mejoras/ronda-2.md §3.1). */
+/** A variant label: 1–60 letters (mejoras/ronda-2.md §3.1); required to create a variant. */
 export const variantLabel = z.string().trim().min(1).max(60);
 export const saveProductAsVariantInput = saveProductInput.extend({ variantLabel });
 

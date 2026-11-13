@@ -19,6 +19,13 @@ describe('injection in text fields', () => {
     expect(p.json.data).toMatchObject({ name: ATTACK, tags: ['<x>'], note: ATTACK, spec: { file: '../../etc/passwd' } });
     const id = (p.json.data as { id: string }).id;
     expect((await h.call('POST', '/api/v1/collections', { body: { name: ATTACK, parts: [{ productId: id, qty: 1 }], note: ATTACK } })).json.data).toMatchObject({ name: ATTACK });
+    // A variant label is kept literally too, and shows inside displayName and in the search of variants.
+    const label = "<img src=x onerror=alert(1)> %_' OR 1=1 --";
+    const v = await h.call('POST', `/api/v1/products/${id}/variant`, { body: { name: 'V', mode: 'value', priceCents: 1, hours: 1, variantLabel: label } });
+    expect(v.json.data).toMatchObject({ variantLabel: label, displayName: `${ATTACK} · ${label}`, parentId: id });
+    const found = await h.call('GET', `/api/v1/products?q=${encodeURIComponent("%_' OR 1=1")}`);
+    expect((found.json.data as { items: { id: string; matchedByVariant: boolean }[] }).items.map((f) => [f.id, f.matchedByVariant])).toEqual([[id, true]]);
+    expect((await h.call('GET', '/api/v1/products?q=%25%25')).json.data).toMatchObject({ total: 0 });
     expect((await h.call('POST', '/api/v1/channels', { body: { name: ATTACK, commissionPct: 0 } })).json.data).toMatchObject({ name: ATTACK });
     expect((await h.call('PATCH', '/api/v1/settings', { body: { business: { footer: ATTACK, name: '<h1>' } } })).json.data).toMatchObject({ business: { footer: ATTACK, name: '<h1>' } });
     expect((await h.call('GET', '/api/v1/supplies')).json.data).toMatchObject({ total: 1 });
@@ -34,10 +41,13 @@ describe('input limits (docs/15 §4)', () => {
     ['unit price $1,000,000', '/api/v1/products', product({ priceCents: 100_000_000 }), product({ priceCents: 100_000_001 }), 'priceCents', 'too_big'],
     ['hours 1000', '/api/v1/products', product({ hours: 1000 }), product({ hours: 1000.01 }), 'hours', 'too_big'],
     ['12 tags', '/api/v1/products', product({ tags: Array.from({ length: 12 }, (_, i) => `t${i}`) }), product({ tags: Array.from({ length: 13 }, (_, i) => `t${i}`) }), 'tags', 'too_big'],
+    ['variant label 60', '/api/v1/products/:id/variant', product({ variantLabel: 'x'.repeat(60) }), product({ variantLabel: 'x'.repeat(61) }), 'variantLabel', 'too_long'],
+    ['variant label required', '/api/v1/products/:id/variant', product({ variantLabel: 'x' }), product({ variantLabel: '   ' }), 'variantLabel', 'required'],
     ['percent 99', '/api/v1/channels', { name: 'c1', commissionPct: 99 }, { name: 'c2', commissionPct: 99.5 }, 'commissionPct', 'too_big'],
     ['spool grams 100 000', '/api/v1/spools', { filament: { material: 'PLA', color: 'L' }, costCents: 1, grams: 100_000, purchasedOn: '2026-11-01' }, { filament: { material: 'PLA', color: 'L' }, costCents: 1, grams: 100_000.1, purchasedOn: '2026-11-01' }, 'grams', 'too_big'],
     ['amount $10,000,000', '/api/v1/printers', { name: 'p', costCents: 1_000_000_000, lifeHours: 1, maintenanceCentsPerHour: 0, kw: 0 }, { name: 'p', costCents: 1_000_000_001, lifeHours: 1, maintenanceCentsPerHour: 0, kw: 0 }, 'costCents', 'too_big'],
-  ])('%s', async (_n, path, okBody, badBody, field, rule) => {
+  ])('%s', async (_n, rawPath, okBody, badBody, field, rule) => {
+    const path = rawPath.includes(':id') ? rawPath.replace(':id', ((await h.call('POST', '/api/v1/products', { body: product({}) })).json.data as { id: string }).id) : rawPath;
     expect((await h.call('POST', path, { body: okBody })).status).toBe(201);
     const r = await h.call('POST', path, { body: badBody });
     expect(r.status).toBe(422);

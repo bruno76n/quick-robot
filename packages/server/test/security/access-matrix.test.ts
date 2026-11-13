@@ -41,7 +41,7 @@ const SAMPLES: Record<string, { path: () => string; body?: () => unknown }> = {
   'POST /api/v1/printers/:id/maintenance/:taskId/complete': { path: () => `/api/v1/printers/${first(s.b.printer)}/maintenance/${s.b.task}/complete`, body: () => ({ on: '2026-11-01' }) },
   'GET /api/v1/products/:id': { path: () => `/api/v1/products/${first(s.b.product)}` },
   'PUT /api/v1/products/:id': { path: () => `/api/v1/products/${first(s.b.product)}`, body: product },
-  'POST /api/v1/products/:id/variant': { path: () => `/api/v1/products/${first(s.b.product)}/variant`, body: product },
+  'POST /api/v1/products/:id/variant': { path: () => `/api/v1/products/${first(s.b.product)}/variant`, body: () => ({ ...product(), variantLabel: 'Azul' }) },
   'DELETE /api/v1/products/:id': { path: () => `/api/v1/products/${first(s.b.product)}` },
   'POST /api/v1/products/:id/restore': { path: () => `/api/v1/products/${first(s.b.product)}/restore` },
   'GET /api/v1/collections/:id': { path: () => `/api/v1/collections/${first(s.b.collection)}` },

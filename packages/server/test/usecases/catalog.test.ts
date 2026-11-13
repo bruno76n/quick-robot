@@ -123,14 +123,26 @@ describe('saveProduct and friends', () => {
     expect((await s.h.call('POST', '/api/v1/products', { body: { name: 'X', mode: 'value', priceCents: 1, hours: 1, printerId: first(s.b.printer) } })).status).toBe(404);
   });
 
-  it('variant: a copy with parentId; delete and restore', async () => {
+  it('variant: a copy with the root as parent and a required label; from a variant it goes up to the root; delete and restore', async () => {
     const base = first(s.a.product);
     const d = productDetail.parse(data(await s.h.call('GET', `/api/v1/products/${base}`)));
-    const v = productDetail.parse(data(await s.h.call('POST', `/api/v1/products/${base}/variant`, { body: { ...d, name: `${d.name} (variante)`, priceCents: d.priceCents } })));
-    expect(v.parentId).toBe(base);
+    expect((await s.h.call('POST', `/api/v1/products/${base}/variant`, { body: { ...d } })).json).toMatchObject({ code: 'VALIDATION_ERROR', details: { fields: [{ path: 'variantLabel', rule: 'required' }] } });
+    const v = productDetail.parse(data(await s.h.call('POST', `/api/v1/products/${base}/variant`, { body: { ...d, variantLabel: '  Negro   mate ' } })));
+    expect([v.parentId, v.variantLabel, v.name, v.displayName]).toEqual([base, 'Negro mate', d.name, `${d.name} · Negro mate`]);
+    // "Guardar como variante nueva" while editing a variant: the copy goes to the root (no chains).
+    const w = productDetail.parse(data(await s.h.call('POST', `/api/v1/products/${v.id}/variant`, { body: { ...v, variantLabel: 'Rojo' } })));
+    expect([w.parentId, w.displayName]).toEqual([base, `${d.name} · Rojo`]);
+    // Editing a variant can change its label; an original ignores it.
+    expect(productDetail.parse(data(await s.h.call('PUT', `/api/v1/products/${w.id}`, { body: { ...w, variantLabel: 'Rojo fuego' } }))).displayName).toBe(`${d.name} · Rojo fuego`);
+    expect(productDetail.parse(data(await s.h.call('PUT', `/api/v1/products/${base}`, { body: { ...d, variantLabel: 'X' } }))).variantLabel).toBeNull();
+    // An original with live variants cannot be deleted (PRODUCT_HAS_VARIANTS); a variant can, alone, with undo.
+    expect((await s.h.call('DELETE', `/api/v1/products/${base}`)).json).toMatchObject({ code: 'PRODUCT_HAS_VARIANTS', details: { count: 2 } });
     expect((await s.h.call('DELETE', `/api/v1/products/${v.id}`)).status).toBe(204);
     expect((await s.h.call('GET', `/api/v1/products/${v.id}`)).status).toBe(404);
-    expect(data(await s.h.call('POST', `/api/v1/products/${v.id}/restore`))).toMatchObject({ id: v.id });
+    expect((await s.h.call('DELETE', `/api/v1/products/${base}`)).json).toMatchObject({ code: 'PRODUCT_HAS_VARIANTS', details: { count: 1 } });
+    expect(data(await s.h.call('POST', `/api/v1/products/${v.id}/restore`))).toMatchObject({ id: v.id, parentId: base });
+    for (const x of [v.id, w.id]) expect((await s.h.call('DELETE', `/api/v1/products/${x}`)).status).toBe(204);
+    expect((await s.h.call('POST', `/api/v1/products/${first(s.b.product)}/variant`, { body: { ...d, variantLabel: 'B' } })).status).toBe(404);
   });
 
   it('deleting a piece in active orders or with stock is refused; turning off stock with pieces on hand too', async () => {

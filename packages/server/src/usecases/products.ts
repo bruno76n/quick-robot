@@ -1,11 +1,11 @@
 // Pieces and collections (docs/04 §2–3, docs/06 §3, docs/12 §5). The server recalculates every cost and price.
 import {
   BusinessError, type CollectionDetail, type CollectionListItem, type ProductDetail, type ProductFamilyFilter, type ProductFamilyPage, type ProductListItem,
-  type ProductVariantItem, type SaveCollectionInput, type SaveProductInput,
+  type ProductVariantItem, type SaveCollectionInput, type SaveProductAsVariantInput, type SaveProductInput,
 } from '@app/contract';
 import { TECHNICAL_MATERIALS, tidyName } from '@app/core';
 import {
-  getCollection, getFile, getFilament, getPrinter, getProduct, getSupply, insertCollection, insertProduct, listCollections, listPrinters, listProductFamilies, listProducts,
+  countLiveVariants, getCollection, getFile, getFilament, getPrinter, getProduct, getSupply, insertCollection, insertProduct, listCollections, listPrinters, listProductFamilies, listProducts,
   replaceCollectionParts, replaceProductParts, setCollectionDeleted, setProductDeleted, transaction, updateCollection, updateProduct,
   type Ctx, type Executor, type ProductFull,
 } from '@app/db';
@@ -134,7 +134,7 @@ export async function saveProduct(deps: Deps, ctx: Ctx, input: SaveProductInput,
         const onHand = (await productHooks.stock(tx, ctx, [id])).get(id)?.physical ?? 0;
         if (onHand > 0) throw new BusinessError('STOCK_TRACKING_HAS_STOCK', { onHand });
       }
-      await updateProduct(tx, ctx, id, productRow(input));
+      await updateProduct(tx, ctx, id, { ...productRow(input), ...(before.parentId && input.variantLabel ? { variantLabel: tidyName(input.variantLabel) } : {}) });
     } else {
       productId = (await insertProduct(tx, ctx, { id: deps.ids.next(), parentId: null, ...productRow(input) })).id;
     }
@@ -143,12 +143,18 @@ export async function saveProduct(deps: Deps, ctx: Ctx, input: SaveProductInput,
   });
 }
 
-/** A copy with parent_id = the original (docs/06 §3). */
-export async function saveProductAsVariant(deps: Deps, ctx: Ctx, parentId: string, input: SaveProductInput): Promise<ProductDetail> {
+/**
+ * A copy with parent_id = the root original (docs/06 §3, one level): from a variant, it goes up to its original.
+ * The label is required (mejoras/ronda-2.md §3.1).
+ */
+export async function saveProductAsVariant(deps: Deps, ctx: Ctx, sourceId: string, input: SaveProductAsVariantInput): Promise<ProductDetail> {
   return transaction(deps.db, async (tx) => {
-    if (!(await getProduct(tx, ctx, parentId))) throw notFound('product');
+    const source = await getProduct(tx, ctx, sourceId);
+    if (!source) throw notFound('product');
+    const parent = source.parentId ? await getProduct(tx, ctx, source.parentId) : undefined;
+    const rootId = parent ? parent.id : source.id;
     await checkRefs(tx, ctx, input);
-    const p = await insertProduct(tx, ctx, { id: deps.ids.next(), parentId, ...productRow(input) });
+    const p = await insertProduct(tx, ctx, { id: deps.ids.next(), parentId: rootId, ...productRow(input), variantLabel: tidyName(input.variantLabel) });
     await writeParts(deps, tx, ctx, p.id, input);
     return productDetail(deps, tx, ctx, p.id);
   });
@@ -157,6 +163,8 @@ export async function saveProductAsVariant(deps: Deps, ctx: Ctx, parentId: strin
 export async function deleteProduct(deps: Deps, ctx: Ctx, id: string): Promise<void> {
   await transaction(deps.db, async (tx) => {
     if (!(await getProduct(tx, ctx, id, { forUpdate: true }))) throw notFound('product');
+    const variants = await countLiveVariants(tx, ctx, id);
+    if (variants > 0) throw new BusinessError('PRODUCT_HAS_VARIANTS', { count: variants });
     const folios = await productHooks.activeOrderFolios(tx, ctx, id);
     if (folios.length) throw new BusinessError('PRODUCT_IN_ACTIVE_ORDERS', { count: folios.length, folios: folios.map((f) => `#${f}`) });
     const onHand = (await productHooks.stock(tx, ctx, [id])).get(id)?.physical ?? 0;

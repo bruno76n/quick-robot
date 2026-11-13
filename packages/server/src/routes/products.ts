@@ -1,5 +1,5 @@
 // Pieces and collections (docs/12 §5).
-import { LIMITS, pageQuery, productFamilyFilter, saveCollectionInput, saveProductInput } from '@app/contract';
+import { LIMITS, pageQuery, productFamilyFilter, saveCollectionInput, saveProductAsVariantInput, saveProductInput } from '@app/contract';
 import { z } from 'zod';
 import { body, idParam, noContent, ok, query } from '../http';
 import {
@@ -17,7 +17,7 @@ export function productRoutes(r: Router) {
   r.get('/products/:id', 'product.read', async (c) => ok(c, await productDetail(c.get('deps'), c.get('deps').db, c.get('ctx'), idParam(c, 'id', 'product'))));
   r.post('/products', 'product.create', async (c) => ok(c, await saveProduct(c.get('deps'), c.get('ctx'), await body(c, saveProductInput)), 201));
   r.put('/products/:id', 'product.update', async (c) => ok(c, await saveProduct(c.get('deps'), c.get('ctx'), await body(c, saveProductInput), idParam(c, 'id', 'product'))));
-  r.post('/products/:id/variant', 'product.create', async (c) => ok(c, await saveProductAsVariant(c.get('deps'), c.get('ctx'), idParam(c, 'id', 'product'), await body(c, saveProductInput)), 201));
+  r.post('/products/:id/variant', 'product.create', async (c) => ok(c, await saveProductAsVariant(c.get('deps'), c.get('ctx'), idParam(c, 'id', 'product'), await body(c, saveProductAsVariantInput)), 201));
   r.delete('/products/:id', 'product.delete', async (c) => { await deleteProduct(c.get('deps'), c.get('ctx'), idParam(c, 'id', 'product')); return noContent(c); });
   r.post('/products/:id/restore', 'product.delete', async (c) => ok(c, await restoreProduct(c.get('deps'), c.get('ctx'), idParam(c, 'id', 'product'))));
 
