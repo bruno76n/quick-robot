@@ -178,3 +178,14 @@ Claude Code leyó la v2 completa: confirmó que las 9 contradicciones estaban re
 
 ## 2026-11-05 · Ajustes guarda con botón
 - **Decisión de Bruno:** Ajustes deja de guardar campo por campo al salir; los cambios se acumulan en un formulario y se guardan juntos con **Guardar cambios** (deshabilitado sin cambios; "Hay cambios sin guardar." mientras hay). Cubre costos, nombre y comisión de canales y datos del negocio. Agregar y quitar canal siguen siendo acciones inmediatas. Es un cambio respecto al mockup, pedido por la persona. Usa `updateSettings` y `updateChannel` existentes; sin cambios en `12`.
+
+++ docs/decisiones.md
+
+## 2026-11-12 · Ronda 2 · Planeación tras una semana de uso real
+Después de una semana usando el sistema con datos reales, la persona pidió tres rediseños y una regla de pocos clics. Se diseñaron las pantallas como maquetas (`reference/ronda-2/`) y se escribió el plan en `mejoras/ronda-2.md`. Decisiones D36–D45 en `01`:
+- **Variantes agrupadas bajo su pieza** (Productos): antes cada variante era una tarjeta aparte con “(variante)” en el nombre.
+- **Existencias:** vista Lista y fichas sin cuadritos repetidos (el número de cuadritos duplicaba el de “libres”).
+- **Inicio:** la atención dejaba de duplicar la cuadrícula de rollos; se quita la cuadrícula y la atención se agrupa por prioridad.
+- **Panel neutro:** se quita el morado y la mascota de la interfaz porque el panel se va a distribuir a otros negocios; cambia la regla de color (“morado = costo” pasa a “gris oscuro = costo”) en `CLAUDE.md` y `07`.
+- **Pocos clics:** se medirá cada flujo y se acortarán los que más se usan; el primero es “Agregar filamento” en una pieza nueva (la fila nueva debe nacer con el selector abierto).
+- **Abierto para revisión de la persona:** estado de una familia en Existencias (“Pocas” si algún miembro está bajo), vista por defecto de Existencias (Lista) y que Productos abra el panel de variantes solo al buscar por una variante.

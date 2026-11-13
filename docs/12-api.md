@@ -80,6 +80,7 @@ Los nombres de los casos de uso son los de `06 §16`. Los textos en español de 
 | `RESTORE_CONFLICT` | 409 | `entity`, `reason` | "Deshacer" ya no es posible (el nombre ya lo usa otro registro) |
 | `PRODUCT_IN_ACTIVE_ORDERS` | 409 | `count`, `folios[]` | Eliminar una pieza que está en pedidos sin entregar |
 | `PRODUCT_HAS_STOCK` | 409 | `onHand` | Eliminar una pieza con existencias físicas |
+| `PRODUCT_HAS_VARIANTS` | 409 | `count` | Eliminar una original que aún tiene variantes vivas (ronda 2) |
 | `STOCK_TRACKING_HAS_STOCK` | 409 | `onHand` | Dejar de llevar existencias con piezas en la repisa |
 | `COLLECTION_EMPTY` | 422 | — | Colección sin piezas |
 | `NO_PRODUCTS` | 409 | — | Crear una colección sin que existan piezas |
@@ -170,11 +171,11 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 
 | Operación | Entrada | Salida | Errores |
 |---|---|---|---|
-| `GET /products` | `q`, `filter` (`all` \| `technical` \| `variant`), `tag`, `page` | Página de `{ id, name, tags, parentId, photoUrl, costCents, listCents, floorCents, tracksStock, free }` más lo que pintan las fichas del mockup: `technical`, `mode`, `hexes[]`, `hours`, `printerId`, `printerName`, `parentName`, `collections[]`, `sold`, `physical`, `reserved` | — |
+| `GET /products` | `q`, `filter` (`all` \| `technical` \| `with_variants`), `tag`, `page` | **Página de familias** (la paginación cuenta familias, no piezas): `{ id, name, tags, photoUrl, costCents, listCents, floorCents, tracksStock, free, variantCount, variants[] }`, donde cada variante trae `{ id, label, displayName, costCents, listCents, tracksStock, free, soldCount, material }`. Una pieza sin variantes trae `variants: []`. También devuelve `counts { families, technical, withVariants }` para los chips y la pestaña. Dos consultas por página, no una por tarjeta. (`variant` ya no existe como valor de `filter`.) Cada familia conserva además lo que pintan las fichas del mockup: `technical`, `mode`, `hexes[]`, `hours`, `printerId`, `printerName`, `collections[]`, `sold`, `physical`, `reserved` | — |
 | `GET /products/:id` | — | Pieza completa + `breakdown`, `suggestedCents`, `floorCents`, `listCents`, `profitByChannel[]`, `stock { physical, reserved, free }` | — |
 | `saveProduct` · `POST /products` y `PUT /products/:id` | `{ name, tags[], mode ('value' \| 'formula'), priceCents?, marginPct?, printerId? (nulo = promedio), hours, batchSize, extrasCents, tracksStock, filaments[{ filamentId, grams }], supplies[{ supplyId, qty }], spec{…}, note, photoFileId? }` | Pieza completa (el costo lo recalcula el servidor) | `STOCK_TRACKING_HAS_STOCK` |
-| `saveProductAsVariant` · `POST /products/:id/variant` | Igual que `saveProduct`; crea una copia con `parentId = :id` | Pieza nueva | — |
-| `deleteProduct` · `DELETE /products/:id` | — | 204 (borrado suave) | `PRODUCT_IN_ACTIVE_ORDERS`, `PRODUCT_HAS_STOCK` |
+| `saveProductAsVariant` · `POST /products/:id/variant` | Igual que `saveProduct` más `variantLabel` (1–60, obligatorio); crea una copia con `parentId` = la **original raíz** de `:id` (si `:id` es una variante, se sube a su original) | Pieza nueva con `displayName` | — |
+| `deleteProduct` · `DELETE /products/:id` | — | 204 (borrado suave) | `PRODUCT_IN_ACTIVE_ORDERS`, `PRODUCT_HAS_STOCK`, `PRODUCT_HAS_VARIANTS` |
 | `restoreProduct` · `POST /products/:id/restore` | — | Pieza | `RESTORE_CONFLICT` |
 | `GET /collections` | `q`, `page` | Página de `{ id, name, tags, listCents, costCents, buildableSets }` más `looseCents`, `pieces`, `partNames[]`, `typedPrice`, `sold`, `hexes[]`, `partHexes[]` | — |
 | `GET /collections/:id` | — | Colección + partes `{ productId, name, qty }` + costo, precio, ganancia, `looseCents`, `buildableSets` | — |
@@ -288,7 +289,7 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 | `GET /print-runs/:id` | — | Registro con filamento por rollo y foto | — |
 | `logPrintRun` · `POST /print-runs` | `{ on, productId? (o `text` si es prueba), qty, printerId?, result ('ok' \| 'fail'), hours, reason, filaments[{ filamentId, grams }], photoFileId? }` | Registro. El filamento se descuenta rollo por rollo con la purga. `ok` + `stock` suma piezas a existencias; `ok` que no sea prueba gasta los insumos de la pieza | `NO_SPOOLS` · aviso `FILAMENT_SHORTFALL` |
 | `deletePrintRun` · `DELETE /print-runs/:id` | — | 204. Devuelve filamento e insumos, quita las piezas que sumó, resta las horas | `PRINT_RUN_LOCKED` · aviso `FILAMENT_NOT_RETURNED` |
-| `GET /stock` | `q`, `page` | Página de `{ productId, name, physical, reserved, free, buildableSets, status (`out` \| `all_reserved` \| `few` \| `ok`) }` | — |
+| `GET /stock` | `q`, `status` (`all` \| `few` \| `all_reserved` \| `ok` \| `out`), `sort` (`free_asc` por defecto \| `free_desc`), `page` | **Página de filas** (una pieza simple o una familia): `{ productId, name, listCents, physical, reserved, free, buildableSets, status, members[] }`. Una familia suma sus miembros y su `status` sigue `04 §5`; `members[]` trae `{ productId, label, displayName, physical, reserved, free, status }` (original primero) y va vacío en una pieza simple. Además `counts { all, few, allReserved, ok, out }` y `totals { units, pieces, free, reserved }` (`pieces` cuenta familias) | — |
 | `GET /stock/:productId` | — | Pieza con `movements[]` | — |
 | `enableStockTracking` · `POST /stock/:productId/enable` | `{ initialCount ≥ 0 }` | Pieza | — |
 | `adjustStock` · `POST /stock/:productId/adjust` | `{ mode ('count' \| 'delta'), value, note }`. El conteo no baja de lo apartado; una salida no pasa de las libres | Pieza | `COUNT_UNCHANGED`, `INSUFFICIENT_STOCK`, `VALIDATION_ERROR` (`value` < apartadas) |
@@ -315,7 +316,7 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 | `deleteExpense` · `DELETE /expenses/:id` | — | 204 | — |
 | `restoreExpense` · `POST /expenses/:id/restore` | — | Gasto | — |
 | `GET /reports` | `period` (`7` \| `30` \| `90` \| `all`) o `from` y `to` | `{ totals { salesCents, costCents, profitCents, marginPct, pieces }, byChannel[], topProducts[], expensesCents, netProfitCents, investmentRecovered }` | — |
-| `GET /home` | — | `{ stats, printingNow[], attentions[] }`; cada atención trae `kind`, `severity`, `target { type, id }` y `params` (`06 §2`) | — |
+| `GET /home` | — | `{ stats, printingNow[], attentions[] }`; cada atención trae `kind`, `severity` (`urgent` \| `soon` \| `review`, calculado por `core › classifyAttention`, `06 §2`), `target { type, id }` y `params`. Ya no manda la cuadrícula de rollos de filamento | — |
 | `GET /search` | `q` (mín. 2 letras) | Grupos `{ products, customers, orders, sales, filaments, actions }`, máximo 8 por grupo | — |
 
 **Invalidan:** `customers`, `expenses`, `reports`, `home`.

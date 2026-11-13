@@ -239,3 +239,69 @@ Comandos o pasos exactos.
 | Algo no se ve igual al mockup | `Compara la pantalla X con el mockup en 1440, 820 y 390, lista las diferencias y corrígelas. Textos: reference/mockup-textos.md.` |
 | Quiero ver cómo va todo | `Resume docs/progreso.md: qué pantallas están igual al mockup, cuáles no y qué sigue.` |
 | Se interrumpió una sesión | `Continúa donde quedaste: lee docs/progreso.md y el último commit de la rama actual.` |
+
+---
+
+## 9. Ronda 2 · Mejoras tras el uso real (fases A a D, todo seguido)
+
+El sistema ya está construido y se usa con datos reales. Este prompt hace **las cuatro fases de la ronda 2** una tras otra, sin parar: A mide el rediseño, B lo construye, C mide los clics y D los acorta. Cada fase se fusiona sola a la rama principal si todo está en verde. Plan completo en `docs/mejoras/ronda-2.md`.
+
+**Antes de pegarlo:** haz una copia de seguridad (Ajustes › Descargar copia) y guárdala aparte. Descomprime el .zip de la ronda 2 **dentro** de la carpeta del proyecto (solo agrega archivos nuevos; no pisa nada). Abre Claude Code en la carpeta del proyecto, en la rama principal y sin cambios sin guardar.
+
+```
+Haz la ronda 2 completa (fases A, B, C y D) de docs/mejoras/ronda-2.md, en modo autónomo y sin
+parar entre fases.
+
+Antes de nada, pon los documentos al día: la carpeta trae archivos nuevos (docs/mejoras/ronda-2.md,
+docs/mejoras/parches-docs.diff y reference/ronda-2/). Aplica el parche a las versiones actuales de
+los documentos (git apply --3way o patch -p1). Si un bloque no encaja porque el documento cambió
+durante la construcción, aplica el mismo cambio a mano conservando lo que ya tenía; en
+decisiones.md y progreso.md solo agrega lo nuevo al final. Nunca reemplaces un documento entero por
+una copia vieja. Un commit: "docs: ronda 2 planning".
+
+Después lee CLAUDE.md y docs/mejoras/ronda-2.md completos. Luego lee solo: 01 (D36 a D45),
+04 (§5), 05 (producto), 06 (§1, §2, §3 y §10), 07 (sistema de diseño), 12 (productos,
+existencias y home), 13 (§3 y §9.1), 14 y 15 (§1). Abre en el navegador las cinco maquetas de
+reference/ronda-2/ (ver su README) y úsalas como la referencia de estructura y comportamiento.
+
+El sistema ya está en uso con datos reales. No toques la base real: las pruebas usan datos
+generados o reference/mockup-backup-v7.json. Toda migración es solo aditiva, se prueba con casos
+raros (variante de variante, original eliminada, nombres con "(variante)") y antes de aplicarla
+se hace la copia de BackupStore.
+
+Orden, una rama por fase (ronda2-a-medicion, ronda2-b-rediseno, ronda2-c-clics, ronda2-d-mejoras):
+A) mide el rediseño y escribe docs/mejoras/informe-ronda2-a.md;
+B) construye el rediseño en los pasos B1 a B6 de la sección 8 de ronda-2.md;
+C) mide los clics de cada flujo (sección 11) y busca por tu cuenta otros flujos con pasos de más;
+D) acorta lo que C marcó "hacer", empezando por "Agregar filamento" en una pieza nueva: la fila
+   nueva debe nacer con el selector abierto y el foco dentro (sección 12).
+
+Un commit por paso, mensaje en inglés. Un paso solo está terminado cuando pasan pruebas, lint,
+typecheck y pnpm security. Compara cada pantalla nueva contra su maqueta en 1440, 820 y 390.
+Mantén los documentos al día (04, 06, 12, 13) en el mismo commit que cambia el comportamiento.
+
+Al cerrar cada fase con todo en verde: crea la etiqueta antes-ronda2-<letra> en la rama principal,
+fusiona la fase a la rama principal sin pedirme permiso y publica. Si el entorno solo deja publicar
+tu rama de trabajo, deja la rama lista, dilo en el informe y apila la fase siguiente encima.
+Nunca fusiones con pruebas en rojo, no fuerces ningún push, no reescribas la historia.
+
+Cambios que NO debes hacer: agrupar variantes en los selectores de venta o pedido, subir logo del
+negocio, elegir el color de acento por negocio, cambiar fórmulas de costo o precio, ni quitar
+confirmaciones de acciones que mueven dinero o existencias.
+
+No me hagas preguntas salvo los casos de parada de CLAUDE.md. Si algo no está claro, decide con
+ronda-2.md, luego 04 y 06, luego lo más simple, y anótalo en docs/decisiones.md.
+
+Al cerrar cada fase escribe docs/mejoras/informe-ronda2-<letra>.md (plantilla en docs/prompts.md §6)
+y actualiza docs/progreso.md, de modo que una sesión nueva pueda continuar leyéndolo. Al terminar
+la D, deja un resumen final de las cuatro fases, con la tabla de clics antes y después.
+```
+
+**Si se interrumpe a la mitad:**
+
+```
+Continúa la ronda 2 donde quedaste: lee docs/progreso.md, los informes de docs/mejoras/ y el último
+commit de la rama actual. Sigue las mismas reglas de docs/mejoras/ronda-2.md (fusionar cada fase
+en verde sin pedirme permiso) y termina las fases que falten.
+```
+

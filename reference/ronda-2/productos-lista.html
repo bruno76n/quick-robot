@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Productos, lista con variantes</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Geist',system-ui,-apple-system,'Segoe UI',sans-serif;color:#121214;background:#fff;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+</style>
+
+</head>
+<!--
+  REFERENCIA VISUAL (ronda 2): Productos en lista, con variantes agrupadas.
+  Maqueta para ver estructura, jerarquía y comportamiento. NO es código del producto.
+  - Los datos, nombres y cifras son de ejemplo. No copiarlos.
+  - Los textos reales salen de es.ts; esta maqueta no los define (salvo los nuevos de docs/mejoras/ronda-2.md §9).
+  - Colores: solo neutros y de estado (verde, ámbar, rojo). Sin morado. La marca del negocio no aparece.
+  - Los radios y sombras de componentes que ya existen se toman del sistema, no de aquí.
+  - Se abre con doble clic; los despliegues y filtros funcionan.
+-->
+<body>
+<div id="root"></div>
+<template id="tpl">
+
+<div style="display:flex;flex-wrap:wrap;width:100%;min-height:1180px;background:#ffffff;color:#121214;font-size:15px;line-height:1.45">
+
+<aside style="width:248px;flex:none;box-sizing:border-box;background:#f6f6f8;border-right:1px solid #e7e7ec;padding:16px 12px 14px;display:flex;flex-direction:column;gap:14px">
+  <div style="display:flex;align-items:center;gap:10px;padding:2px 6px">
+    <div aria-hidden="true" style="flex:none;width:40px;height:40px;border-radius:10px;background:#e7e7ec;color:#3a3a43;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;letter-spacing:-.02em">MN</div>
+    <div style="min-width:0"><div style="font-size:19px;font-weight:600;letter-spacing:-.03em;line-height:1.1">Mi negocio</div><div style="font-size:12.5px;color:#6a6a73;margin-top:3px">Giro del negocio</div></div>
+  </div>
+  <button style="display:flex;align-items:center;justify-content:center;gap:8px;background:#121214;color:#fff;border:0;border-radius:9px;padding:11px 12px;font-weight:500">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Nueva pieza
+  </button>
+  <div style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #d2d2da;border-radius:9px;padding:9px 10px;color:#6a6a73">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6a6a73" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 21l-4.3-4.3M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"/></svg>
+    <span style="flex:1">Buscar</span><span style="font-size:11px;border:1px solid #d2d2da;border-radius:4px;padding:0 5px">⌘K</span>
+  </div>
+  <nav aria-label="Pantallas" style="display:flex;flex-direction:column;gap:14px">
+    <sc-for list="{{groups}}" as="g" hint-placeholder-count="4">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <sc-if value="{{g.label}}" hint-placeholder-val="{{ true }}"><div style="font-size:12.5px;color:#6a6a73;font-weight:600;padding:0 10px 3px">{{g.label}}</div></sc-if>
+        <sc-for list="{{g.items}}" as="it" hint-placeholder-count="3">
+          <a href="#" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;text-decoration:none;background:{{it.bg}};color:{{it.ink}};font-weight:{{it.w}}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{it.ink}}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{it.d}}"/></svg>{{it.name}}
+          </a>
+        </sc-for>
+      </div>
+    </sc-for>
+  </nav>
+</aside>
+
+<main style="flex:999 1 560px;min-width:0;box-sizing:border-box;padding:26px 44px 40px;display:flex;flex-direction:column;gap:16px">
+  <header style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px">
+    <div>
+      <h1 style="margin:0;font-size:28px;line-height:1.1;font-weight:600;letter-spacing:-.04em">Productos</h1>
+      <p style="margin:6px 0 0;color:#6a6a73">Piezas con su costo y su precio de lista. Las variantes viven dentro de su pieza.</p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button style="background:#fff;border:1px solid #d2d2da;border-radius:9px;padding:10px 16px;font-weight:500">Nueva colección</button>
+      <button style="background:#121214;color:#fff;border:0;border-radius:9px;padding:11px 16px;font-weight:500">+ Nueva pieza</button>
+    </div>
+  </header>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
+    <div style="display:flex;background:#f1f1f4;border-radius:999px;padding:4px;gap:2px">
+      <span style="background:#fff;border-radius:999px;padding:7px 16px;font-weight:600;box-shadow:0 1px 2px rgba(18,18,20,.08)">Piezas <span style="color:#6a6a73;font-weight:500;font-size:13px">8</span></span>
+      <span style="padding:7px 16px;color:#6a6a73;font-weight:500">Colecciones <span style="font-size:13px">2</span></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="border:1px solid #d2d2da;border-radius:9px;padding:10px 14px;color:#6a6a73;width:230px;box-sizing:border-box">Buscar pieza</div>
+      <div style="display:flex;background:#f1f1f4;border-radius:999px;padding:4px">
+        <span style="padding:6px 14px;color:#6a6a73;font-weight:500;font-size:14px">Fichas</span>
+        <span style="background:#fff;border-radius:999px;padding:6px 14px;font-weight:600;font-size:14px;box-shadow:0 1px 2px rgba(18,18,20,.08)">Lista</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;gap:8px">
+    <span style="background:#121214;color:#fff;border-radius:999px;padding:6px 14px;font-weight:600;font-size:14px">Todas <span style="font-weight:500;opacity:.8">8</span></span>
+    <span style="background:#f1f1f4;color:#4a4a53;border-radius:999px;padding:6px 14px;font-weight:500;font-size:14px">Técnicas <span>1</span></span>
+    <span style="background:#f1f1f4;color:#3a3a43;border-radius:999px;padding:6px 14px;font-weight:500;font-size:14px">Con variantes <span>1</span></span>
+  </div>
+
+  <div style="overflow-x:auto">
+    <div style="min-width:980px">
+      <div style="display:grid;grid-template-columns:minmax(260px,2.6fr) minmax(0,1fr) minmax(0,.8fr) minmax(0,.9fr) minmax(0,1fr) minmax(0,.9fr) minmax(0,.8fr) minmax(0,.7fr) 128px;column-gap:12px;padding:8px 8px 8px 8px;font-size:12.5px;color:#6a6a73;font-weight:600;border-bottom:1px solid #e7e7ec">
+        <span>Pieza</span><span style="text-align:right">En existencia</span><span style="text-align:right">Costo</span><span style="text-align:right">Precio de lista</span><span></span><span style="text-align:right">Ganancia</span><span style="text-align:right">Veces el costo</span><span style="text-align:right">Vendidas</span><span></span>
+      </div>
+
+      <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+        <div style="border-bottom:1px solid #e7e7ec;background:{{r.bg}}">
+          <div style="display:grid;grid-template-columns:minmax(260px,2.6fr) minmax(0,1fr) minmax(0,.8fr) minmax(0,.9fr) minmax(0,1fr) minmax(0,.9fr) minmax(0,.8fr) minmax(0,.7fr) 128px;column-gap:12px;align-items:center;padding:12px 8px">
+            <div style="display:flex;align-items:flex-start;gap:8px;min-width:0">
+              <sc-if value="{{r.hasVar}}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{r.toggle}}" aria-expanded="{{r.expanded}}" aria-label="Ver variantes" style="flex:none;width:28px;height:28px;margin-top:1px;border:1px solid #d2d2da;background:#f1f1f4;border-radius:7px;display:flex;align-items:center;justify-content:center;padding:0">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3a3a43" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform:rotate({{r.rot}}deg)"><path d="m9 6 6 6-6 6"/></svg>
+                </button>
+              </sc-if>
+              <sc-if value="{{r.noVar}}" hint-placeholder-val="{{ true }}"><span style="flex:none;width:28px"></span></sc-if>
+              <span style="flex:none;width:18px;height:18px;margin-top:5px;border-radius:50%;background:{{r.sw}};border:1px solid rgba(18,18,20,.18)"></span>
+              <div style="min-width:0">
+                <div style="font-weight:600;font-size:15px">{{r.name}}</div>
+                <div style="font-size:13px;color:#6a6a73">{{r.printer}}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">
+                  <sc-for list="{{r.pills}}" as="p" hint-placeholder-count="1"><span style="background:#ececf1;color:#4a4a53;border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:500">● {{p}}</span></sc-for>
+                  <sc-if value="{{r.hasVar}}" hint-placeholder-val="{{ false }}"><span style="background:#f1f1f4;color:#3a3a43;border-radius:999px;padding:2px 10px;font-size:12.5px;font-weight:600">{{r.varLabel}}</span></sc-if>
+                </div>
+              </div>
+            </div>
+            <div style="text-align:right;font-variant-numeric:tabular-nums"><b style="color:{{r.freeInk}}">{{r.free}}</b><div style="font-size:12.5px;color:#6a6a73">{{r.reserved}}</div></div>
+            <div style="text-align:right;font-variant-numeric:tabular-nums">{{r.cost}}</div>
+            <div style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">{{r.price}}</div>
+            <div style="display:flex;height:8px;border-radius:2px;overflow:hidden;background:#00ae42"><div style="width:{{r.cp}}%;background:#5a5a65"></div></div>
+            <div style="text-align:right;color:#067a30;font-weight:600;font-variant-numeric:tabular-nums">{{r.profit}}</div>
+            <div style="text-align:right;font-variant-numeric:tabular-nums">{{r.times}}</div>
+            <div style="text-align:right;font-variant-numeric:tabular-nums">{{r.sold}}</div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px"><button style="background:#fff;border:1px solid #d2d2da;border-radius:9px;padding:6px 16px;font-weight:500;font-size:14px">{{r.act}}</button><button style="background:transparent;border:0;color:#6a6a73;font-size:13px;padding:2px 6px">+ Variante</button></div>
+          </div>
+
+          <sc-if value="{{r.open}}" hint-placeholder-val="{{ false }}">
+            <div style="background:#f6f6f8;border-top:1px solid #e7e7ec;padding:2px 8px 10px 8px">
+              <sc-for list="{{r.variantRows}}" as="v" hint-placeholder-count="3">
+                <div style="display:grid;grid-template-columns:minmax(260px,2.6fr) minmax(0,1fr) minmax(0,.8fr) minmax(0,.9fr) minmax(0,1fr) minmax(0,.9fr) minmax(0,.8fr) minmax(0,.7fr) 128px;column-gap:12px;align-items:center;padding:9px 0;border-bottom:1px dashed #e7e7ec">
+                  <div style="display:flex;align-items:center;gap:8px;padding-left:36px;position:relative">
+                    <span style="position:absolute;left:14px;top:-9px;bottom:50%;width:12px;border-left:2px solid #b9b9c4;border-bottom:2px solid #b9b9c4;border-bottom-left-radius:6px"></span>
+                    <span style="flex:none;width:16px;height:16px;border-radius:50%;background:{{v.sw}};border:1px solid rgba(18,18,20,.18)"></span>
+                    <span style="font-weight:600">{{v.name}}</span>
+                    <sc-if value="{{v.original}}" hint-placeholder-val="{{ false }}"><span style="background:#ececf1;color:#4a4a53;border-radius:999px;padding:1px 9px;font-size:12px;font-weight:500">Original</span></sc-if>
+                    <span style="font-size:13px;color:#6a6a73">{{v.material}}</span>
+                  </div>
+                  <div style="text-align:right;font-variant-numeric:tabular-nums"><b>{{v.free}}</b><div style="font-size:12.5px;color:#6a6a73">{{v.reserved}}</div></div>
+                  <div style="text-align:right;font-variant-numeric:tabular-nums">{{v.cost}}</div>
+                  <div style="text-align:right;font-weight:600;font-variant-numeric:tabular-nums">{{v.price}}</div>
+                  <div style="display:flex;height:8px;border-radius:2px;overflow:hidden;background:#00ae42"><div style="width:{{v.cp}}%;background:#5a5a65"></div></div>
+                  <div style="text-align:right;color:#067a30;font-weight:600;font-variant-numeric:tabular-nums">{{v.profit}}</div>
+                  <div style="text-align:right;font-variant-numeric:tabular-nums">{{v.times}}</div>
+                  <div style="text-align:right;font-variant-numeric:tabular-nums">{{v.sold}}</div>
+                  <div style="display:flex;gap:6px;justify-content:flex-end"><button style="background:#fff;border:1px solid #d2d2da;border-radius:9px;padding:6px 14px;font-weight:500;font-size:14px">Vender</button><button style="background:transparent;border:0;color:#6a6a73;font-size:13px;padding:2px 6px">Editar</button></div>
+                </div>
+              </sc-for>
+              <div style="padding:10px 0 2px 36px"><button style="background:transparent;border:1px dashed #b9b9c4;color:#3a3a43;border-radius:9px;padding:6px 14px;font-weight:600;font-size:14px">+ Agregar variante de {{r.name}}</button></div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</main>
+</div>
+</template>
+<script>
+
+class DCLogic {
+  constructor(props) { this.props = props || {}; this.state = {}; }
+  setState(p) { Object.assign(this.state, typeof p === 'function' ? p(this.state) : p); render(); }
+}
+
+
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { open: 'salto' }; }
+  renderVals() {
+    const open = this.state.open;
+    const nav = [
+      { label: '', items: [['Inicio', 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z']] },
+      { label: 'Vender', items: [['Productos', 'M21 8 12 3 3 8v8l9 5 9-5z M3 8l9 5 9-5 M12 13v8', 1], ['Ventas', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M12 7v10 M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.6 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5'], ['Pedidos', 'M9 4h6v3H9z M7 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-1 M9 12h6 M9 16h6']] },
+      { label: 'Taller', items: [['Filamentos', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z'], ['Insumos', 'M12 3l7.8 4.5v9L12 21l-7.8-4.5v-9z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z'], ['Impresoras', 'M4 4h16v10H4z M4 18h16 M8 14v4 M16 14v4'], ['Producción', 'M12 3 3 8l9 5 9-5z M3 13l9 5 9-5'], ['Existencias', 'M5 5h14v5H5z M5 14h14v5H5z M8 7.5h.01 M8 16.5h.01'], ['Compras', 'M3 4h2l2.4 11h10.2L20 8H6.5 M9 20h.01 M17 20h.01']] },
+      { label: 'Negocio', items: [['Clientes', 'M16 20v-1.5a3.5 3.5 0 0 0-3.5-3.5h-3A3.5 3.5 0 0 0 6 18.5V20 M11 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z'], ['Gastos', 'M3 7h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M3 7l2-3h12 M16 14h2'], ['Reportes', 'M4 20V4 M4 20h16 M9 16v-5 M14 16V8 M19 16v-3'], ['Ajustes', 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M12 3v3 M12 18v3 M3 12h3 M18 12h3 M5.6 5.6l2.1 2.1 M16.3 16.3l2.1 2.1 M5.6 18.4l2.1-2.1 M16.3 7.7l2.1-2.1']] }
+    ];
+    const groups = nav.map(g => ({ label: g.label, items: g.items.map(i => ({ name: i[0], d: i[1], bg: i[2] ? '#ececf1' : 'transparent', ink: i[2] ? '#121214' : '#6a6a73', w: i[2] ? 600 : 500 })) }));
+
+    const base = [
+      { id: 'llavero', name: 'Llavero con nombre', printer: 'Ender 3 V3 SE', sw: '#d6334f', pills: [], free: '6', reserved: '3 apartadas', cost: '$3.67', price: '$50', cp: 7.3, profit: '$46', times: '×13.6', sold: 33, act: 'Vender' },
+      { id: 'servilletero', name: 'Servilletero con logo', printer: 'Bambu Lab P1S', sw: '#26262c', pills: [], free: '—', reserved: 'solo por pedido', cost: '$26.75', price: '$120', cp: 22.3, profit: '$93', times: '×4.5', sold: 24, act: 'Pedido' },
+      { id: 'salto', name: 'Spider-Man · salto', printer: 'Bambu Lab P1S', sw: '#f4f4f6', pills: ['Colección Doomsday blanca', 'Spider-Man · 2 poses'], free: '1', reserved: '2 apartadas', cost: '$38.96', price: '$250', cp: 15.6, profit: '$211', times: '×6.4', sold: 10, act: 'Vender', nvar: 2 },
+      { id: 'trepando', name: 'Spider-Man · trepando', printer: 'Bambu Lab P1S', sw: '#f4f4f6', pills: ['Colección Doomsday blanca', 'Spider-Man · 2 poses'], free: '0', freeInk: '#b3223f', reserved: '1 apartada', cost: '$36.35', price: '$250', cp: 14.5, profit: '$214', times: '×6.9', sold: 9, act: 'Pedido' },
+      { id: 'doom', name: 'Doctor Doom · busto', printer: 'Bambu Lab P1S', sw: '#f4f4f6', pills: ['Colección Doomsday blanca'], free: '1', reserved: '2 apartadas', cost: '$41.56', price: '$250', cp: 16.6, profit: '$208', times: '×6', sold: 6, act: 'Vender' },
+      { id: 'hulk', name: 'Hulk · puño', printer: 'Bambu Lab P1S', sw: '#f4f4f6', pills: ['Colección Doomsday blanca'], free: '2', reserved: '1 apartada', cost: '$37.90', price: '$250', cp: 15.2, profit: '$212', times: '×6.6', sold: 7, act: 'Vender' },
+      { id: 'soporte', name: 'Soporte de celular PETG', printer: 'Bambu Lab P1S', sw: '#26262c', pills: ['Técnica'], free: '2', reserved: '0 apartadas', cost: '$39.28', price: '$79', cp: 49.7, profit: '$40', times: '×2', sold: 3, act: 'Vender' },
+      { id: 'letrero', name: 'Letrero de taquería', printer: 'Bambu Lab P1S', sw: '#d6334f', pills: [], free: '—', reserved: 'solo por pedido', cost: '$68.89', price: '$450', cp: 15.3, profit: '$381', times: '×6.5', sold: 2, act: 'Pedido' }
+    ];
+    const variantData = {
+      salto: [
+        { name: 'Silk morado', sw: '#6b3fd4', material: 'PLA Silk Morado', free: '1', reserved: '0 apartadas', cost: '$44.80', price: '$250', cp: 17.9, profit: '$205', times: '×5.6', sold: 2 },
+        { name: 'Negro mate', sw: '#26262c', material: 'PLA Negro', free: '2', reserved: '1 apartada', cost: '$38.96', price: '$250', cp: 15.6, profit: '$211', times: '×6.4', sold: 3 }
+      ]
+    };
+    const rows = base.map(b => {
+      const isOpen = open === b.id;
+      const has = !!b.nvar;
+      return {
+        ...b, freeInk: b.freeInk || '#121214', hasVar: has, noVar: !has, varLabel: b.nvar + ' variantes',
+        open: isOpen, rot: isOpen ? 90 : 0, expanded: isOpen ? 'true' : 'false', bg: isOpen ? '#ffffff' : '#ffffff',
+        variantRows: variantData[b.id] || [], toggle: () => this.setState({ open: isOpen ? null : b.id })
+      };
+    });
+    return { groups, rows };
+  }
+}
+
+
+const __tpl = document.getElementById('tpl').content;
+const __root = document.getElementById('root');
+const __comp = new Component({});
+const __get = (scope, p) => { let v = scope; for (const k of p.split('.')) { if (v == null) return undefined; v = v[k]; } return v; };
+const __hole = s => { const m = /^\s*\{\{\s*([\w.$]+)\s*\}\}\s*$/.exec(s || ''); return m ? m[1] : null; };
+const __interp = (s, scope) => s.replace(/\{\{\s*([\w.$]+)\s*\}\}/g, (m, p) => { const v = __get(scope, p); return v == null ? '' : String(v); });
+function __build(node, scope, parent) {
+  if (node.nodeType === 3) { parent.appendChild(document.createTextNode(__interp(node.textContent, scope))); return; }
+  if (node.nodeType !== 1) return;
+  const tag = node.localName;
+  if (tag === 'sc-for') {
+    const list = __get(scope, __hole(node.getAttribute('list'))) || [];
+    const as = node.getAttribute('as');
+    list.forEach(item => { const s = Object.create(scope); s[as] = item; node.childNodes.forEach(c => __build(c, s, parent)); });
+    return;
+  }
+  if (tag === 'sc-if') {
+    if (__get(scope, __hole(node.getAttribute('value')))) node.childNodes.forEach(c => __build(c, scope, parent));
+    return;
+  }
+  const el = document.createElementNS(node.namespaceURI, tag);
+  for (const a of Array.from(node.attributes)) {
+    if (a.name.startsWith('hint-')) continue;
+    const h = __hole(a.value);
+    if (a.name.startsWith('on') && h) { const fn = __get(scope, h); if (typeof fn === 'function') el.addEventListener(a.name.slice(2), ev => { ev.preventDefault(); fn(ev); }); continue; }
+    el.setAttribute(a.name, __interp(a.value, scope));
+  }
+  node.childNodes.forEach(c => __build(c, scope, el));
+  parent.appendChild(el);
+}
+function render() {
+  const scope = __comp.renderVals();
+  const frag = document.createDocumentFragment();
+  __tpl.childNodes.forEach(c => __build(c, scope, frag));
+  __root.replaceChildren(frag);
+}
+render();
+
+</script>
+</body>
+</html>

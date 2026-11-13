@@ -18,7 +18,7 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 | Elemento | Qué hace |
 |---|---|
-| **Barra lateral** | Arriba: la mascota con el **nombre y el giro del negocio** (datos de Ajustes; el mockup los trae fijos como “Quick Robot · Impresión 3D”). Después: Inicio · *Vender*: Productos, Ventas, Pedidos · *Taller*: Filamentos, Insumos, Impresoras, Producción, Existencias, Compras · *Negocio*: Clientes, Gastos, Reportes, Ajustes. En pantallas pequeñas se oculta tras un botón de menú |
+| **Barra lateral** | Arriba: un **monograma** (iniciales del nombre del negocio) con el **nombre y el giro del negocio** (datos de Ajustes; el mockup los traía fijos como “Quick Robot · Impresión 3D” y con la mascota: **ya no**, el panel es neutro, `mejoras/ronda-2.md §2`). Después: Inicio · *Vender*: Productos, Ventas, Pedidos · *Taller*: Filamentos, Insumos, Impresoras, Producción, Existencias, Compras · *Negocio*: Clientes, Gastos, Reportes, Ajustes. En pantallas pequeñas se oculta tras un botón de menú |
 | **Buscar** (⌘/Ctrl + K) | Paleta de comandos: busca piezas, clientes, pedidos, ventas, filamentos y acciones; Enter abre el resultado |
 | **Atajos** (`?`) | Muestra la lista. `g` + letra navega (ir a pantalla); `⌘/Ctrl+Z` deshace; `⇧⌘Z` rehace |
 | **Cajón lateral** | Detalle de un elemento de una lista ancha (filamento, insumo, pieza de existencias) sin salir de la lista; Esc o clic fuera lo cierra |
@@ -31,7 +31,7 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 ## 2. Inicio
 
-**Muestra:** resumen compacto del taller (el "brief"): cifras clave del periodo, qué se está imprimiendo ahora, y una lista de **atenciones**, cada una con un botón que lleva al elemento. Se generan con estas reglas:
+**Muestra:** resumen compacto del taller (el "brief"): cifras clave del periodo, qué se está imprimiendo ahora, y las **atenciones** agrupadas por prioridad, cada una con un botón que lleva al elemento. **Ronda 2:** “Atención” es la columna principal, las atenciones se agrupan en **Urgente · Esta semana · Para revisar** con chips de filtro, y **se quitó la cuadrícula de rollos de filamento** (`mejoras/ronda-2.md §5`, maqueta `reference/ronda-2/inicio.html`). Las atenciones se generan con estas reglas:
 
 - Pedido **aceptado** sin descontar filamento y con faltante → "falta tanto de tal filamento".
 - Filamento con rollos y **150 g o menos** disponibles.
@@ -41,6 +41,8 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 - Mantenimiento pendiente ("Pronto" o "Toca ya"), hasta 3.
 - Insumo agotado o en su mínimo.
 - Sin copia de seguridad descargada, o la última con más de **7 días**.
+
+**Prioridad de cada atención** (`severity`, `core › classifyAttention`): **Urgente** = pedido aceptado con faltante de filamento; pedido activo con entrega vencida, hoy o mañana. **Esta semana** = entrega en 2 días; venta con saldo; filamento con 150 g o menos; insumo agotado o en su mínimo. **Para revisar** = mantenimiento pendiente; precio por debajo del piso; copia de seguridad. Si un grupo pasa de 5, se muestran 5 y “Ver las N restantes” despliega el resto.
 
 **Acciones**
 | Botón | Caso de uso / efecto | Lleva a |
@@ -54,7 +56,7 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 ## 3. Productos
 
-**Muestra:** dos pestañas con contador, **Piezas** y **Colecciones**; buscador; forma de ver en **Fichas** o **Lista**; en Piezas, filtros **Todas · Técnicas · Variantes**. Cada pieza muestra precio, costo, ganancia y libres en Existencias.
+**Muestra:** dos pestañas con contador, **Piezas** y **Colecciones**; buscador; forma de ver en **Fichas** o **Lista**; en Piezas, filtros **Todas · Técnicas · Con variantes**. Cada pieza muestra precio, costo, ganancia y libres en Existencias. **Ronda 2:** las variantes viven **dentro de su pieza original** (una familia): el botón “N variantes” de la ficha despliega un panel debajo de su fila, y en la lista una flecha despliega sus filas. “Piezas N” cuenta familias. Detalle en `mejoras/ronda-2.md §3`; maquetas `productos-fichas.html` y `productos-lista.html`.
 
 | Botón | Efecto | Lleva a |
 |---|---|---|
@@ -62,7 +64,8 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 | Nueva colección | — | Colección (nueva). Pide que existan piezas |
 | Fichas / Lista | Preferencia de vista | — |
 | Vender (en una pieza con libres) | — | Armar venta con esa pieza |
-| Variante (en una pieza) | Abre la calculadora con una **copia** de la pieza (nombre "… (variante)", `parentId` = la original); al Guardar se crea con `saveProduct` | Calculadora |
+| Variante · Nueva variante · Agregar variante de … (en una pieza) | Abre la calculadora con una **copia** de la original, título “Nueva variante de {pieza}” y el campo **Nombre de la variante** enfocado; al Guardar se crea con `saveProductAsVariant` (`parentId` = la original raíz) y se vuelve a Productos con su panel abierto | Calculadora |
+| N variantes (en una ficha) · flecha (en la lista) | Despliega o cierra las variantes de la pieza; un solo panel abierto a la vez en Fichas | — |
 | Abrir pieza / colección | — | Calculadora / Colección |
 
 ### 3.1 Calculadora (pieza)
@@ -78,7 +81,7 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 | Cotizar | Diálogo de cotización rápida (cantidad → total y tiempo) | — |
 | Vender | — | Armar venta |
 | Guardar | `saveProduct` | Productos |
-| Guardar como variante nueva | `saveProductAsVariant` (copia con `parent_id`) | Productos |
+| Guardar como variante nueva | `saveProductAsVariant` (copia con `parent_id` = la original raíz y `variant_label`) | Productos |
 | Eliminar | `deleteProduct` (soft) + Deshacer | Productos |
 | Cancelar | Descarta cambios | Productos |
 
@@ -216,13 +219,15 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 ## 10. Existencias
 
-**Muestra:** lista ancha de piezas con existencias: Físicas, Apartadas, Libres, y sets armables. Cajón con movimientos.
+**Muestra:** piezas con existencias en **Lista** (por defecto) o **Fichas** (selector, se recuerda): Estado, Libres, Apartadas, Total y precio de lista, y sets armables; filtros por estado (Todas · Pocas · Todo apartado · Disponible · Agotadas) y buscador. Orden: menos libres primero. **Ronda 2:** una pieza con variantes es **una fila o ficha** con sus miembros desplegables y la suma de sus existencias; las fichas ya no dibujan un cuadrito por unidad (un número grande de libres y una barra de libres contra apartadas). El cajón con movimientos se abre desde la pieza o el miembro que tiene movimientos propios. Detalle en `mejoras/ronda-2.md §4`; maquetas `existencias-lista.html` y `existencias-fichas.html`.
 | Botón | Caso de uso |
 |---|---|
 | Llevar existencias (en una pieza) | `enableStockTracking` (con conteo inicial) |
 | Ajustar | `adjustStock` (conteo real o corrección con nota) |
 | Registrar impresión | Abre Producción con el diálogo (suma a existencias) |
-| Seleccionar pieza | Abre el cajón |
+| Fichas / Lista | Preferencia de vista de Existencias (`view.stock`) | — |
+| Seleccionar pieza (o un miembro de una familia) | Abre el cajón | — |
+| Flecha de una familia | Despliega o cierra sus variantes | — |
 
 ---
 
