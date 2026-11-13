@@ -25,7 +25,7 @@ export const BUDGET = {
   acceptOrder: { today: 1, fieldsClicked: 0 },
   startProduction: { today: 2, fieldsClicked: 0 },
   markReady: { today: 1, fieldsClicked: 0 },
-  orderPayment: { today: 4, fieldsClicked: 0 },
+  orderPayment: { today: 3, fieldsClicked: 0 },
   deliverAndCharge: { today: 2, fieldsClicked: 0 },
   finishJob: { today: 1, fieldsClicked: 0 },
   // Existencias, Producción, Filamentos, Insumos, Compras

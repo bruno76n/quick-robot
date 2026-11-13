@@ -75,7 +75,9 @@ function Order({ o, runner, tab: asked }: { o: OrderDetail; runner: StepRunner; 
       <section className="strip band slim" aria-label={L.bandAria}>
         <div><span className="k">{L.total}</span><b className="v num">{centsTotal(T.totalCents)}</b><span className="s">{t('screens.order.piecesIn', { pieces, items: o.items.length })}</span></div>
         <div><span className="k">{T.owedCents > 0 ? L.owed : canc ? L.collectedK : L.paid}</span><b className={`v num ${T.owedCents > 0 ? 'neg' : 'pos'}`}>{centsTotal(T.owedCents > 0 ? T.owedCents : canc ? T.paidCents : T.totalCents)}</b>
-          <span className="s">{T.owedCents > 0 ? t('screens.order.paidAmount', { amount: centsTotal(T.paidCents) }) : canc ? L.afterRefund : L.fullyPaid}</span></div>
+          <span className="s">{T.owedCents > 0 ? t('screens.order.paidAmount', { amount: centsTotal(T.paidCents) }) : canc ? L.afterRefund : L.fullyPaid}</span>
+          {/* Ronda-2 §12, D7: the payment at hand from any tab (Cobro keeps its own button, so it is not repeated there). */}
+          {T.owedCents > 0 && isActive(o.status) && tab !== 'pagos' ? <Button size="sm" className="band-pay" onClick={() => runner.setDlg({ kind: 'pay', id: o.id })}>{L.recordPayment}</Button> : null}</div>
         <div><span className="k">{fin ? L.deliveredK : L.dueK}</span><b className={`v num ${!fin && !canc && n <= 1 ? 'neg' : ''}`}>{date(fin ? o.deliveredOn ?? o.dueOn : o.dueOn)}</b><span className="s">{fin ? L.saleInSales : canc ? '' : relativeDay(o.dueOn, today)}</span></div>
       </section>
       <details className="more"><summary>{L.costProfit}</summary><div className="more-b">

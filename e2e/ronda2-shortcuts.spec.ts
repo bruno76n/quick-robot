@@ -2,6 +2,7 @@
 // where Cancelar goes back to, what stays the same for a sale or order that owes nothing.
 import { expect, test, type Page } from './support/test';
 import { startServer, type LocalServer } from './support/server';
+import { createOrder, seed } from './support/order-helpers';
 
 let server: LocalServer;
 test.beforeAll(async () => { server = await startServer(); });
@@ -51,4 +52,23 @@ test('D6: "Nuevo cliente" under the customer of a sale being edited creates it a
   await dlg.getByRole('button', { name: 'Guardar cliente' }).click();
   await expect(page.getByRole('dialog').locator('select[name=cliente] option:checked')).toHaveText('Cliente desde editar');
   await expect(page.getByRole('dialog').getByRole('button', { name: 'Nuevo cliente' })).toHaveCount(0);
+});
+
+test('D7: "Registrar pago" under Saldo from any tab of an active order that owes; Cobro keeps only its own', async ({ page, request }) => {
+  const s = await seed(request, server.url);
+  const order = await createOrder(request, server.url, s, { accepted: false, items: [{ name: 'Servilletero con logo', qty: 1 }], depositCents: 5000 });
+  await page.goto(`${server.url}/pedidos/pedido?id=${order.id}`);
+  const band = page.getByRole('region', { name: 'Resumen del pedido' });
+  await expect(band.getByRole('button', { name: 'Registrar pago' })).toBeVisible();
+  await page.getByRole('tab', { name: 'Datos' }).click();
+  await expect(band.getByRole('button', { name: 'Registrar pago' })).toBeVisible();
+  await page.getByRole('tab', { name: /^Cobro/ }).click();
+  await expect(page.getByRole('button', { name: 'Registrar pago' })).toHaveCount(1);
+  await expect(band.getByRole('button', { name: 'Registrar pago' })).toHaveCount(0);
+  await page.getByRole('tab', { name: 'Piezas' }).click();
+  await band.getByRole('button', { name: 'Registrar pago' }).click();
+  const dlg = page.getByRole('dialog');
+  await expect(dlg.locator('input[name=monto]')).toBeFocused();
+  await dlg.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(page.getByRole('tab', { name: 'Piezas', selected: true })).toBeVisible();
 });

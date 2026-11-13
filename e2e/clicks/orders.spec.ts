@@ -65,12 +65,12 @@ test('marcar listo (from the Tablero card)', async ({ page }) => {
   await c.expectBudget(BUDGET.markReady);
 });
 
-test('registrar pago de un pedido (card → Cobro → Registrar pago)', async ({ page }) => {
+test('registrar pago de un pedido (card → Registrar pago under Saldo, any tab)', async ({ page }) => {
   const c = await countedPage(page);
   await c.start(`${server.url}/pedidos`);
   await card(page, folio).locator('.kc-h').click();
-  await page.getByRole('tab', { name: 'Cobro' }).click();
-  await page.getByRole('button', { name: 'Registrar pago' }).click();
+  await expect(page.getByRole('tab', { name: 'Piezas', selected: true })).toBeVisible();
+  await page.getByRole('region', { name: 'Resumen del pedido' }).getByRole('button', { name: 'Registrar pago' }).click();
   const dlg = page.getByRole('dialog');
   await c.fill(dlg.locator('input[name=monto]'), '50');
   await dlg.getByRole('button', { name: 'Registrar pago' }).click();

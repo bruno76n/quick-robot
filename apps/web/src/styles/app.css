@@ -45,3 +45,6 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 /* "Debe $X" of a sale row is a button that opens the payment (ronda 2 · D5): the same chip, clickable. */
 .chip-btn { font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; border-top: 0; border-right: 0; border-bottom: 0; }
 .chip-btn:hover { background: var(--amber-soft); }
+
+/* "Registrar pago" under Saldo of an order (ronda 2 · D7). */
+.strip .band-pay { justify-self: start; margin-top: 6px; }
