@@ -1,5 +1,5 @@
 // Through the API, the seeded mockup business gives the mockup's own figures (golden, ±0.01) for phase 3.
-import { stockPage } from '@app/contract';
+import { homeOutput, stockPage } from '@app/contract';
 import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { applyDevelopmentSeed } from '../src/dev-seed';
@@ -53,6 +53,21 @@ describe('seeded phase 3 figures', () => {
     const x = await get('/api/v1/expenses') as { fixedPerMonthCents: number; periodTotalCents: number };
     expect(pesos(x.fixedPerMonthCents)).toBe(golden.fijosMes);
     near(pesos(x.periodTotalCents), golden.inversion.gastos);
+  });
+
+  it('home: each attention carries its priority group (urgent | soon | review) by kind and due date', async () => {
+    const home = homeOutput.parse(await get('/api/v1/home'));
+    const expected = (a: { kind: string; params: Record<string, unknown> }) => {
+      if (a.kind === 'order_filament_short') return 'urgent';
+      if (a.kind === 'order_due') return (a.params.days as number) <= 1 ? 'urgent' : 'soon';
+      return ['sale_owed', 'filament_low', 'supply_low'].includes(a.kind) ? 'soon' : 'review';
+    };
+    expect(home.attentions.length).toBeGreaterThan(0);
+    for (const a of home.attentions) expect([a.kind, a.severity]).toEqual([a.kind, expected(a)]);
+    expect(home.attentions.filter((a) => a.kind === 'order_due').every((a) => (a.params.days as number) <= 2)).toBe(true);
+    const kinds = new Set(home.attentions.map((a) => a.kind));
+    expect([...kinds].sort()).toEqual(expect.arrayContaining(['order_due', 'sale_owed']));
+    expect(new Set(home.attentions.map((a) => a.severity)).size).toBeGreaterThan(1);
   });
 
   it('home, purchases, search and printers load', async () => {

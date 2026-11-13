@@ -26,7 +26,7 @@ export interface Report {
 }
 
 export type AttentionKind = 'order_filament_short' | 'filament_low' | 'order_due' | 'sale_owed' | 'price_below_floor' | 'maintenance' | 'supply_low' | 'backup';
-export interface Attention { kind: AttentionKind; severity: 'bad' | 'warn' | 'info'; target: { type: 'order' | 'filament' | 'sale' | 'product' | 'collection' | 'printer' | 'supply' | 'settings'; id: string | null }; params: Record<string, unknown> }
+export interface Attention { kind: AttentionKind; severity: 'urgent' | 'soon' | 'review'; target: { type: 'order' | 'filament' | 'sale' | 'product' | 'collection' | 'printer' | 'supply' | 'settings'; id: string | null }; params: Record<string, unknown> }
 export interface Home {
   stats: { incomeCents: number; profitCents: number; marginPct: number; sales: number; pieces: number; activeOrders: number; owedCents: number; inProduction: number; ready: number; printersBusy: number; printers: number; products: number };
   printingNow: { printerId: string; printer: string; id: string; orderId: string; orderNumber: number; text: string; minutes: number; remainingMinutes: number; progress: number; customer: string }[];
