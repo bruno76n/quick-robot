@@ -55,6 +55,12 @@ describe.runIf(RUN)(`budgets of docs/15 §2 with ${LOAD.sales} sales`, () => {
   it('lists (page of 50) ≤ 300 ms', async () => {
     for (const p of ['/sales?pageSize=50', '/orders?view=list&pageSize=50', '/orders?view=board', '/customers', '/stock', '/print-runs?pageSize=50', '/expenses', '/products', '/filaments', '/printers', '/purchases']) await measure(`GET ${p}`, 300, get(p));
   });
+  it('ronda 2: families in Productos and Existencias, the flat picker list ≤ 300 ms (baseline: informe-ronda2-a §5)', async () => {
+    const page = (await get('/products')()).data as J;
+    expect([page.counts.withVariants, page.items.length]).toEqual([LOAD.families + 1, 50]); // + the variant of the mockup seed
+    expect(((await get('/products/options')()).data as J).items.length).toBe(LOAD.products);
+    for (const p of ['/products?filter=with_variants', '/products?q=Variante%2012', '/products/options', '/stock?status=few', '/stock?sort=free_desc&q=carga']) await measure(`GET ${p}`, 300, get(p));
+  });
   it('reports: 30 days ≤ 400 ms, all ≤ 1.5 s; home ≤ 400 ms; search ≤ 200 ms', async () => {
     await measure('GET /reports?period=30', 400, get('/reports?period=30'));
     await measure('GET /reports?period=all', 1500, get('/reports?period=all'), 3);
@@ -68,7 +74,7 @@ describe.runIf(RUN)(`budgets of docs/15 §2 with ${LOAD.sales} sales`, () => {
   }, 600_000);
 
   it('writes ≤ 500 ms; the heaviest ≤ 800 ms', async () => {
-    const products = ((await get('/products')()).data as J).items as J[];
+    const products = ((await get('/products/options')()).data as J).items as J[];
     const channel = (((await get('/settings')()).data as J).channels as J[])[0]!.id;
     const customer = (((await get('/customers')()).data as J[])[0]!).id;
     const printer = ((((await get('/printers')()).data as J).items as J[])[0]!).id;

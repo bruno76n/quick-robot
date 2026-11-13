@@ -18,7 +18,7 @@ export interface ProductHooks {
   stock(tx: Executor, ctx: Ctx, productIds: readonly string[]): Promise<Map<string, { physical: number; reserved: number; free: number }>>;
   activeOrderFolios(tx: Executor, ctx: Ctx, productId: string): Promise<number[]>;
   /** Pieces sold (also inside sets) and sets sold, from phase 3. */
-  sold(tx: Executor, ctx: Ctx): Promise<{ products: Map<string, number>; collections: Map<string, number> }>;
+  sold(tx: Executor, ctx: Ctx, productIds?: readonly string[]): Promise<{ products: Map<string, number>; collections: Map<string, number> }>;
 }
 export const productHooks: ProductHooks = { stock: async () => new Map(), activeOrderFolios: async () => [], sold: async () => ({ products: new Map(), collections: new Map() }) };
 const NO_STOCK = { physical: 0, reserved: 0, free: 0 };
@@ -40,7 +40,8 @@ async function extrasFor(deps: Deps, ex: Executor, ctx: Ctx, products: readonly 
   const printers = new Map((await listPrinters(ex, ctx)).map((p) => [p.id, p.name]));
   const cols = await listCollections(ex, ctx);
   const stock = await productHooks.stock(ex, ctx, products.map((p) => p.id));
-  const sold = await productHooks.sold(ex, ctx);
+  // Only the pieces asked for (a page of families, or one piece): never a scan of every sale for nothing (R13).
+  const sold = await productHooks.sold(ex, ctx, products.map((p) => p.id));
   return async (p: ProductFull): Promise<ProductExtras> => {
     const st = stock.get(p.id) ?? NO_STOCK;
     return {

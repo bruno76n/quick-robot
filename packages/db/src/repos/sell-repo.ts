@@ -382,16 +382,23 @@ export async function orderFacts(ex: Executor, ctx: Ctx, f: OrderFilter = {}): P
 }
 
 /** Pieces sold per product (sets opened into their parts) and sets per collection, without returned sales. */
-export async function soldTotals(ex: Executor, ctx: Ctx) {
+/** Pieces sold (also inside sets) and sets sold. With `productIds`, only those pieces and no sets (a page of Productos). */
+export async function soldTotals(ex: Executor, ctx: Ctx, productIds?: readonly string[]) {
   inWorkspace(sale.workspaceId, ctx);
   const live = and(eq(sale.workspaceId, ctx.workspaceId), isNull(sale.deletedAt), isNull(sale.return));
+  if (productIds && !productIds.length) return { products: new Map<string, number>(), collections: new Map<string, number>() };
   const pieces = await ex.select({ productId: lineItem.productId, n: sql<string>`sum(${lineItem.qty})` }).from(lineItem)
     .innerJoin(sale, and(eq(sale.workspaceId, lineItem.workspaceId), eq(sale.id, lineItem.parentId)))
-    .where(and(live, eq(lineItem.parentKind, 'sale'), eq(lineItem.kind, 'piece'))).groupBy(lineItem.productId);
+    .where(and(live, eq(lineItem.parentKind, 'sale'), eq(lineItem.kind, 'piece'), productIds ? inArray(lineItem.productId, [...productIds]) : undefined)).groupBy(lineItem.productId);
   const parts = await ex.select({ productId: sql<string>`p->>'productId'`, n: sql<string>`sum(${lineItem.qty} * (p->>'qty')::int)` })
     .from(sql`${lineItem} cross join lateral jsonb_array_elements(${lineItem.parts}) p`)
     .innerJoin(sale, and(eq(sale.workspaceId, lineItem.workspaceId), eq(sale.id, lineItem.parentId)))
-    .where(and(live, eq(lineItem.parentKind, 'sale'), eq(lineItem.kind, 'set'))).groupBy(sql`p->>'productId'`);
+    .where(and(live, eq(lineItem.parentKind, 'sale'), eq(lineItem.kind, 'set'), productIds ? sql`p->>'productId' in (${sql.join(productIds.map((x) => sql`${x}`), sql`, `)})` : undefined)).groupBy(sql`p->>'productId'`);
+  if (productIds) {
+    const only = new Map<string, number>();
+    for (const r of [...pieces, ...parts]) if (r.productId) only.set(r.productId, (only.get(r.productId) ?? 0) + Number(r.n));
+    return { products: only, collections: new Map<string, number>() };
+  }
   const sets = await ex.select({ collectionId: lineItem.collectionId, n: sql<string>`sum(${lineItem.qty})` }).from(lineItem)
     .innerJoin(sale, and(eq(sale.workspaceId, lineItem.workspaceId), eq(sale.id, lineItem.parentId)))
     .where(and(live, eq(lineItem.parentKind, 'sale'), eq(lineItem.kind, 'set'))).groupBy(lineItem.collectionId);
