@@ -1,5 +1,7 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { createMemoryHistory, createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { AppShell } from './AppShell';
 import { Banner } from './Banner';
 import { Button } from './Button';
 import { Dialog } from './Dialog';
@@ -8,6 +10,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { Field } from './Field';
 import { Icon } from './Icon';
 import { Mascot } from './Mascot';
+import { Monogram } from './Monogram';
 import { Pill, Swatch } from './Pill';
 import { Segmented } from './Segmented';
 import { Table } from './Table';
@@ -106,5 +109,40 @@ describe('components', () => {
     expect(screen.queryByText('boom')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Volver al Inicio' }));
     expect(onHome).toHaveBeenCalledOnce();
+  });
+});
+
+describe('neutral sidebar (ronda-2 §2)', () => {
+  const shell = async (businessName: string, trade: string) => {
+    const root = createRootRoute({ component: () => <AppShell businessName={businessName} trade={trade}><p>vista</p></AppShell> });
+    render(<RouterProvider router={createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: ['/inicio'] }) })} />);
+    await waitFor(() => expect(screen.getByText('vista')).toBeTruthy());
+    return document.querySelector('.brand')!;
+  };
+
+  it('shows the monogram, the name and the trade from Ajustes', async () => {
+    const brand = await shell('Taller de Ana', 'Impresión 3D');
+    expect(brand.querySelector('.mono')?.textContent).toBe('TA');
+    expect(brand.querySelector('b')?.textContent).toBe('Taller de Ana');
+    expect(brand.querySelector('b')?.className ?? '').not.toContain('ph-txt');
+    expect(brand.querySelector('small')?.textContent).toBe('Impresión 3D');
+    expect(document.querySelector('.topbar .mono')?.textContent).toBe('TA');
+    expect(document.querySelector('img')).toBeNull();
+  });
+
+  it('without a name or trade shows "Mi negocio" and "Giro del negocio" in grey', async () => {
+    const brand = await shell('  ', '');
+    expect(brand.querySelector('.mono')?.textContent).toBe('MN');
+    expect(brand.querySelector('b.ph-txt')?.textContent).toBe('Mi negocio');
+    expect(brand.querySelector('small.ph-txt')?.textContent).toBe('Giro del negocio');
+    expect(document.querySelector('.topbar .ph-txt')?.textContent).toBe('Mi negocio');
+  });
+
+  it('Monogram is decorative and scales with its size', () => {
+    render(<Monogram name="Ángel Óptica" size={28} />);
+    const m = document.querySelector('.mono') as HTMLElement;
+    expect(m.textContent).toBe('ÁÓ');
+    expect(m.getAttribute('aria-hidden')).toBe('true');
+    expect(m.style.width).toBe('28px');
   });
 });

@@ -20,3 +20,7 @@
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 /* Every checkbox and radio, not only .chk and .switch, takes the neutral accent (ronda-2 §2). */
 input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
+/* Monogram of the business and grey placeholders when Ajustes has no name or trade (ronda-2 §2). */
+.mono { flex: none; display: inline-grid; place-items: center; border-radius: 10px; background: var(--panel-2); color: var(--ink); font-family: var(--font-display); font-weight: 600; letter-spacing: -.02em; line-height: 1; }
+.topbar .mono { border-radius: 8px; }
+.ph-txt, .brand small.ph-txt { color: var(--ink-3); }

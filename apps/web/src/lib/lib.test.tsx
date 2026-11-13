@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useToast } from '../components/Toast';
 import { api, ApiError } from './api';
+import { initialsOf } from './initials';
 import { parseNumber, todayLocal } from './input';
 import { useWrite } from './mutate';
 import { go, setNavigator } from './nav';
@@ -107,5 +108,28 @@ describe('useWrite', () => {
     const fail = renderHook(() => useWrite(async () => { throw new ApiError('LAST_CHANNEL', 409); }, { touches: ['settings'] }), { wrapper });
     await act(async () => { fail.result.current.mutate(undefined); });
     await waitFor(() => expect(useToast.getState().text).toBe('Debe quedar al menos un canal de venta.'));
+  });
+});
+
+describe('initialsOf (business monogram)', () => {
+  it('two words give their first letters; connectors are skipped', () => {
+    expect(initialsOf('Mi negocio')).toBe('MN');
+    expect(initialsOf('Taller de Ana')).toBe('TA');
+    expect(initialsOf('impresiones   del   norte  3D')).toBe('IN');
+  });
+  it('one word gives its first two letters', () => {
+    expect(initialsOf('Prototipos')).toBe('PR');
+    expect(initialsOf('X')).toBe('X');
+  });
+  it('keeps accents and ñ, ignores symbols and emoji', () => {
+    expect(initialsOf('Ángel Óptica')).toBe('ÁÓ');
+    expect(initialsOf('ñandú')).toBe('ÑA');
+    expect(initialsOf('“El Ñu” & Co.')).toBe('ÑC');
+    expect(initialsOf('🚀 3D Lab')).toBe('3L');
+  });
+  it('empty or without letters gives an empty string', () => {
+    expect(initialsOf('')).toBe('');
+    expect(initialsOf('   ')).toBe('');
+    expect(initialsOf('— · —')).toBe('');
   });
 });

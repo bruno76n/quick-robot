@@ -15,6 +15,7 @@ export const es = {
     expenses: 'Gastos', reports: 'Reportes', settings: 'Ajustes', groupSell: 'Vender', groupWorkshop: 'Taller', groupBusiness: 'Negocio',
     newPiece: 'Nueva pieza',
   },
+  sidebar: { businessPlaceholder: 'Mi negocio', industryPlaceholder: 'Giro del negocio' },
   status: {
     filament: { no_spools: 'Sin rollos', out: 'Agotado', ending: 'Se acaba', low: 'Poco', new: 'Nuevo', ok: 'Normal' },
     spool: { empty: 'Vacío', new: 'Nuevo', in_use: 'En uso' },
