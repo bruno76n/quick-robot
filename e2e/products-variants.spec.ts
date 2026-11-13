@@ -79,3 +79,24 @@ for (const width of [1440, 390]) {
     await expect(rows).toHaveCount(0);
   });
 }
+
+test('search by a variant label opens its family; "Piezas N" and the chips count families', async ({ page }) => {
+  await page.goto(`${server.url}/productos`);
+  // 8 originals and 2 variants (the seed's and the one made here): families, not pieces.
+  await expect(page.getByTestId('pieces-count')).toHaveText('8');
+  await expect(page.getByTestId('product-tile')).toHaveCount(8);
+  await expect(page.getByRole('button', { name: 'Con variantes 2' })).toBeVisible();
+  await page.getByRole('button', { name: 'Con variantes 2' }).click();
+  await expect(page).toHaveURL(/filtro=con-variantes/);
+  await expect(page.getByTestId('product-tile')).toHaveCount(2);
+  await page.getByRole('button', { name: /^Todas/ }).click();
+  await page.getByPlaceholder('Buscar pieza').fill('silk');
+  await expect(page.getByTestId('product-tile')).toHaveCount(1);
+  await expect(page.getByTestId('pieces-count')).toHaveText('1');
+  await expect(panel(page)).toContainText('Variantes de Spider-Man · salto');
+  await expect(tile(page, 'Spider-Man · salto').getByTestId('variants-toggle')).toHaveAttribute('aria-expanded', 'true');
+  // A text that matches the original does not open the panel.
+  await page.getByPlaceholder('Buscar pieza').fill('trepando');
+  await expect(page.getByTestId('product-tile')).toHaveCount(1);
+  await expect(panel(page)).toHaveCount(0);
+});

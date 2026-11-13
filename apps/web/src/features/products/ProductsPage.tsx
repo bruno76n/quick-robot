@@ -42,6 +42,8 @@ export function ProductsPage() {
   const pages = families.data?.pages ?? [];
   const items = pages.flatMap((p) => p.items);
   const counts = pages[0]?.counts ?? { families: 0, technical: 0, withVariants: 0 };
+  const matched = needle ? items.find((f) => f.matchedByVariant)?.id ?? null : null;
+  useEffect(() => { if (matched) setOpen(matched); }, [matched]);
   const collections = useCollections().data?.items ?? [];
   const nav = (next: { tab?: string; vista?: string; filtro?: string }) => {
     const p = new URLSearchParams();
@@ -87,6 +89,7 @@ export function ProductsPage() {
           {!families.data ? <div className="skel" /> : view === 'lista'
             ? <FamilyTable items={items} anyPieces={anyPieces} open={open} onToggle={toggle} />
             : <FamilyTiles items={items} open={open} onToggle={toggle} empty={<div className="empty-card"><p>{anyPieces ? L.noPieceMatchTile : L.emptyPiecesTile}</p><Button variant="green" icon="plus" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></div>} />}
+          {families.hasNextPage ? <div className="more-row"><Button busy={families.isFetchingNextPage} onClick={() => void families.fetchNextPage()}>{L.showMore}</Button></div> : null}
           <p className="foot-note">{L.piecesFoot}</p>
         </>
       )}
