@@ -49,4 +49,16 @@ describe('design tokens', () => {
     expect(t).toMatch(/--cost:\s*#5a5a65/);
     expect(t).toMatch(/--cost-soft:\s*#f1f1f4/);
   });
+  it('the focus ring and the accent of checkboxes and radios use --accent, in the app and on the fatal page', () => {
+    const rules = (p: string) => read(p).replace(/\/\*[\s\S]*?\*\//g, '');
+    const app = css.filter((p) => p !== TOKENS).map(rules).join('\n');
+    expect(app).toMatch(/(^|\n|\})\s*:focus-visible\s*\{\s*outline:\s*2px solid var\(--accent\)/);
+    expect(rules('/src/fatal/fatal.css')).toMatch(/:focus-visible\s*\{\s*outline:\s*2px solid var\(--accent\)/);
+    expect(app).toMatch(/input\[type="checkbox"\], input\[type="radio"\]\s*\{\s*accent-color:\s*var\(--accent\)/);
+    // Every focus ring (2px outline on :focus*) and every accent-color takes the accent.
+    const focus = [...app.matchAll(/[^{}]*:focus[^{]*\{([^}]*)\}/g)].map((m) => m[1]!).filter((b) => /outline:\s*2px/.test(b));
+    expect(focus.length).toBeGreaterThan(2);
+    expect(focus.filter((b) => !/var\(--accent\)/.test(b))).toEqual([]);
+    expect([...app.matchAll(/accent-color:\s*([^;}]+)/g)].map((m) => m[1]!.trim()).filter((v) => v !== 'var(--accent)')).toEqual([]);
+  });
 });
