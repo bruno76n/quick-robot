@@ -42,7 +42,9 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 - Insumo agotado o en su mínimo.
 - Sin copia de seguridad descargada, o la última con más de **7 días**.
 
-**Prioridad de cada atención** (`severity`, `core › classifyAttention`): **Urgente** = pedido aceptado con faltante de filamento; pedido activo con entrega vencida, hoy o mañana. **Esta semana** = entrega en 2 días; venta con saldo; filamento con 150 g o menos; insumo agotado o en su mínimo. **Para revisar** = mantenimiento pendiente; precio por debajo del piso; copia de seguridad. Si un grupo pasa de 5, se muestran 5 y “Ver las N restantes” despliega el resto.
+**Prioridad de cada atención** (`severity`, `core › classifyAttention`): **Urgente** = pedido aceptado con faltante de filamento; pedido activo con entrega vencida, hoy o mañana. **Esta semana** = entrega en 2 días; venta con saldo; filamento con 150 g o menos; insumo agotado o en su mínimo. **Para revisar** = mantenimiento pendiente; precio por debajo del piso; copia de seguridad.
+
+**Cómo se ve la atención:** cada grupo lleva un punto de su color (rojo, ámbar, gris), su título y una nota (“Bloquea una impresión o vence hoy o mañana” · “Conviene resolverlo pronto” · “Sin prisa”). Arriba, chips con contador **Todas · Urgente · Esta semana · Para revisar**; el filtro no se guarda (al volver a Inicio está en “Todas”) y con un grupo elegido no se repite su título. Cada atención: ícono por tipo (filamento, pedido, cobro, mantenimiento, precio, insumo, copia) en el color de su grupo, el texto de siempre con lo importante en negrita y su botón de siempre. Dentro de un grupo se conserva el orden en que llegan. Si un grupo pasa de 5, se muestran 5 y “Ver las N restantes” agrega 50 más en el mismo lugar hasta acabar; abrir un grupo regresa los otros a 5 y la pantalla nunca pinta más de 200 atenciones (si un grupo pasa de ese número, se quedan a la vista las últimas que se abrieron). Sin atenciones: “Todo en orden”.
 
 **Acciones**
 | Botón | Caso de uso / efecto | Lleva a |

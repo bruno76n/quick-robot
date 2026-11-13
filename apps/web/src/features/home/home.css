@@ -1,0 +1,32 @@
+/* Inicio (ronda-2 §5; mockup reference/ronda-2/inicio.html). Colors only from tokens.css. */
+.home-cols { display: flex; flex-wrap: wrap; gap: 32px 40px; align-items: flex-start; margin-bottom: 32px; }
+.home-cols > .atn, .home-cols > .home-main { flex: 2 1 520px; min-width: 0; }
+.home-side { flex: 1 1 320px; max-width: 440px; min-width: 0; display: grid; gap: 28px; align-content: start; }
+@media (max-width: 1000px) { .home-side { max-width: none; } }
+
+.atn-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.atn-f { display: flex; flex-wrap: wrap; gap: 8px; }
+.atn-chip { --tb: var(--panel-2); --ti: var(--ink); border: 0; border-radius: 99px; padding: 6px 14px; font: inherit; font-size: 14px; font-weight: 500; background: var(--tb); color: var(--ti); cursor: pointer; }
+.atn-chip .num { font-weight: 500; opacity: .85; }
+.atn-chip.s-urgent { --tb: var(--red-soft); --ti: var(--red-ink); }
+.atn-chip.s-soon { --tb: var(--amber-soft); --ti: var(--amber-ink); }
+.atn-chip[aria-pressed="true"] { --tb: var(--accent); --ti: var(--accent-ink); font-weight: 600; }
+
+.atn-g { --dot: var(--ink-2); --ib: var(--panel-2); --ii: var(--ink-2); }
+.atn-g.s-urgent { --dot: var(--red); --ib: var(--red-soft); --ii: var(--red-ink); }
+.atn-g.s-soon { --dot: var(--amber); --ib: var(--amber-soft); --ii: var(--amber-ink); }
+.atn-g + .atn-g .atn-gh { padding-top: 22px; }
+.atn-gh { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; padding: 4px 4px 8px; }
+.atn-gh .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); align-self: center; }
+.atn-gh > span:last-child { font-size: 13px; color: var(--ink-2); }
+.atn-g ul { list-style: none; margin: 0; padding: 0; }
+.atn-g li { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 4px; border-bottom: 1px solid var(--line); font-size: 14.5px; }
+.atn-g .ai { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--ib); color: var(--ii); }
+.atn-g .at { flex: 1 1 260px; min-width: 0; line-height: 1.35; }
+.atn-g .at b { font-weight: 600; }
+.atn-g a.btn { flex: none; white-space: nowrap; text-decoration: none; }
+.atn-more { display: inline-block; margin: 10px 4px 0; background: none; border: 0; padding: 4px 0; font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+@media (max-width: 700px) {
+  .atn-g li { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+  .atn-g a.btn { grid-column: 2; justify-self: start; }
+}

@@ -1,59 +1,23 @@
 // Inicio (docs/06 §2; mockup vInicio): the brief of the last 30 days, top pieces, filament, attentions and printers.
 import type { FilamentListItem } from '@app/contract';
 import { useQuery } from '@tanstack/react-query';
-import type { CSSProperties, ReactNode } from 'react';
+import type { CSSProperties } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
 import { Icon } from '../../components/Icon';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { api } from '../../lib/api';
-import { centsTotal, date, grams, money, number1, queueDuration } from '../../lib/format';
+import { centsTotal, grams, number1, queueDuration } from '../../lib/format';
 import { go } from '../../lib/nav';
 import { keys, usePrinters } from '../../lib/queries';
 import { Piece3d, shapeOf } from '../products/Piece3d';
-import { useHome, useReport, type Attention } from '../reports/api';
+import { useHome, useReport } from '../reports/api';
 import { Brief } from '../reports/Brief';
-import { allBold, rt } from '../reports/text';
+import { Attentions } from './Attentions';
+import './home.css';
 
 const L = es.screens.home;
-const A = 'screens.home.att.';
-
-/** Text, button and destination of each attention (server kinds: reports.ts › home). */
-export function attentionView(a: Attention): { text: ReactNode; button: string; href: string } {
-  const p = a.params as Record<string, string | number | null>;
-  const id = a.target.id ?? '';
-  switch (a.kind) {
-    case 'order_filament_short':
-      return { text: rt(`${A}order_filament_short`, { number: `#${p.number}`, customer: p.customer ?? '', missing: grams(Number(p.missingGrams)), filament: p.filament ?? '', available: grams(Number(p.availableGrams ?? 0)) }, allBold('number', 'customer', 'missing')), button: L.btn.addSpool, href: p.filamentId ? `/filamentos?f=${p.filamentId}` : `/pedidos/pedido?id=${id}` };
-    case 'filament_low':
-      return { text: rt(`${A}filament_low`, { name: p.name ?? '', grams: grams(Number(p.grams)) }, allBold('name')), button: L.btn.seeFilament, href: `/filamentos?f=${id}` };
-    case 'order_due': {
-      const d = Number(p.days);
-      const when = d < 0 ? t(`${A}dueLate`, { days: -d }) : d === 0 ? L.att.dueToday : d === 1 ? L.att.dueTomorrow : t(`${A}dueIn`, { days: d });
-      return { text: rt(`${A}order_due`, { number: `#${p.number}`, customer: p.customer ?? '', when, ready: p.status === 'ready' ? L.att.readySuffix : '' }, allBold('number', 'customer')), button: L.btn.openOrder, href: `/pedidos/pedido?id=${id}` };
-    }
-    case 'sale_owed':
-      return { text: rt(p.customer ? `${A}sale_owed_to` : `${A}sale_owed`, { date: p.on ? date(String(p.on)) : '', customer: p.customer ?? '', owed: centsTotal(Number(p.owedCents)) }, allBold('date', 'customer', 'owed')), button: L.btn.addPayment, href: `/ventas?v=${id}` };
-    case 'price_below_floor': {
-      const col = a.target.type === 'collection';
-      return { text: rt(col ? `${A}price_below_floor_collection` : `${A}price_below_floor_product`, { name: p.name ?? '', price: centsTotal(Number(p.priceCents)), cost: money(Number(p.costCents ?? p.floorCents) / 100) }, allBold('name')), button: col ? L.btn.seeCollection : L.btn.seeProducts, href: col ? `/productos/coleccion?id=${id}` : `/productos/pieza?id=${id}` };
-    }
-    case 'maintenance': {
-      const h = Number(p.remainingHours);
-      const status = h <= 0 ? t(`${A}maintenancePast`, { hours: number1(-h) }) : t(`${A}maintenanceLeft`, { hours: number1(h) });
-      return { text: rt(`${A}maintenance`, { printer: p.printer ?? '', task: String(p.task ?? '').toLocaleLowerCase('es'), status }, allBold('printer')), button: L.btn.seePrinters, href: '/impresoras' };
-    }
-    case 'supply_low': {
-      const stock = Number(p.stock);
-      const state = stock <= 0 ? L.att.supplyOut : t(`${A}supplyLeft`, { qty: number1(stock), unit: p.unit || es.screens.supplies.pza });
-      return { text: rt(`${A}supply_low`, { name: p.name ?? '', state }, allBold('name')), button: L.btn.seeSupply, href: `/insumos?i=${id}` };
-    }
-    case 'backup':
-    default:
-      return { text: p.days === null || p.days === undefined ? L.att.backupNever : rt(`${A}backupDays`, { days: Number(p.days) }, allBold('days')), button: L.btn.backup, href: '/ajustes' };
-  }
-}
 
 export function HomePage() {
   const home = useHome().data;
@@ -90,15 +54,8 @@ export function HomePage() {
           {fils?.length ? <Spools fils={fils} /> : null}
         </section>
         <section>
-          <h2>{L.attention}</h2>
-          {home && !att.length ? <div className="allok"><span className="allok-ic"><Icon name="check" size={26} /></span><div><b>{L.allOk}</b><p>{L.allOkText}</p></div></div> : null}
-          {att.length ? (
-            <ul className="att2" data-testid="attentions">{att.slice(0, 6).map((a, i) => {
-              const v = attentionView(a);
-              return <li key={i}><span className="ai"><Icon name="warn" size={16} /></span><span className="at">{v.text}</span><a className="btn sm" href={v.href} onClick={(e) => { e.preventDefault(); go(v.href); }}>{v.button}</a></li>;
-            })}</ul>
-          ) : null}
-          {att.length > 6 ? <p className="more">{t('screens.home.more', { count: att.length - 6 })}</p> : null}
+          {home && !att.length ? <><h2>{L.attention.title}</h2><div className="allok"><span className="allok-ic"><Icon name="check" size={26} /></span><div><b>{L.allOk}</b><p>{L.allOkText}</p></div></div></> : null}
+          {att.length ? <Attentions items={att} /> : null}
           <h2 className="gap">{L.printers}</h2>
           {printers && !printers.length ? <div className="empty-card"><p>{L.printersEmpty}</p><Button onClick={() => go('/impresoras')}>{L.goPrinters}</Button></div> : null}
           {printers?.length ? (

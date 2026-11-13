@@ -14,8 +14,9 @@ test('Inicio shows the brief and the attentions; each button goes to its element
   await expect(page.getByRole('heading', { name: 'Inicio' })).toBeVisible();
   await expect(page.getByTestId('brief')).toContainText('Se vendieron $6,270 en 13 ventas en los últimos 30 días.');
   const att = page.getByTestId('attentions');
-  await expect(att.locator('li')).toHaveCount(6);
-  await expect(page.getByText('Y 3 avisos más.')).toBeVisible();
+  // Ronda 2: every attention is shown, grouped by priority (the "Y 3 avisos más." line is gone).
+  await expect(att.locator('li')).toHaveCount(9);
+  await expect(page.getByText(/avisos? más/)).toHaveCount(0);
   await expect(att).toContainText('Pedido #5 de Tacos El Güero: faltan 535 g de PLA Negro (disponible 410 g).');
 
   const cases: [string, RegExp][] = [
