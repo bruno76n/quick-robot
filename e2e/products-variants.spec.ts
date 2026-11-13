@@ -54,3 +54,28 @@ for (const width of [1440, 390]) {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
   });
 }
+
+for (const width of [1440, 390]) {
+  test(`lista at ${width}: the arrow unfolds the variant rows and "+ Agregar variante de …"`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(`${server.url}/productos?vista=lista`);
+    const salto = page.getByTestId('family-row').filter({ hasText: 'Spider-Man · salto' });
+    await expect(page.getByTestId('family-row').filter({ hasText: 'Doctor Doom' }).getByTestId('variants-arrow')).toHaveCount(0);
+    await expect(salto).toContainText('1 variante');
+    const arrow = salto.getByTestId('variants-arrow');
+    await expect(arrow).toHaveAttribute('aria-label', 'Ver variantes');
+    await expect(page.getByTestId('variant-list-row')).toHaveCount(0);
+    await arrow.click();
+    await expect(arrow).toHaveAttribute('aria-expanded', 'true');
+    await expect(arrow).toHaveAttribute('aria-label', 'Ocultar variantes');
+    const rows = page.getByTestId('variant-list-row');
+    await expect(rows).toHaveCount(1);
+    await expect(rows.first()).toContainText('silk morado');
+    await expect(rows.first()).not.toContainText('Original');
+    await expect(page.getByRole('button', { name: 'Agregar variante de Spider-Man · salto' })).toBeVisible();
+    if (width === 390) expect(await page.locator('table.fam thead').isVisible()).toBe(false);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+    await arrow.click();
+    await expect(rows).toHaveCount(0);
+  });
+}
