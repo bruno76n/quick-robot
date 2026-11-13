@@ -80,7 +80,7 @@ function CollectionForm({ id, initial, products, minMarginPct }: { id: string | 
               const q = partQty(num(p.qty, 1));
               return (
                 <div className="frow cparte" key={i}>
-                  <label className="fld"><span className="sr">{L.piece}</span><select value={p.productId} onChange={(e) => part(i, { productId: e.target.value })}><option value="">{L.choosePiece}</option>{products.map((y) => <option key={y.id} value={y.id}>{y.name}</option>)}</select></label>
+                  <label className="fld"><span className="sr">{L.piece}</span><select value={p.productId} onChange={(e) => part(i, { productId: e.target.value })}><option value="">{L.choosePiece}</option>{products.map((y) => <option key={y.id} value={y.id}>{y.displayName}</option>)}</select></label>
                   <label className="fld"><span className="sr">{L.qtyInSet}</span><UnitInput unit="×" inputMode="numeric" value={p.qty} onChange={(e) => part(i, { qty: e.target.value })} aria-label={L.qtyInSet} /></label>
                   <span className="fcost num">{x ? moneyTotal((x.listCents / 100) * q) : ''}</span>
                   <button type="button" className="btn ghost icon" onClick={() => set({ parts: d.parts.filter((_, k) => k !== i) })} aria-label={L.removePiece} disabled={d.parts.length < 2}><Icon name="x" size={16} /></button>
@@ -113,7 +113,7 @@ function CollectionForm({ id, initial, products, minMarginPct }: { id: string | 
           <p className={`status ${status[0]}`}><Icon name={status[0] === 'good' ? 'check' : 'warn'} size={16} /><span>{status[1]}</span></p>
           {rows.length ? <p className="note">{t('screens.collection.looseSum', { amount: moneyTotal(loose) })} {auto ? L.autoPrice : dif > 0.5 ? t('screens.collection.discount', { amount: moneyTotal(dif), pct: pct((dif / loose) * 100) }) : dif < -0.5 ? t('screens.collection.surcharge', { amount: moneyTotal(-dif) }) : L.sameButSet}</p> : null}
           <table className="tbl sm legend"><tbody>
-            {rows.map((r, i) => <tr key={i}><td><span className="lk" style={{ '--s': 'var(--c-m)' } as CSSProperties} />{r.qty > 1 ? `${r.qty} × ` : ''}{r.x.name}</td><td className="r num">{money((r.qty * r.x.costCents) / 100)}</td><td className="r num mut">{price > 0 ? pct((((r.qty * r.x.costCents) / 100) / price) * 100) : ''}</td></tr>)}
+            {rows.map((r, i) => <tr key={i}><td><span className="lk" style={{ '--s': 'var(--c-m)' } as CSSProperties} />{r.qty > 1 ? `${r.qty} × ` : ''}{r.x.displayName}</td><td className="r num">{money((r.qty * r.x.costCents) / 100)}</td><td className="r num mut">{price > 0 ? pct((((r.qty * r.x.costCents) / 100) / price) * 100) : ''}</td></tr>)}
             {extras > 0 ? <tr><td><span className="lk" style={{ '--s': 'var(--c-t)' } as CSSProperties} />{L.box}</td><td className="r num">{money(extras)}</td><td className="r num mut">{price > 0 ? pct((extras / price) * 100) : ''}</td></tr> : null}
             <tr className="tot"><td>{L.setCost}</td><td className="r num">{money(total)}</td><td /></tr>
             {price > 0 && rows.length ? <tr className="gan"><td><span className="lk gain" />{es.screens.calculator.gain}</td><td className="r num">{money(gain)}</td><td className="r num mut">{pct((gain / price) * 100)}</td></tr> : null}
