@@ -236,6 +236,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 | Fichas / Lista | Preferencia de vista de Existencias (`view.stock`) | — |
 | Seleccionar pieza (o un miembro de una familia) | Abre el cajón | — |
 | Flecha de una familia | Despliega o cierra sus variantes | — |
+| Vender (en la fila de una pieza simple o de una variante con libres; en Fichas, en la ficha de una pieza simple con libres) | Lleva a Armar venta con esa pieza, como “Vender” del cajón (ronda 2 · D4). Sin libres no aparece: el cajón ofrece “Hacer pedido”. La fila de una familia solo despliega | Armar venta |
 
 ---
 

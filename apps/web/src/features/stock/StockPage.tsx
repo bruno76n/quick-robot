@@ -162,7 +162,7 @@ function StockList({ rows, selected, needle, sort, onSort, onOpen }: {
                 <div className="sk-name"><b>{r.name}</b>{sub ? <small>{sub}</small> : null}</div>
               </div>
               <Cells x={r} />
-              <span className="sk-act">{family ? null : <OpenBtn name={r.name} onClick={() => onOpen(r.productId)} />}</span>
+              <span className="sk-act">{family ? null : <>{r.free > 0 ? <SellBtn id={r.productId} name={r.name} /> : null}<OpenBtn name={r.name} onClick={() => onOpen(r.productId)} /></>}</span>
             </div>
             {open ? (
               <div className="sk-members">
@@ -173,7 +173,7 @@ function StockList({ rows, selected, needle, sort, onSort, onOpen }: {
                       <div className="sk-name"><b>{memberName(m)}</b>{m.isOriginal ? <> <span className="sk-orig">{L.original}</span></> : null}</div>
                     </div>
                     <Cells x={m} />
-                    <span className="sk-act"><OpenBtn name={m.displayName} onClick={() => onOpen(m.productId)} /></span>
+                    <span className="sk-act">{m.free > 0 ? <SellBtn id={m.productId} name={m.displayName} /> : null}<OpenBtn name={m.displayName} onClick={() => onOpen(m.productId)} /></span>
                   </div>
                 ))}
               </div>
@@ -201,6 +201,11 @@ const OpenBtn = ({ name, onClick }: { name: string; onClick: () => void }) => (
   <button type="button" className="sk-open" aria-label={t('screens.stock.open', { name })} onClick={(e) => { e.stopPropagation(); onClick(); }}><Chevron /></button>
 );
 
+/** "Vender" on the row of a piece with free units (ronda-2 §12, D4): the same sale the drawer opens. */
+const SellBtn = ({ id, name }: { id: string; name: string }) => (
+  <Button size="sm" className="sk-sell" aria-label={t('screens.stock.sellOne', { name })} onClick={(e) => { e.stopPropagation(); go(`/armar?modo=venta&pieza=${id}`); }}>{L.sell}</Button>
+);
+
 /** Fichas: one card per family; a big free number, a thin bar of free against reserved, and free per variant. */
 function StockCards({ rows, selected, onOpen }: { rows: StockRow[]; selected: string | null; onOpen: (id: string) => void }) {
   return (
@@ -224,7 +229,7 @@ function StockCards({ rows, selected, onOpen }: { rows: StockRow[]; selected: st
               {r.free > 0 ? <span className="f" style={{ flex: `${r.free} 1 0%` }} /> : null}
               {r.reserved > 0 ? <span className="a" style={{ flex: `${r.reserved} 1 0%` }} /> : null}
             </div>
-            <div className="sk-foot"><span>{t('screens.stock.card.reserved', { count: r.reserved })}</span><b>{centsTotal(r.listCents)}</b></div>
+            <div className="sk-foot"><span>{t('screens.stock.card.reserved', { count: r.reserved })}</span><span className="sk-foot-r">{!r.members.length && r.free > 0 ? <SellBtn id={r.productId} name={r.name} /> : null}<b>{centsTotal(r.listCents)}</b></span></div>
             {r.members.length ? (
               <div className="sk-vars">
                 <div>{t('screens.stock.card.variantsFree', { count: r.members.length })}</div>

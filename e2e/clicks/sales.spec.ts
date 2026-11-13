@@ -12,11 +12,11 @@ test.afterAll(async () => { await server.stop(); });
 const status = (page: Page) => page.locator('.toast[role=status]');
 const stockRow = (page: Page, name: string) => page.getByTestId('stock-row').filter({ has: page.getByText(name, { exact: true }) });
 
-test('vender una pieza de existencias: row → drawer → Vender → Registrar venta', async ({ page }) => {
+test('vender una pieza de existencias: Vender on the row → Registrar venta', async ({ page }) => {
   const c = await countedPage(page);
   await c.start(`${server.url}/existencias`);
-  await stockRow(page, 'Llavero con nombre').click();
-  await page.getByRole('complementary', { name: 'Detalle' }).getByRole('button', { name: 'Vender', exact: true }).click();
+  await stockRow(page, 'Llavero con nombre').getByRole('button', { name: 'Vender Llavero con nombre' }).click();
+  await expect(page).toHaveURL(/\/armar\?modo=venta&pieza=/);
   await expect(page.getByTestId('builder-line')).toHaveCount(1);
   await page.locator('.res-act').getByRole('button', { name: 'Registrar venta' }).click();
   await expect(status(page)).toHaveText('Venta registrada. 1 pieza salió de Existencias.');

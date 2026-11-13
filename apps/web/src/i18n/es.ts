@@ -613,7 +613,7 @@ export const es = {
       sortFewFirst: 'Libres: menos primero', sortMostFirst: 'Libres: más primero', noMatch: 'No hay piezas con ese filtro o búsqueda.', more: 'Ver más',
       variantsSub: '{count} {count|variante|variantes}',
       drawerKind: 'Existencias', priceLine: 'Precio de lista {price} · Costo {cost}', total: 'Total', free: 'Libres', reserved: 'Apartadas', inOrders: 'en pedidos aceptados',
-      noOrders: 'sin pedidos', listValue: 'Valor de lista', costValue: 'costo {amount}', adjust: 'Ajustar', sell: 'Vender', makeOrder: 'Hacer pedido',
+      noOrders: 'sin pedidos', listValue: 'Valor de lista', costValue: 'costo {amount}', adjust: 'Ajustar', sell: 'Vender', sellOne: 'Vender {name}', makeOrder: 'Hacer pedido',
       reservedFor: 'Apartadas para pedidos', orderLine: 'Pedido #{folio} · {customer}', pieces: '{count} {count|pieza|piezas}',
       reservedHint: 'Siguen en Existencias, pero están reservadas. Salen al entregar el pedido.', movements: 'Movimientos',
       movementsHint: 'Las existencias se calculan sumando cada movimiento; no se editan directamente.', colDate: 'Fecha', colMovement: 'Movimiento', colPieces: 'Piezas', colNote: 'Nota',

@@ -14,7 +14,7 @@ export const BUDGET = {
   quote: { today: 3, fieldsClicked: 0 },
   newCollection: { today: 6, fieldsClicked: 0 },
   // Ventas
-  sellFromStock: { today: 3, fieldsClicked: 0 },
+  sellFromStock: { today: 2, fieldsClicked: 0 },
   sellFromProducts: { today: 2, fieldsClicked: 0 },
   saleSeveralItems: { today: 7, fieldsClicked: 1 },
   salePayment: { today: 3, fieldsClicked: 0 },
