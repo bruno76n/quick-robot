@@ -8,7 +8,6 @@ import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
 import { Drawer } from '../../components/Drawer';
 import { Icon } from '../../components/Icon';
-import { Mascot } from '../../components/Mascot';
 import { Pill, type Tone } from '../../components/Pill';
 import { Table } from '../../components/Table';
 import { es } from '../../i18n/es';
@@ -49,7 +48,7 @@ export function SuppliesPage() {
             </div>
           );
         })}
-        {data && !items.length ? <div className="empty-card"><Mascot size={64} /><p>{L.empty}</p><Button variant="primary" icon="plus" onClick={() => setDlg({ kind: 'new' })}>{L.emptyButton}</Button></div> : null}
+        {data && !items.length ? <div className="empty-card"><p>{L.empty}</p><Button variant="primary" icon="plus" onClick={() => setDlg({ kind: 'new' })}>{L.emptyButton}</Button></div> : null}
       </div>
       <SupplyDrawer id={search.i ?? null} onClose={() => select(null)} open={(kind, supply) => setDlg({ kind, supply })} />
       {dlg?.kind === 'new' || dlg?.kind === 'edit' ? <SupplyDialog supply={dlg.kind === 'edit' ? dlg.supply : null} onClose={() => setDlg(null)} onSaved={(id) => { setDlg(null); select(id); }} onDeleted={() => { setDlg(null); select(null); }} /> : null}

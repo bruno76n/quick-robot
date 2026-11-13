@@ -5,7 +5,6 @@ import { useState, type CSSProperties } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
 import { Drawer } from '../../components/Drawer';
-import { Mascot } from '../../components/Mascot';
 import { Pill, type Tone } from '../../components/Pill';
 import { Table } from '../../components/Table';
 import { toast } from '../../components/Toast';
@@ -76,7 +75,7 @@ export function StockPage() {
           </div>
         ))}
         {data && !items.length ? (
-          <div className="empty-card"><Mascot size={64} /><p>{L.empty}</p><Button variant="primary" icon="plus" onClick={() => setDlg({ kind: 'print' })}>{L.register}</Button> <Button onClick={enable}>{L.enableOne}</Button></div>
+          <div className="empty-card"><p>{L.empty}</p><Button variant="primary" icon="plus" onClick={() => setDlg({ kind: 'print' })}>{L.register}</Button> <Button onClick={enable}>{L.enableOne}</Button></div>
         ) : null}
       </div>
       <StockDrawer id={search.p ?? null} onClose={() => select(null)} open={setDlg} />

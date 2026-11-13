@@ -9,7 +9,6 @@ import { Drawer } from './Drawer';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Field } from './Field';
 import { Icon } from './Icon';
-import { Mascot } from './Mascot';
 import { Monogram } from './Monogram';
 import { Pill, Swatch } from './Pill';
 import { Segmented } from './Segmented';
@@ -43,12 +42,12 @@ describe('components', () => {
     expect(screen.queryByText('ayuda')).toBeNull();
   });
 
-  it('Pill, Swatch, Icon, Mascot, Table and Banner render', () => {
-    render(<><Pill tone="bad">Agotado</Pill><Swatch hex="#ff0000" large /><Icon name="spool" /><Icon name="nope" /><Mascot size={60} /><Table small head={<th>A</th>}><tr><td>1</td></tr></Table><Banner action={<button type="button">r</button>}>x</Banner></>);
+  it('Pill, Swatch, Icon, Table and Banner render', () => {
+    render(<><Pill tone="bad">Agotado</Pill><Swatch hex="#ff0000" large /><Icon name="spool" /><Icon name="nope" /><Table small head={<th>A</th>}><tr><td>1</td></tr></Table><Banner action={<button type="button">r</button>}>x</Banner></>);
     expect(screen.getByText('Agotado').className).toBe('chip bad');
     expect(document.querySelector('.sw.lg')).toBeTruthy();
     expect(document.querySelectorAll('svg.ic')).toHaveLength(2);
-    expect(document.querySelector('img.mascot')?.getAttribute('height')).toBe('53');
+    expect(document.querySelector('img')).toBeNull();
     expect(document.querySelector('table.tbl.sm')).toBeTruthy();
     expect(screen.getByRole('alert').textContent).toContain('x');
   });

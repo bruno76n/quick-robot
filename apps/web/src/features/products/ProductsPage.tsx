@@ -4,7 +4,6 @@ import { useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
-import { Mascot } from '../../components/Mascot';
 import { Pill, Swatch } from '../../components/Pill';
 import { toast } from '../../components/Toast';
 import { es } from '../../i18n/es';
@@ -59,7 +58,7 @@ export function ProductsPage() {
       </div>
       {isCol ? (
         <>
-          {view === 'lista' ? <CollectionTable items={shownC} total={collections.length} onNew={newCollection} /> : <div className="pt-grid">{shownC.map((c) => <CollectionTile key={c.id} c={c} />)}{!shownC.length ? <div className="empty-card"><Mascot size={64} /><p>{collections.length ? L.noCollectionMatch : L.emptyCollectionsTile}</p><Button variant="green" icon="plus" onClick={newCollection}>{L.createCollection}</Button></div> : null}</div>}
+          {view === 'lista' ? <CollectionTable items={shownC} total={collections.length} onNew={newCollection} /> : <div className="pt-grid">{shownC.map((c) => <CollectionTile key={c.id} c={c} />)}{!shownC.length ? <div className="empty-card"><p>{collections.length ? L.noCollectionMatch : L.emptyCollectionsTile}</p><Button variant="green" icon="plus" onClick={newCollection}>{L.createCollection}</Button></div> : null}</div>}
           <p className="foot-note">{L.collectionsFoot}</p>
         </>
       ) : (
@@ -67,7 +66,7 @@ export function ProductsPage() {
           <div className="tags" role="group" aria-label={L.filter}>
             {([['todo', L.all], ['tecnico', L.technical], ['variante', L.variants]] as const).map(([k, l]) => <button key={k} type="button" className={`tag${filter === k ? ' on' : ''}`} aria-pressed={filter === k} onClick={() => nav({ filtro: k })}>{l} {count(k)}</button>)}
           </div>
-          {view === 'lista' ? <ProductTable items={shownP} total={products.length} /> : <div className="pt-grid">{shownP.map((p) => <ProductTile key={p.id} p={p} />)}{!shownP.length ? <div className="empty-card"><Mascot size={64} /><p>{products.length ? L.noPieceMatchTile : L.emptyPiecesTile}</p><Button variant="green" icon="plus" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></div> : null}</div>}
+          {view === 'lista' ? <ProductTable items={shownP} total={products.length} /> : <div className="pt-grid">{shownP.map((p) => <ProductTile key={p.id} p={p} />)}{!shownP.length ? <div className="empty-card"><p>{products.length ? L.noPieceMatchTile : L.emptyPiecesTile}</p><Button variant="green" icon="plus" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></div> : null}</div>}
           <p className="foot-note">{L.piecesFoot}</p>
         </>
       )}
@@ -126,7 +125,7 @@ function ProductTable({ items, total }: { items: ProductListItem[]; total: numbe
             </tr>
           );
         })}
-        {!items.length ? <tr><td colSpan={9} className="empty-td"><Mascot size={48} /><p>{total ? L.noPieceMatch : L.emptyPieces}</p><Button variant="green" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></td></tr> : null}
+        {!items.length ? <tr><td colSpan={9} className="empty-td"><p>{total ? L.noPieceMatch : L.emptyPieces}</p><Button variant="green" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></td></tr> : null}
       </tbody></table></div>
   );
 }
@@ -175,7 +174,7 @@ function CollectionTable({ items, total, onNew }: { items: CollectionListItem[];
             </tr>
           );
         })}
-        {!items.length ? <tr><td colSpan={8} className="empty-td"><Mascot size={48} /><p>{total ? L.noCollectionMatch : L.emptyCollections}</p><Button variant="green" onClick={onNew}>{L.createCollection}</Button></td></tr> : null}
+        {!items.length ? <tr><td colSpan={8} className="empty-td"><p>{total ? L.noCollectionMatch : L.emptyCollections}</p><Button variant="green" onClick={onNew}>{L.createCollection}</Button></td></tr> : null}
       </tbody></table></div>
   );
 }

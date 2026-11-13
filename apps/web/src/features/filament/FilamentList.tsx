@@ -5,7 +5,6 @@ import { go } from '../../lib/nav';
 import { useState } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
-import { Mascot } from '../../components/Mascot';
 import { Pill, Swatch, type Tone } from '../../components/Pill';
 import { Table } from '../../components/Table';
 import { es } from '../../i18n/es';
@@ -38,7 +37,7 @@ export function FilamentList() {
       <Table className="fil-t" head={<><th>{L.colFilament}</th><th className="r">{L.colPerGram}</th><th>{L.colAvailable}</th><th /></>}>
         {isLoading ? <tr><td colSpan={4}><div className="skel" /></td></tr> : null}
         {!isLoading && !items.length ? (
-          <tr><td colSpan={4} className="empty-td"><Mascot size={48} /><p>{L.empty}</p><Button variant="primary" onClick={() => setDialog({})}>{L.emptyButton}</Button></td></tr>
+          <tr><td colSpan={4} className="empty-td"><p>{L.empty}</p><Button variant="primary" onClick={() => setDialog({})}>{L.emptyButton}</Button></td></tr>
         ) : null}
         {items.map((f) => (
           <tr key={f.id} className={`click${selected === f.id ? ' sel' : ''}`} tabIndex={0} onClick={() => select(f.id)} onKeyDown={(e) => { if (e.key === 'Enter') select(f.id); }} data-testid="filament-row">

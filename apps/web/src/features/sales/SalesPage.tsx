@@ -5,7 +5,6 @@ import { useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
-import { Mascot } from '../../components/Mascot';
 import { Pill } from '../../components/Pill';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
@@ -88,7 +87,7 @@ export function SalesPage() {
                 </tr>
               );
             })}
-            {data && !shown.length ? <tr><td colSpan={4} className="empty-td"><Mascot size={48} /><p>{L.empty}</p><Button variant="primary" onClick={newSale}>{L.registerFirst}</Button></td></tr> : null}
+            {data && !shown.length ? <tr><td colSpan={4} className="empty-td"><p>{L.empty}</p><Button variant="primary" onClick={newSale}>{L.registerFirst}</Button></td></tr> : null}
           </tbody>
         </table>
       </div>

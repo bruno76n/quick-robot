@@ -7,7 +7,6 @@ import { useQueries, useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Button } from '../../components/Button';
-import { Mascot } from '../../components/Mascot';
 import { toast } from '../../components/Toast';
 import { UnitInput } from '../../components/UnitInput';
 import { es } from '../../i18n/es';
@@ -179,7 +178,7 @@ function Builder({ search, edit }: { search: Search; edit: OrderForEdit | null }
                 <LineView key={`${r.line.kind}-${r.line.id}-${r.i}`} r={r} defs={defs} order={B.order} gPct={B.gPct} byProduct={byProduct}
                   onChange={(patch) => setLine(r.i, patch)} onRemove={() => set({ lines: B.lines.filter((_, k) => k !== r.i) })}
                   onSplit={() => { set({ lines: B.lines.flatMap((l, k) => (k === r.i ? splitSet(l, defs) : [l])) }); toast(es.toast['builder.split']); }} />
-              )) : <div className="ln-empty"><Mascot size={40} /><p>{L.emptyLines}</p></div>}
+              )) : <div className="ln-empty"><p>{L.emptyLines}</p></div>}
             </div>
           </fieldset>
           <div className="ed-mini b-bar" id="b-mini">

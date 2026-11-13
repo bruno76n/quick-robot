@@ -24,3 +24,5 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 .mono { flex: none; display: inline-grid; place-items: center; border-radius: 10px; background: var(--panel-2); color: var(--ink); font-family: var(--font-display); font-weight: 600; letter-spacing: -.02em; line-height: 1; }
 .topbar .mono { border-radius: 8px; }
 .ph-txt, .brand small.ph-txt { color: var(--ink-3); }
+/* "Todo en orden" on Inicio: a neutral check instead of the mascot (ronda-2 §2). */
+.allok-ic { flex: none; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; background: var(--bg); color: var(--green-ink); }

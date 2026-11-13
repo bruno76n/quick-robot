@@ -4,7 +4,6 @@ import { es } from '../i18n/es';
 import { t } from '../i18n/t';
 import { date } from '../lib/format';
 import type { DesktopBackup, DesktopFatal } from '../lib/platform';
-import mascot from '../styles/mascot.svg';
 import './fatal.css';
 
 type Kind = 'down' | 'migration' | 'data';
@@ -58,10 +57,6 @@ async function restore(run: () => Promise<boolean | null>, status: HTMLElement) 
 export async function render(root: HTMLElement, kind: Kind, api: DesktopFatal | undefined) {
   document.title = more.title;
   root.replaceChildren();
-  const img = el('img');
-  img.src = mascot;
-  img.alt = '';
-  root.append(img);
   const status = el('p', { className: 'note' });
   status.setAttribute('role', 'status');
   if (kind === 'down') {

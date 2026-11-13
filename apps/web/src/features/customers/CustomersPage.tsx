@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
-import { Mascot } from '../../components/Mascot';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { centsTotal } from '../../lib/format';
@@ -45,7 +44,7 @@ export function CustomersPage() {
                 <td className={`r num ${c.owedCents > 0 ? 'neg' : 'mut'}`}>{c.owedCents > 0 ? centsTotal(c.owedCents) : '—'}</td>
               </tr>
             ))}
-            {data && !list.length ? <tr><td colSpan={4} className="empty-td"><Mascot size={48} /><p>{L.empty}</p><Button variant="primary" onClick={() => setCreating(true)}>{L.newCustomer}</Button></td></tr> : null}
+            {data && !list.length ? <tr><td colSpan={4} className="empty-td"><p>{L.empty}</p><Button variant="primary" onClick={() => setCreating(true)}>{L.newCustomer}</Button></td></tr> : null}
           </tbody>
         </table>
       </div>

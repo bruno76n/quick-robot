@@ -5,7 +5,6 @@ import { Button } from '../../components/Button';
 import { ConfirmButton } from '../../components/ConfirmButton';
 import { Dialog } from '../../components/Dialog';
 import { Field } from '../../components/Field';
-import { Mascot } from '../../components/Mascot';
 import { toast } from '../../components/Toast';
 import { UnitInput } from '../../components/UnitInput';
 import { es } from '../../i18n/es';
@@ -43,7 +42,7 @@ export function ExpensesPage() {
     return (
       <>
         <PageHead title={L.title} sub={L.sub} actions={actions} />
-        <div className="empty-card"><Mascot size={64} /><p>{L.empty}</p><Button variant="primary" icon="plus" onClick={() => setDlg('new')}>{L.firstExpense}</Button></div>
+        <div className="empty-card"><p>{L.empty}</p><Button variant="primary" icon="plus" onClick={() => setDlg('new')}>{L.firstExpense}</Button></div>
         {dialog}
       </>
     );

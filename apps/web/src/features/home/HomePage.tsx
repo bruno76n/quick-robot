@@ -5,7 +5,6 @@ import type { CSSProperties, ReactNode } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
 import { Icon } from '../../components/Icon';
-import { Mascot } from '../../components/Mascot';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { api } from '../../lib/api';
@@ -66,7 +65,7 @@ export function HomePage() {
   const att = home?.attentions ?? [];
   return (
     <>
-      <PageHead title={<><Mascot size={44} /><span>{L.title}</span></>} actions={<>
+      <PageHead title={L.title} actions={<>
         <Button onClick={() => go('/armar?modo=pedido')}>{L.newOrder}</Button>
         <Button onClick={() => go('/armar?modo=venta')}>{L.newSale}</Button>
         <Button variant="green" icon="plus" onClick={() => go('/productos/pieza')}>{L.newPiece}</Button>
@@ -75,7 +74,7 @@ export function HomePage() {
       <div className="cols2 soft">
         <section>
           <h2>{L.top}</h2>
-          {R && !rank.length ? <div className="empty-card"><Mascot size={64} /><p>{L.topEmpty}</p><Button variant="green" onClick={() => go('/armar?modo=venta')}>{L.newSale}</Button></div> : null}
+          {R && !rank.length ? <div className="empty-card"><p>{L.topEmpty}</p><Button variant="green" onClick={() => go('/armar?modo=venta')}>{L.newSale}</Button></div> : null}
           {rank.length ? (
             <ul className="rk">{rank.map((r) => (
               <li key={r.productId}>
@@ -92,7 +91,7 @@ export function HomePage() {
         </section>
         <section>
           <h2>{L.attention}</h2>
-          {home && !att.length ? <div className="allok"><Mascot size={76} /><div><b>{L.allOk}</b><p>{L.allOkText}</p></div></div> : null}
+          {home && !att.length ? <div className="allok"><span className="allok-ic"><Icon name="check" size={26} /></span><div><b>{L.allOk}</b><p>{L.allOkText}</p></div></div> : null}
           {att.length ? (
             <ul className="att2" data-testid="attentions">{att.slice(0, 6).map((a, i) => {
               const v = attentionView(a);
@@ -101,7 +100,7 @@ export function HomePage() {
           ) : null}
           {att.length > 6 ? <p className="more">{t('screens.home.more', { count: att.length - 6 })}</p> : null}
           <h2 className="gap">{L.printers}</h2>
-          {printers && !printers.length ? <div className="empty-card"><Mascot size={64} /><p>{L.printersEmpty}</p><Button onClick={() => go('/impresoras')}>{L.goPrinters}</Button></div> : null}
+          {printers && !printers.length ? <div className="empty-card"><p>{L.printersEmpty}</p><Button onClick={() => go('/impresoras')}>{L.goPrinters}</Button></div> : null}
           {printers?.length ? (
             <div className="bays">{printers.map((p) => {
               const e = p.queue[0];
