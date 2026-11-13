@@ -28,7 +28,7 @@ describe('seeded phase 3 figures', () => {
     const s = stockPage.parse(await get('/api/v1/stock'));
     const names = new Map(golden.productos.map((p: { id: string; nombre: string }) => [p.id, p.nombre]));
     // Spider-Man · salto and its variant are one family row; each member keeps its own numbers.
-    const pieces = s.items.flatMap((r) => (r.members.length ? r.members : [r]));
+    const pieces: { name: string; physical: number; reserved: number; free: number }[] = s.items.flatMap((r): { name: string; physical: number; reserved: number; free: number }[] => (r.members.length ? r.members : [r]));
     for (const e of golden.existencias as { id: string; fisicas: number; apartadas: number; libres: number }[]) {
       const x = pieces.find((i) => i.name === names.get(e.id))!;
       expect([x.physical, x.reserved, x.free]).toEqual([e.fisicas, e.apartadas, e.libres]);
