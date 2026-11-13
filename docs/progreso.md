@@ -51,5 +51,5 @@ Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 2` · `t
 | Existencias (lista y fichas simplificadas) | B | igual a la maqueta de la ronda 2 | Móvil: filas en tarjeta; 820: fichas en 3 columnas (aceptado) |
 | Inicio (atención por prioridad, sin rollos) | B | igual a la maqueta de la ronda 2 | Fase B cerrada: `docs/mejoras/informe-ronda2-b.md`; sigue la fase C (medir clics) |
 | Medición de clics | C | terminada | `docs/mejoras/informe-ronda2-c.md`: 35 flujos medidos en `e2e/clicks/` (presupuestos en `e2e/clicks/budget.ts`), 16 “hacer” ordenados (D1 = P1 en filas nuevas, primero); sigue la fase D |
-| Mejoras de clics | D | no iniciada | “Agregar filamento” va primero; `docs/mejoras/informe-ronda2-d.md` |
+| Mejoras de clics | D | terminada | `docs/mejoras/informe-ronda2-d.md`: las 16 “hacer” de C hechas (D1–D9, T1), selector accesible `components/Picker.tsx`; 35 flujos: 131 → 117 clics y 25 → 16 campos (`e2e/clicks/budget.ts`). **Ronda 2 terminada** (resumen final en ese informe); lo siguiente es la fase 5 |
 
