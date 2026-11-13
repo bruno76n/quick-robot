@@ -1,5 +1,6 @@
 // The development seed reproduces the figures of the mockup's Filamentos screen.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { listProducts } from '@app/db';
 import { applyDevelopmentSeed } from '../src/dev-seed';
 import { makeHarness, type Harness } from './harness';
 
@@ -23,6 +24,13 @@ describe('development seed', () => {
     expect(by['TPU 95A Azul']).toMatchObject({ remainingGrams: 300, status: 'low' });
     expect(by['PLA Blanco']!.costPerGram.toFixed(2)).toBe('0.38');
     expect(by['TPU 95A Azul']!.costPerGram.toFixed(2)).toBe('0.86');
+  });
+
+  it('the variant of the mockup gets the label "silk morado" and points to its original (like migration 0007)', async () => {
+    const all = await listProducts(h.deps.db, h.A);
+    const v = all.find((p) => p.name === 'Spider-Man · salto (silk morado)')!;
+    expect([v.parentId, v.variantLabel]).toEqual([all.find((p) => p.name === 'Spider-Man · salto')!.id, 'silk morado']);
+    expect(all.filter((p) => p.parentId)).toHaveLength(1);
   });
 
   it('does nothing when there is data already', async () => {

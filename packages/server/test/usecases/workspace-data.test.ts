@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { applyDevelopmentSeed } from '../../src/dev-seed';
 import { ensureDailyBackup, exportData } from '../../src/usecases/workspace-data';
+import { listProducts } from '@app/db';
 import { B_TOKEN, makeHarness, type Harness } from '../harness';
 
 const MOCKUP = readFileSync(new URL('../../../../reference/mockup-backup-v7.json', import.meta.url));
@@ -68,6 +69,33 @@ describe('export and import of the own format', () => {
       const fd = new FormData(); fd.set('file', new Blob(['x'.repeat(5000)]), 'c.json'); fd.set('confirm', 'true');
       expect(((await (await big.app.request('http://127.0.0.1/api/v1/workspace/import', { method: 'POST', headers: { authorization: 'Bearer token-a' }, body: fd })).json()) as J).code).toBe('FILE_TOO_LARGE');
     } finally { await big.close(); }
+  });
+});
+
+describe('old backups with variants (informe-ronda2-a §4.3): normalized like migration 0007', () => {
+  it('no variant_label, a chain, an orphan and a hostile label → root, independent piece, labels; names unchanged', async () => {
+    const good = JSON.parse(JSON.stringify(await exportData(h.deps, h.A))) as J;
+    const rows = good.tables.product as J[];
+    const root = rows.find((p) => p.name === 'Spider-Man · salto')!;
+    const silk = rows.find((p) => p.name === 'Spider-Man · salto (silk morado)')!;
+    const id = (n: number) => `0190ffff-0000-7000-8000-${n.toString(16).padStart(12, '0')}`;
+    const copy = (over: J) => ({ ...root, ...over });
+    rows.push(
+      copy({ id: id(1), name: 'Spider-Man · salto (silk morado) (variante)', parentId: silk.id }), // chain → root
+      copy({ id: id(2), name: 'Maceta borrada', parentId: null, deletedAt: '2026-10-01T00:00:00.000Z' }),
+      copy({ id: id(3), name: 'Maceta borrada (variante)', parentId: id(2) }), // orphan → independent
+      copy({ id: id(4), name: 'Spider-Man · salto · dorado', parentId: root.id, variantLabel: ` ${'<script>'.repeat(20)} ` }), // too long → cut to 60
+    );
+    for (const p of rows) if (p.id !== id(4)) delete p.variantLabel;
+    const r = await upload(JSON.stringify(good));
+    expect(r.status).toBe(200);
+    const all = await listProducts(h.deps.db, h.B, { withDeleted: true });
+    const by = (n: string) => all.find((p) => p.name === n)!;
+    expect([by('Spider-Man · salto (silk morado)').parentId, by('Spider-Man · salto (silk morado)').variantLabel]).toEqual([by('Spider-Man · salto').id, 'silk morado']);
+    expect([by('Spider-Man · salto (silk morado) (variante)').parentId, by('Spider-Man · salto (silk morado) (variante)').variantLabel]).toEqual([by('Spider-Man · salto').id, 'silk morado']);
+    expect([by('Maceta borrada (variante)').parentId, by('Maceta borrada (variante)').variantLabel]).toEqual([null, null]);
+    expect(by('Spider-Man · salto · dorado').variantLabel).toBe('<script>'.repeat(20).slice(0, 60));
+    expect(all.map((p) => p.name).sort()).toEqual(rows.map((p) => p.name).sort());
   });
 });
 

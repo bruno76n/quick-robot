@@ -13,6 +13,7 @@ import { saveCollection, saveProduct } from './usecases/products';
 import { addChannel, ensureWorkspaceDefaults, removeChannel, updateChannel, updateSettings } from './usecases/settings';
 import { createSupplier } from './usecases/suppliers';
 import { createSupply } from './usecases/supplies';
+import { normalizeVariants, type LegacyPiece } from './usecases/variants';
 
 // eslint-disable-next-line max-lines-per-function
 export async function applyDevelopmentSeed(deps: Deps, ctx: Ctx, path?: string): Promise<boolean> {
@@ -90,7 +91,7 @@ export async function applyMockupBackup(deps: Deps, ctx: Ctx, b: MockupBackup, h
     });
     productIds.set(p.id, saved.id);
   }
-  await setParents(deps, ctx, b.productos.filter((p) => p.padre).map((p) => [productIds.get(p.id)!, productIds.get(p.padre!)!] as const));
+  await setParents(deps, ctx, b.productos.filter((p) => productIds.has(p.id)).map((p) => ({ id: productIds.get(p.id)!, name: p.nombre, parentId: p.padre ? productIds.get(p.padre) ?? null : null })));
   for (const c of b.colecciones) {
     await saveCollection(deps, ctx, { name: c.nombre, tags: c.tags, parts: c.partes.filter((x) => productIds.has(x.prod)).map((x) => ({ productId: productIds.get(x.prod)!, qty: x.cant })), extrasCents: toCents(c.extras), priceCents: toCents(c.precio), note: c.nota });
   }
@@ -112,6 +113,10 @@ export async function applyMockupBackup(deps: Deps, ctx: Ctx, b: MockupBackup, h
 
 export interface MockupHooks { image?: (dataUrl: string, kind: 'product_photo' | 'customer_logo') => Promise<string | null>; notes?: string[] }
 
-async function setParents(deps: Deps, ctx: Ctx, pairs: readonly (readonly [string, string])[]) {
-  await transaction(deps.db, async (tx) => { for (const [id, parentId] of pairs) await updateProduct(tx, ctx, id, { parentId }); });
+/** The mockup's "padre" may chain variants: one level to the root, with a label from the name (like migration 0007). */
+async function setParents(deps: Deps, ctx: Ctx, pieces: readonly LegacyPiece[]) {
+  const fixed = normalizeVariants(pieces);
+  await transaction(deps.db, async (tx) => {
+    for (const [id, v] of fixed) if (v.parentId) await updateProduct(tx, ctx, id, v);
+  });
 }
