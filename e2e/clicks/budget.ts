@@ -38,7 +38,7 @@ export const BUDGET = {
   filamentMovement: { today: 5, fieldsClicked: 1 },
   newSupply: { today: 4, fieldsClicked: 2 },
   supplyPurchase: { today: 3, fieldsClicked: 1 },
-  supplyPurchaseFromPurchases: { today: 3, fieldsClicked: 1 },
+  supplyPurchaseFromPurchases: { today: 2, fieldsClicked: 1 },
   supplyUse: { today: 3, fieldsClicked: 0 },
   // Clientes, Gastos, Impresoras
   newCustomer: { today: 4, fieldsClicked: 1 },

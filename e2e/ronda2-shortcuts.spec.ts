@@ -72,3 +72,17 @@ test('D7: "Registrar pago" under Saldo from any tab of an active order that owes
   await dlg.getByRole('button', { name: 'Cancelar' }).click();
   await expect(page.getByRole('tab', { name: 'Piezas', selected: true })).toBeVisible();
 });
+
+test('D9: Cancelar of a purchase opened from Compras leaves the drawer of the supply open, and does not reopen', async ({ page }) => {
+  await page.goto(`${server.url}/compras`);
+  await page.getByTestId('purchase-line').filter({ hasText: 'Caja de regalo' }).getByRole('button', { name: 'Registrar compra' }).click();
+  const dlg = page.getByRole('dialog');
+  await expect(dlg.locator('input[name=n]')).toBeFocused();
+  await dlg.getByRole('button', { name: 'Cancelar' }).click();
+  await expect(page).toHaveURL(/\/insumos\?i=[^&]+$/);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+  const drawer = page.getByRole('complementary', { name: 'Detalle' });
+  await expect(drawer.getByRole('heading', { name: 'Caja de regalo' })).toBeVisible();
+  await drawer.getByRole('button', { name: 'Registrar compra' }).click(); // the drawer's own button still works
+  await expect(page.getByRole('dialog')).toContainText('Caja de regalo');
+});

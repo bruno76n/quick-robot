@@ -248,6 +248,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 | Botón | Caso de uso |
 |---|---|
 | Copiar lista | Texto para mandar por mensaje (por proveedor) |
+| Registrar compra (en una línea) | De un **insumo**: abre Insumos con su cajón y el diálogo de la compra **ya abierto** (`/insumos?i=<id>&compra=1`); al guardar o cancelar queda el cajón (ronda 2 · D9). De un **filamento**: abre su cajón en Filamentos |
 | Nuevo / Editar proveedor | `createSupplier` / `updateSupplier` |
 | Eliminar proveedor | `deleteSupplier` |
 

@@ -35,7 +35,7 @@ const route = <P extends string>(path: P, component: () => React.ReactNode, vali
 
 const BUILT: Record<string, AnyRoute> = {
   '/filamentos': route('/filamentos', FilamentList, idSearch('f')),
-  '/insumos': route('/insumos', SuppliesPage, idSearch('i')),
+  '/insumos': route('/insumos', SuppliesPage, (s) => ({ ...idSearch('i')(s), ...flag('compra')(s) })),
   '/impresoras': route('/impresoras', PrintersPage),
   '/ajustes': route('/ajustes', SettingsPage),
   '/inicio': route('/inicio', HomePage),

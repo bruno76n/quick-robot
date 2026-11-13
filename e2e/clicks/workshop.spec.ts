@@ -137,12 +137,14 @@ test('registrar compra de un insumo (Insumos: card → drawer → Registrar comp
   await c.expectBudget(BUDGET.supplyPurchase);
 });
 
-test('registrar compra from Compras (the list sends to Insumos)', async ({ page }) => {
+test('registrar compra from Compras (the purchase opens directly, its drawer behind)', async ({ page }) => {
   const c = await countedPage(page);
   await c.start(`${server.url}/compras`);
   await page.getByTestId('purchase-line').filter({ hasText: 'Caja de regalo' }).getByRole('button', { name: 'Registrar compra' }).click();
-  await drawer(page).getByRole('button', { name: 'Registrar compra' }).click();
+  await expect(page).toHaveURL(/\/insumos\?i=[^&]+&compra=1$/);
   const dlg = page.getByRole('dialog');
+  await expect(dlg).toContainText('Caja de regalo');
+  await expect(dlg.locator('input[name=n]')).toBeFocused();
   await c.fill(dlg.locator('input[name=n]'), '20');
   await c.fill(dlg.locator('input[name=tot]'), '200');
   await dlg.getByRole('button', { name: 'Registrar' }).click();
