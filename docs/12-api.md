@@ -138,7 +138,7 @@ LineItemInput = {
   fromStock?: { [productId]: int }   // solo pedidos: cuántas salen de la repisa
 }
 ```
-**Lo que el servidor agrega y la interfaz nunca manda:** `name`, `listCents`, `costCents`, `extrasCents`, `parts` (las partes del set) — la foto del momento (`04 §4`). Si la interfaz mandara un costo, se ignora.
+**Lo que el servidor agrega y la interfaz nunca manda:** `name`, `listCents`, `costCents`, `extrasCents`, `parts` (las partes del set) — la foto del momento (`04 §4`). Si la interfaz mandara un costo, se ignora. El `name` de una pieza (y de cada parte de un set) es su `displayName` del momento: una variante se guarda como “original · etiqueta”; cambiar la etiqueta después no reescribe ventas ni pedidos ya guardados. Los nombres de `INSUFFICIENT_STOCK`, la búsqueda (que también busca en `variant_label`), las partes de las colecciones y la clasificación de Reportes (cada variante por separado) usan `displayName`.
 
 ```
 LineItem   = LineItemInput + { id, name, listCents, costCents, parts?, printerId? }

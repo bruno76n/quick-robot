@@ -1,6 +1,7 @@
 // Print queues (docs/04 §7): one entry per printer and order, durations from the pieces that are printed.
 import { itemHours, itemToPrint, jobMinutes, jobProgress, type LineItemData } from '@app/core';
 import { deleteQueueEntries, insertQueueEntries, listOrders, listQueue, updateQueueEntry, type Ctx, type Executor, type LineItemRow, type OrderRow, type ProductFull } from '@app/db';
+import { displayNames } from '../../views/costing';
 import { groupBy, lineItemData } from './common';
 
 /** "3 × Letrero, 10 × Servilletero": what is printed. */
@@ -13,7 +14,7 @@ export function printText(items: readonly LineItemData[], names: ReadonlyMap<str
 /** Adds the order to the end of each printer queue that got items; an empty queue starts now. */
 export async function enqueue(tx: Executor, ctx: Ctx, o: OrderRow, items: readonly LineItemRow[], products: readonly ProductFull[], now: Date, nextId: () => string) {
   const byId = new Map(products.map((p) => [p.id, p]));
-  const names = new Map(products.map((p) => [p.id, p.name]));
+  const names = displayNames(products);
   const groups = groupBy(items.filter((it) => it.printerId), (it) => it.printerId!);
   const current = groupBy(await listQueue(tx, ctx, { printerIds: [...groups.keys()], forUpdate: true }), (q) => q.printerId);
   const rows = [...groups].map(([printerId, its]) => {

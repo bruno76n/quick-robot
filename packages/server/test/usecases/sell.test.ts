@@ -240,3 +240,30 @@ describe('customers and expenses (docs/12 §9)', () => {
     expect((await call('POST', `/expenses/${e.id}/restore`)).data.id).toBe(e.id);
   });
 });
+
+describe('displayName of variants (mejoras/ronda-2.md §6)', () => {
+  it('a sale and an order keep the displayName of the moment; a new label does not rewrite them', async () => {
+    const root = await newPiece(5, { name: 'Dragón articulado' });
+    const d = (await call('GET', `/products/${root}`)).data;
+    const v = (await call('POST', `/products/${root}/variant`, { ...d, variantLabel: 'Silk morado' })).data;
+    await call('POST', `/stock/${v.id}/enable`, { initialCount: 3 });
+    const sale = (await call('POST', '/sales', { on: '2026-11-01', channelId: ch(), items: [piece(v.id, 1)] })).data;
+    expect(sale.items.map((it: J) => it.name)).toEqual(['Dragón articulado · Silk morado']);
+    const o = (await call('POST', '/orders', order([piece(v.id, 1)]))).data;
+    expect(o.items.map((it: J) => it.name)).toEqual(['Dragón articulado · Silk morado']);
+    await call('PUT', `/products/${v.id}`, { ...v, variantLabel: 'Morado mate' });
+    expect((await call('GET', `/sales/${sale.id}`)).data.items.map((it: J) => it.name)).toEqual(['Dragón articulado · Silk morado']);
+    expect((await call('GET', `/orders/${o.id}`)).data.items.map((it: J) => it.name)).toEqual(['Dragón articulado · Silk morado']);
+    // A new sale takes the new label; stock errors use displayName.
+    expect((await call('POST', '/sales', { on: '2026-11-01', channelId: ch(), items: [piece(v.id, 1)] })).data.items[0].name).toBe('Dragón articulado · Morado mate');
+    expect((await call('POST', '/sales', { on: '2026-11-01', channelId: ch(), items: [piece(v.id, 9)] })).details).toMatchObject({ name: 'Dragón articulado · Morado mate', requested: 9 });
+    expect((await call('POST', `/stock/${v.id}/adjust`, { mode: 'delta', value: -9 })).details).toMatchObject({ name: 'Dragón articulado · Morado mate' });
+    // Collections show their parts with displayName; search finds a variant by its label.
+    const col = (await call('POST', '/collections', { name: 'Dúo dragón', parts: [{ productId: root, qty: 1 }, { productId: v.id, qty: 1 }] })).data;
+    expect(col.parts.map((p: J) => p.name)).toEqual(['Dragón articulado', 'Dragón articulado · Morado mate']);
+    expect((await call('GET', '/search?q=morado mate')).data.products.map((p: J) => p.name)).toEqual(['Dragón articulado · Morado mate']);
+    // Reports: each variant counts on its own, with its displayName.
+    const top = (await call('GET', '/reports?period=all')).data.topProducts as J[];
+    expect(top.filter((x) => x.name.startsWith('Dragón articulado')).map((x) => [x.name, x.qty])).toEqual([['Dragón articulado · Morado mate', 2]]);
+  });
+});

@@ -103,12 +103,21 @@ export function productDetailView(p: ProductFull, c: CostingContext, opts: Produ
   };
 }
 
+type Named = { id: string; name: string; parentId: string | null; variantLabel: string | null };
+/** "<original> · <label>" for a variant whose original is in the list, the name otherwise. */
+export const displayNameOf = (p: Named, byId: ReadonlyMap<string, { name: string }>) => variantDisplayName(p.name, p.parentId ? byId.get(p.parentId)?.name : null, p.variantLabel);
+/** id → displayName for a list of pieces (their originals must be in the same list). */
+export function displayNames(products: readonly Named[]): Map<string, string> {
+  const byId = new Map(products.map((p) => [p.id, p]));
+  return new Map(products.map((p) => [p.id, displayNameOf(p, byId)]));
+}
+
 export function setPartsOf(col: CollectionFull, products: ReadonlyMap<string, ProductFull>, c: CostingContext): (SetPart & { name: string })[] {
   return col.parts.flatMap((r) => {
     const p = products.get(r.productId);
     if (!p) return [];
     const total = costOf(p, c).total;
-    return [{ productId: p.id, name: p.name, qty: partQty(r.qty), listPrice: priceOf(p, c, total), cost: total }];
+    return [{ productId: p.id, name: displayNameOf(p, products), qty: partQty(r.qty), listPrice: priceOf(p, c, total), cost: total }];
   });
 }
 

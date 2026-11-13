@@ -1,6 +1,6 @@
 // Existencias (docs/04 §5, docs/06 §11, docs/12 §8 › Producción y existencias).
 import { BusinessError, type AdjustStockInput, type EnableStockInput } from '@app/contract';
-import { buildableSets, soldCounts, stockStatus } from '@app/core';
+import { buildableSets, soldCounts, stockStatus, variantDisplayName } from '@app/core';
 import {
   getProduct, insertStockMovements, listChannels, listCollections, listCustomers, listOrders, listProducts, listSales, listStockMovements, transaction, updateProduct,
   type Ctx, type Executor,
@@ -94,7 +94,11 @@ export async function adjustStock(deps: Deps, ctx: Ctx, productId: string, input
     const delta = input.mode === 'count' ? input.value - physical : input.value;
     if (input.mode === 'count' && input.value < reserved) throw new BusinessError('VALIDATION_ERROR', { fields: [{ path: 'value', rule: 'too_small', params: { min: reserved } }] });
     if (delta === 0) throw new BusinessError('COUNT_UNCHANGED');
-    if (delta < 0 && -delta > free) throw new BusinessError('INSUFFICIENT_STOCK', { items: [{ productId, name: p.name, requested: -delta, free }], productId, name: p.name, requested: -delta, free });
+    if (delta < 0 && -delta > free) {
+      const parent = p.parentId ? await getProduct(tx, ctx, p.parentId) : undefined;
+      const name = variantDisplayName(p.name, parent?.name, p.variantLabel);
+      throw new BusinessError('INSUFFICIENT_STOCK', { items: [{ productId, name, requested: -delta, free }], productId, name, requested: -delta, free });
+    }
     await insertStockMovements(tx, ctx, [{ id: deps.ids.next(), productId, on: deps.clock.today(), kind: 'adjustment', qty: delta, note: input.note?.trim() ?? '' }]);
   });
   return stockDetail(deps, deps.db, ctx, productId);

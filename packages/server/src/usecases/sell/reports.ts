@@ -10,7 +10,7 @@ import {
 } from '@app/db';
 import type { Deps } from '../../deps';
 import { notFound } from '../../http';
-import { costOf, loadCostingContext, type CostingContext, setPartsOf, supplyIdsOf } from '../../views/costing';
+import { costOf, displayNames, loadCostingContext, type CostingContext, setPartsOf, supplyIdsOf } from '../../views/costing';
 import { cents, childrenOf, commissionOf, factSale, itemsText, lineItemData, orderData, saleData } from './common';
 import { queueViews } from './queue';
 import { grossProfitAndExpensesFast, totalsOf } from './fast';
@@ -142,7 +142,8 @@ export async function report(deps: Deps, ex: Executor, ctx: Ctx, q: { period?: '
   const totalsRow = groups.find((r) => r.key === 'total');
   const prevRow = prevRange ? (await saleTotals(ex, ctx, prevRange))[0] : undefined;
   const products = await listProducts(ex, ctx, { withDeleted: true });
-  const names = new Map(products.map((p) => [p.id, p.name]));
+  // Each variant counts on its own, with its displayName (mejoras/ronda-2.md §6).
+  const names = displayNames(products);
   const customers = new Map((await listCustomers(ex, ctx, { withDeleted: true })).map((c) => [c.id, c.name]));
   const exps = await listExpenses(ex, ctx);
   const expensesCents = cents(expensesInRange(exps.map(expenseData), from, to));
@@ -299,10 +300,11 @@ export async function home(deps: Deps, ex: Executor, ctx: Ctx) {
   for (const { o } of [...active].sort((x, y) => x.o.dueOn.localeCompare(y.o.dueOn))) { const d = daysBetween(today, o.dueOn); if (d <= 2) attentions.push({ kind: 'order_due', severity: d < 0 ? 'bad' : 'warn', target: { type: 'order', id: o.id }, params: { number: o.number, customer: customers.get(o.customerId) ?? '', days: d, dueOn: o.dueOn, status: o.status } }); }
   for (const { f, owed } of [...owing].sort((x, y) => x.f.on.localeCompare(y.f.on))) attentions.push({ kind: 'sale_owed', severity: 'info', target: { type: 'sale', id: f.id }, params: { customer: f.customerId ? customers.get(f.customerId) ?? '' : '', owedCents: cents(owed), on: f.on } });
   const c = await loadCostingContext(ex, ctx, supplyIdsOf(products));
+  const pn = displayNames(products);
   for (const p of products) {
     if (p.mode !== 'value' || !p.priceCents) continue;
     const floor = floorPrice(costOf(p, c).total, c.settings.minMarginPct);
-    if (p.priceCents / 100 < floor - 0.005) attentions.push({ kind: 'price_below_floor', severity: 'warn', target: { type: 'product', id: p.id }, params: { name: p.name, priceCents: p.priceCents, floorCents: cents(floor), costCents: cents(costOf(p, c).total) } });
+    if (p.priceCents / 100 < floor - 0.005) attentions.push({ kind: 'price_below_floor', severity: 'warn', target: { type: 'product', id: p.id }, params: { name: pn.get(p.id) ?? p.name, priceCents: p.priceCents, floorCents: cents(floor), costCents: cents(costOf(p, c).total) } });
   }
   for (const col of await listCollections(ex, ctx)) {
     if (!col.priceCents) continue;
@@ -335,13 +337,14 @@ export async function search(_deps: Deps, ex: Executor, ctx: Ctx, q: string) {
   const needle = normalizeName(q);
   const hit = (...t: (string | null | undefined)[]) => t.some((x) => x && normalizeName(x).includes(needle));
   const productsAll = await listProducts(ex, ctx);
-  const foundProducts = productsAll.filter((p) => hit(p.name, p.note, ...p.tags)).slice(0, 8);
+  const dn = displayNames(productsAll);
+  const foundProducts = productsAll.filter((p) => hit(p.name, p.variantLabel, p.note, ...p.tags)).slice(0, 8);
   const foundCols = (await listCollections(ex, ctx)).filter((col) => hit(col.name)).slice(0, 8);
   // Prices are costed only when something matched (the costing context is the heavy part).
   // A piece with a typed price (mode "value") shows it as is; costs are loaded only for formula prices or sets without a price.
   const needsCost = foundProducts.some((p) => p.mode === 'formula') || foundCols.some((col) => !col.priceCents);
   const c = needsCost ? await loadCostingContext(ex, ctx, supplyIdsOf(productsAll)) : null;
-  const products = foundProducts.map((p) => ({ id: p.id, name: p.name, listCents: p.mode === 'formula' ? cents(priceOf(p, c!)) : p.priceCents }));
+  const products = foundProducts.map((p) => ({ id: p.id, name: dn.get(p.id) ?? p.name, listCents: p.mode === 'formula' ? cents(priceOf(p, c!)) : p.priceCents }));
   const byId = new Map(productsAll.map((p) => [p.id, p]));
   const collections = foundCols.map((col) => ({ id: col.id, name: col.name, priceCents: col.priceCents ? col.priceCents : cents(setPrice(null, setPartsOf(col, byId, c!))) }));
   const customersAll = await listCustomers(ex, ctx);
