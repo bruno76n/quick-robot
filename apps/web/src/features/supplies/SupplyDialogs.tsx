@@ -84,7 +84,7 @@ export function UseDialog({ supply, onClose }: { supply: SupplyDetail; onClose: 
       <p>{t('screens.supplies.availableNow', { qty: number1(supply.stock), unit: supply.unit || L.pza })}</p>
       <div className="grid2">
         <Field label={L.reason}><select name="tipo" value={kind} onChange={(e) => setKind(e.target.value as typeof kind)}><option value="use">{L.reasonUse}</option><option value="waste">{L.reasonWaste}</option><option value="adjustment">{L.reasonCount}</option></select></Field>
-        <Field label={L.qty}><input name="n" inputMode="decimal" value={qty} onChange={(e) => setQty(e.target.value)} placeholder="0" /></Field>
+        <Field label={L.qty}><input name="n" inputMode="decimal" value={qty} onChange={(e) => setQty(e.target.value)} placeholder="0" data-autofocus="" /></Field>
       </div>
       <Field label={L.note}><input name="nota" value={note} onChange={(e) => setNote(e.target.value)} placeholder={L.usePlaceholder} /></Field>
       <p className={`note${over ? ' warn' : ''}`}>{kind === 'adjustment' ? t('screens.supplies.countChange', { from: number1(supply.stock), to: number1(q) }) : t('screens.supplies.afterTotal', { total: number1(supply.stock - q) })}</p>

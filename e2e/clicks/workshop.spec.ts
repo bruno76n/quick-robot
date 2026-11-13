@@ -33,6 +33,7 @@ test('registrar impresión from the drawer of a piece (the piece comes chosen)',
   await drawer(page).getByRole('button', { name: 'Registrar impresión' }).click();
   const dlg = page.getByRole('dialog');
   await expect(dlg.locator('.frow.ro').first()).toBeVisible();
+  await expect(dlg.locator('input[name=cant]')).toBeFocused(); // T1: the dialog focuses the marked field
   await c.fill(dlg.locator('input[name=cant]'), '2');
   await dlg.getByRole('button', { name: 'Registrar impresión' }).click();
   await expect(status(page)).toContainText('Se sumaron 2 piezas a Existencias.');
@@ -70,6 +71,7 @@ test('agregar rollo of a filament that exists (from its row)', async ({ page }) 
   await page.getByTestId('filament-row').filter({ hasText: 'PLA Blanco' }).click();
   await drawer(page).getByRole('button', { name: 'Agregar rollo de PLA Blanco' }).click();
   const dlg = page.getByRole('dialog');
+  await expect(dlg.locator('input[name=costo]')).toBeFocused(); // T1: the dialog focuses the marked field
   await c.fill(dlg.locator('input[name=costo]'), '350');
   await dlg.getByRole('button', { name: 'Agregar rollo' }).click();
   await expect(status(page)).toContainText('Rollo agregado a PLA Blanco.');
@@ -149,6 +151,7 @@ test('usar o ajustar un insumo (use 5)', async ({ page }) => {
   await page.getByTestId('supply-card').filter({ hasText: 'Imán de base' }).click();
   await drawer(page).getByRole('button', { name: 'Usar o ajustar' }).click();
   const dlg = page.getByRole('dialog');
+  await expect(dlg.locator('input[name=n]')).toBeFocused(); // T1: the dialog focuses the marked field
   await c.fill(dlg.locator('input[name=n]'), '5');
   await dlg.getByRole('button', { name: 'Guardar' }).click();
   await expect(status(page)).toContainText('Movimiento');

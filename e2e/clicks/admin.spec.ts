@@ -52,6 +52,7 @@ test('mantenimiento hecho with its cost (Impresoras)', async ({ page }) => {
   await c.start(`${server.url}/impresoras`);
   await page.getByTestId('printer-card').first().getByRole('button', { name: 'Hecho' }).first().click();
   const dlg = page.getByRole('dialog');
+  await expect(dlg.locator('input[name=costo]')).toBeFocused(); // T1: not the date, which is already today
   await c.fill(dlg.locator('input[name=costo]'), '150');
   await dlg.getByRole('button', { name: 'Marcar como hecha' }).click();
   await expect(status(page)).toHaveText('Mantenimiento registrado');

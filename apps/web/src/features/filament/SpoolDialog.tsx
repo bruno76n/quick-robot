@@ -172,7 +172,7 @@ function SpoolForm({ filamentId, editing, filaments, onClose, onAdded, onDeleted
       </details>
       <p className={`note${linkOk ? ' ok' : ''}`}>{link}</p>
       <div className="grid2">
-        <Field label={L.cost} error={err('costCents')}><UnitInput unit="$" name="costo" inputMode="decimal" placeholder="350" value={cost} onChange={(e) => setCost(e.target.value)} autoFocus={Boolean(preset)} /></Field>
+        <Field label={L.cost} error={err('costCents')}><UnitInput unit="$" name="costo" inputMode="decimal" placeholder="350" value={cost} onChange={(e) => setCost(e.target.value)} data-autofocus={preset ? '' : undefined} /></Field>
         <Field label={L.shipping} hint={L.shippingHint} error={err('shippingCents')}><UnitInput unit="$" name="envio" inputMode="decimal" value={shipping} onChange={(e) => setShipping(e.target.value)} /></Field>
         <Field label={L.weight} error={err('grams')}><UnitInput unit="g" name="gramos" inputMode="numeric" value={weight} onChange={(e) => setWeight(e.target.value)} /></Field>
         <Field label={L.date} error={err('purchasedOn')}><input name="fecha" type="date" value={on} onChange={(e) => setOn(e.target.value)} /></Field>
