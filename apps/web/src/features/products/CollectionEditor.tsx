@@ -8,6 +8,7 @@ import { Button } from '../../components/Button';
 import { ConfirmButton } from '../../components/ConfirmButton';
 import { Field } from '../../components/Field';
 import { Icon } from '../../components/Icon';
+import { Picker } from '../../components/Picker';
 import { toast } from '../../components/Toast';
 import { UnitInput } from '../../components/UnitInput';
 import { es } from '../../i18n/es';
@@ -36,6 +37,8 @@ export function CollectionEditor() {
 
 function CollectionForm({ id, initial, products, minMarginPct }: { id: string | undefined; initial: CDraft; products: ProductListItem[]; minMarginPct: number }) {
   const [d, setD] = useState<CDraft>(initial);
+  // Row just created by "Agregar pieza": its picker is born open (ronda-2 §12, D1).
+  const [fresh, setFresh] = useState<number | null>(null);
   const search = { id };
   const touches = ['collections', 'products'] as const;
   const input = () => ({ name: d.name, tags: d.tags, parts: d.parts.filter((p) => p.productId).map((p) => ({ productId: p.productId, qty: partQty(num(p.qty, 1)) })), extrasCents: Math.round(num(d.extras) * 100), priceCents: num(d.price) > 0 ? Math.round(num(d.price) * 100) : null, note: d.note });
@@ -47,6 +50,7 @@ function CollectionForm({ id, initial, products, minMarginPct }: { id: string | 
   const set = (patch: Partial<CDraft>) => setD({ ...d, ...patch });
   const part = (i: number, patch: Partial<CDraft['parts'][number]>) => set({ parts: d.parts.map((p, k) => (k === i ? { ...p, ...patch } : p)) });
   const byId = new Map<string, ProductListItem>(products.map((p) => [p.id, p]));
+  const pieceOptions = products.map((y) => ({ value: y.id, label: y.displayName }));
   const rows = d.parts.flatMap((p) => { const x = byId.get(p.productId); return x ? [{ x, qty: partQty(num(p.qty, 1)) }] : []; });
   const pieces = rows.reduce((a, r) => a + (r.x.costCents / 100) * r.qty, 0);
   const extras = num(d.extras);
@@ -80,14 +84,14 @@ function CollectionForm({ id, initial, products, minMarginPct }: { id: string | 
               const q = partQty(num(p.qty, 1));
               return (
                 <div className="frow cparte" key={i}>
-                  <label className="fld"><span className="sr">{L.piece}</span><select value={p.productId} onChange={(e) => part(i, { productId: e.target.value })}><option value="">{L.choosePiece}</option>{products.map((y) => <option key={y.id} value={y.id}>{y.displayName}</option>)}</select></label>
+                  <div className="fld"><Picker label={L.piece} value={p.productId} options={pieceOptions} placeholder={L.choosePiece} onChange={(v) => part(i, { productId: v })} autoOpen={fresh === i} next={(el) => el.closest('.cparte')?.querySelector<HTMLInputElement>('.unit input')} /></div>
                   <label className="fld"><span className="sr">{L.qtyInSet}</span><UnitInput unit="×" inputMode="numeric" value={p.qty} onChange={(e) => part(i, { qty: e.target.value })} aria-label={L.qtyInSet} /></label>
                   <span className="fcost num">{x ? moneyTotal((x.listCents / 100) * q) : ''}</span>
                   <button type="button" className="btn ghost icon" onClick={() => set({ parts: d.parts.filter((_, k) => k !== i) })} aria-label={L.removePiece} disabled={d.parts.length < 2}><Icon name="x" size={16} /></button>
                 </div>
               );
             })}</div>
-            <Button size="sm" icon="plus" onClick={() => set({ parts: [...d.parts, { productId: '', qty: '1' }] })}>{L.addPiece}</Button>
+            <Button size="sm" icon="plus" onClick={() => { setFresh(d.parts.length); set({ parts: [...d.parts, { productId: '', qty: '1' }] }); }}>{L.addPiece}</Button>
             <p className="hint">{L.piecesHint}</p>
           </fieldset>
           <fieldset className="blk"><legend>{L.box}</legend>

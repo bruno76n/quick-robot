@@ -2,6 +2,7 @@
 // and the one new-variant flow, at 1440 and 390.
 import { expect, test, type Page } from './support/test';
 import { startServer, type LocalServer } from './support/server';
+import { pick } from './support/picker';
 
 let server: LocalServer;
 test.beforeAll(async () => { server = await startServer(); await addVariant(server.url, 'Llavero con nombre', 'Azul'); });
@@ -111,13 +112,14 @@ test('a new variant from Productos: the calculator copy, its panel, the sale pic
   const label = page.getByLabel('Nombre de la variante');
   await expect(label).toBeFocused();
   await expect(label).toHaveValue('');
-  await expect(page.locator('.frow select').first()).toHaveValue(/.+/);
+  await expect(page.locator('.frow .pick-b').first()).not.toHaveClass(/empty/);
+  await expect(page.locator('.frow .pick-b').first()).toHaveAccessibleName(/^Filamento: \S/);
   // Saving without a label keeps the form and the focus on the field.
   await page.getByRole('button', { name: 'Guardar en el catálogo' }).click();
   await expect(page).toHaveURL(/\/productos\/pieza/);
   await expect(label).toBeFocused();
   await label.fill('Negro mate');
-  await page.locator('.frow select').first().selectOption({ label: 'PLA Negro' });
+  await pick(page, page.locator('.frow .pick-b').first(), 'PLA Negro');
   await page.getByRole('button', { name: 'Guardar en el catálogo' }).click();
   await expect(page.getByRole('status')).toHaveText('Variante guardada en el catálogo');
   await expect(page).toHaveURL(/\/productos\?abierta=/);

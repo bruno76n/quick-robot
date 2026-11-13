@@ -23,6 +23,7 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 | **Atajos** (`?`) | Muestra la lista. `g` + letra navega (ir a pantalla); `⌘/Ctrl+Z` deshace; `⇧⌘Z` rehace |
 | **Cajón lateral** | Detalle de un elemento de una lista ancha (filamento, insumo, pieza de existencias) sin salir de la lista; Esc o clic fuera lo cierra |
 | **Diálogos** | Formularios cortos de alta/edición y confirmaciones; se cierran con Esc |
+| **Selector con búsqueda** (`components/Picker.tsx`, ronda 2 · D1) | Lo usan las filas de filamentos e insumos de la calculadora y las piezas de una colección. Un botón con el valor elegido abre una lista (`role=listbox`) con un campo “Escribir para buscar…” arriba. Teclado: Enter, Espacio o ↓ abren (escribir una letra sobre el botón abre con esa letra buscada); ↑ ↓ Inicio Fin se mueven; Enter o clic eligen; Esc cierra y devuelve el foco al botón; Tab cierra sin elegir. Al elegir, el foco pasa al campo siguiente de la fila (gramos o cantidad). Una fila nueva creada con “Agregar …” nace con la lista abierta y el foco dentro |
 | **Aviso emergente** | Confirma lo hecho; si fue una eliminación, trae "Deshacer" (devolver una venta y cancelar un pedido no se deshacen: mueven dinero y existencias, `D32`) |
 
 *Producto:* "Deshacer/Rehacer" por historial de estados no se porta tal cual. En el producto, toda eliminación es suave (`deleted_at`) y el aviso llama a `restore<Entidad>` (`12`). El rehacer general queda fuera de la primera versión. Las eliminaciones y cancelaciones piden **confirmación en dos toques** (el botón cambia a "Toca de nuevo para eliminar", `13 §7`), no un cuadro de diálogo.
@@ -76,8 +77,9 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 | Botón | Caso de uso | Lleva a |
 |---|---|---|
 | Modo (valor / fórmula) | Cambia cómo se fija el precio | — |
-| Agregar filamento | — (si no existe el rollo → "Agregar rollo") | Diálogo de rollo |
-| Agregar insumo | — | — |
+| Agregar otro filamento | Crea la fila con su lista de filamentos **ya abierta y el foco dentro** (selector con búsqueda, §1); arriba van los filamentos que ya usa la pieza (o su original, si es variante), después “Los demás”. Al elegir, el foco pasa a los gramos | — |
+| Agregar rollo de otro filamento | Si no existe el filamento → "Agregar rollo"; el nuevo queda elegido en la fila vacía (o en una fila nueva) | Diálogo de rollo |
+| Agregar insumo | Crea la fila con la lista de insumos abierta y el foco dentro; al elegir, el foco pasa a la cantidad | — |
 | Copiar ficha | Copia la ficha técnica como texto | — |
 | Quitar foto | Quita la imagen de la ficha | — |
 | Cotizar | Diálogo de cotización rápida (cantidad → total y tiempo) | — |
@@ -92,7 +94,7 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 *Cálculo en vivo:* el navegador usa `core` para la vista previa. Al guardar, el servidor recalcula; nunca confía en el costo enviado.
 
 ### 3.2 Colección
-Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), etiquetas, nota. Muestra costo, precio, ganancia, y cuántos **sets se pueden armar hoy** con los libres. Acciones: Agregar parte, Guardar (`saveCollection`), Eliminar, Vender, Cancelar.
+Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), etiquetas, nota. Muestra costo, precio, ganancia, y cuántos **sets se pueden armar hoy** con los libres. Acciones: Agregar pieza (crea la fila con la lista de piezas abierta y el foco dentro, con búsqueda; al elegir, el foco pasa a la cantidad), Guardar (`saveCollection`), Eliminar, Vender, Cancelar.
 
 ---
 

@@ -8,6 +8,7 @@ export const es = {
     genericText: 'Listo.', loading: 'Cargando…', backHome: 'Volver al Inicio', errorCode: 'Código: {errorId}',
     openMenu: 'Abrir el menú', closeDetail: 'Cerrar el detalle', search: 'Buscar', searchShortcut: '⌘K', searchAll: 'Buscar en todo',
     mainMenu: 'Menú principal', screens: 'Pantallas', detail: 'Detalle',
+    picker: { search: 'Buscar', placeholder: 'Escribir para buscar…', none: 'Sin resultados.' },
   },
   nav: {
     home: 'Inicio', products: 'Productos', sales: 'Ventas', orders: 'Pedidos', filaments: 'Filamentos', supplies: 'Insumos',
@@ -233,6 +234,7 @@ export const es = {
       filaments: 'Filamentos', filament: 'Filamento', chooseFilament: 'Elige un filamento…', grams: 'Gramos', removeFilament: 'Quitar filamento',
       availableShort: 'Disponible: {grams} (insuficiente)', available: 'Disponible: {grams} en {count} {count|rollo|rollos} · {perGram} por gramo',
       addFilament: 'Agregar otro filamento', addSpoolOther: 'Agregar rollo de otro filamento',
+      usedInPiece: 'En esta pieza', otherFilaments: 'Los demás',
       filamentsHint: 'Se elige material y color, no un rollo. Los gramos salen del laminador; si usa varios colores, una línea por filamento.',
       supplies: 'Insumos', supply: 'Insumo', chooseSupply: 'Elegir insumo', qtyPerPiece: 'Cantidad por pieza', removeSupply: 'Quitar insumo', noSupplies: 'Esta pieza no lleva insumos.',
       addSupply: 'Agregar insumo', noSuppliesYet: 'Aún no hay insumos. Créalos en Insumos y luego agrégalos a la pieza.', suppliesHint: 'Su costo entra en el de la pieza y se descuentan solos al imprimir.',

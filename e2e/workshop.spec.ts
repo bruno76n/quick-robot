@@ -2,6 +2,7 @@
 // collections, spools; and every phase 2 screen in three widths without console errors.
 import { expect, test, type Page } from './support/test';
 import { startServer, type LocalServer } from './support/server';
+import { pick, pickOpen } from './support/picker';
 
 let server: LocalServer;
 test.beforeAll(async () => { server = await startServer(); });
@@ -16,8 +17,8 @@ test('catalog shows the mockup costs; the calculator saves the cost it shows', a
   await expect(page.getByTestId('product-tile').filter({ hasText: 'Doctor Doom' })).toContainText('Costo $41.56');
   await page.getByRole('button', { name: 'Nueva pieza' }).first().click();
   await page.getByPlaceholder('Nombre de la pieza, por ejemplo: Llavero con nombre').fill('Pieza de prueba');
-  await page.locator('.frow select').first().selectOption({ label: 'PLA Negro' });
-  await page.locator('.frow input').first().fill('50');
+  await pick(page, page.locator('.frow .pick-b').first(), 'PLA Negro');
+  await page.locator('.frow .unit input').first().fill('50');
   await page.getByLabel('Horas').fill('2');
   const shown = await page.locator('.res-top .big').first().textContent();
   await page.locator('.res-top input').fill('120');
@@ -76,9 +77,9 @@ test('collection: new set with its price; spool: movement, edit and delete with 
   await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: 'Nueva colección' }).click();
   await page.getByPlaceholder('Nombre de la colección, por ejemplo: Colección Doomsday blanca').fill('Dúo arácnido');
-  await page.locator('.cparte select').first().selectOption({ label: 'Spider-Man · salto' });
+  await pick(page, page.locator('.cparte .pick-b').first(), 'Spider-Man · salto');
   await page.getByRole('button', { name: 'Agregar pieza' }).click();
-  await page.locator('.cparte select').nth(1).selectOption({ label: 'Spider-Man · trepando' });
+  await pickOpen(page, 'Spider-Man · trepando');
   await expect(page.getByText('Las piezas sueltas suman $500.')).toBeVisible();
   await page.getByRole('button', { name: 'Guardar la colección' }).click();
   await expect(status(page)).toHaveText('Colección guardada');
