@@ -233,7 +233,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 | Botón | Caso de uso |
 |---|---|
 | Llevar existencias (en una pieza) | `enableStockTracking` (con conteo inicial) |
-| Ajustar | `adjustStock` (conteo real o corrección con nota) |
+| Ajustar | `adjustStock` (conteo real o corrección con nota). Los cuatro motivos (Regalo o muestra · Dañada o defectuosa · Piezas sin registrar · Conteo: total real) se ven como botones segmentados de dos en dos, como “Motivo” de Registrar impresión (un toque; las flechas los recorren); el foco empieza en la cantidad (ronda 2 · D8) |
 | Registrar impresión | Abre Producción con el diálogo (suma a existencias) |
 | Fichas / Lista | Preferencia de vista de Existencias (`view.stock`) | — |
 | Seleccionar pieza (o un miembro de una familia) | Abre el cajón | — |

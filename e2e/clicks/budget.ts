@@ -31,7 +31,7 @@ export const BUDGET = {
   // Existencias, Producción, Filamentos, Insumos, Compras
   printRun: { today: 4, fieldsClicked: 1 },
   printRunFromPiece: { today: 3, fieldsClicked: 0 },
-  adjustStock: { today: 5, fieldsClicked: 1 },
+  adjustStock: { today: 4, fieldsClicked: 1 },
   enableStock: { today: 4, fieldsClicked: 1 },
   addSpoolExisting: { today: 3, fieldsClicked: 0 },
   addSpoolHeader: { today: 6, fieldsClicked: 1 },

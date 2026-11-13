@@ -46,7 +46,10 @@ test('ajustar existencias (one damaged piece, with a note)', async ({ page }) =>
   await stockRow(page, 'Llavero con nombre').click();
   await drawer(page).getByRole('button', { name: 'Ajustar' }).click();
   const dlg = page.getByRole('dialog');
-  await dlg.locator('select[name=tipo]').selectOption('damaged');
+  // D8: the four reasons at sight; one tap. The focus is on the quantity (T1), already 1.
+  await expect(dlg.getByRole('radiogroup', { name: 'Motivo' }).getByRole('radio')).toHaveCount(4);
+  await expect(dlg.locator('input[name=n]')).toBeFocused();
+  await dlg.getByRole('radio', { name: 'Dañada o defectuosa' }).check();
   await c.fill(dlg.locator('input[name=nota]'), 'Se rompió');
   await dlg.getByRole('button', { name: 'Registrar' }).click();
   await expect(status(page)).toContainText('Existencias de Llavero con nombre: total');

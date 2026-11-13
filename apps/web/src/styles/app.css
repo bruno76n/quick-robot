@@ -48,3 +48,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 
 /* "Registrar pago" under Saldo of an order (ronda 2 · D7). */
 .strip .band-pay { justify-self: start; margin-top: 6px; }
+
+/* The four reasons of Ajustar existencias as a segmented choice, two by two (ronda 2 · D8). */
+.seg.wide.seg4 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; border-bottom: 0; }
+.seg4 .rad span { padding: 7px 10px; }
