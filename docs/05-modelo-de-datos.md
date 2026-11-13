@@ -121,6 +121,9 @@ Llevan `deleted_at` (y por tanto "Deshacer" = `restore…`, `12`): `product`, `c
 - `order (workspace_id, status, due_on)` para el calendario y la lista.
 - `sale (workspace_id, on)` para reportes.
 - `line_item (workspace_id, parent_kind, parent_id)`.
+- `product (workspace_id, parent_id)` para traer las variantes de una página de familias (`parent_id IN (…)`).
+
+**Migración `0007` (ronda 2, aditiva):** agrega `variant_label`, el índice de arriba y la comprobación `product_variant_label` (etiqueta de 1 a 60 letras, obligatoria si hay `parent_id`). Normaliza los datos viejos: una cadena (variante de variante) apunta a la original raíz; una variante sin ninguna original viva arriba queda como pieza independiente (`parent_id` y etiqueta nulos); la etiqueta sale del nombre con la regla de `core › variantLabelFromName`. Ningún nombre cambia.
 
 ## Aislamiento entre negocios
 

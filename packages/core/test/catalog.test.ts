@@ -68,7 +68,7 @@ describe('variants (mejoras/ronda-2.md §3.1, informe-ronda2-a §4.3)', () => {
       a: null, b: 'a', c: 'a', d: 'a', // chains of 2 and 3 levels → the root
       x: null, y: null, z: 'y', q: null, // root deleted: the live middle link becomes the original; orphans stand alone
       del: 'a', 'under-del': 'a', // a deleted variant keeps its family (in case it is restored)
-      loop1: 'loop2', loop2: 'loop1', lost: null, // corrupt data does not hang
+      loop1: null, loop2: null, lost: null, // corrupt data does not hang nor stay a cycle
     });
   });
 });

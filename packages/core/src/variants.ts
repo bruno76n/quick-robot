@@ -57,11 +57,14 @@ export function normalizeParents(pieces: readonly FamilyMember[]): Map<string, s
   for (const p of pieces) {
     let root: string | null = null;
     const seen = new Set<string>([p.id]);
-    for (let cur = p.parentId ? byId.get(p.parentId) : undefined; cur && !seen.has(cur.id); cur = cur.parentId ? byId.get(cur.parentId) : undefined) {
+    let cycle = false;
+    for (let cur = p.parentId ? byId.get(p.parentId) : undefined; cur; cur = cur.parentId ? byId.get(cur.parentId) : undefined) {
+      if (seen.has(cur.id)) { cycle = cur.id === p.id; break; }
       seen.add(cur.id);
       if (!cur.deleted) root = cur.id;
     }
-    out.set(p.id, root);
+    // Corrupt data (a piece that is its own ancestor) never hangs and never stays a cycle: it becomes an original.
+    out.set(p.id, cycle ? null : root);
   }
   return out;
 }
