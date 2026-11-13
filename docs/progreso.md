@@ -44,7 +44,7 @@ Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 2` · `t
 
 | Parte | Fase | Estado | Notas |
 |---|---|---|---|
-| Medición del rediseño | A | no iniciada | `docs/mejoras/informe-ronda2-a.md` |
+| Medición del rediseño | A | terminada | `docs/mejoras/informe-ronda2-a.md`: inventario, morado y marca, datos, línea base de rendimiento y plan de la B (24 pasos) |
 | Panel neutro (sin morado ni marca) | B | no iniciada | |
 | Datos y API (familias, `variant_label`, `severity`) | B | no iniciada | Migración aditiva con copia previa |
 | Productos (fichas y lista con variantes agrupadas) | B | no iniciada | |
