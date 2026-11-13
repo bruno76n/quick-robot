@@ -2,7 +2,7 @@
 
 Sistema para negocios de impresión 3D: costeo, ventas, pedidos, producción, inventarios y reportes. Es **un solo producto**: aplicación web con cuentas y suscripción; la app de escritorio (Electron) es solo una cáscara para uso personal en Mac. Documentación completa en `docs/` (empieza por `docs/README.md`). Prompts por fase en `docs/prompts.md`.
 
-**Dónde está cada cosa:** reglas de negocio → `04` · datos → `05` · pantallas y flujos → `06` · contrato de la API (entrada, salida, errores) → `12` · textos y mensajes en español → `13` · convenciones y pruebas → `14` · rendimiento, límites y fallos → `15` · seguridad → `11` · plan por fase → `10`.
+**Dónde está cada cosa:** reglas de negocio → `04` · datos → `05` · pantallas y flujos → `06` · contrato de la API (entrada, salida, errores) → `12` · textos y mensajes en español → `13` · convenciones y pruebas → `14` · rendimiento, límites y fallos → `15` · seguridad → `11` · plan por fase → `10` · **mejoras tras el uso real (ronda 2: variantes agrupadas, Existencias, Inicio, panel neutro, menos clics) → `docs/mejoras/ronda-2.md`**.
 
 ## Lo que no se negocia
 
@@ -11,7 +11,7 @@ Sistema para negocios de impresión 3D: costeo, ventas, pedidos, producción, in
 3. **Reglas de negocio solo en `packages/core`**: funciones puras, sin I/O, sin hora ni ids propios. Cada regla con prueba usando los casos numéricos de `docs/04-reglas-de-negocio.md`.
 4. **El servidor es la autoridad.** Recalcula con `core` y guarda su resultado; nunca el que mandó el cliente.
 5. **Una operación de negocio = un caso de uso en una transacción** (`markOrderReady`, `deliverOrder`, …). La interfaz no encadena escrituras sueltas.
-6. **Nada específico de "Quick Robot" en el código.** Nombre, teléfono, canales, comisiones, márgenes y textos de documentos son registros del negocio (`workspace_settings`). Los datos de ejemplo viven solo en la semilla de desarrollo.
+6. **Nada específico de "Quick Robot" en el código ni en la interfaz.** Nombre, giro, teléfono, canales, comisiones, márgenes y textos de documentos son registros del negocio (`workspace_settings`). Los datos de ejemplo viven solo en la semilla de desarrollo. **El panel es neutro:** sin la marca de Quick Robot (mascota, nombre) y sin su color (morado); se va a distribuir a otros negocios (`docs/mejoras/ronda-2.md §2`).
 7. **Ningún `if (mode === 'cloud')` en reglas ni casos de uso.** Las diferencias entre local y nube se resuelven eligiendo dependencias (`AuthProvider`, `FileStore`, `Entitlements`, `Mailer`, `BackupStore`) en `apps/desktop` / `apps/cloud`.
 8. **Cada pantalla funciona sin funciones nativas.** Lo nativo (`window.desktop`) mejora; nunca habilita.
 9. **Inventarios = libros de movimientos** (filamento, piezas terminadas, insumos). Nunca se escribe "hay 7": se suma.
@@ -52,11 +52,11 @@ Estándar: **OWASP Top 10:2025**, aplicado a todo lo web (interfaz y API) desde 
 
 ## Vocabulario de la interfaz (fijo)
 
-Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Libres, Apartadas, Artículos. Botones y títulos sin segunda persona ("Registrar venta", no "Registra tu venta"); los mensajes que heredó del mockup conservan su imperativo ("Agrega al menos un artículo.") y los nuevos van en infinitivo o impersonales (`docs/13 §1`); los documentos para clientes sí pueden hablar directo. Color con significado: **morado = costo, verde = ganancia**.
+Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Libres, Apartadas, Artículos. Botones y títulos sin segunda persona ("Registrar venta", no "Registra tu venta"); los mensajes que heredó del mockup conservan su imperativo ("Agrega al menos un artículo.") y los nuevos van en infinitivo o impersonales (`docs/13 §1`); los documentos para clientes sí pueden hablar directo. Color con significado: **gris oscuro = costo, verde = ganancia** (el morado ya no se usa).
 
 ## Diseño
 
-Solo modo claro. Solo tipografía Geist. Tokens en `docs/07-frontend.md`. Si algo se ve distinto del mockup (`reference/Quick Robot mockup.html`), el mockup tiene la razón hasta que se decida lo contrario. Marca (ícono, mascota) en `assets/`. El nombre y el giro que se ven en pantalla y en documentos salen de Ajustes, nunca del código; el logo con el texto “Quick Robot” es solo para uso externo.
+Solo modo claro. Solo tipografía Geist. Tokens en `docs/07-frontend.md`, **neutros, sin morado y en un solo archivo**. Si algo se ve distinto del mockup (`reference/Quick Robot mockup.html`), el mockup tiene la razón hasta que se decida lo contrario, **salvo** en Productos, Existencias, Inicio y el color, donde mandan `docs/mejoras/ronda-2.md` y las maquetas de `reference/ronda-2/` (estructura y comportamiento; los radios y sombras son los del sistema). La marca (ícono, mascota) vive en `assets/` y **no aparece en la interfaz del panel**: la barra lateral muestra un monograma con el nombre y el giro de Ajustes. El logo con el texto “Quick Robot” es solo para uso externo.
 
 ## Datos
 
@@ -92,6 +92,8 @@ Anotar siempre la decisión en `docs/decisiones.md` (formato en ese archivo). Nu
 - La misma prueba falla tres veces seguidas con enfoques distintos. En ese caso: anotar el bloqueo en `docs/decisiones.md`, dejar el paso marcado como bloqueado y **seguir con los pasos que no dependan de él**.
 
 **Al cerrar cada fase:** escribir `docs/informe-fase-N.md` con lo hecho, qué pasó las pruebas, las decisiones tomadas, lo que quedó bloqueado o dudoso y qué conviene que revise la persona; actualizar `docs/progreso.md`; dejar la rama lista para fusionar. **Ninguna fase se fusiona con pruebas rojas.**
+
+**Excepción: la ronda 2** (`docs/mejoras/ronda-2.md §1`). Sus cuatro fases se fusionan a la rama principal **sin pedir permiso** al cerrar cada una en verde, con etiqueta `antes-ronda2-<letra>` como punto de regreso; si el entorno no deja publicar en la principal, se deja la rama lista y la fase siguiente se apila encima.
 
 **Nunca:** agregar funciones fuera del alcance de `docs/01`; saltarse una prueba para "avanzar"; cambiar un número esperado de `docs/04` o de `golden/` para que la prueba pase; tocar archivos en `reference/`; escribir textos de interfaz fuera de `i18n/es.ts`; cambiar o reutilizar un código de error ya publicado en `docs/12`; mostrar al usuario el `message` técnico de un error; tocar datos reales del negocio (las pruebas usan `reference/mockup-backup-v7.json` o datos generados).
 

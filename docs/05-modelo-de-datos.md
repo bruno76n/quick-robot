@@ -46,7 +46,7 @@ Punto de partida: el estado del mockup (esquema v7). Aquí se traduce a tablas. 
 
 | Tabla | Columnas principales | Notas |
 |---|---|---|
-| `product` | `workspace_id`, `name`, `parent_id?` (variante), `mode` (`value` \| `formula`), `price_cents`, `margin_pct?`, `printer_id?` (nulo = promedio), `hours`, `batch_size`, `extras_cents`, `tracks_stock` (bool), `tags` (text[]), `note`, `photo_file_id?`, `spec` (jsonb: capa, relleno, paredes, soportes, boquilla, cama, archivo, nota) | `batch_size` (piezas por placa) es informativo: sirve para planear y no cambia el costo. Los campos `prep` y `acab` del mockup no se usan en ninguna pantalla y no se migran |
+| `product` | `workspace_id`, `name`, `parent_id?` (variante; siempre apunta a la **original raíz**, un solo nivel), `variant_label?` (texto 1–60; obligatoria si hay `parent_id`; las listas agrupadas muestran solo la etiqueta y fuera de ellas se muestra `displayName` = “original · etiqueta”), `mode` (`value` \| `formula`), `price_cents`, `margin_pct?`, `printer_id?` (nulo = promedio), `hours`, `batch_size`, `extras_cents`, `tracks_stock` (bool), `tags` (text[]), `note`, `photo_file_id?`, `spec` (jsonb: capa, relleno, paredes, soportes, boquilla, cama, archivo, nota) | `batch_size` (piezas por placa) es informativo: sirve para planear y no cambia el costo. Los campos `prep` y `acab` del mockup no se usan en ninguna pantalla y no se migran |
 | `product_filament` | `workspace_id`, `product_id`, `filament_id`, `grams` | Qué filamentos y cuántos gramos lleva |
 | `product_supply` | `workspace_id`, `product_id`, `supply_id`, `qty` | |
 | `collection` | `workspace_id`, `name`, `price_cents?`, `extras_cents`, `tags`, `note` | Precio vacío = suma de sueltas |

@@ -98,6 +98,7 @@ Un renglón por código de `12 §2`. Entre llaves, los parámetros de `details`.
 |---|---|
 | `PRODUCT_IN_ACTIVE_ORDERS` | Esta pieza está en {count} {count\|pedido sin entregar\|pedidos sin entregar} ({folios}). Primero deben entregarse o eliminarse. |
 | `PRODUCT_HAS_STOCK` | No se puede eliminar: quedan {onHand} {onHand\|pieza\|piezas} en Existencias. Primero ajustar el conteo a 0. |
+| `PRODUCT_HAS_VARIANTS` | Esta pieza tiene {count} {count\|variante\|variantes}. Primero hay que eliminarlas. |
 | `STOCK_TRACKING_HAS_STOCK` | Hay {onHand} en existencias: ajústalas a 0 en Existencias antes de desactivarlo. |
 | `COLLECTION_EMPTY` | La colección necesita al menos una pieza. |
 | `NO_PRODUCTS` | Primero crea una pieza en Productos. |
@@ -386,6 +387,12 @@ Texto del botón de cada acción del mockup, para que `es.ts` use los mismos. (E
 | `bak-dl` | Descargar copia | `auto-rest` | Restaurar |
 | `demo-reset` | *(solo desarrollo)* Volver a los datos de ejemplo | `doc-print` | Guardar como PDF |
 | `exp-copy` | Copiar tabla | `buscar` | Buscar ⌘K |
+
+---
+
+## 9.1 Textos de la ronda 2
+
+Los textos nuevos de variantes agrupadas, Existencias (lista y fichas), Inicio (atención por prioridad) y la barra lateral neutra están en `mejoras/ronda-2.md §9` (claves de `es.ts` incluidas). Los demás textos de esas pantallas no cambian.
 
 ---
 

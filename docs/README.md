@@ -21,7 +21,8 @@ Sistema para negocios de impresión 3D. Un solo producto: web con suscripción; 
 | [13 · Textos y errores](13-textos-y-errores.md) | Todos los mensajes en español: errores, avisos, campos, confirmaciones, estados |
 | [14 · Convenciones y pruebas](14-convenciones-y-pruebas.md) | Cómo se nombra y se escribe el código, cómo se escribe una prueba, datos de prueba y cobertura mínima |
 | [15 · Rendimiento y errores](15-rendimiento-y-errores.md) | Presupuestos de tiempo, límites, y qué ve la persona cuando algo falla |
-| [prompts](prompts.md) | **Un prompt listo para pegar por cada fase**, plantilla de informe y qué hacer entre fases |
+| [prompts](prompts.md) | **Un prompt listo para pegar por cada fase**, plantilla de informe y qué hacer entre fases (incluye el de la ronda 2, §9) |
+| [mejoras/ronda-2](mejoras/ronda-2.md) | **Ronda 2 tras el uso real:** variantes agrupadas, Existencias, Inicio, panel neutro y menos clics, en cuatro fases autónomas |
 | [bitácora](bitacora.md) · [decisiones](decisiones.md) · [progreso](progreso.md) | Bitácora de la construcción y cómo seguir en la Mac; registro de decisiones y estado de cada pantalla (los llena Claude Code) |
 
 Además: `CLAUDE.md` en la raíz del proyecto resume las reglas para quien programe.
@@ -34,6 +35,7 @@ Además: `CLAUDE.md` en la raíz del proyecto resume las reglas para quien progr
 | `reference/mockup-backup-v7.json` | Copia de seguridad del mockup con datos de ejemplo (semilla y prueba del importador) |
 | `reference/mockup-textos.md` | Texto visible de cada pantalla y diálogo del mockup (para llenar `es.ts`) |
 | `packages/core/test/golden/mockup-values.json` | Costos y precios esperados de cada pieza y colección del mockup (±0.01) |
+| `reference/ronda-2/` | Cinco maquetas HTML de la ronda 2 (Productos, Existencias, Inicio); ver su README |
 | `assets/` | Ícono de la app, logo y mascota (provisionales; ver su README) |
 
 ## Por dónde empezar

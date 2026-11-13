@@ -138,7 +138,9 @@ No debe fallar nada más. Si falla, hay una frontera rota.
 | Movimiento de insumo | `supply_movement` |
 | Proveedor | `supplier` |
 | Pieza / producto | `product` |
-| Variante | `product` con `parent_id` |
+| Variante | `product` con `parent_id` (y `variant_label`) |
+| Familia (original + sus variantes) | `product` raíz con sus `product` hijos |
+| Etiqueta de variante | `variant_label` |
 | Colección / set | `collection` |
 | Existencias | `stock` |
 | Movimiento de existencias | `stock_movement` |

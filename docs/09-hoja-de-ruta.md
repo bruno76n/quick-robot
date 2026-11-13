@@ -50,3 +50,7 @@ Roles y varios usuarios por negocio, catálogo público para clientes, recordato
 ## Cómo medir el avance
 
 `docs/progreso.md`: una línea por pantalla con su estado (*no iniciada · en curso · igual al mockup · verificada*). Cada fase termina cuando sus filas llegan a "igual al mockup", sus pruebas pasan y existe su `docs/informe-fase-N.md`.
+
+## Después de la fase 4 · Ronda 2
+
+Tras una semana de uso real se hace una ronda de mejoras en cuatro fases cortas (medir el rediseño, construirlo, medir clics, acortarlos): variantes agrupadas, Existencias en lista, Inicio con atención por prioridad, panel neutro y menos clics. Plan en `mejoras/ronda-2.md`. No condiciona la fase 5.

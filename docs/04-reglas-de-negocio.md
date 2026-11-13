@@ -123,6 +123,10 @@ libres    = max(0, físicas − apartadas)
 
 > Caso 5.2 — Físicas 5 y apartadas 5 → `Todo apartado`. Físicas 5 y apartadas 3 (libres 2) → `Pocas`. Físicas 5 y apartadas 2 (libres 3) → `Disponible`. Físicas 0 → `Agotada`.
 
+**Estado de una familia de variantes** (original + variantes con existencias, `mejoras/ronda-2.md §4.1`). Sus físicas, apartadas y libres son la **suma** de sus miembros. Estado: `Agotada` si **todos** sus miembros están agotados; `Todo apartado` si la suma de libres es 0; `Pocas` si **algún** miembro tiene 2 libres o menos; si no, `Disponible`. Una pieza sin variantes (o con una sola que lleve existencias) usa la regla de arriba.
+
+> Caso 5.3 — Familia con tres miembros de libres 1, 1 y 2 (apartadas 2, 0 y 1) → suma: libres 4, apartadas 3 · `Pocas` (hay miembros con 2 o menos). Misma familia con libres 3, 4 y 6 → `Disponible`. Con libres 0, 0 y 0 y físicas > 0 → `Todo apartado`. Con físicas 0 en todos → `Agotada`.
+
 **Sets armables hoy** = mínimo, entre las piezas del set, de `floor(libres / cantidad requerida)`; si alguna pieza no lleva existencias, 0.
 
 **Al aceptar un pedido** se apartan las piezas planeadas; si ya no alcanzan, se aparta lo que haya y **el resto se imprime**. El sistema regresa cuántas faltaron para avisar.

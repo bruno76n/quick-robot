@@ -50,24 +50,24 @@ features/orders/
 | `--panel`, `--panel-2` | `#f6f6f8`, `#ececf1` | Paneles, chips neutros, pastillas |
 | `--ink`, `--ink-2`, `--ink-3` | `#121214`, `#6a6a73`, `#777782` | Texto: principal, secundario, terciario |
 | `--line`, `--line-2` | `#e7e7ec`, `#d2d2da` | Bordes |
-| `--purple` | `#6b3fd4` | Acción principal y **Costo** |
-| `--purple-soft` | `#efe9fd` | Fondo de costo |
+| `--accent` | `#121214` (igual a `--ink`) | Acción principal, selección y anillo de foco. **Neutro a propósito**: el panel no lleva color de marca (`mejoras/ronda-2.md §2`) |
+| `--cost`, `--cost-soft` | `#5a5a65`, `#f1f1f4` | **Costo** |
 | `--green`, `--green-ink`, `--green-soft` | `#00ae42`, `#067a30`, `#e3f5e9` | **Ganancia**, estados buenos |
 | `--amber`, `--amber-ink`, `--amber-soft` | `#e9a817`, `#86500a`, `#fff1d3` | Avisos |
 | `--red`, `--red-ink`, `--red-soft` | `#d6334f`, `#b3223f`, `#fde8ec` | Errores, cancelado |
 | `--blue` | `#3f86c9` | Informativo |
-| `--c-m … --c-f` | morados y gris | Capas de la barra de desglose del costo |
+| `--c-m … --c-f` | grises (y tonos neutros) | Capas de la barra de desglose del costo |
 | Radio | tarjetas 20 px, botones/campos 10 px, diálogos 18 px, pastillas 99 px | |
 | Texto base | 15 px / 1.45; títulos con espaciado negativo | |
 
-**Regla de color con significado:** *morado = costo*, *verde = ganancia*. Se mantiene en toda la interfaz.
+**Regla de color con significado:** *gris oscuro = costo*, *verde = ganancia*. Se mantiene en toda la interfaz. **No se usa morado** (era el color de la marca de Quick Robot; D36–D37). Todo el color sale de estos tokens, definidos en un solo archivo, de modo que cambiar el color de acento de un negocio sea cambiar una variable. Los colores de **datos** (el swatch de un filamento) no son color de interfaz y no cambian.
 
 **Componentes que ya existen en el mockup y se reconstruyen como componentes reales:**
 `Button` (primary / default / sm / link), `Field` (etiqueta + ayuda), `UnitInput` ($, g, h, %), `Segmented`, `Tag`, `Pill`/`Chip` (con punto de color), `Table` ancha (`xlist`, con columnas y fila clicable), `Drawer` (cajón), `Dialog`, `Toast` (con acción), `Stepper` del pedido, `Tabs`, `Details` plegable, `StatBand` (cifras), `KV` (listas de datos), `Calendar` (mes), `CommandPalette`, `DocumentSheet` (cotización/nota con estilos de impresión).
 
 **Responsivo:** tres anchos probados en el mockup (escritorio, tableta, móvil). La barra lateral se oculta tras un botón en pantallas pequeñas. Sin desbordes horizontales.
 
-**Accesibilidad mínima:** foco visible (anillo morado de 2 px), diálogos y cajones con captura de foco y cierre con Esc, `prefers-reduced-motion` respetado, contraste suficiente en texto terciario.
+**Accesibilidad mínima:** foco visible (anillo de 2 px con `--accent`), diálogos y cajones con captura de foco y cierre con Esc, `prefers-reduced-motion` respetado, contraste suficiente en texto terciario.
 
 ## Cómo hablar con el servidor
 

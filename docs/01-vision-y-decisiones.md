@@ -68,6 +68,16 @@ Nace para **Quick Robot** (Guadalajara) y está pensado desde el inicio para con
 | D33 | Segunda persona: nunca en botones ni títulos; los mensajes heredados del mockup conservan su imperativo y los nuevos van en infinitivo o impersonales | `13 §1` |
 | D34 | Los paquetes internos usan el alcance neutral `@app/*` | `14 §1` |
 | D35 | Los estados de filamento, rollo, insumo y pieza en Existencias se definen en `04` con sus valores internos en `03` (el mockup los tenía solo en código) | `04 §1` y `§5`, `03`, `13 §8` |
+| D36 | Panel neutro: sin la marca de Quick Robot (mascota, nombre) y sin su color. La barra lateral muestra un monograma con el nombre y el giro de Ajustes. Motivo: el panel se va a distribuir a otros negocios | `mejoras/ronda-2.md §2`, `06 §1`, `07` |
+| D37 | Regla de color: **gris oscuro = costo, verde = ganancia** (reemplaza “morado = costo”); todo el color sale de tokens en un solo archivo, con `--accent` neutro | `07`, `CLAUDE.md` |
+| D38 | Variantes agrupadas: una familia = original + variantes (un solo nivel, `parent_id` siempre a la raíz), con `variant_label` y `displayName`; “Piezas N” cuenta familias; eliminar una original con variantes se bloquea (`PRODUCT_HAS_VARIANTS`) | `mejoras/ronda-2.md §3`, `05`, `12` |
+| D39 | Existencias: vista Lista (por defecto) además de Fichas; fichas sin cuadritos por unidad (número grande y barra); familias como una fila o ficha con sus miembros | `mejoras/ronda-2.md §4`, `06 §10` |
+| D40 | Estado de una familia en Existencias: suma de sus miembros; “Pocas” si algún miembro tiene 2 libres o menos (marcado para revisión por la persona) | `04 §5` caso 5.3 |
+| D41 | Inicio: “Atención” es la columna principal, agrupada en Urgente · Esta semana · Para revisar (`severity` = `urgent` \| `soon` \| `review`); se quita la cuadrícula de rollos | `mejoras/ronda-2.md §5`, `06 §2`, `12` |
+| D42 | Regla de pocos clics: patrones P1–P9, medición por flujo y presupuesto de clics fijado en pruebas; no se quitan confirmaciones de acciones que mueven dinero o existencias | `mejoras/ronda-2.md §11–§12` |
+| D43 | Ronda 2 en cuatro fases seguidas (medir, construir, medir clics, acortar clics) con fusión a la rama principal sin pedir permiso al cerrar cada una en verde (excepción a “dejar la rama lista”) | `CLAUDE.md`, `mejoras/ronda-2.md §1` |
+| D44 | Con datos reales en uso, toda migración de la ronda 2 es solo aditiva, con copia previa y probada contra casos raros (cadenas, huérfanas, nombres con “(variante)”) | `mejoras/ronda-2.md §1.6` |
+| D45 | Las maquetas de `reference/ronda-2/` mandan en estructura y comportamiento; los radios y sombras de componentes existentes son los del sistema | `mejoras/ronda-2.md` |
 
 ## Decisiones abiertas
 

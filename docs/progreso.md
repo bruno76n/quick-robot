@@ -37,3 +37,19 @@ Estados: `no iniciada` · `en curso` · `igual al mockup` · `verificada con dat
 | 3 | terminada | `docs/informe-fase-3.md` |
 | 4 | terminada en lo que no requiere la Mac (falta: .dmg en tu Mac y una semana de uso con tus datos) | `docs/informe-fase-4.md` |
 | 5 | planeación pendiente (`16`, `17`, `legal/`) | `docs/informe-fase-5.md` |
+
+## Ronda 2 (`mejoras/ronda-2.md`)
+
+Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 2` · `terminada`.
+
+| Parte | Fase | Estado | Notas |
+|---|---|---|---|
+| Medición del rediseño | A | terminada | `docs/mejoras/informe-ronda2-a.md`: inventario, morado y marca, datos, línea base de rendimiento y plan de la B (24 pasos) |
+| Panel neutro (sin morado ni marca) | B | no iniciada | |
+| Datos y API (familias, `variant_label`, `severity`) | B | no iniciada | Migración aditiva con copia previa |
+| Productos (fichas y lista con variantes agrupadas) | B | no iniciada | |
+| Existencias (lista y fichas simplificadas) | B | no iniciada | |
+| Inicio (atención por prioridad, sin rollos) | B | no iniciada | |
+| Medición de clics | C | no iniciada | `docs/mejoras/informe-ronda2-c.md` |
+| Mejoras de clics | D | no iniciada | “Agregar filamento” va primero; `docs/mejoras/informe-ronda2-d.md` |
+

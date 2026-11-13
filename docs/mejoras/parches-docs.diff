@@ -1,0 +1,421 @@
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -2,7 +2,7 @@
+ 
+ Sistema para negocios de impresión 3D: costeo, ventas, pedidos, producción, inventarios y reportes. Es **un solo producto**: aplicación web con cuentas y suscripción; la app de escritorio (Electron) es solo una cáscara para uso personal en Mac. Documentación completa en `docs/` (empieza por `docs/README.md`). Prompts por fase en `docs/prompts.md`.
+ 
+-**Dónde está cada cosa:** reglas de negocio → `04` · datos → `05` · pantallas y flujos → `06` · contrato de la API (entrada, salida, errores) → `12` · textos y mensajes en español → `13` · convenciones y pruebas → `14` · rendimiento, límites y fallos → `15` · seguridad → `11` · plan por fase → `10`.
++**Dónde está cada cosa:** reglas de negocio → `04` · datos → `05` · pantallas y flujos → `06` · contrato de la API (entrada, salida, errores) → `12` · textos y mensajes en español → `13` · convenciones y pruebas → `14` · rendimiento, límites y fallos → `15` · seguridad → `11` · plan por fase → `10` · **mejoras tras el uso real (ronda 2: variantes agrupadas, Existencias, Inicio, panel neutro, menos clics) → `docs/mejoras/ronda-2.md`**.
+ 
+ ## Lo que no se negocia
+ 
+@@ -11,7 +11,7 @@
+ 3. **Reglas de negocio solo en `packages/core`**: funciones puras, sin I/O, sin hora ni ids propios. Cada regla con prueba usando los casos numéricos de `docs/04-reglas-de-negocio.md`.
+ 4. **El servidor es la autoridad.** Recalcula con `core` y guarda su resultado; nunca el que mandó el cliente.
+ 5. **Una operación de negocio = un caso de uso en una transacción** (`markOrderReady`, `deliverOrder`, …). La interfaz no encadena escrituras sueltas.
+-6. **Nada específico de "Quick Robot" en el código.** Nombre, teléfono, canales, comisiones, márgenes y textos de documentos son registros del negocio (`workspace_settings`). Los datos de ejemplo viven solo en la semilla de desarrollo.
++6. **Nada específico de "Quick Robot" en el código ni en la interfaz.** Nombre, giro, teléfono, canales, comisiones, márgenes y textos de documentos son registros del negocio (`workspace_settings`). Los datos de ejemplo viven solo en la semilla de desarrollo. **El panel es neutro:** sin la marca de Quick Robot (mascota, nombre) y sin su color (morado); se va a distribuir a otros negocios (`docs/mejoras/ronda-2.md §2`).
+ 7. **Ningún `if (mode === 'cloud')` en reglas ni casos de uso.** Las diferencias entre local y nube se resuelven eligiendo dependencias (`AuthProvider`, `FileStore`, `Entitlements`, `Mailer`, `BackupStore`) en `apps/desktop` / `apps/cloud`.
+ 8. **Cada pantalla funciona sin funciones nativas.** Lo nativo (`window.desktop`) mejora; nunca habilita.
+ 9. **Inventarios = libros de movimientos** (filamento, piezas terminadas, insumos). Nunca se escribe "hay 7": se suma.
+@@ -52,11 +52,11 @@
+ 
+ ## Vocabulario de la interfaz (fijo)
+ 
+-Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Libres, Apartadas, Artículos. Botones y títulos sin segunda persona ("Registrar venta", no "Registra tu venta"); los mensajes que heredó del mockup conservan su imperativo ("Agrega al menos un artículo.") y los nuevos van en infinitivo o impersonales (`docs/13 §1`); los documentos para clientes sí pueden hablar directo. Color con significado: **morado = costo, verde = ganancia**.
++Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Libres, Apartadas, Artículos. Botones y títulos sin segunda persona ("Registrar venta", no "Registra tu venta"); los mensajes que heredó del mockup conservan su imperativo ("Agrega al menos un artículo.") y los nuevos van en infinitivo o impersonales (`docs/13 §1`); los documentos para clientes sí pueden hablar directo. Color con significado: **gris oscuro = costo, verde = ganancia** (el morado ya no se usa).
+ 
+ ## Diseño
+ 
+-Solo modo claro. Solo tipografía Geist. Tokens en `docs/07-frontend.md`. Si algo se ve distinto del mockup (`reference/Quick Robot mockup.html`), el mockup tiene la razón hasta que se decida lo contrario. Marca (ícono, mascota) en `assets/`. El nombre y el giro que se ven en pantalla y en documentos salen de Ajustes, nunca del código; el logo con el texto “Quick Robot” es solo para uso externo.
++Solo modo claro. Solo tipografía Geist. Tokens en `docs/07-frontend.md`, **neutros, sin morado y en un solo archivo**. Si algo se ve distinto del mockup (`reference/Quick Robot mockup.html`), el mockup tiene la razón hasta que se decida lo contrario, **salvo** en Productos, Existencias, Inicio y el color, donde mandan `docs/mejoras/ronda-2.md` y las maquetas de `reference/ronda-2/` (estructura y comportamiento; los radios y sombras son los del sistema). La marca (ícono, mascota) vive en `assets/` y **no aparece en la interfaz del panel**: la barra lateral muestra un monograma con el nombre y el giro de Ajustes. El logo con el texto “Quick Robot” es solo para uso externo.
+ 
+ ## Datos
+ 
+@@ -93,6 +93,8 @@
+ 
+ **Al cerrar cada fase:** escribir `docs/informe-fase-N.md` con lo hecho, qué pasó las pruebas, las decisiones tomadas, lo que quedó bloqueado o dudoso y qué conviene que revise la persona; actualizar `docs/progreso.md`; dejar la rama lista para fusionar. **Ninguna fase se fusiona con pruebas rojas.**
+ 
++**Excepción: la ronda 2** (`docs/mejoras/ronda-2.md §1`). Sus cuatro fases se fusionan a la rama principal **sin pedir permiso** al cerrar cada una en verde, con etiqueta `antes-ronda2-<letra>` como punto de regreso; si el entorno no deja publicar en la principal, se deja la rama lista y la fase siguiente se apila encima.
++
+ **Nunca:** agregar funciones fuera del alcance de `docs/01`; saltarse una prueba para "avanzar"; cambiar un número esperado de `docs/04` o de `golden/` para que la prueba pase; tocar archivos en `reference/`; escribir textos de interfaz fuera de `i18n/es.ts`; cambiar o reutilizar un código de error ya publicado en `docs/12`; mostrar al usuario el `message` técnico de un error; tocar datos reales del negocio (las pruebas usan `reference/mockup-backup-v7.json` o datos generados).
+ 
+ ## Cómo trabajar
+--- a/docs/01-vision-y-decisiones.md
++++ b/docs/01-vision-y-decisiones.md
+@@ -68,6 +68,16 @@
+ | D33 | Segunda persona: nunca en botones ni títulos; los mensajes heredados del mockup conservan su imperativo y los nuevos van en infinitivo o impersonales | `13 §1` |
+ | D34 | Los paquetes internos usan el alcance neutral `@app/*` | `14 §1` |
+ | D35 | Los estados de filamento, rollo, insumo y pieza en Existencias se definen en `04` con sus valores internos en `03` (el mockup los tenía solo en código) | `04 §1` y `§5`, `03`, `13 §8` |
++| D36 | Panel neutro: sin la marca de Quick Robot (mascota, nombre) y sin su color. La barra lateral muestra un monograma con el nombre y el giro de Ajustes. Motivo: el panel se va a distribuir a otros negocios | `mejoras/ronda-2.md §2`, `06 §1`, `07` |
++| D37 | Regla de color: **gris oscuro = costo, verde = ganancia** (reemplaza “morado = costo”); todo el color sale de tokens en un solo archivo, con `--accent` neutro | `07`, `CLAUDE.md` |
++| D38 | Variantes agrupadas: una familia = original + variantes (un solo nivel, `parent_id` siempre a la raíz), con `variant_label` y `displayName`; “Piezas N” cuenta familias; eliminar una original con variantes se bloquea (`PRODUCT_HAS_VARIANTS`) | `mejoras/ronda-2.md §3`, `05`, `12` |
++| D39 | Existencias: vista Lista (por defecto) además de Fichas; fichas sin cuadritos por unidad (número grande y barra); familias como una fila o ficha con sus miembros | `mejoras/ronda-2.md §4`, `06 §10` |
++| D40 | Estado de una familia en Existencias: suma de sus miembros; “Pocas” si algún miembro tiene 2 libres o menos (marcado para revisión por la persona) | `04 §5` caso 5.3 |
++| D41 | Inicio: “Atención” es la columna principal, agrupada en Urgente · Esta semana · Para revisar (`severity` = `urgent` \| `soon` \| `review`); se quita la cuadrícula de rollos | `mejoras/ronda-2.md §5`, `06 §2`, `12` |
++| D42 | Regla de pocos clics: patrones P1–P9, medición por flujo y presupuesto de clics fijado en pruebas; no se quitan confirmaciones de acciones que mueven dinero o existencias | `mejoras/ronda-2.md §11–§12` |
++| D43 | Ronda 2 en cuatro fases seguidas (medir, construir, medir clics, acortar clics) con fusión a la rama principal sin pedir permiso al cerrar cada una en verde (excepción a “dejar la rama lista”) | `CLAUDE.md`, `mejoras/ronda-2.md §1` |
++| D44 | Con datos reales en uso, toda migración de la ronda 2 es solo aditiva, con copia previa y probada contra casos raros (cadenas, huérfanas, nombres con “(variante)”) | `mejoras/ronda-2.md §1.6` |
++| D45 | Las maquetas de `reference/ronda-2/` mandan en estructura y comportamiento; los radios y sombras de componentes existentes son los del sistema | `mejoras/ronda-2.md` |
+ 
+ ## Decisiones abiertas
+ 
+--- a/docs/03-estructura-de-carpetas.md
++++ b/docs/03-estructura-de-carpetas.md
+@@ -138,7 +138,9 @@
+ | Movimiento de insumo | `supply_movement` |
+ | Proveedor | `supplier` |
+ | Pieza / producto | `product` |
+-| Variante | `product` con `parent_id` |
++| Variante | `product` con `parent_id` (y `variant_label`) |
++| Familia (original + sus variantes) | `product` raíz con sus `product` hijos |
++| Etiqueta de variante | `variant_label` |
+ | Colección / set | `collection` |
+ | Existencias | `stock` |
+ | Movimiento de existencias | `stock_movement` |
+--- a/docs/04-reglas-de-negocio.md
++++ b/docs/04-reglas-de-negocio.md
+@@ -123,6 +123,10 @@
+ 
+ > Caso 5.2 — Físicas 5 y apartadas 5 → `Todo apartado`. Físicas 5 y apartadas 3 (libres 2) → `Pocas`. Físicas 5 y apartadas 2 (libres 3) → `Disponible`. Físicas 0 → `Agotada`.
+ 
++**Estado de una familia de variantes** (original + variantes con existencias, `mejoras/ronda-2.md §4.1`). Sus físicas, apartadas y libres son la **suma** de sus miembros. Estado: `Agotada` si **todos** sus miembros están agotados; `Todo apartado` si la suma de libres es 0; `Pocas` si **algún** miembro tiene 2 libres o menos; si no, `Disponible`. Una pieza sin variantes (o con una sola que lleve existencias) usa la regla de arriba.
++
++> Caso 5.3 — Familia con tres miembros de libres 1, 1 y 2 (apartadas 2, 0 y 1) → suma: libres 4, apartadas 3 · `Pocas` (hay miembros con 2 o menos). Misma familia con libres 3, 4 y 6 → `Disponible`. Con libres 0, 0 y 0 y físicas > 0 → `Todo apartado`. Con físicas 0 en todos → `Agotada`.
++
+ **Sets armables hoy** = mínimo, entre las piezas del set, de `floor(libres / cantidad requerida)`; si alguna pieza no lleva existencias, 0.
+ 
+ **Al aceptar un pedido** se apartan las piezas planeadas; si ya no alcanzan, se aparta lo que haya y **el resto se imprime**. El sistema regresa cuántas faltaron para avisar.
+--- a/docs/05-modelo-de-datos.md
++++ b/docs/05-modelo-de-datos.md
+@@ -46,7 +46,7 @@
+ 
+ | Tabla | Columnas principales | Notas |
+ |---|---|---|
+-| `product` | `workspace_id`, `name`, `parent_id?` (variante), `mode` (`value` \| `formula`), `price_cents`, `margin_pct?`, `printer_id?` (nulo = promedio), `hours`, `batch_size`, `extras_cents`, `tracks_stock` (bool), `tags` (text[]), `note`, `photo_file_id?`, `spec` (jsonb: capa, relleno, paredes, soportes, boquilla, cama, archivo, nota) | `batch_size` (piezas por placa) es informativo: sirve para planear y no cambia el costo. Los campos `prep` y `acab` del mockup no se usan en ninguna pantalla y no se migran |
++| `product` | `workspace_id`, `name`, `parent_id?` (variante; siempre apunta a la **original raíz**, un solo nivel), `variant_label?` (texto 1–60; obligatoria si hay `parent_id`; las listas agrupadas muestran solo la etiqueta y fuera de ellas se muestra `displayName` = “original · etiqueta”), `mode` (`value` \| `formula`), `price_cents`, `margin_pct?`, `printer_id?` (nulo = promedio), `hours`, `batch_size`, `extras_cents`, `tracks_stock` (bool), `tags` (text[]), `note`, `photo_file_id?`, `spec` (jsonb: capa, relleno, paredes, soportes, boquilla, cama, archivo, nota) | `batch_size` (piezas por placa) es informativo: sirve para planear y no cambia el costo. Los campos `prep` y `acab` del mockup no se usan en ninguna pantalla y no se migran |
+ | `product_filament` | `workspace_id`, `product_id`, `filament_id`, `grams` | Qué filamentos y cuántos gramos lleva |
+ | `product_supply` | `workspace_id`, `product_id`, `supply_id`, `qty` | |
+ | `collection` | `workspace_id`, `name`, `price_cents?`, `extras_cents`, `tags`, `note` | Precio vacío = suma de sueltas |
+--- a/docs/06-pantallas-y-flujos.md
++++ b/docs/06-pantallas-y-flujos.md
+@@ -18,7 +18,7 @@
+ 
+ | Elemento | Qué hace |
+ |---|---|
+-| **Barra lateral** | Arriba: la mascota con el **nombre y el giro del negocio** (datos de Ajustes; el mockup los trae fijos como “Quick Robot · Impresión 3D”). Después: Inicio · *Vender*: Productos, Ventas, Pedidos · *Taller*: Filamentos, Insumos, Impresoras, Producción, Existencias, Compras · *Negocio*: Clientes, Gastos, Reportes, Ajustes. En pantallas pequeñas se oculta tras un botón de menú |
++| **Barra lateral** | Arriba: un **monograma** (iniciales del nombre del negocio) con el **nombre y el giro del negocio** (datos de Ajustes; el mockup los traía fijos como “Quick Robot · Impresión 3D” y con la mascota: **ya no**, el panel es neutro, `mejoras/ronda-2.md §2`). Después: Inicio · *Vender*: Productos, Ventas, Pedidos · *Taller*: Filamentos, Insumos, Impresoras, Producción, Existencias, Compras · *Negocio*: Clientes, Gastos, Reportes, Ajustes. En pantallas pequeñas se oculta tras un botón de menú |
+ | **Buscar** (⌘/Ctrl + K) | Paleta de comandos: busca piezas, clientes, pedidos, ventas, filamentos y acciones; Enter abre el resultado |
+ | **Atajos** (`?`) | Muestra la lista. `g` + letra navega (ir a pantalla); `⌘/Ctrl+Z` deshace; `⇧⌘Z` rehace |
+ | **Cajón lateral** | Detalle de un elemento de una lista ancha (filamento, insumo, pieza de existencias) sin salir de la lista; Esc o clic fuera lo cierra |
+@@ -31,7 +31,7 @@
+ 
+ ## 2. Inicio
+ 
+-**Muestra:** resumen compacto del taller (el "brief"): cifras clave del periodo, qué se está imprimiendo ahora, y una lista de **atenciones**, cada una con un botón que lleva al elemento. Se generan con estas reglas:
++**Muestra:** resumen compacto del taller (el "brief"): cifras clave del periodo, qué se está imprimiendo ahora, y las **atenciones** agrupadas por prioridad, cada una con un botón que lleva al elemento. **Ronda 2:** “Atención” es la columna principal, las atenciones se agrupan en **Urgente · Esta semana · Para revisar** con chips de filtro, y **se quitó la cuadrícula de rollos de filamento** (`mejoras/ronda-2.md §5`, maqueta `reference/ronda-2/inicio.html`). Las atenciones se generan con estas reglas:
+ 
+ - Pedido **aceptado** sin descontar filamento y con faltante → "falta tanto de tal filamento".
+ - Filamento con rollos y **150 g o menos** disponibles.
+@@ -42,6 +42,8 @@
+ - Insumo agotado o en su mínimo.
+ - Sin copia de seguridad descargada, o la última con más de **7 días**.
+ 
++**Prioridad de cada atención** (`severity`, `core › classifyAttention`): **Urgente** = pedido aceptado con faltante de filamento; pedido activo con entrega vencida, hoy o mañana. **Esta semana** = entrega en 2 días; venta con saldo; filamento con 150 g o menos; insumo agotado o en su mínimo. **Para revisar** = mantenimiento pendiente; precio por debajo del piso; copia de seguridad. Si un grupo pasa de 5, se muestran 5 y “Ver las N restantes” despliega el resto.
++
+ **Acciones**
+ | Botón | Caso de uso / efecto | Lleva a |
+ |---|---|---|
+@@ -54,7 +56,7 @@
+ 
+ ## 3. Productos
+ 
+-**Muestra:** dos pestañas con contador, **Piezas** y **Colecciones**; buscador; forma de ver en **Fichas** o **Lista**; en Piezas, filtros **Todas · Técnicas · Variantes**. Cada pieza muestra precio, costo, ganancia y libres en Existencias.
++**Muestra:** dos pestañas con contador, **Piezas** y **Colecciones**; buscador; forma de ver en **Fichas** o **Lista**; en Piezas, filtros **Todas · Técnicas · Con variantes**. Cada pieza muestra precio, costo, ganancia y libres en Existencias. **Ronda 2:** las variantes viven **dentro de su pieza original** (una familia): el botón “N variantes” de la ficha despliega un panel debajo de su fila, y en la lista una flecha despliega sus filas. “Piezas N” cuenta familias. Detalle en `mejoras/ronda-2.md §3`; maquetas `productos-fichas.html` y `productos-lista.html`.
+ 
+ | Botón | Efecto | Lleva a |
+ |---|---|---|
+@@ -62,7 +64,8 @@
+ | Nueva colección | — | Colección (nueva). Pide que existan piezas |
+ | Fichas / Lista | Preferencia de vista | — |
+ | Vender (en una pieza con libres) | — | Armar venta con esa pieza |
+-| Variante (en una pieza) | Abre la calculadora con una **copia** de la pieza (nombre "… (variante)", `parentId` = la original); al Guardar se crea con `saveProduct` | Calculadora |
++| Variante · Nueva variante · Agregar variante de … (en una pieza) | Abre la calculadora con una **copia** de la original, título “Nueva variante de {pieza}” y el campo **Nombre de la variante** enfocado; al Guardar se crea con `saveProductAsVariant` (`parentId` = la original raíz) y se vuelve a Productos con su panel abierto | Calculadora |
++| N variantes (en una ficha) · flecha (en la lista) | Despliega o cierra las variantes de la pieza; un solo panel abierto a la vez en Fichas | — |
+ | Abrir pieza / colección | — | Calculadora / Colección |
+ 
+ ### 3.1 Calculadora (pieza)
+@@ -78,7 +81,7 @@
+ | Cotizar | Diálogo de cotización rápida (cantidad → total y tiempo) | — |
+ | Vender | — | Armar venta |
+ | Guardar | `saveProduct` | Productos |
+-| Guardar como variante nueva | `saveProductAsVariant` (copia con `parent_id`) | Productos |
++| Guardar como variante nueva | `saveProductAsVariant` (copia con `parent_id` = la original raíz y `variant_label`) | Productos |
+ | Eliminar | `deleteProduct` (soft) + Deshacer | Productos |
+ | Cancelar | Descarta cambios | Productos |
+ 
+@@ -216,13 +219,15 @@
+ 
+ ## 10. Existencias
+ 
+-**Muestra:** lista ancha de piezas con existencias: Físicas, Apartadas, Libres, y sets armables. Cajón con movimientos.
++**Muestra:** piezas con existencias en **Lista** (por defecto) o **Fichas** (selector, se recuerda): Estado, Libres, Apartadas, Total y precio de lista, y sets armables; filtros por estado (Todas · Pocas · Todo apartado · Disponible · Agotadas) y buscador. Orden: menos libres primero. **Ronda 2:** una pieza con variantes es **una fila o ficha** con sus miembros desplegables y la suma de sus existencias; las fichas ya no dibujan un cuadrito por unidad (un número grande de libres y una barra de libres contra apartadas). El cajón con movimientos se abre desde la pieza o el miembro que tiene movimientos propios. Detalle en `mejoras/ronda-2.md §4`; maquetas `existencias-lista.html` y `existencias-fichas.html`.
+ | Botón | Caso de uso |
+ |---|---|
+ | Llevar existencias (en una pieza) | `enableStockTracking` (con conteo inicial) |
+ | Ajustar | `adjustStock` (conteo real o corrección con nota) |
+ | Registrar impresión | Abre Producción con el diálogo (suma a existencias) |
+-| Seleccionar pieza | Abre el cajón |
++| Fichas / Lista | Preferencia de vista de Existencias (`view.stock`) | — |
++| Seleccionar pieza (o un miembro de una familia) | Abre el cajón | — |
++| Flecha de una familia | Despliega o cierra sus variantes | — |
+ 
+ ---
+ 
+--- a/docs/07-frontend.md
++++ b/docs/07-frontend.md
+@@ -50,24 +50,24 @@
+ | `--panel`, `--panel-2` | `#f6f6f8`, `#ececf1` | Paneles, chips neutros, pastillas |
+ | `--ink`, `--ink-2`, `--ink-3` | `#121214`, `#6a6a73`, `#777782` | Texto: principal, secundario, terciario |
+ | `--line`, `--line-2` | `#e7e7ec`, `#d2d2da` | Bordes |
+-| `--purple` | `#6b3fd4` | Acción principal y **Costo** |
+-| `--purple-soft` | `#efe9fd` | Fondo de costo |
++| `--accent` | `#121214` (igual a `--ink`) | Acción principal, selección y anillo de foco. **Neutro a propósito**: el panel no lleva color de marca (`mejoras/ronda-2.md §2`) |
++| `--cost`, `--cost-soft` | `#5a5a65`, `#f1f1f4` | **Costo** |
+ | `--green`, `--green-ink`, `--green-soft` | `#00ae42`, `#067a30`, `#e3f5e9` | **Ganancia**, estados buenos |
+ | `--amber`, `--amber-ink`, `--amber-soft` | `#e9a817`, `#86500a`, `#fff1d3` | Avisos |
+ | `--red`, `--red-ink`, `--red-soft` | `#d6334f`, `#b3223f`, `#fde8ec` | Errores, cancelado |
+ | `--blue` | `#3f86c9` | Informativo |
+-| `--c-m … --c-f` | morados y gris | Capas de la barra de desglose del costo |
++| `--c-m … --c-f` | grises (y tonos neutros) | Capas de la barra de desglose del costo |
+ | Radio | tarjetas 20 px, botones/campos 10 px, diálogos 18 px, pastillas 99 px | |
+ | Texto base | 15 px / 1.45; títulos con espaciado negativo | |
+ 
+-**Regla de color con significado:** *morado = costo*, *verde = ganancia*. Se mantiene en toda la interfaz.
++**Regla de color con significado:** *gris oscuro = costo*, *verde = ganancia*. Se mantiene en toda la interfaz. **No se usa morado** (era el color de la marca de Quick Robot; D36–D37). Todo el color sale de estos tokens, definidos en un solo archivo, de modo que cambiar el color de acento de un negocio sea cambiar una variable. Los colores de **datos** (el swatch de un filamento) no son color de interfaz y no cambian.
+ 
+ **Componentes que ya existen en el mockup y se reconstruyen como componentes reales:**
+ `Button` (primary / default / sm / link), `Field` (etiqueta + ayuda), `UnitInput` ($, g, h, %), `Segmented`, `Tag`, `Pill`/`Chip` (con punto de color), `Table` ancha (`xlist`, con columnas y fila clicable), `Drawer` (cajón), `Dialog`, `Toast` (con acción), `Stepper` del pedido, `Tabs`, `Details` plegable, `StatBand` (cifras), `KV` (listas de datos), `Calendar` (mes), `CommandPalette`, `DocumentSheet` (cotización/nota con estilos de impresión).
+ 
+ **Responsivo:** tres anchos probados en el mockup (escritorio, tableta, móvil). La barra lateral se oculta tras un botón en pantallas pequeñas. Sin desbordes horizontales.
+ 
+-**Accesibilidad mínima:** foco visible (anillo morado de 2 px), diálogos y cajones con captura de foco y cierre con Esc, `prefers-reduced-motion` respetado, contraste suficiente en texto terciario.
++**Accesibilidad mínima:** foco visible (anillo de 2 px con `--accent`), diálogos y cajones con captura de foco y cierre con Esc, `prefers-reduced-motion` respetado, contraste suficiente en texto terciario.
+ 
+ ## Cómo hablar con el servidor
+ 
+--- a/docs/09-hoja-de-ruta.md
++++ b/docs/09-hoja-de-ruta.md
+@@ -50,3 +50,7 @@
+ ## Cómo medir el avance
+ 
+ `docs/progreso.md`: una línea por pantalla con su estado (*no iniciada · en curso · igual al mockup · verificada*). Cada fase termina cuando sus filas llegan a "igual al mockup", sus pruebas pasan y existe su `docs/informe-fase-N.md`.
++
++## Después de la fase 4 · Ronda 2
++
++Tras una semana de uso real se hace una ronda de mejoras en cuatro fases cortas (medir el rediseño, construirlo, medir clics, acortarlos): variantes agrupadas, Existencias en lista, Inicio con atención por prioridad, panel neutro y menos clics. Plan en `mejoras/ronda-2.md`. No condiciona la fase 5.
+--- a/docs/12-api.md
++++ b/docs/12-api.md
+@@ -80,6 +80,7 @@
+ | `RESTORE_CONFLICT` | 409 | `entity`, `reason` | "Deshacer" ya no es posible (el nombre ya lo usa otro registro) |
+ | `PRODUCT_IN_ACTIVE_ORDERS` | 409 | `count`, `folios[]` | Eliminar una pieza que está en pedidos sin entregar |
+ | `PRODUCT_HAS_STOCK` | 409 | `onHand` | Eliminar una pieza con existencias físicas |
++| `PRODUCT_HAS_VARIANTS` | 409 | `count` | Eliminar una original que aún tiene variantes vivas (ronda 2) |
+ | `STOCK_TRACKING_HAS_STOCK` | 409 | `onHand` | Dejar de llevar existencias con piezas en la repisa |
+ | `COLLECTION_EMPTY` | 422 | — | Colección sin piezas |
+ | `NO_PRODUCTS` | 409 | — | Crear una colección sin que existan piezas |
+@@ -170,11 +171,11 @@
+ 
+ | Operación | Entrada | Salida | Errores |
+ |---|---|---|---|
+-| `GET /products` | `q`, `filter` (`all` \| `technical` \| `variant`), `tag`, `page` | Página de `{ id, name, tags, parentId, photoUrl, costCents, listCents, floorCents, tracksStock, free }` | — |
++| `GET /products` | `q`, `filter` (`all` \| `technical` \| `with_variants`), `tag`, `page` | **Página de familias** (la paginación cuenta familias, no piezas): `{ id, name, tags, photoUrl, costCents, listCents, floorCents, tracksStock, free, variantCount, variants[] }`, donde cada variante trae `{ id, label, displayName, costCents, listCents, tracksStock, free, soldCount, material }`. Una pieza sin variantes trae `variants: []`. También devuelve `counts { families, technical, withVariants }` para los chips y la pestaña. Dos consultas por página, no una por tarjeta. (`variant` ya no existe como valor de `filter`.) | — |
+ | `GET /products/:id` | — | Pieza completa + `breakdown`, `suggestedCents`, `floorCents`, `listCents`, `profitByChannel[]`, `stock { physical, reserved, free }` | — |
+ | `saveProduct` · `POST /products` y `PUT /products/:id` | `{ name, tags[], mode ('value' \| 'formula'), priceCents?, marginPct?, printerId? (nulo = promedio), hours, batchSize, extrasCents, tracksStock, filaments[{ filamentId, grams }], supplies[{ supplyId, qty }], spec{…}, note, photoFileId? }` | Pieza completa (el costo lo recalcula el servidor) | `STOCK_TRACKING_HAS_STOCK` |
+-| `saveProductAsVariant` · `POST /products/:id/variant` | Igual que `saveProduct`; crea una copia con `parentId = :id` | Pieza nueva | — |
+-| `deleteProduct` · `DELETE /products/:id` | — | 204 (borrado suave) | `PRODUCT_IN_ACTIVE_ORDERS`, `PRODUCT_HAS_STOCK` |
++| `saveProductAsVariant` · `POST /products/:id/variant` | Igual que `saveProduct` más `variantLabel` (1–60, obligatorio); crea una copia con `parentId` = la **original raíz** de `:id` (si `:id` es una variante, se sube a su original) | Pieza nueva con `displayName` | — |
++| `deleteProduct` · `DELETE /products/:id` | — | 204 (borrado suave) | `PRODUCT_IN_ACTIVE_ORDERS`, `PRODUCT_HAS_STOCK`, `PRODUCT_HAS_VARIANTS` |
+ | `restoreProduct` · `POST /products/:id/restore` | — | Pieza | `RESTORE_CONFLICT` |
+ | `GET /collections` | `q`, `page` | Página de `{ id, name, tags, listCents, costCents, buildableSets }` | — |
+ | `GET /collections/:id` | — | Colección + partes `{ productId, name, qty }` + costo, precio, ganancia, `looseCents`, `buildableSets` | — |
+@@ -288,7 +289,7 @@
+ | `GET /print-runs/:id` | — | Registro con filamento por rollo y foto | — |
+ | `logPrintRun` · `POST /print-runs` | `{ on, productId? (o `text` si es prueba), qty, printerId?, result ('ok' \| 'fail'), hours, reason, filaments[{ spoolId, grams }], photoFileId? }` | Registro. `ok` + `stock` suma piezas a existencias; `ok` que no sea prueba gasta los insumos de la pieza | `NO_SPOOLS` · aviso `FILAMENT_SHORTFALL` |
+ | `deletePrintRun` · `DELETE /print-runs/:id` | — | 204. Devuelve filamento e insumos, quita las piezas que sumó, resta las horas | `PRINT_RUN_LOCKED` · aviso `FILAMENT_NOT_RETURNED` |
+-| `GET /stock` | `q`, `page` | Página de `{ productId, name, physical, reserved, free, buildableSets, status (`out` \| `all_reserved` \| `few` \| `ok`) }` | — |
++| `GET /stock` | `q`, `status` (`all` \| `few` \| `all_reserved` \| `ok` \| `out`), `sort` (`free_asc` por defecto \| `free_desc`), `page` | **Página de filas** (una pieza simple o una familia): `{ productId, name, listCents, physical, reserved, free, buildableSets, status, members[] }`. Una familia suma sus miembros y su `status` sigue `04 §5`; `members[]` trae `{ productId, label, displayName, physical, reserved, free, status }` (original primero) y va vacío en una pieza simple. Además `counts { all, few, allReserved, ok, out }` y `totals { units, pieces, free, reserved }` (`pieces` cuenta familias) | — |
+ | `GET /stock/:productId` | — | Pieza con `movements[]` | — |
+ | `enableStockTracking` · `POST /stock/:productId/enable` | `{ initialCount ≥ 0 }` | Pieza | — |
+ | `adjustStock` · `POST /stock/:productId/adjust` | `{ mode ('count' \| 'delta'), value, note }` | Pieza | `COUNT_UNCHANGED` |
+@@ -315,7 +316,7 @@
+ | `deleteExpense` · `DELETE /expenses/:id` | — | 204 | — |
+ | `restoreExpense` · `POST /expenses/:id/restore` | — | Gasto | — |
+ | `GET /reports` | `period` (`7` \| `30` \| `90` \| `all`) o `from` y `to` | `{ totals { salesCents, costCents, profitCents, marginPct, pieces }, byChannel[], topProducts[], expensesCents, netProfitCents, investmentRecovered }` | — |
+-| `GET /home` | — | `{ stats, printingNow[], attentions[] }`; cada atención trae `kind`, `severity`, `target { type, id }` y `params` (`06 §2`) | — |
++| `GET /home` | — | `{ stats, printingNow[], attentions[] }`; cada atención trae `kind`, `severity` (`urgent` \| `soon` \| `review`, calculado por `core › classifyAttention`, `06 §2`), `target { type, id }` y `params`. Ya no manda la cuadrícula de rollos de filamento | — |
+ | `GET /search` | `q` (mín. 2 letras) | Grupos `{ products, customers, orders, sales, filaments, actions }`, máximo 8 por grupo | — |
+ 
+ **Invalidan:** `customers`, `expenses`, `reports`, `home`.
+--- a/docs/13-textos-y-errores.md
++++ b/docs/13-textos-y-errores.md
+@@ -98,6 +98,7 @@
+ |---|---|
+ | `PRODUCT_IN_ACTIVE_ORDERS` | Esta pieza está en {count} {count\|pedido sin entregar\|pedidos sin entregar} ({folios}). Primero deben entregarse o eliminarse. |
+ | `PRODUCT_HAS_STOCK` | No se puede eliminar: quedan {onHand} {onHand\|pieza\|piezas} en Existencias. Primero ajustar el conteo a 0. |
++| `PRODUCT_HAS_VARIANTS` | Esta pieza tiene {count} {count\|variante\|variantes}. Primero hay que eliminarlas. |
+ | `STOCK_TRACKING_HAS_STOCK` | Hay {onHand} en existencias: ajústalas a 0 en Existencias antes de desactivarlo. |
+ | `COLLECTION_EMPTY` | La colección necesita al menos una pieza. |
+ | `NO_PRODUCTS` | Primero crea una pieza en Productos. |
+@@ -386,6 +387,12 @@
+ 
+ ---
+ 
++## 9.1 Textos de la ronda 2
++
++Los textos nuevos de variantes agrupadas, Existencias (lista y fichas), Inicio (atención por prioridad) y la barra lateral neutra están en `mejoras/ronda-2.md §9` (claves de `es.ts` incluidas). Los demás textos de esas pantallas no cambian.
++
++---
++
+ ## 10. Cómo se prueba
+ 
+ - `i18n.test.ts`: cada código de `12 §2` tiene entrada en `errors` y en `warnings`; ninguna clave de `toast`, `errors` o `fields` está vacía; todo parámetro `{x}` del texto existe en `details` (también el primero de cada plural y de cada elección); ningún texto escribe a mano la unidad de un parámetro `…Cents`, `…Grams`, `…Hours` o `…Pct`.
+--- a/docs/README.md
++++ b/docs/README.md
+@@ -21,7 +21,8 @@
+ | [13 · Textos y errores](13-textos-y-errores.md) | Todos los mensajes en español: errores, avisos, campos, confirmaciones, estados |
+ | [14 · Convenciones y pruebas](14-convenciones-y-pruebas.md) | Cómo se nombra y se escribe el código, cómo se escribe una prueba, datos de prueba y cobertura mínima |
+ | [15 · Rendimiento y errores](15-rendimiento-y-errores.md) | Presupuestos de tiempo, límites, y qué ve la persona cuando algo falla |
+-| [prompts](prompts.md) | **Un prompt listo para pegar por cada fase**, plantilla de informe y qué hacer entre fases |
++| [prompts](prompts.md) | **Un prompt listo para pegar por cada fase**, plantilla de informe y qué hacer entre fases (incluye el de la ronda 2, §9) |
++| [mejoras/ronda-2](mejoras/ronda-2.md) | **Ronda 2 tras el uso real:** variantes agrupadas, Existencias, Inicio, panel neutro y menos clics, en cuatro fases autónomas |
+ | [decisiones](decisiones.md) · [progreso](progreso.md) | Registro de decisiones y estado de cada pantalla (los llena Claude Code) |
+ 
+ Además: `CLAUDE.md` en la raíz del proyecto resume las reglas para quien programe.
+@@ -34,6 +35,7 @@
+ | `reference/mockup-backup-v7.json` | Copia de seguridad del mockup con datos de ejemplo (semilla y prueba del importador) |
+ | `reference/mockup-textos.md` | Texto visible de cada pantalla y diálogo del mockup (para llenar `es.ts`) |
+ | `packages/core/test/golden/mockup-values.json` | Costos y precios esperados de cada pieza y colección del mockup (±0.01) |
++| `reference/ronda-2/` | Cinco maquetas HTML de la ronda 2 (Productos, Existencias, Inicio); ver su README |
+ | `assets/` | Ícono de la app, logo y mascota (provisionales; ver su README) |
+ 
+ ## Por dónde empezar
+--- a/docs/decisiones.md
++++ b/docs/decisiones.md
+@@ -48,3 +48,13 @@
+ - **Unidad repetida:** `SPOOL_INSUFFICIENT` escribía “g” después de `{availableGrams}`, que ya se formatea con su unidad. Regla nueva en `13 §2`: la unidad nunca va en el texto; `i18n.test.ts` lo comprueba.
+ - **Sintaxis de `t()`:** había plurales sin nombre (`{count} {pieza|piezas}`) y elecciones sin definir (`{entregado|cancelado}`). Ahora hay tres formas explícitas (valor, plural, elección) y todos los textos se reescribieron con ellas.
+ - **Referencia:** el límite de 100 MB de las copias está en `15 §4`, no en `§3` (corregido en `12` y `07`).
++
++## 2026-11-12 · Ronda 2 · Planeación tras una semana de uso real
++Después de una semana usando el sistema con datos reales, la persona pidió tres rediseños y una regla de pocos clics. Se diseñaron las pantallas como maquetas (`reference/ronda-2/`) y se escribió el plan en `mejoras/ronda-2.md`. Decisiones D36–D45 en `01`:
++- **Variantes agrupadas bajo su pieza** (Productos): antes cada variante era una tarjeta aparte con “(variante)” en el nombre.
++- **Existencias:** vista Lista y fichas sin cuadritos repetidos (el número de cuadritos duplicaba el de “libres”).
++- **Inicio:** la atención dejaba de duplicar la cuadrícula de rollos; se quita la cuadrícula y la atención se agrupa por prioridad.
++- **Panel neutro:** se quita el morado y la mascota de la interfaz porque el panel se va a distribuir a otros negocios; cambia la regla de color (“morado = costo” pasa a “gris oscuro = costo”) en `CLAUDE.md` y `07`.
++- **Pocos clics:** se medirá cada flujo y se acortarán los que más se usan; el primero es “Agregar filamento” en una pieza nueva (la fila nueva debe nacer con el selector abierto).
++- **Abierto para revisión de la persona:** estado de una familia en Existencias (“Pocas” si algún miembro está bajo), vista por defecto de Existencias (Lista) y que Productos abra el panel de variantes solo al buscar por una variante.
++
+--- a/docs/progreso.md
++++ b/docs/progreso.md
+@@ -37,3 +37,19 @@
+ | 3 | no iniciada | `docs/informe-fase-3.md` |
+ | 4 | no iniciada | `docs/informe-fase-4.md` |
+ | 5 | planeación pendiente (`16`, `17`, `legal/`) | `docs/informe-fase-5.md` |
++
++## Ronda 2 (`mejoras/ronda-2.md`)
++
++Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 2` · `terminada`.
++
++| Parte | Fase | Estado | Notas |
++|---|---|---|---|
++| Medición del rediseño | A | no iniciada | `docs/mejoras/informe-ronda2-a.md` |
++| Panel neutro (sin morado ni marca) | B | no iniciada | |
++| Datos y API (familias, `variant_label`, `severity`) | B | no iniciada | Migración aditiva con copia previa |
++| Productos (fichas y lista con variantes agrupadas) | B | no iniciada | |
++| Existencias (lista y fichas simplificadas) | B | no iniciada | |
++| Inicio (atención por prioridad, sin rollos) | B | no iniciada | |
++| Medición de clics | C | no iniciada | `docs/mejoras/informe-ronda2-c.md` |
++| Mejoras de clics | D | no iniciada | “Agregar filamento” va primero; `docs/mejoras/informe-ronda2-d.md` |
++
+--- a/docs/prompts.md
++++ b/docs/prompts.md
+@@ -41,7 +41,7 @@
+ cuando pasan pruebas, lint, typecheck y pnpm security (docs/14 §6).
+ 
+ La fase termina cuando: agrego un rollo de filamento en el navegador y queda guardado en el
+-archivo local; los casos 1.1 y 1.2 de docs/04 pasan; la prueba de aislamiento entre negocios pasa;
++archivo local; los casos 1.1, 1.2 y 1.3 de docs/04 pasan; la prueba de aislamiento entre negocios pasa;
+ y el lint rechaza una frontera rota.
+ 
+ No hagas nada fuera de la fase 1. No me hagas preguntas salvo los casos de parada de CLAUDE.md.
+@@ -239,3 +239,69 @@
+ | Algo no se ve igual al mockup | `Compara la pantalla X con el mockup en 1440, 820 y 390, lista las diferencias y corrígelas. Textos: reference/mockup-textos.md.` |
+ | Quiero ver cómo va todo | `Resume docs/progreso.md: qué pantallas están igual al mockup, cuáles no y qué sigue.` |
+ | Se interrumpió una sesión | `Continúa donde quedaste: lee docs/progreso.md y el último commit de la rama actual.` |
++
++---
++
++## 9. Ronda 2 · Mejoras tras el uso real (fases A a D, todo seguido)
++
++El sistema ya está construido y se usa con datos reales. Este prompt hace **las cuatro fases de la ronda 2** una tras otra, sin parar: A mide el rediseño, B lo construye, C mide los clics y D los acorta. Cada fase se fusiona sola a la rama principal si todo está en verde. Plan completo en `docs/mejoras/ronda-2.md`.
++
++**Antes de pegarlo:** haz una copia de seguridad (Ajustes › Descargar copia) y guárdala aparte. Descomprime el .zip de la ronda 2 **dentro** de la carpeta del proyecto (solo agrega archivos nuevos; no pisa nada). Abre Claude Code en la carpeta del proyecto, en la rama principal y sin cambios sin guardar.
++
++```
++Haz la ronda 2 completa (fases A, B, C y D) de docs/mejoras/ronda-2.md, en modo autónomo y sin
++parar entre fases.
++
++Antes de nada, pon los documentos al día: la carpeta trae archivos nuevos (docs/mejoras/ronda-2.md,
++docs/mejoras/parches-docs.diff y reference/ronda-2/). Aplica el parche a las versiones actuales de
++los documentos (git apply --3way o patch -p1). Si un bloque no encaja porque el documento cambió
++durante la construcción, aplica el mismo cambio a mano conservando lo que ya tenía; en
++decisiones.md y progreso.md solo agrega lo nuevo al final. Nunca reemplaces un documento entero por
++una copia vieja. Un commit: "docs: ronda 2 planning".
++
++Después lee CLAUDE.md y docs/mejoras/ronda-2.md completos. Luego lee solo: 01 (D36 a D45),
++04 (§5), 05 (producto), 06 (§1, §2, §3 y §10), 07 (sistema de diseño), 12 (productos,
++existencias y home), 13 (§3 y §9.1), 14 y 15 (§1). Abre en el navegador las cinco maquetas de
++reference/ronda-2/ (ver su README) y úsalas como la referencia de estructura y comportamiento.
++
++El sistema ya está en uso con datos reales. No toques la base real: las pruebas usan datos
++generados o reference/mockup-backup-v7.json. Toda migración es solo aditiva, se prueba con casos
++raros (variante de variante, original eliminada, nombres con "(variante)") y antes de aplicarla
++se hace la copia de BackupStore.
++
++Orden, una rama por fase (ronda2-a-medicion, ronda2-b-rediseno, ronda2-c-clics, ronda2-d-mejoras):
++A) mide el rediseño y escribe docs/mejoras/informe-ronda2-a.md;
++B) construye el rediseño en los pasos B1 a B6 de la sección 8 de ronda-2.md;
++C) mide los clics de cada flujo (sección 11) y busca por tu cuenta otros flujos con pasos de más;
++D) acorta lo que C marcó "hacer", empezando por "Agregar filamento" en una pieza nueva: la fila
++   nueva debe nacer con el selector abierto y el foco dentro (sección 12).
++
++Un commit por paso, mensaje en inglés. Un paso solo está terminado cuando pasan pruebas, lint,
++typecheck y pnpm security. Compara cada pantalla nueva contra su maqueta en 1440, 820 y 390.
++Mantén los documentos al día (04, 06, 12, 13) en el mismo commit que cambia el comportamiento.
++
++Al cerrar cada fase con todo en verde: crea la etiqueta antes-ronda2-<letra> en la rama principal,
++fusiona la fase a la rama principal sin pedirme permiso y publica. Si el entorno solo deja publicar
++tu rama de trabajo, deja la rama lista, dilo en el informe y apila la fase siguiente encima.
++Nunca fusiones con pruebas en rojo, no fuerces ningún push, no reescribas la historia.
++
++Cambios que NO debes hacer: agrupar variantes en los selectores de venta o pedido, subir logo del
++negocio, elegir el color de acento por negocio, cambiar fórmulas de costo o precio, ni quitar
++confirmaciones de acciones que mueven dinero o existencias.
++
++No me hagas preguntas salvo los casos de parada de CLAUDE.md. Si algo no está claro, decide con
++ronda-2.md, luego 04 y 06, luego lo más simple, y anótalo en docs/decisiones.md.
++
++Al cerrar cada fase escribe docs/mejoras/informe-ronda2-<letra>.md (plantilla en docs/prompts.md §6)
++y actualiza docs/progreso.md, de modo que una sesión nueva pueda continuar leyéndolo. Al terminar
++la D, deja un resumen final de las cuatro fases, con la tabla de clics antes y después.
++```
++
++**Si se interrumpe a la mitad:**
++
++```
++Continúa la ronda 2 donde quedaste: lee docs/progreso.md, los informes de docs/mejoras/ y el último
++commit de la rama actual. Sigue las mismas reglas de docs/mejoras/ronda-2.md (fusionar cada fase
++en verde sin pedirme permiso) y termina las fases que falten.
++```
++
