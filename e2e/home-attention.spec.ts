@@ -104,7 +104,7 @@ for (const width of [1440, 390]) {
       const cases: [string, RegExp][] = [
         ['Agregar rollo', /\/filamentos\?f=/],
         ['Abrir pedido', /\/pedidos\/pedido\?id=/],
-        ['Registrar abono', /\/ventas\?v=/],
+        ['Registrar abono', /\/ventas\?v=[^&]+&abono=1$/],
         ['Ver filamento', /\/filamentos\?f=/],
         ['Ver insumo', /\/insumos\?i=/],
         ['Ver impresoras', /\/impresoras$/],

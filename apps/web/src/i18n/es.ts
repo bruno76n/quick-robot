@@ -59,7 +59,7 @@ export const es = {
     sales: {
       title: 'Ventas', sub: 'Últimos 60 días.', register: 'Registrar venta', registerFirst: 'Registrar la primera venta',
       allChannels: 'Todos los canales', channelGroup: 'Canal', colDate: 'Fecha', colItems: 'Artículos', colTotal: 'Total', colProfit: 'Ganancia',
-      empty: 'Sin ventas en este canal.', collection: 'Colección', more: '+ {count} más', returned: 'Devuelta', owes: 'Debe {amount}',
+      empty: 'Sin ventas en este canal.', collection: 'Colección', more: '+ {count} más', returned: 'Devuelta', owes: 'Debe {amount}', owesPay: '{owes}: registrar abono',
       vsList: '{sign}{value}% vs lista', orderRef: 'Pedido #{folio}',
       owedNote: 'Hay {count} {count|venta|ventas} con saldo: faltan {amount} por cobrar. Se registra con “Registrar abono” al abrir la venta.',
       when: 'en los últimos 60 días', whenChannel: 'en los últimos 60 días por {channel}',

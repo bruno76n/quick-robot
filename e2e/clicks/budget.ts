@@ -17,8 +17,8 @@ export const BUDGET = {
   sellFromStock: { today: 2, fieldsClicked: 0 },
   sellFromProducts: { today: 2, fieldsClicked: 0 },
   saleSeveralItems: { today: 7, fieldsClicked: 1 },
-  salePayment: { today: 3, fieldsClicked: 0 },
-  salePaymentFromHome: { today: 3, fieldsClicked: 0 },
+  salePayment: { today: 2, fieldsClicked: 0 },
+  salePaymentFromHome: { today: 2, fieldsClicked: 0 },
   returnSale: { today: 3, fieldsClicked: 0 },
   // Pedidos
   newOrderNewCustomer: { today: 6, fieldsClicked: 1 },

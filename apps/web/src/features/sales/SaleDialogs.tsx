@@ -31,10 +31,13 @@ type Sub = null | 'edit' | 'pay' | 'return' | 'doc';
 const TOUCH_ALL = ['sales', 'stock', 'products', 'collections', 'customers', 'orders', 'reports', 'home', 'search'] as const;
 const TOUCH_PAY = ['sales', 'customers', 'reports', 'home'] as const;
 
-export function SaleDialogs({ id, onClose }: { id: string; onClose: () => void }) {
-  const [sub, setSub] = useState<Sub>(null);
+export function SaleDialogs({ id, startWithPayment = false, onClose }: { id: string; startWithPayment?: boolean; onClose: () => void }) {
+  // `?abono=1` (the "Debe" chip of the row, "Registrar abono" of Inicio): the payment opens on top of the sale and
+  // Cancelar returns to the sale (ronda-2 §12, D5). A sale that owes nothing, or was given back, shows the sale.
+  const [sub, setSub] = useState<Sub>(startWithPayment ? 'pay' : null);
   const { data: s } = useQuery({ queryKey: [...keys.sales, 'detail', id], queryFn: async () => (await salesApi.get(id)).data });
   if (!s) return null;
+  if (sub === 'pay' && (s.return || s.totals.owedCents <= 0)) return <SaleDialog s={s} onClose={onClose} open={setSub} />;
   if (sub === 'edit') return <EditDialog s={s} onBack={() => setSub(null)} onDone={onClose} />;
   if (sub === 'pay') return <PaymentDialog s={s} onBack={() => setSub(null)} onDone={onClose} />;
   if (sub === 'return') return <ReturnDialog s={s} onBack={() => setSub(null)} onDone={onClose} />;

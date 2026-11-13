@@ -23,7 +23,7 @@ test('Inicio shows the brief and the attentions; each button goes to its element
     ['Agregar rollo', /\/filamentos\?f=/],
     ['Ver filamento', /\/filamentos\?f=/],
     ['Abrir pedido', /\/pedidos\/pedido\?id=/],
-    ['Registrar abono', /\/ventas\?v=/],
+    ['Registrar abono', /\/ventas\?v=[^&]+&abono=1$/],
     ['Ver impresoras', /\/impresoras$/],
   ];
   for (const [button, url] of cases) {

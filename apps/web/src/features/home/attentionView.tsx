@@ -25,7 +25,7 @@ export function attentionView(a: Attention): { text: ReactNode; button: string; 
       return { text: rt(`${A}order_due`, { number: `#${p.number}`, customer: p.customer ?? '', when, ready: p.status === 'ready' ? L.att.readySuffix : '' }, allBold('number', 'customer')), button: L.btn.openOrder, href: `/pedidos/pedido?id=${id}` };
     }
     case 'sale_owed':
-      return { text: rt(p.customer ? `${A}sale_owed_to` : `${A}sale_owed`, { date: p.on ? date(String(p.on)) : '', customer: p.customer ?? '', owed: centsTotal(Number(p.owedCents)) }, allBold('date', 'customer', 'owed')), button: L.btn.addPayment, href: `/ventas?v=${id}` };
+      return { text: rt(p.customer ? `${A}sale_owed_to` : `${A}sale_owed`, { date: p.on ? date(String(p.on)) : '', customer: p.customer ?? '', owed: centsTotal(Number(p.owedCents)) }, allBold('date', 'customer', 'owed')), button: L.btn.addPayment, href: `/ventas?v=${id}&abono=1` };
     case 'price_below_floor': {
       const col = a.target.type === 'collection';
       return { text: rt(col ? `${A}price_below_floor_collection` : `${A}price_below_floor_product`, { name: p.name ?? '', price: centsTotal(Number(p.priceCents)), cost: money(Number(p.costCents ?? p.floorCents) / 100) }, allBold('name')), button: col ? L.btn.seeCollection : L.btn.seeProducts, href: col ? `/productos/coleccion?id=${id}` : `/productos/pieza?id=${id}` };

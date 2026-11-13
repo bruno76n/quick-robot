@@ -41,3 +41,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 .pick-l { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pick-o small { color: var(--ink-3); font-size: 12px; white-space: nowrap; }
 .pick-e { padding: 12px 14px; margin: 0; color: var(--ink-3); font-size: 14px; }
+
+/* "Debe $X" of a sale row is a button that opens the payment (ronda 2 · D5): the same chip, clickable. */
+.chip-btn { font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; border-top: 0; border-right: 0; border-bottom: 0; }
+.chip-btn:hover { background: var(--amber-soft); }

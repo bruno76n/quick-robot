@@ -108,6 +108,7 @@ Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), 
 |---|---|---|
 | Registrar venta | — | Armar venta |
 | Abrir venta | — | Diálogo de la venta |
+| Chip “Debe $X” (botón) | Abre la venta **con el diálogo “Registrar abono” ya abierto** (monto = saldo; `/ventas?v=<id>&abono=1`). Cancelar vuelve al diálogo de la venta; la confirmación con el monto se queda (ronda 2 · D5). “Registrar abono” de la Atención de Inicio usa la misma dirección. Una venta sin saldo o devuelta abre la venta normal | Diálogo del abono |
 
 ### 4.1 Diálogo de la venta
 Desglose por pieza (con dónde está cada una), cobro (pagos), nota de venta.

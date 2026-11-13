@@ -49,12 +49,12 @@ test('registrar venta con varios artículos, a customer and a note', async ({ pa
   await c.expectBudget(BUDGET.saleSeveralItems);
 });
 
-test('registrar abono of a sale that owes', async ({ page }) => {
+test('registrar abono of a sale that owes: the "Debe" chip opens the payment', async ({ page }) => {
   const c = await countedPage(page);
   await c.start(`${server.url}/ventas`);
-  await page.getByTestId('sale-row').filter({ hasText: 'Colección completa y dos llaveros' }).click();
-  const dlg = page.getByRole('dialog');
-  await dlg.getByRole('button', { name: 'Registrar abono' }).click();
+  await page.getByTestId('sale-row').filter({ hasText: 'Colección completa y dos llaveros' }).getByRole('button', { name: /^Debe .*: registrar abono$/ }).click();
+  const dlg = page.getByRole('dialog', { name: 'Registrar abono' });
+  await expect(dlg.locator('input[name=monto]')).toBeFocused();
   await c.fill(dlg.locator('input[name=monto]'), '200');
   await dlg.getByRole('button', { name: 'Registrar abono' }).click();
   await expect(status(page)).toHaveText('Abono registrado. Faltan $300.');
@@ -65,8 +65,8 @@ test('registrar abono from Inicio (attention "Registrar abono")', async ({ page 
   const c = await countedPage(page);
   await c.start(`${server.url}/inicio`);
   await page.getByTestId('attentions').getByRole('link', { name: 'Registrar abono' }).first().click();
-  const dlg = page.getByRole('dialog');
-  await dlg.getByRole('button', { name: 'Registrar abono' }).click();
+  const dlg = page.getByRole('dialog', { name: 'Registrar abono' });
+  await expect(dlg.locator('input[name=monto]')).toBeVisible();
   await dlg.getByRole('button', { name: 'Registrar abono' }).click();
   await expect(status(page)).toContainText('Abono registrado.');
   await c.expectBudget(BUDGET.salePaymentFromHome);
