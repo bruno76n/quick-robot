@@ -126,6 +126,7 @@ function EditDialog({ s, onBack, onDone }: { s: SaleDetail; onBack: () => void; 
             </select>
           </Field>
         )}
+        {!s.orderId && !customerId ? <p className="cli-mini"><button type="button" className="link" onClick={() => setCreating(true)}>{L.newCustomerLink}</button></p> : null}
       </div>
       <div className="mt"><Field label={L.fNote}><input name="nota" value={note} placeholder={L.notePlaceholder} onChange={(e) => setNote(e.target.value)} /></Field></div>
       <p className="note">{L.editNote}</p>

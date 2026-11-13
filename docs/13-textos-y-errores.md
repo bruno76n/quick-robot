@@ -405,6 +405,7 @@ Los textos nuevos de variantes agrupadas, Existencias (lista y fichas), Inicio (
 | `screens.calculator.otherFilaments` | Los demás | Grupo de la lista de filamentos: el resto |
 | `screens.stock.sellOne` | Vender {name} | Nombre accesible del botón “Vender” de cada fila o ficha de Existencias |
 | `screens.sales.owesPay` | {owes}: registrar abono | Nombre accesible del chip “Debe $X” de la lista de Ventas, que abre el abono |
+| `screens.builder.newCustomerLink`, `screens.sales.newCustomerLink` | Nuevo cliente | Enlace bajo el selector de cliente de Armar venta o pedido y de Editar datos de la venta |
 
 ---
 

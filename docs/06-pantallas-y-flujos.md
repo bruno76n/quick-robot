@@ -118,7 +118,7 @@ Desglose por pieza (con dónde está cada una), cobro (pagos), nota de venta.
 | Quitar pago | `deleteSalePayment` |
 | Nota de venta | Abre el documento (ver §14) |
 | Devolver venta | `returnSale` (con o sin regresar a existencias; reembolso y nota) |
-| Editar | `updateSale` (fecha, canal, cliente, nota) |
+| Editar | `updateSale` (fecha, canal, cliente, nota). Sin cliente elegido, el enlace “Nuevo cliente” bajo el selector crea uno y lo deja elegido (como en Armar venta) |
 | Eliminar | `deleteSale` + Deshacer (devuelve las piezas a existencias si salieron) |
 | Cliente / Pedido | Abre la ficha del cliente / el pedido |
 
@@ -130,6 +130,7 @@ Desglose por pieza (con dónde está cada una), cobro (pagos), nota de venta.
 | Agregar pieza / set | — | — |
 | Precio de lista / separar / descuento / piso | Ajustan el precio unitario | — |
 | Convertir en pedido | Cambia el modo; lo que hay en existencias se aparta y el resto se imprime | — |
+| Nuevo cliente (enlace bajo el selector de cliente, sin cliente elegido) | Abre el diálogo de cliente nuevo; al guardar queda elegido. La opción “＋ Cliente nuevo…” al final del selector se conserva (ronda 2 · D6) | — |
 | Guardar venta | `createSale` (descuenta existencias de las piezas con `tracks_stock`) | Ventas |
 | Guardar pedido | `createOrder` (+ `acceptOrder` si ya está aceptado; + pago de anticipo) | Pedido |
 | Cancelar | — | Ventas / Pedidos |

@@ -36,3 +36,19 @@ test('D5: ?abono=1 on a sale that owes nothing shows the sale, not an empty paym
   await expect(page.getByRole('dialog', { name: 'Registrar abono' })).toHaveCount(0);
   await expect(page.getByRole('dialog')).toBeVisible();
 });
+
+test('D6: "Nuevo cliente" under the customer of a sale being edited creates it and leaves it chosen', async ({ page }) => {
+  await page.goto(`${server.url}/ventas`);
+  const walkIn = page.getByTestId('sale-row').filter({ hasNot: page.getByText(/Pedido #/) }).first();
+  await walkIn.click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Editar datos' }).click();
+  const edit = page.getByRole('dialog');
+  const customer = edit.locator('select[name=cliente]');
+  await customer.selectOption({ index: 0 }); // Sin cliente: the link shows
+  await edit.getByRole('button', { name: 'Nuevo cliente' }).click();
+  const dlg = page.getByRole('dialog');
+  await dlg.locator('input[name=nombre]').fill('Cliente desde editar');
+  await dlg.getByRole('button', { name: 'Guardar cliente' }).click();
+  await expect(page.getByRole('dialog').locator('select[name=cliente] option:checked')).toHaveText('Cliente desde editar');
+  await expect(page.getByRole('dialog').getByRole('button', { name: 'Nuevo cliente' })).toHaveCount(0);
+});

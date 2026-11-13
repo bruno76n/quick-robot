@@ -156,7 +156,7 @@ function Builder({ search, edit }: { search: Search; edit: OrderForEdit | null }
                   </select>
                 </label>
                 <p className="cli-mini" id="b-cli-info">
-                  {customer ? <>{customer.type} · {customer.phone || <b className="neg">{L.infoNoContact}</b>}{customer.hasLogo ? ` · ${L.infoWithLogo}` : ''} · <button type="button" className="link" onClick={() => setCreating('edit')}>{es.common.edit}</button></> : B.order ? L.infoNeedsCustomer : L.infoWalkIn}
+                  {customer ? <>{customer.type} · {customer.phone || <b className="neg">{L.infoNoContact}</b>}{customer.hasLogo ? ` · ${L.infoWithLogo}` : ''} · <button type="button" className="link" onClick={() => setCreating('edit')}>{es.common.edit}</button></> : <>{B.order ? L.infoNeedsCustomer : L.infoWalkIn} · <button type="button" className="link" onClick={() => setCreating('new')}>{L.newCustomerLink}</button></>}
                 </p>
               </div>
               {B.order

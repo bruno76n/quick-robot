@@ -18,12 +18,14 @@ const card = (page: Page, folio: number) => page.getByTestId('order-card').filte
 let folio = 0;
 let paid = 0;
 
-test('nuevo pedido con cliente nuevo (created from the customer selector)', async ({ page }) => {
+test('nuevo pedido con cliente nuevo (the visible "Nuevo cliente" link under the selector)', async ({ page }) => {
   const c = await countedPage(page);
   await c.start(`${server.url}/pedidos`);
   await page.getByRole('button', { name: 'Nuevo pedido' }).first().click();
   await expect(page.getByRole('heading', { name: 'Nuevo pedido' })).toBeVisible();
-  await page.locator('[data-b=cliente]').selectOption({ label: '＋ Cliente nuevo…' });
+  // The option at the end of the selector stays.
+  await expect(page.locator('[data-b=cliente] option', { hasText: '＋ Cliente nuevo…' })).toHaveCount(1);
+  await page.locator('#b-cli-info').getByRole('button', { name: 'Nuevo cliente' }).click();
   const dlg = page.getByRole('dialog');
   await c.fill(dlg.locator('input[name=nombre]'), 'Florería Clics');
   await c.fill(dlg.locator('input[name=tel]'), '33 1234 5678');
