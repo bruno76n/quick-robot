@@ -4,6 +4,7 @@ import { useSearch } from '@tanstack/react-router';
 import { Fragment, useDeferredValue, useState, type CSSProperties, type ReactNode } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
+import { Mascot } from '../../components/Mascot';
 import { toast } from '../../components/Toast';
 import { es } from '../../i18n/es';
 import { fill, formatParam, t, type Params } from '../../i18n/t';
@@ -97,7 +98,7 @@ export function StockPage() {
         actions={<><Button variant="primary" icon="plus" onClick={() => setDlg({ kind: 'print' })}>{L.register}</Button><Button onClick={enable}>{L.enableOther}</Button></>}
       />
       {first && !anyStock ? (
-        <div className="empty-card"><p>{L.empty}</p><Button variant="primary" icon="plus" onClick={() => setDlg({ kind: 'print' })}>{L.register}</Button> <Button onClick={enable}>{L.enableOne}</Button></div>
+        <div className="empty-card"><Mascot size={64} /><p>{L.empty}</p><Button variant="primary" icon="plus" onClick={() => setDlg({ kind: 'print' })}>{L.register}</Button> <Button onClick={enable}>{L.enableOne}</Button></div>
       ) : (
         <>
           <div className="sk-tools">

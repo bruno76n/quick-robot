@@ -4,6 +4,7 @@ import { useSearch } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
+import { Mascot } from '../../components/Mascot';
 import { Pill, Swatch } from '../../components/Pill';
 import { toast } from '../../components/Toast';
 import { es } from '../../i18n/es';
@@ -79,7 +80,7 @@ export function ProductsPage() {
       </div>
       {isCol ? (
         <>
-          {view === 'lista' ? <CollectionTable items={shownC} total={collections.length} onNew={newCollection} /> : <div className="pt-grid">{shownC.map((c) => <CollectionTile key={c.id} c={c} />)}{!shownC.length ? <div className="empty-card"><p>{collections.length ? L.noCollectionMatch : L.emptyCollectionsTile}</p><Button variant="green" icon="plus" onClick={newCollection}>{L.createCollection}</Button></div> : null}</div>}
+          {view === 'lista' ? <CollectionTable items={shownC} total={collections.length} onNew={newCollection} /> : <div className="pt-grid">{shownC.map((c) => <CollectionTile key={c.id} c={c} />)}{!shownC.length ? <div className="empty-card"><Mascot size={64} /><p>{collections.length ? L.noCollectionMatch : L.emptyCollectionsTile}</p><Button variant="green" icon="plus" onClick={newCollection}>{L.createCollection}</Button></div> : null}</div>}
           <p className="foot-note">{L.collectionsFoot}</p>
         </>
       ) : (
@@ -89,7 +90,7 @@ export function ProductsPage() {
           </div>
           {!families.data ? <div className="skel" /> : view === 'lista'
             ? <FamilyTable items={items} anyPieces={anyPieces} open={open} onToggle={toggle} />
-            : <FamilyTiles items={items} open={open} onToggle={toggle} empty={<div className="empty-card"><p>{anyPieces ? L.noPieceMatchTile : L.emptyPiecesTile}</p><Button variant="green" icon="plus" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></div>} />}
+            : <FamilyTiles items={items} open={open} onToggle={toggle} empty={<div className="empty-card"><Mascot size={64} /><p>{anyPieces ? L.noPieceMatchTile : L.emptyPiecesTile}</p><Button variant="green" icon="plus" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></div>} />}
           {families.hasNextPage ? <div className="more-row"><Button busy={families.isFetchingNextPage} onClick={() => void families.fetchNextPage()}>{L.showMore}</Button></div> : null}
           <p className="foot-note">{L.piecesFoot}</p>
         </>
@@ -142,7 +143,7 @@ function CollectionTable({ items, total, onNew }: { items: CollectionListItem[];
             </tr>
           );
         })}
-        {!items.length ? <tr><td colSpan={8} className="empty-td"><p>{total ? L.noCollectionMatch : L.emptyCollections}</p><Button variant="green" onClick={onNew}>{L.createCollection}</Button></td></tr> : null}
+        {!items.length ? <tr><td colSpan={8} className="empty-td"><Mascot size={48} /><p>{total ? L.noCollectionMatch : L.emptyCollections}</p><Button variant="green" onClick={onNew}>{L.createCollection}</Button></td></tr> : null}
       </tbody></table></div>
   );
 }

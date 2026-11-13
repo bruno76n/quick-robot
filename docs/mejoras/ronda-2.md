@@ -52,6 +52,8 @@ El panel es un producto que se va a distribuir a otros negocios. **No lleva la m
 - Capas del desglose de costo: grises (ver la barra “De cada $100 vendidos” en `reference/ronda-2/inicio.html`).
 
 **Marca**
+> **Cambio por decisión de la persona (2026-11-13, `decisiones.md`):** la mascota **se queda**. Lo que se quitó fue el morado (y el verde por todos lados) que hacía ver el sistema “hecho 100 % con IA”, no el logo. La barra lateral y la barra superior vuelven a mostrar la mascota junto al nombre y el giro de Ajustes (en lugar del monograma), igual que el título de Inicio, los estados vacíos, la página de falla y el ícono de la pestaña. Lo que sigue en esta lista sobre monograma y “no aparecen en pantallas” queda sustituido; el resto (color neutro, sin “Quick Robot” escrito en código, sin subir logo) sigue en pie.
+
 - La barra lateral deja de mostrar la mascota. Arriba va un **monograma** (las iniciales del nombre del negocio, en una caja gris `--panel-2`) con el **nombre** y el **giro** que vienen de Ajustes (`06 §1`). Si el negocio no ha puesto nombre, “Mi negocio” y “Giro del negocio” en gris.
 - No se agrega subir logo del negocio (fuera de alcance).
 - `assets/` sigue existiendo: la mascota y el ícono son de la app de escritorio personal y de uso externo. No aparecen en pantallas ni en documentos del panel.

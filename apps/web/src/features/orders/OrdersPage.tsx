@@ -5,6 +5,7 @@ import { useState, type KeyboardEvent } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
 import { Icon } from '../../components/Icon';
+import { Mascot } from '../../components/Mascot';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { centsTotal, date, daysBetween, queueDuration, relativeDay } from '../../lib/format';
@@ -34,7 +35,7 @@ export function OrdersPage() {
     <>
       <PageHead title={L.title} actions={<Button variant="primary" icon="plus" onClick={() => go('/armar?modo=pedido')}>{L.newOrder}</Button>} />
       {empty ? (
-        <div className="empty-box"><p>{L.empty}</p><Button variant="primary" onClick={() => go('/armar?modo=pedido')}>{L.emptyButton}</Button></div>
+        <div className="empty-box"><Mascot size={56} /><p>{L.empty}</p><Button variant="primary" onClick={() => go('/armar?modo=pedido')}>{L.emptyButton}</Button></div>
       ) : board.data ? (
         <>
           <Strip active={active} today={today} />

@@ -3,6 +3,7 @@ import { useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
+import { Mascot } from '../../components/Mascot';
 import { Pill, Swatch } from '../../components/Pill';
 import { Table } from '../../components/Table';
 import { es } from '../../i18n/es';
@@ -76,7 +77,7 @@ export function ProductionPage() {
       ) : null}
       <Table head={<><th>{L.colDate}</th><th>{L.colDetail}</th><th>{L.colPrinter}</th><th>{L.colFilament}</th><th className="r">{L.colGrams}</th><th className="r">{L.colTime}</th><th>{L.colResult}</th></>}>
         {isLoading ? <tr><td colSpan={7}><div className="skel" /></td></tr> : null}
-        {data && !list.length ? <tr><td colSpan={7} className="empty-td"><p>{L.empty}</p></td></tr> : null}
+        {data && !list.length ? <tr><td colSpan={7} className="empty-td"><Mascot size={48} /><p>{L.empty}</p></td></tr> : null}
         {list.map((r) => (
           <tr key={r.id} className="click" tabIndex={0} onClick={() => setOpen(r.id)} onKeyDown={(e) => { if (e.key === 'Enter') setOpen(r.id); }} data-testid="print-run-row">
             <td>{date(r.on)}</td>

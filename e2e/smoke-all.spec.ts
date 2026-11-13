@@ -1,5 +1,5 @@
 // The 14 screens of the menu and the 5 detail screens load in three widths (1440, 820, 390) with the mockup
-// business: no console errors, no blank screen, no horizontal scroll of the page (docs/10 §3, docs/15 §5), no mascot.
+// business: no console errors, no blank screen, no horizontal scroll of the page (docs/10 §3, docs/15 §5).
 import { expect, test } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 
@@ -25,7 +25,6 @@ test('14 menu screens and 5 detail screens in three widths', async ({ page, requ
       await page.goto(`${server.url}${path}`);
       await expect(page.locator('#view')).not.toBeEmpty();
       await expect(page.getByText('Esta pantalla no se pudo mostrar.')).toHaveCount(0);
-      await expect(page.locator('img.mascot, img[src*="mascot"]'), `${path} at ${width}`).toHaveCount(0); // neutral panel (ronda-2 §2)
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
       expect(overflow, `${path} at ${width}`).toBeLessThanOrEqual(1);
     }

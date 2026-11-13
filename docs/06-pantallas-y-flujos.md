@@ -18,7 +18,7 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 | Elemento | Qué hace |
 |---|---|
-| **Barra lateral** | Arriba: un **monograma** (iniciales del nombre del negocio) con el **nombre y el giro del negocio** (datos de Ajustes; el mockup los traía fijos como “Quick Robot · Impresión 3D” y con la mascota: **ya no**, el panel es neutro, `mejoras/ronda-2.md §2`). Después: Inicio · *Vender*: Productos, Ventas, Pedidos · *Taller*: Filamentos, Insumos, Impresoras, Producción, Existencias, Compras · *Negocio*: Clientes, Gastos, Reportes, Ajustes. En pantallas pequeñas se oculta tras un botón de menú |
+| **Barra lateral** | Arriba: la **mascota** con el **nombre y el giro del negocio** (datos de Ajustes; el mockup los traía fijos como “Quick Robot · Impresión 3D”: ya no, el texto sale de Ajustes; la mascota se conserva por decisión de la persona del 2026-11-13, `mejoras/ronda-2.md §2`). Sin nombre ni giro, “Mi negocio” y “Giro del negocio” en gris. Después: Inicio · *Vender*: Productos, Ventas, Pedidos · *Taller*: Filamentos, Insumos, Impresoras, Producción, Existencias, Compras · *Negocio*: Clientes, Gastos, Reportes, Ajustes. En pantallas pequeñas se oculta tras un botón de menú |
 | **Buscar** (⌘/Ctrl + K) | Paleta de comandos: busca piezas, clientes, pedidos, ventas, filamentos y acciones; Enter abre el resultado |
 | **Atajos** (`?`) | Muestra la lista. `g` + letra navega (ir a pantalla); `⌘/Ctrl+Z` deshace; `⇧⌘Z` rehace |
 | **Cajón lateral** | Detalle de un elemento de una lista ancha (filamento, insumo, pieza de existencias) sin salir de la lista; Esc o clic fuera lo cierra |

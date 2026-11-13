@@ -25,15 +25,6 @@ describe('fatal page', () => {
     expect(readKind('')).toBe('down');
   });
 
-  it('shows no mascot nor any image in any kind (neutral panel, ronda-2 §2)', async () => {
-    for (const kind of ['down', 'migration', 'data'] as const) {
-      const root = document.createElement('main');
-      await render(root, kind, api());
-      expect(root.querySelector('h1')).toBeTruthy();
-      expect(root.querySelector('img, svg')).toBeNull();
-    }
-  });
-
   it('down: text and Reintentar', async () => {
     const root = document.createElement('main');
     const a = api();

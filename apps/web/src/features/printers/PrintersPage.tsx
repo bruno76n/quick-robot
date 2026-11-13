@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
 import { Icon } from '../../components/Icon';
+import { Mascot } from '../../components/Mascot';
 import { Pill } from '../../components/Pill';
 import { es } from '../../i18n/es';
 import { tb } from '../../i18n/rich';
@@ -40,7 +41,7 @@ export function PrintersPage() {
       ) : null}
       <div className="pc-grid">
         {items.map((p) => <PrinterCard key={p.id} p={p} kwh={kwh} open={setDlg} />)}
-        {data && !items.length ? <div className="empty-card"><p>{L.empty}</p><Button variant="primary" icon="plus" onClick={() => setDlg({ kind: 'printer', printer: null })}>{L.add}</Button></div> : null}
+        {data && !items.length ? <div className="empty-card"><Mascot size={64} /><p>{L.empty}</p><Button variant="primary" icon="plus" onClick={() => setDlg({ kind: 'printer', printer: null })}>{L.add}</Button></div> : null}
       </div>
       {dlg?.kind === 'printer' ? <PrinterDialog printer={dlg.printer} kwh={kwh} onClose={() => setDlg(null)} /> : null}
       {dlg?.kind === 'task' ? <TaskDialog printer={dlg.printer} task={dlg.task} onClose={() => setDlg(null)} /> : null}

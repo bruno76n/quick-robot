@@ -2,6 +2,7 @@
 import type { ProductFamily } from '@app/contract';
 import { Fragment } from 'react';
 import { Button } from '../../components/Button';
+import { Mascot } from '../../components/Mascot';
 import { Pill, Swatch } from '../../components/Pill';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
@@ -38,7 +39,7 @@ export function FamilyTable({ items, anyPieces, open, onToggle }: { items: Produ
             </Fragment>
           );
         })}
-        {!items.length ? <tr><td colSpan={9} className="empty-td"><p>{anyPieces ? L.noPieceMatch : L.emptyPieces}</p><Button variant="green" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></td></tr> : null}
+        {!items.length ? <tr><td colSpan={9} className="empty-td"><Mascot size={48} /><p>{anyPieces ? L.noPieceMatch : L.emptyPieces}</p><Button variant="green" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></td></tr> : null}
       </tbody></table></div>
   );
 }

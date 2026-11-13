@@ -3,7 +3,7 @@
 import type { CSSProperties } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
-import { Icon } from '../../components/Icon';
+import { Mascot } from '../../components/Mascot';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { centsTotal, number1, queueDuration } from '../../lib/format';
@@ -26,7 +26,7 @@ export function HomePage() {
   const att = home?.attentions ?? [];
   return (
     <>
-      <PageHead title={L.title} actions={<>
+      <PageHead title={<><Mascot size={44} /><span>{L.title}</span></>} actions={<>
         <Button onClick={() => go('/armar?modo=pedido')}>{L.newOrder}</Button>
         <Button onClick={() => go('/armar?modo=venta')}>{L.newSale}</Button>
         <Button variant="green" icon="plus" onClick={() => go('/productos/pieza')}>{L.newPiece}</Button>
@@ -34,12 +34,12 @@ export function HomePage() {
       {R ? <Brief compact T={R.totals} K={R.costConcepts} gA={R.hasExpenses ? R.expensesCents : null} A={R.previous} gP={R.hasExpenses ? R.previousExpensesCents : null} when={L.when} empty={L.briefEmpty} /> : <div className="skel" />}
       <div className="home-cols">
         {!home ? <section className="home-main" aria-busy="true" /> : null}
-        {home && !att.length ? <section className="home-main"><h2>{L.attention.title}</h2><div className="allok"><span className="allok-ic"><Icon name="check" size={26} /></span><div><b>{L.allOk}</b><p>{L.allOkText}</p></div></div></section> : null}
+        {home && !att.length ? <section className="home-main"><h2>{L.attention.title}</h2><div className="allok"><Mascot size={76} /><div><b>{L.allOk}</b><p>{L.allOkText}</p></div></div></section> : null}
         {att.length ? <Attentions items={att} /> : null}
         <div className="home-side">
           <section>
             <h2>{L.top}</h2>
-            {R && !rank.length ? <div className="empty-card"><p>{L.topEmpty}</p><Button variant="green" onClick={() => go('/armar?modo=venta')}>{L.newSale}</Button></div> : null}
+            {R && !rank.length ? <div className="empty-card"><Mascot size={64} /><p>{L.topEmpty}</p><Button variant="green" onClick={() => go('/armar?modo=venta')}>{L.newSale}</Button></div> : null}
             {rank.length ? (
               <ul className="rk">{rank.map((r) => (
                 <li key={r.productId}>
@@ -55,7 +55,7 @@ export function HomePage() {
           </section>
           <section>
             <h2>{L.printers}</h2>
-            {printers && !printers.length ? <div className="empty-card"><p>{L.printersEmpty}</p><Button onClick={() => go('/impresoras')}>{L.goPrinters}</Button></div> : null}
+            {printers && !printers.length ? <div className="empty-card"><Mascot size={64} /><p>{L.printersEmpty}</p><Button onClick={() => go('/impresoras')}>{L.goPrinters}</Button></div> : null}
             {printers?.length ? (
               <div className="bays">{printers.map((p) => {
                 const e = p.queue[0];

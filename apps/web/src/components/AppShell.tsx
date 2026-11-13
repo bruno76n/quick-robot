@@ -1,10 +1,11 @@
 // Sidebar, top bar on small screens and the work area (docs/06 §1). Business name and trade come from
-// the workspace (Ajustes), never from code (D30); with none, grey placeholders and a monogram (ronda-2 §2).
+// the workspace (Ajustes), never from code (D30); with none, grey placeholders.
+// The mascot is the owner's brand mark and stays next to the name (person's decision, docs/decisiones.md 2026-11-13).
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useEffect, useState, type ReactNode } from 'react';
 import { es } from '../i18n/es';
 import { Icon } from './Icon';
-import { Monogram } from './Monogram';
+import { Mascot } from './Mascot';
 
 export interface NavItem { to: string; label: string; icon: string }
 export const NAV: readonly (readonly [string | null, readonly NavItem[]])[] = [
@@ -46,11 +47,11 @@ export function AppShell({ businessName, trade, banner, onNewPiece, onSearch, ch
     <div className="app" id="app">
       <header className="topbar">
         <button type="button" className="btn ghost icon" onClick={() => setNavOpen(true)} aria-label={es.common.openMenu}><Icon name="menu" size={20} /></button>
-        <span className="t-name"><Monogram name={shownName} size={28} /><span className={name ? undefined : 'ph-txt'}>{shownName}</span></span>
+        <span className="t-name"><span className="mk"><Mascot size={28} /></span><span className={name ? undefined : 'ph-txt'}>{shownName}</span></span>
         <button type="button" className="btn green sm" onClick={onNewPiece} disabled={!onNewPiece}>{es.nav.newPiece}</button>
       </header>
       <aside className="side" id="side" aria-label={es.common.mainMenu}>
-        <div className="brand"><Monogram name={shownName} /><div>{nameEl}{trade.trim() ? <small>{trade}</small> : <small className="ph-txt">{es.sidebar.industryPlaceholder}</small>}</div></div>
+        <div className="brand"><span className="mk"><Mascot size={40} /></span><div>{nameEl}{trade.trim() ? <small>{trade}</small> : <small className="ph-txt">{es.sidebar.industryPlaceholder}</small>}</div></div>
         <button type="button" className="btn green block" onClick={onNewPiece} disabled={!onNewPiece}><Icon name="plus" size={16} />{es.nav.newPiece}</button>
         <button type="button" className="srch" onClick={onSearch} aria-label={es.common.searchAll}><Icon name="search" size={16} /><span>{es.common.search}</span><kbd>{es.common.searchShortcut}</kbd></button>
         <nav className="nav" aria-label={es.common.screens}>

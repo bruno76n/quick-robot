@@ -9,7 +9,7 @@ import { Drawer } from './Drawer';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Field } from './Field';
 import { Icon } from './Icon';
-import { Monogram } from './Monogram';
+import { Mascot } from './Mascot';
 import { Pill, Swatch } from './Pill';
 import { Segmented } from './Segmented';
 import { Table } from './Table';
@@ -42,12 +42,12 @@ describe('components', () => {
     expect(screen.queryByText('ayuda')).toBeNull();
   });
 
-  it('Pill, Swatch, Icon, Table and Banner render', () => {
-    render(<><Pill tone="bad">Agotado</Pill><Swatch hex="#ff0000" large /><Icon name="spool" /><Icon name="nope" /><Table small head={<th>A</th>}><tr><td>1</td></tr></Table><Banner action={<button type="button">r</button>}>x</Banner></>);
+  it('Pill, Swatch, Icon, Mascot, Table and Banner render', () => {
+    render(<><Pill tone="bad">Agotado</Pill><Swatch hex="#ff0000" large /><Icon name="spool" /><Icon name="nope" /><Mascot size={60} /><Table small head={<th>A</th>}><tr><td>1</td></tr></Table><Banner action={<button type="button">r</button>}>x</Banner></>);
     expect(screen.getByText('Agotado').className).toBe('chip bad');
     expect(document.querySelector('.sw.lg')).toBeTruthy();
     expect(document.querySelectorAll('svg.ic')).toHaveLength(2);
-    expect(document.querySelector('img')).toBeNull();
+    expect(document.querySelector('img.mascot')?.getAttribute('height')).toBe('53');
     expect(document.querySelector('table.tbl.sm')).toBeTruthy();
     expect(screen.getByRole('alert').textContent).toContain('x');
   });
@@ -119,29 +119,19 @@ describe('neutral sidebar (ronda-2 §2)', () => {
     return document.querySelector('.brand')!;
   };
 
-  it('shows the monogram, the name and the trade from Ajustes', async () => {
+  it('shows the mascot, the name and the trade from Ajustes', async () => {
     const brand = await shell('Taller de Ana', 'Impresión 3D');
-    expect(brand.querySelector('.mono')?.textContent).toBe('TA');
+    expect(brand.querySelector('img.mascot')).toBeTruthy();
     expect(brand.querySelector('b')?.textContent).toBe('Taller de Ana');
     expect(brand.querySelector('b')?.className ?? '').not.toContain('ph-txt');
     expect(brand.querySelector('small')?.textContent).toBe('Impresión 3D');
-    expect(document.querySelector('.topbar .mono')?.textContent).toBe('TA');
-    expect(document.querySelector('img')).toBeNull();
+    expect(document.querySelector('.topbar img.mascot')).toBeTruthy();
   });
 
   it('without a name or trade shows "Mi negocio" and "Giro del negocio" in grey', async () => {
     const brand = await shell('  ', '');
-    expect(brand.querySelector('.mono')?.textContent).toBe('MN');
     expect(brand.querySelector('b.ph-txt')?.textContent).toBe('Mi negocio');
     expect(brand.querySelector('small.ph-txt')?.textContent).toBe('Giro del negocio');
     expect(document.querySelector('.topbar .ph-txt')?.textContent).toBe('Mi negocio');
-  });
-
-  it('Monogram is decorative and scales with its size', () => {
-    render(<Monogram name="Ángel Óptica" size={28} />);
-    const m = document.querySelector('.mono') as HTMLElement;
-    expect(m.textContent).toBe('ÁÓ');
-    expect(m.getAttribute('aria-hidden')).toBe('true');
-    expect(m.style.width).toBe('28px');
   });
 });
