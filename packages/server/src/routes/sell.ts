@@ -1,7 +1,7 @@
 // Stock, customers, sales, orders, production, expenses, reports, purchases, home and search (docs/12 §6–9).
 import {
   adjustStockInput, assignmentsInput, cancelInput, customerInput, customerPatch, deliverInput, enableStockInput, expenseInput, expenseQuery, orderInput,
-  orderQuery, orderUpdateInput, pageQuery, paymentInput, printRunInput, printRunQuery, reportQuery, returnSaleInput, saleInput, salePatch, saleQuery,
+  orderQuery, orderUpdateInput, pageQuery, paymentInput, printRunInput, printRunQuery, reportQuery, returnSaleInput, saleInput, salePatch, saleQuery, stockQuery,
   searchQuery, startProductionInput,
 } from '@app/contract';
 import { body, idParam, noContent, ok, query } from '../http';
@@ -13,11 +13,12 @@ import {
 import { deletePrintRun, finishQueueEntry, logPrintRun, printRunDetail, printRunList } from '../usecases/sell/production';
 import { createExpense, deleteExpense, expenseList, home, purchases, report, restoreExpense, search, updateExpenseUc } from '../usecases/sell/reports';
 import { createSale, deleteSale, deleteSalePayment, recordSalePayment, restoreSale, returnSale, saleDetail, saleList, updateSaleUc } from '../usecases/sell/sales';
-import { adjustStock, enableStockTracking, stockDetail, stockList } from '../usecases/sell/stock';
+import { adjustStock, enableStockTracking, stockDetail } from '../usecases/sell/stock';
+import { stockList } from '../usecases/sell/stock-list';
 import type { Router } from './router';
 
 export function sellRoutes(r: Router) {
-  r.get('/stock', 'stock.read', async (c) => ok(c, await stockList(c.get('deps'), c.get('deps').db, c.get('ctx'), query(c, pageQuery).q)));
+  r.get('/stock', 'stock.read', async (c) => ok(c, await stockList(c.get('deps'), c.get('deps').db, c.get('ctx'), query(c, stockQuery))));
   r.get('/stock/:productId', 'stock.read', async (c) => ok(c, await stockDetail(c.get('deps'), c.get('deps').db, c.get('ctx'), idParam(c, 'productId', 'product'))));
   r.post('/stock/:productId/enable', 'stock.adjust', async (c) => ok(c, await enableStockTracking(c.get('deps'), c.get('ctx'), idParam(c, 'productId', 'product'), await body(c, enableStockInput))));
   r.post('/stock/:productId/adjust', 'stock.adjust', async (c) => ok(c, await adjustStock(c.get('deps'), c.get('ctx'), idParam(c, 'productId', 'product'), await body(c, adjustStockInput))));

@@ -6,3 +6,4 @@ export * from './schemas/supplies';
 export * from './schemas/printers';
 export * from './schemas/products';
 export * from './schemas/sell';
+export * from './schemas/stock-home';
