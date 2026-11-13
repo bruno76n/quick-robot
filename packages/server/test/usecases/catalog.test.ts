@@ -1,6 +1,6 @@
 // Pieces, collections and files: golden values through the server, the server ignores client costs,
 // and every error of docs/12 §5 and §10.
-import { collectionDetail, productDetail, uploadOutput } from '@app/contract';
+import { collectionDetail, productDetail, productFamilyPage, productOptions, uploadOutput } from '@app/contract';
 import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { productHooks } from '../../src/usecases/products';
@@ -16,7 +16,7 @@ const data = <T>(r: { json: { data?: unknown } }) => r.json.data as T;
 
 describe('golden values through the server', () => {
   it('every piece: cost, list price and floor (in cents, ±$0.01)', async () => {
-    const items = data<{ items: { name: string; costCents: number; listCents: number; floorCents: number }[] }>(await s.h.call('GET', '/api/v1/products')).items;
+    const items = productOptions.parse(data(await s.h.call('GET', '/api/v1/products/options'))).items;
     expect(items).toHaveLength(golden.productos.length);
     for (const g of golden.productos as { nombre: string; costo: number; precio: number; piso: number }[]) {
       const p = items.find((x) => x.name === g.nombre)!;
@@ -47,11 +47,59 @@ describe('golden values through the server', () => {
     }
   });
 
-  it('filters: technical pieces and variants', async () => {
-    const tech = data<{ items: { name: string }[] }>(await s.h.call('GET', '/api/v1/products?filter=technical')).items.map((p) => p.name);
-    expect(tech).toEqual(['Soporte de celular PETG']);
-    const variants = data<{ items: { name: string; parentId: string }[] }>(await s.h.call('GET', '/api/v1/products?filter=variant')).items;
-    expect(variants.map((p) => [p.name, p.parentId])).toEqual([['Spider-Man · salto (silk morado)', s.a.product['Spider-Man · salto']]]);
+});
+
+describe('GET /products by families (docs/12 §5)', () => {
+  const families = async (qs = '') => productFamilyPage.parse(data(await s.h.call('GET', `/api/v1/products${qs}`)));
+  const SPIDER = 'Spider-Man · salto';
+
+  it('a family is the original with its variants; counts are families; a variant carries label and displayName', async () => {
+    const pg = await families();
+    expect([pg.total, pg.items.length, pg.counts]).toEqual([8, 8, { families: 8, technical: 1, withVariants: 1 }]);
+    const spider = pg.items.find((f) => f.name === SPIDER)!;
+    expect([spider.variantCount, spider.displayName, spider.variantLabel, spider.matchedByVariant]).toEqual([1, SPIDER, null, false]);
+    expect(spider.variants.map((v) => [v.name, v.label, v.displayName, v.material])).toEqual([[`${SPIDER} (silk morado)`, 'silk morado', `${SPIDER} · silk morado`, 'PLA Silk Morado']]);
+    expect(pg.items.filter((f) => f.name !== SPIDER).every((f) => f.variants.length === 0 && f.variantCount === 0)).toBe(true);
+    expect(pg.items.some((f) => f.parentId)).toBe(false);
+  });
+
+  it('filters: technical and with_variants count families (any member counts)', async () => {
+    expect((await families('?filter=technical')).items.map((p) => p.name)).toEqual(['Soporte de celular PETG']);
+    const v = await families('?filter=with_variants');
+    expect([v.total, v.items.map((p) => p.name)]).toEqual([1, [SPIDER]]);
+    expect((await s.h.call('GET', '/api/v1/products?filter=variant')).json.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('search matches names, labels and tags; a match only in a variant says so (the screen opens its panel)', async () => {
+    const byLabel = await families('?q=SILK');
+    expect(byLabel.items.map((f) => [f.name, f.matchedByVariant, f.variants.length])).toEqual([[SPIDER, true, 1]]);
+    expect(byLabel.counts).toEqual({ families: 1, technical: 0, withVariants: 1 });
+    expect((await families('?q=spider')).items.map((f) => [f.name, f.matchedByVariant])).toEqual([[SPIDER, false], ['Spider-Man · trepando', false]]);
+    expect((await families('?q=negocio')).items.map((f) => f.name)).toEqual(['Servilletero con logo', 'Letrero de taquería']);
+    expect((await families('?q=%25')).total).toBe(0);
+    expect((await families('?q=zzz')).items).toEqual([]);
+  });
+
+  it('pagination counts families', async () => {
+    const all = (await families()).items.map((f) => f.id);
+    const p1 = await families('?pageSize=3');
+    const p3 = await families('?pageSize=3&page=3');
+    expect([p1.total, p1.items.length, p3.items.length]).toEqual([8, 3, 2]);
+    expect([...p1.items, ...(await families('?pageSize=3&page=2')).items, ...p3.items].map((f) => f.id)).toEqual(all);
+    expect((await s.h.call('GET', '/api/v1/products?pageSize=201')).json.code).toBe('VALIDATION_ERROR');
+  });
+});
+
+describe('GET /products/options (D-1)', () => {
+  it('every live piece, flat, ordered by family with the original first; displayName for variants', async () => {
+    const items = productOptions.parse(data(await s.h.call('GET', '/api/v1/products/options'))).items;
+    expect(items).toHaveLength(9);
+    const i = items.findIndex((p) => p.name === 'Spider-Man · salto');
+    expect(items.slice(i, i + 2).map((p) => [p.displayName, p.variantLabel, p.parentId])).toEqual([
+      ['Spider-Man · salto', null, null],
+      ['Spider-Man · salto · silk morado', 'silk morado', items[i]!.id],
+    ]);
+    expect(items.filter((p) => !p.parentId).map((p) => p.name)).toEqual((await s.h.call('GET', '/api/v1/products').then((r) => productFamilyPage.parse(r.json.data))).items.map((f) => f.name));
   });
 });
 

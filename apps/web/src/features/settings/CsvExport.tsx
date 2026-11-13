@@ -39,7 +39,7 @@ export const TABLES: Record<CsvTable, () => Promise<Rows>> = {
   orders: async () => (await pages<OrderRow>('/orders')).sort((a, b) => a.number - b.number)
     .map((o) => [o.number, o.customer, es.status.order[o.status] ?? o.status, o.dueOn, o.itemsText, csvMoney(o.totalCents), csvMoney(o.paidCents)]),
   customers: async () => (await request<CustomerRow[]>('GET', '/customers')).data.map((c) => [c.name, c.type, c.phone, c.note, c.createdOn]),
-  pieces: async () => (await api.products.list()).data.items.map((p) => [p.name, csvMoney(p.costCents), csvMoney(p.listCents), csvMoney(p.listCents - p.costCents), p.physical, p.tracksStock ? p.free : '']),
+  pieces: async () => (await api.products.options()).data.items.map((p) => [p.displayName, csvMoney(p.costCents), csvMoney(p.listCents), csvMoney(p.listCents - p.costCents), p.physical, p.tracksStock ? p.free : '']),
   filaments: async () => {
     const fils = (await api.filaments.list({ pageSize: 200 })).data.items;
     const details: FilamentDetail[] = await Promise.all(fils.map(async (f) => (await api.filaments.get(f.id)).data));

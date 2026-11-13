@@ -107,7 +107,7 @@ const BODY_REFS: { method: string; path: () => string; body: () => unknown }[] =
 ];
 
 const snapshotB = async () => {
-  const paths = ['/api/v1/filaments?pageSize=200', '/api/v1/supplies', '/api/v1/suppliers', '/api/v1/printers', '/api/v1/products', '/api/v1/collections', '/api/v1/settings',
+  const paths = ['/api/v1/filaments?pageSize=200', '/api/v1/supplies', '/api/v1/suppliers', '/api/v1/printers', '/api/v1/products', '/api/v1/products/options', '/api/v1/collections', '/api/v1/settings',
     `/api/v1/filaments/${first(s.b.filament)}`, `/api/v1/supplies/${first(s.b.supply)}`, `/api/v1/products/${first(s.b.product)}`,
     '/api/v1/stock', '/api/v1/customers', '/api/v1/orders?pageSize=200', '/api/v1/sales?pageSize=200', '/api/v1/print-runs', '/api/v1/expenses', '/api/v1/reports?period=all'];
   return JSON.stringify(await Promise.all(paths.map(async (p) => (await s.h.call('GET', p, { token: B_TOKEN })).json.data)));

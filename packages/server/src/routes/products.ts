@@ -1,21 +1,19 @@
 // Pieces and collections (docs/12 §5).
-import { saveCollectionInput, saveProductInput } from '@app/contract';
+import { LIMITS, pageQuery, productFamilyFilter, saveCollectionInput, saveProductInput } from '@app/contract';
 import { z } from 'zod';
 import { body, idParam, noContent, ok, query } from '../http';
 import {
-  collectionDetail, collectionList, deleteCollection, deleteProduct, productDetail, productList, restoreCollection, restoreProduct,
+  collectionDetail, collectionList, deleteCollection, deleteProduct, productDetail, productFamilies, productOptions, restoreCollection, restoreProduct,
   saveCollection, saveProduct, saveProductAsVariant,
 } from '../usecases/products';
 import type { Router } from './router';
 
-const listQuery = z.object({ q: z.string().max(120).optional(), filter: z.enum(['all', 'technical', 'variant']).default('all') });
+const familyQuery = pageQuery.extend({ filter: productFamilyFilter.default('all'), tag: z.string().trim().min(1).max(LIMITS.short).optional() });
 const page = <T>(items: T[]) => ({ items, page: 1, pageSize: items.length, total: items.length });
 
 export function productRoutes(r: Router) {
-  r.get('/products', 'product.read', async (c) => {
-    const q = query(c, listQuery);
-    return ok(c, page(await productList(c.get('deps'), c.get('deps').db, c.get('ctx'), q.filter, q.q)));
-  });
+  r.get('/products', 'product.read', async (c) => ok(c, await productFamilies(c.get('deps'), c.get('deps').db, c.get('ctx'), query(c, familyQuery))));
+  r.get('/products/options', 'product.read', async (c) => ok(c, { items: await productOptions(c.get('deps'), c.get('deps').db, c.get('ctx')) }));
   r.get('/products/:id', 'product.read', async (c) => ok(c, await productDetail(c.get('deps'), c.get('deps').db, c.get('ctx'), idParam(c, 'id', 'product'))));
   r.post('/products', 'product.create', async (c) => ok(c, await saveProduct(c.get('deps'), c.get('ctx'), await body(c, saveProductInput)), 201));
   r.put('/products/:id', 'product.update', async (c) => ok(c, await saveProduct(c.get('deps'), c.get('ctx'), await body(c, saveProductInput), idParam(c, 'id', 'product'))));
