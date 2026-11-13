@@ -37,6 +37,18 @@ export function stockStatus(physicalQty: number, reservedQty: number): StockStat
   return 'ok';
 }
 
+/**
+ * Status of a family of variants (case 5.3): its numbers are the sum of its members. Out if every member is out;
+ * all reserved if the free sum is 0; few if any member has 2 free or less; ok otherwise. One member → case 5.2.
+ */
+export function familyStockStatus(members: readonly { physical: number; reserved: number }[]): StockStatus {
+  if (members.length === 1) return stockStatus(members[0]!.physical, members[0]!.reserved);
+  if (members.every((m) => m.physical <= 0)) return 'out';
+  if (members.reduce((a, m) => a + free(m.physical, m.reserved), 0) === 0) return 'all_reserved';
+  if (members.some((m) => free(m.physical, m.reserved) <= 2)) return 'few';
+  return 'ok';
+}
+
 /** Sets that can be built today: min over the parts of floor(free / needed); 0 if a part does not track stock. */
 export function buildableSets(parts: readonly { productId: string; qty: number }[], freeOf: (productId: string) => number | null): number {
   const need: Record<string, number> = {};

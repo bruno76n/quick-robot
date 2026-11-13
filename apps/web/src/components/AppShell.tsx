@@ -1,5 +1,6 @@
 // Sidebar, top bar on small screens and the work area (docs/06 §1). Business name and trade come from
-// the workspace (Ajustes), never from code (D30).
+// the workspace (Ajustes), never from code (D30); with none, grey placeholders.
+// The mascot is the owner's brand mark and stays next to the name (person's decision, docs/decisiones.md 2026-11-13).
 import { Link, useRouterState } from '@tanstack/react-router';
 import { useEffect, useState, type ReactNode } from 'react';
 import { es } from '../i18n/es';
@@ -39,15 +40,18 @@ export function AppShell({ businessName, trade, banner, onNewPiece, onSearch, ch
     return () => obs.disconnect();
   }, []);
   const section = `/${path.split('/')[1] ?? ''}`;
+  const name = businessName.trim();
+  const shownName = name || es.sidebar.businessPlaceholder;
+  const nameEl = <b className={name ? undefined : 'ph-txt'}>{shownName}</b>;
   return (
     <div className="app" id="app">
       <header className="topbar">
         <button type="button" className="btn ghost icon" onClick={() => setNavOpen(true)} aria-label={es.common.openMenu}><Icon name="menu" size={20} /></button>
-        <span className="t-name"><span className="mk"><Mascot size={28} /></span>{businessName}</span>
+        <span className="t-name"><span className="mk"><Mascot size={28} /></span><span className={name ? undefined : 'ph-txt'}>{shownName}</span></span>
         <button type="button" className="btn green sm" onClick={onNewPiece} disabled={!onNewPiece}>{es.nav.newPiece}</button>
       </header>
       <aside className="side" id="side" aria-label={es.common.mainMenu}>
-        <div className="brand"><span className="mk"><Mascot size={40} /></span><div><b>{businessName}</b>{trade ? <small>{trade}</small> : null}</div></div>
+        <div className="brand"><span className="mk"><Mascot size={40} /></span><div>{nameEl}{trade.trim() ? <small>{trade}</small> : <small className="ph-txt">{es.sidebar.industryPlaceholder}</small>}</div></div>
         <button type="button" className="btn green block" onClick={onNewPiece} disabled={!onNewPiece}><Icon name="plus" size={16} />{es.nav.newPiece}</button>
         <button type="button" className="srch" onClick={onSearch} aria-label={es.common.searchAll}><Icon name="search" size={16} /><span>{es.common.search}</span><kbd>{es.common.searchShortcut}</kbd></button>
         <nav className="nav" aria-label={es.common.screens}>

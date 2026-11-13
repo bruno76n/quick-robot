@@ -1,7 +1,7 @@
 // Gastos, Reportes, Compras, Inicio y búsqueda (docs/04 §9, §10, §13; docs/06 §2, §13–16; docs/12 §8–9).
-import type { ExpenseInput } from '@app/contract';
+import type { Attention, ExpenseInput } from '@app/contract';
 import {
-  addDays, ALL_TIME_FROM, daysBetween, expenseInRange, expensesInRange, filamentPurchase, fixedPerMonth, floorPrice, inPeriod, investmentRecovered, isActive,
+  addDays, ALL_TIME_FROM, classifyAttention, type AttentionKind, daysBetween, expenseInRange, expensesInRange, filamentPurchase, fixedPerMonth, floorPrice, inPeriod, investmentRecovered, isActive,
   itemMaterial, maintenanceState, normalizeName, orderOwed, saleOwed, salesTotals, setCost, setPrice, supplyPurchase, type ExpenseData, type OrderStatus,
 } from '@app/core';
 import {
@@ -10,7 +10,7 @@ import {
 } from '@app/db';
 import type { Deps } from '../../deps';
 import { notFound } from '../../http';
-import { costOf, loadCostingContext, type CostingContext, setPartsOf, supplyIdsOf } from '../../views/costing';
+import { costOf, displayNames, loadCostingContext, type CostingContext, setPartsOf, supplyIdsOf } from '../../views/costing';
 import { cents, childrenOf, commissionOf, factSale, itemsText, lineItemData, orderData, saleData } from './common';
 import { queueViews } from './queue';
 import { grossProfitAndExpensesFast, totalsOf } from './fast';
@@ -142,7 +142,8 @@ export async function report(deps: Deps, ex: Executor, ctx: Ctx, q: { period?: '
   const totalsRow = groups.find((r) => r.key === 'total');
   const prevRow = prevRange ? (await saleTotals(ex, ctx, prevRange))[0] : undefined;
   const products = await listProducts(ex, ctx, { withDeleted: true });
-  const names = new Map(products.map((p) => [p.id, p.name]));
+  // Each variant counts on its own, with its displayName (mejoras/ronda-2.md §6).
+  const names = displayNames(products);
   const customers = new Map((await listCustomers(ex, ctx, { withDeleted: true })).map((c) => [c.id, c.name]));
   const exps = await listExpenses(ex, ctx);
   const expensesCents = cents(expensesInRange(exps.map(expenseData), from, to));
@@ -282,7 +283,12 @@ export async function home(deps: Deps, ex: Executor, ctx: Ctx) {
   const active = od.filter((x) => isActive(x.o.status as OrderStatus));
   const printers = await listPrinters(ex, ctx);
   const queues = await queueViews(ex, ctx, { printerIds: printers.map((p) => p.id) }, deps.clock.now());
-  const attentions: { kind: string; severity: 'bad' | 'warn' | 'info'; target: { type: string; id: string | null }; params: Record<string, unknown> }[] = [];
+  // Priority group of each attention (urgent | soon | review) comes from core › classifyAttention (docs/06 §2).
+  const attentions: Attention[] = [];
+  const push = (kind: AttentionKind, target: Attention['target'], params: Record<string, unknown>) => {
+    const severity = classifyAttention(kind, params as { days?: number });
+    if (severity) attentions.push({ kind, severity, target, params });
+  };
   const products = await listProducts(ex, ctx);
   const fils = await listAllFilaments(ex, ctx);
   const spools = await listSpools(ex, ctx, fils.map((f) => f.id));
@@ -293,30 +299,31 @@ export async function home(deps: Deps, ex: Executor, ctx: Ctx) {
   for (const { o } of active.filter((x) => x.o.status === 'accepted' && !x.o.filamentDeducted)) {
     const need: Record<string, number> = {};
     for (const it of oc.items(o.id)) for (const [f, gr] of Object.entries(itemMaterial(lineItemData(it), (id) => byId.get(id)?.filaments ?? []))) need[f] = (need[f] ?? 0) + gr * (1 + purge / 100);
-    for (const [f, gr] of Object.entries(need)) if (gr > left(f) + 0.01) attentions.push({ kind: 'order_filament_short', severity: 'bad', target: { type: 'order', id: o.id }, params: { number: o.number, filament: filName(f), filamentId: f, missingGrams: Math.round((gr - left(f)) * 10) / 10, availableGrams: Math.round(left(f) * 10) / 10, customer: customers.get(o.customerId) ?? '' } });
+    for (const [f, gr] of Object.entries(need)) if (gr > left(f) + 0.01) push('order_filament_short', { type: 'order', id: o.id }, { number: o.number, filament: filName(f), filamentId: f, missingGrams: Math.round((gr - left(f)) * 10) / 10, availableGrams: Math.round(left(f) * 10) / 10, customer: customers.get(o.customerId) ?? '' });
   }
-  for (const f of fils) { const own = spools.filter((s) => s.filamentId === f.id); if (own.length && left(f.id) <= 150) attentions.push({ kind: 'filament_low', severity: left(f.id) <= 0.5 ? 'bad' : 'warn', target: { type: 'filament', id: f.id }, params: { name: filName(f.id), grams: Math.round(left(f.id)) } }); }
-  for (const { o } of [...active].sort((x, y) => x.o.dueOn.localeCompare(y.o.dueOn))) { const d = daysBetween(today, o.dueOn); if (d <= 2) attentions.push({ kind: 'order_due', severity: d < 0 ? 'bad' : 'warn', target: { type: 'order', id: o.id }, params: { number: o.number, customer: customers.get(o.customerId) ?? '', days: d, dueOn: o.dueOn, status: o.status } }); }
-  for (const { f, owed } of [...owing].sort((x, y) => x.f.on.localeCompare(y.f.on))) attentions.push({ kind: 'sale_owed', severity: 'info', target: { type: 'sale', id: f.id }, params: { customer: f.customerId ? customers.get(f.customerId) ?? '' : '', owedCents: cents(owed), on: f.on } });
+  for (const f of fils) { const own = spools.filter((s) => s.filamentId === f.id); if (own.length && left(f.id) <= 150) push('filament_low', { type: 'filament', id: f.id }, { name: filName(f.id), grams: Math.round(left(f.id)) }); }
+  for (const { o } of [...active].sort((x, y) => x.o.dueOn.localeCompare(y.o.dueOn))) { const d = daysBetween(today, o.dueOn); push('order_due', { type: 'order', id: o.id }, { number: o.number, customer: customers.get(o.customerId) ?? '', days: d, dueOn: o.dueOn, status: o.status }); }
+  for (const { f, owed } of [...owing].sort((x, y) => x.f.on.localeCompare(y.f.on))) push('sale_owed', { type: 'sale', id: f.id }, { customer: f.customerId ? customers.get(f.customerId) ?? '' : '', owedCents: cents(owed), on: f.on });
   const c = await loadCostingContext(ex, ctx, supplyIdsOf(products));
+  const pn = displayNames(products);
   for (const p of products) {
     if (p.mode !== 'value' || !p.priceCents) continue;
     const floor = floorPrice(costOf(p, c).total, c.settings.minMarginPct);
-    if (p.priceCents / 100 < floor - 0.005) attentions.push({ kind: 'price_below_floor', severity: 'warn', target: { type: 'product', id: p.id }, params: { name: p.name, priceCents: p.priceCents, floorCents: cents(floor), costCents: cents(costOf(p, c).total) } });
+    if (p.priceCents / 100 < floor - 0.005) push('price_below_floor', { type: 'product', id: p.id }, { name: pn.get(p.id) ?? p.name, priceCents: p.priceCents, floorCents: cents(floor), costCents: cents(costOf(p, c).total) });
   }
   for (const col of await listCollections(ex, ctx)) {
     if (!col.priceCents) continue;
     const parts = setPartsOf(col, byId, c);
     const floor = floorPrice(setCost(parts, col.extrasCents / 100), c.settings.minMarginPct);
-    if (setPrice(col.priceCents / 100, parts) < floor - 0.005) attentions.push({ kind: 'price_below_floor', severity: 'warn', target: { type: 'collection', id: col.id }, params: { name: col.name, priceCents: col.priceCents, floorCents: cents(floor), costCents: cents(setCost(parts, col.extrasCents / 100)) } });
+    if (setPrice(col.priceCents / 100, parts) < floor - 0.005) push('price_below_floor', { type: 'collection', id: col.id }, { name: col.name, priceCents: col.priceCents, floorCents: cents(floor), costCents: cents(setCost(parts, col.extrasCents / 100)) });
   }
   const tasks = await listTasks(ex, ctx, printers.map((p) => p.id));
   const maint = tasks.map((tk) => { const p = printers.find((x) => x.id === tk.printerId)!; return { tk, p, s: maintenanceState({ everyHours: tk.everyHours, lastHours: tk.lastHours }, p.hours) }; })
     .filter((x) => x.s.status !== 'ok').sort((a, b) => a.s.remaining - b.s.remaining).slice(0, 3);
-  for (const m of maint) attentions.push({ kind: 'maintenance', severity: m.s.status === 'due' ? 'bad' : 'warn', target: { type: 'printer', id: m.p.id }, params: { printer: m.p.name, task: m.tk.task, status: m.s.status, remainingHours: Math.round(m.s.remaining * 10) / 10 } });
-  for (const s of (await listSupplies(ex, ctx, { page: 1, pageSize: 100_000 })).items) if (s.stock <= s.minimum) attentions.push({ kind: 'supply_low', severity: s.stock <= 0 ? 'bad' : 'warn', target: { type: 'supply', id: s.id }, params: { name: s.name, stock: s.stock, minimum: s.minimum, unit: s.unit } });
+  for (const m of maint) push('maintenance', { type: 'printer', id: m.p.id }, { printer: m.p.name, task: m.tk.task, status: m.s.status, remainingHours: Math.round(m.s.remaining * 10) / 10 });
+  for (const s of (await listSupplies(ex, ctx, { page: 1, pageSize: 100_000 })).items) if (s.stock <= s.minimum) push('supply_low', { type: 'supply', id: s.id }, { name: s.name, stock: s.stock, minimum: s.minimum, unit: s.unit });
   const backup = (await getSettings(ex, ctx))?.lastBackupOn ?? null;
-  if (!backup || daysBetween(backup, today) > 7) attentions.push({ kind: 'backup', severity: 'warn', target: { type: 'settings', id: null }, params: { lastOn: backup, days: backup ? daysBetween(backup, today) : null } });
+  if (!backup || daysBetween(backup, today) > 7) push('backup', { type: 'settings', id: null }, { lastOn: backup, days: backup ? daysBetween(backup, today) : null });
   const printingNow = printers.flatMap((p) => (queues.get(p.id) ?? []).filter((q) => q.startedAt).slice(0, 1).map((q) => ({ printerId: p.id, printer: p.name, ...q, customer: customers.get(orders.find((o) => o.id === q.orderId)?.customerId ?? '') ?? '' })));
   return {
     stats: {
@@ -335,13 +342,14 @@ export async function search(_deps: Deps, ex: Executor, ctx: Ctx, q: string) {
   const needle = normalizeName(q);
   const hit = (...t: (string | null | undefined)[]) => t.some((x) => x && normalizeName(x).includes(needle));
   const productsAll = await listProducts(ex, ctx);
-  const foundProducts = productsAll.filter((p) => hit(p.name, p.note, ...p.tags)).slice(0, 8);
+  const dn = displayNames(productsAll);
+  const foundProducts = productsAll.filter((p) => hit(p.name, p.variantLabel, p.note, ...p.tags)).slice(0, 8);
   const foundCols = (await listCollections(ex, ctx)).filter((col) => hit(col.name)).slice(0, 8);
   // Prices are costed only when something matched (the costing context is the heavy part).
   // A piece with a typed price (mode "value") shows it as is; costs are loaded only for formula prices or sets without a price.
   const needsCost = foundProducts.some((p) => p.mode === 'formula') || foundCols.some((col) => !col.priceCents);
   const c = needsCost ? await loadCostingContext(ex, ctx, supplyIdsOf(productsAll)) : null;
-  const products = foundProducts.map((p) => ({ id: p.id, name: p.name, listCents: p.mode === 'formula' ? cents(priceOf(p, c!)) : p.priceCents }));
+  const products = foundProducts.map((p) => ({ id: p.id, name: dn.get(p.id) ?? p.name, listCents: p.mode === 'formula' ? cents(priceOf(p, c!)) : p.priceCents }));
   const byId = new Map(productsAll.map((p) => [p.id, p]));
   const collections = foundCols.map((col) => ({ id: col.id, name: col.name, priceCents: col.priceCents ? col.priceCents : cents(setPrice(null, setPartsOf(col, byId, c!))) }));
   const customersAll = await listCustomers(ex, ctx);

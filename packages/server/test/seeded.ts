@@ -28,7 +28,7 @@ export async function idsOf(h: Harness, token: string): Promise<Ids> {
     supplier: byName(await get('/api/v1/suppliers') as { id: string; name: string }[], (s) => s.name),
     supply: byName((await get('/api/v1/supplies') as { items: { id: string; name: string }[] }).items, (s) => s.name),
     printer: byName(printers, (p) => p.name), task: printers[0]!.maintenance[0]!.id,
-    product: byName((await get('/api/v1/products') as { items: { id: string; name: string }[] }).items, (p) => p.name),
+    product: byName((await get('/api/v1/products/options') as { items: { id: string; name: string }[] }).items, (p) => p.name),
     collection: byName((await get('/api/v1/collections') as { items: { id: string; name: string }[] }).items, (c) => c.name),
     channel: byName(settings.channels, (c) => c.name),
     file: ((await up.json()) as { data: { fileId: string } }).data.fileId,

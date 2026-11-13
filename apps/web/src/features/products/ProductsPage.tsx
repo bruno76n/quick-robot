@@ -1,7 +1,7 @@
-// Productos (docs/06 §3): Piezas and Colecciones, as tiles or list, with filters and search.
-import type { CollectionListItem, ProductListItem } from '@app/contract';
+// Productos (docs/06 §3): Piezas (families, mejoras/ronda-2.md §3) and Colecciones, as tiles or list, with filters and search.
+import type { CollectionListItem, ProductFamilyFilter } from '@app/contract';
 import { useSearch } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
 import { Mascot } from '../../components/Mascot';
@@ -9,21 +9,43 @@ import { Pill, Swatch } from '../../components/Pill';
 import { toast } from '../../components/Toast';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
-import { centsTotal, money, number1 } from '../../lib/format';
+import { centsTotal, money } from '../../lib/format';
 import { go } from '../../lib/nav';
-import { useCollections, useProducts } from '../../lib/queries';
+import { useCollections } from '../../lib/queries';
+import { useProductFamilies } from './api';
+import { FamilyTiles } from './FamilyTiles';
+import { FamilyTable } from './FamilyTable';
 import { MarginBar, Piece3d } from './Piece3d';
+import './products.css';
 
 const L = es.screens.products;
-type Filter = 'todo' | 'tecnico' | 'variante';
+type Filter = 'todo' | 'tecnico' | 'con-variantes';
+const API_FILTER: Record<Filter, ProductFamilyFilter> = { todo: 'all', tecnico: 'technical', 'con-variantes': 'with_variants' };
+const FILTERS: [Filter, string, 'families' | 'technical' | 'withVariants'][] = [['todo', L.all, 'families'], ['tecnico', L.technical, 'technical'], ['con-variantes', L.filter.withVariants, 'withVariants']];
+
+/** Search text after a short pause (the server searches names and variant labels). */
+function useDebounced(value: string, ms = 250) {
+  const [v, setV] = useState(value);
+  useEffect(() => { const id = setTimeout(() => setV(value), ms); return () => clearTimeout(id); }, [value, ms]);
+  return v;
+}
 
 export function ProductsPage() {
-  const search = useSearch({ strict: false }) as { tab?: string; vista?: string; filtro?: string };
+  const search = useSearch({ strict: false }) as { tab?: string; vista?: string; filtro?: string; abierta?: string };
   const tab = search.tab === 'colecciones' ? 'colecciones' : 'piezas';
   const view = search.vista === 'lista' ? 'lista' : 'fichas';
-  const filter = (search.filtro ?? 'todo') as Filter;
+  const filter: Filter = search.filtro === 'tecnico' || search.filtro === 'con-variantes' ? search.filtro : 'todo';
   const [q, setQ] = useState('');
-  const products = useProducts().data?.items ?? [];
+  const needle = useDebounced(q.trim());
+  // One family open at a time; it comes back open after creating a variant (?abierta=) and opens when the search matched only a variant.
+  const [open, setOpen] = useState<string | null>(search.abierta ?? null);
+  const families = useProductFamilies(needle, API_FILTER[filter]);
+  const pages = families.data?.pages ?? [];
+  const items = pages.flatMap((p) => p.items);
+  const counts = pages[0]?.counts ?? { families: 0, technical: 0, withVariants: 0 };
+  const matched = needle ? items.find((f) => f.matchedByVariant)?.id ?? null : null;
+  const [seenMatch, setSeenMatch] = useState<string | null>(null);
+  if (matched !== seenMatch) { setSeenMatch(matched); if (matched) setOpen(matched); }
   const collections = useCollections().data?.items ?? [];
   const nav = (next: { tab?: string; vista?: string; filtro?: string }) => {
     const p = new URLSearchParams();
@@ -34,20 +56,19 @@ export function ProductsPage() {
     go(`/productos${p.size ? `?${p}` : ''}`, true);
   };
   const isCol = tab === 'colecciones';
-  const count = (f: Filter) => products.filter((p) => f === 'todo' || (f === 'tecnico' && p.technical) || (f === 'variante' && p.parentId)).length;
-  const needle = q.trim().toLocaleLowerCase('es');
-  const shownP = products.filter((p) => (filter === 'tecnico' ? p.technical : filter === 'variante' ? Boolean(p.parentId) : true) && (!needle || p.name.toLocaleLowerCase('es').includes(needle)));
-  const shownC = collections.filter((c) => !needle || c.name.toLocaleLowerCase('es').includes(needle));
-  const newCollection = () => { if (!products.length) { toast(es.errors.NO_PRODUCTS); return; } go('/productos/coleccion'); };
+  const shownC = collections.filter((c) => !needle || c.name.toLocaleLowerCase('es').includes(needle.toLocaleLowerCase('es')));
+  const newCollection = () => { if (!counts.families && !needle) { toast(es.errors.NO_PRODUCTS); return; } go('/productos/coleccion'); };
+  const toggle = (id: string) => setOpen((o) => (o === id ? null : id));
+  const anyPieces = counts.families > 0 || Boolean(needle) || filter !== 'todo';
   return (
     <>
       <PageHead title={L.title} sub={isCol ? L.subCollections : L.subPieces} actions={<>
         <Button variant={isCol ? 'green' : 'default'} icon={isCol ? 'plus' : undefined} onClick={newCollection}>{L.newCollection}</Button>
         <Button variant={isCol ? 'default' : 'green'} icon={isCol ? undefined : 'plus'} onClick={() => go('/productos/pieza')}>{L.newPiece}</Button>
       </>} />
-      <div className="toolbar">
+      <div className="toolbar prod-tb">
         <div className="seg" role="group" aria-label={L.catalogView}>
-          <button type="button" className={!isCol ? 'on' : ''} onClick={() => nav({ tab: 'piezas' })}>{L.pieces} <small>{products.length}</small></button>
+          <button type="button" className={!isCol ? 'on' : ''} onClick={() => nav({ tab: 'piezas' })}>{L.pieces} <small data-testid="pieces-count">{counts.families}</small></button>
           <button type="button" className={isCol ? 'on' : ''} onClick={() => nav({ tab: 'colecciones' })}>{L.collections} <small>{collections.length}</small></button>
         </div>
         <div className="tb-r">
@@ -64,70 +85,17 @@ export function ProductsPage() {
         </>
       ) : (
         <>
-          <div className="tags" role="group" aria-label={L.filter}>
-            {([['todo', L.all], ['tecnico', L.technical], ['variante', L.variants]] as const).map(([k, l]) => <button key={k} type="button" className={`tag${filter === k ? ' on' : ''}`} aria-pressed={filter === k} onClick={() => nav({ filtro: k })}>{l} {count(k)}</button>)}
+          <div className="tags" role="group" aria-label={L.filter.aria}>
+            {FILTERS.map(([k, l, c]) => <button key={k} type="button" className={`tag${filter === k ? ' on' : ''}`} aria-pressed={filter === k} onClick={() => nav({ filtro: k })}>{l} {counts[c]}</button>)}
           </div>
-          {view === 'lista' ? <ProductTable items={shownP} total={products.length} /> : <div className="pt-grid">{shownP.map((p) => <ProductTile key={p.id} p={p} />)}{!shownP.length ? <div className="empty-card"><Mascot size={64} /><p>{products.length ? L.noPieceMatchTile : L.emptyPiecesTile}</p><Button variant="green" icon="plus" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></div> : null}</div>}
+          {!families.data ? <div className="skel" /> : view === 'lista'
+            ? <FamilyTable items={items} anyPieces={anyPieces} open={open} onToggle={toggle} />
+            : <FamilyTiles items={items} open={open} onToggle={toggle} empty={<div className="empty-card"><Mascot size={64} /><p>{anyPieces ? L.noPieceMatchTile : L.emptyPiecesTile}</p><Button variant="green" icon="plus" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></div>} />}
+          {families.hasNextPage ? <div className="more-row"><Button busy={families.isFetchingNextPage} onClick={() => void families.fetchNextPage()}>{L.showMore}</Button></div> : null}
           <p className="foot-note">{L.piecesFoot}</p>
         </>
       )}
     </>
-  );
-}
-
-const subOf = (p: ProductListItem) => (p.parentName ? t('screens.products.variantOf', { name: p.parentName }) : p.printerName ?? (p.printerId ? '' : L.anyPrinter));
-const openPiece = (id: string) => go(`/productos/pieza?id=${id}`);
-const ratio = (price: number, cost: number) => `×${number1(cost ? price / cost : 0)}`;
-function stockPill(p: ProductListItem) {
-  if (!p.tracksStock) return <span className="pill">{L.onlyToOrder}</span>;
-  const apt = Math.min(p.physical, p.reserved);
-  if (p.free > 0) return <span className="pill good">{t('screens.products.free', { count: p.free })}{apt ? ` · ${t('screens.products.reserved', { count: apt })}` : ''}</span>;
-  return <span className="pill warn">{apt ? es.status.stock.all_reserved : L.noStock}</span>;
-}
-
-function ProductTile({ p }: { p: ProductListItem }) {
-  const gain = p.listCents - p.costCents;
-  return (
-    <article className="pt" tabIndex={0} onClick={() => openPiece(p.id)} onKeyDown={(e) => { if (e.key === 'Enter') openPiece(p.id); }} data-testid="product-tile">
-      <div className={`pt-top${p.photoUrl ? ' has-img' : ''}`}>{p.photoUrl ? <img className="pt-img" src={p.photoUrl} alt="" /> : <Piece3d hexes={p.hexes} id={p.id} />}<span className="pt-tags">{p.technical ? <span className="pill">{L.technicalTag}</span> : null}{p.parentId ? <span className="pill">{L.variantTag}</span> : null}</span></div>
-      <div className="pt-b">
-        <div className="pt-n">{p.name}</div><small className="pt-s">{subOf(p)}</small>
-        <div className="pt-pr"><b className="pt-p num">{centsTotal(p.listCents)}</b><span className={`pt-g num ${gain >= 0 ? 'pos' : 'neg'}`}>{t(gain >= 0 ? 'screens.products.youGain' : 'screens.products.youLose', { amount: centsTotal(Math.abs(gain)) })} · {ratio(p.listCents, p.costCents)}</span></div>
-        <MarginBar cost={p.costCents} price={p.listCents} />
-        <div className="pt-f"><span>{t('screens.products.cost', { cost: money(p.costCents / 100) })}</span><span>{t('screens.products.sold', { count: number1(p.sold) })}</span></div>
-        <div className="pt-st">{stockPill(p)}</div>
-      </div>
-      <div className="pt-a" onClick={(e) => e.stopPropagation()}>
-        <Button size="sm" onClick={() => go(`/armar?modo=${p.free > 0 ? 'venta' : 'pedido'}&pieza=${p.id}`)}>{p.free > 0 ? L.sell : L.order}</Button>
-        <Button size="sm" variant="ghost" onClick={() => go(`/productos/pieza?de=${p.id}`)}>{L.variant}</Button>
-      </div>
-    </article>
-  );
-}
-
-function ProductTable({ items, total }: { items: ProductListItem[]; total: number }) {
-  return (
-    <div className="tw"><table className="tbl prods"><thead><tr><th>{L.colPiece}</th><th className="r">{L.colInStock}</th><th className="r">{L.colCost}</th><th className="r">{L.colList}</th><th className="bar-th"><span className="sr">{L.costVsPrice}</span></th><th className="r">{L.colProfit}</th><th className="r nw">{L.colTimes}</th><th className="r">{L.colSold}</th><th /></tr></thead>
-      <tbody>
-        {items.map((p) => {
-          const gain = p.listCents - p.costCents;
-          const apt = Math.min(p.physical, p.reserved);
-          return (
-            <tr key={p.id} className="click" tabIndex={0} onClick={() => openPiece(p.id)}>
-              <td><div className="pn"><span className="swstack">{p.hexes.map((h, i) => <Swatch key={i} hex={h} />)}</span><div><b>{p.name}</b><small>{subOf(p)}</small>{p.collections.length ? <span className="pcols">{p.collections.slice(0, 2).map((c) => <Pill key={c.id} tone="info">{c.name}</Pill>)}{p.collections.length > 2 ? <Pill>+{p.collections.length - 2}</Pill> : null}</span> : null}</div></div></td>
-              <td className={`r num ex-td${p.tracksStock && !p.free ? ' neg' : ''}`}>{p.tracksStock ? <><b>{p.free}</b>{apt ? <small className="blk">{t('screens.products.reserved', { count: apt })}</small> : null}</> : <><span className="mut">—</span><small className="blk">{L.onlyToOrderLower}</small></>}</td>
-              <td className="r num">{money(p.costCents / 100)}</td>
-              <td className="r num"><b>{centsTotal(p.listCents)}</b>{p.mode === 'formula' ? <small className="blk">{L.costPlusMargin}</small> : null}</td>
-              <td className="bar-td"><MarginBar cost={p.costCents} price={p.listCents} /></td>
-              <td className={`r num ${gain >= 0 ? 'pos' : 'neg'}`}>{centsTotal(gain)}</td>
-              <td className="r num">{ratio(p.listCents, p.costCents)}</td>
-              <td className="r num">{number1(p.sold)}</td>
-              <td className="r" onClick={(e) => e.stopPropagation()}><span className="rowa"><Button size="sm" onClick={() => go(`/armar?modo=${p.free > 0 ? 'venta' : 'pedido'}&pieza=${p.id}`)}>{p.free > 0 ? L.sell : L.order}</Button><Button size="sm" variant="ghost" onClick={() => go(`/productos/pieza?de=${p.id}`)}>{L.variant}</Button></span></td>
-            </tr>
-          );
-        })}
-        {!items.length ? <tr><td colSpan={9} className="empty-td"><Mascot size={48} /><p>{total ? L.noPieceMatch : L.emptyPieces}</p><Button variant="green" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></td></tr> : null}
-      </tbody></table></div>
   );
 }
 

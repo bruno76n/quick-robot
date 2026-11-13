@@ -1,0 +1,107 @@
+/* Existencias (ronda-2 §4; reference/ronda-2/existencias-lista.html and existencias-fichas.html). Colors only from tokens. */
+.sk { --st: var(--ink-2); --st-bar: var(--line-2); }
+.sk.few { --st: var(--amber-ink); --st-bar: var(--amber); }
+.sk.ok { --st: var(--green-ink); --st-bar: var(--green); }
+.sk.all_reserved, .sk.out { --st: var(--red-ink); --st-bar: var(--line-2); }
+
+/* Toolbar: state filters on the left; search and Fichas | Lista on the right. */
+.sk-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.sk-tools .tb-r { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.sk-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.sk-f { border: 0; border-radius: 99px; padding: 6px 14px; font-size: 14px; font-weight: 500; cursor: pointer; background: var(--panel-2); color: var(--ink-2); }
+.sk-f span { font-variant-numeric: tabular-nums; }
+.sk-f.few { background: var(--amber-soft); color: var(--amber-ink); }
+.sk-f.ok { background: var(--green-soft); color: var(--green-ink); }
+.sk-f.out { background: var(--red-soft); color: var(--red-ink); }
+.sk-f.on { background: var(--ink); color: var(--bg); font-weight: 600; }
+.sk-f.on span { opacity: .8; font-weight: 500; }
+
+/* Shared pieces. */
+.sk-thumb { flex: none; width: 44px; height: 44px; border-radius: 6px; background: var(--panel); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.sk-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.sk-name { min-width: 0; }
+.sk-name b { display: block; font-weight: 600; line-height: 1.25; overflow-wrap: break-word; }
+.sk-name small { display: block; font-size: 13px; color: var(--ink-2); }
+.sk-free { color: var(--st); font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.sk-num { font-variant-numeric: tabular-nums; }
+.sk-chev { flex: none; width: 28px; height: 28px; border: 1px solid var(--line-2); background: var(--panel); border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; color: var(--ink-2); }
+.sk-chev svg { transition: transform .15s; }
+.sk-chev[aria-expanded="true"] svg { transform: rotate(90deg); }
+.sk-open { width: 32px; height: 32px; border: 1px solid var(--line); background: var(--bg); border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; color: var(--ink-2); }
+.sk-open:hover, .sk-chev:hover { color: var(--ink); border-color: var(--line-2); }
+.sk-dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: var(--c, var(--no-color)); box-shadow: inset 0 0 0 1px rgba(18, 18, 20, .18); }
+.sk-orig { background: var(--panel-2); color: var(--ink-2); border-radius: 99px; padding: 1px 9px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+
+/* Lista. */
+.sk-table { min-width: 0; }
+.sk-row, .sk-head { display: grid; grid-template-columns: minmax(180px, 3fr) 130px minmax(56px, .8fr) minmax(76px, .9fr) minmax(44px, .7fr) minmax(96px, 1fr) 36px; column-gap: 12px; align-items: center; }
+.sk-head { padding: 8px; font-size: 12.5px; color: var(--ink-2); font-weight: 600; border-bottom: 1px solid var(--line); }
+.sk-head .r, .sk-row .r { text-align: right; justify-self: end; }
+.sk-sort { border: 0; background: none; padding: 0; font: inherit; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.sk-item { border-bottom: 1px solid var(--line); }
+.sk-row { padding: 11px 8px; }
+.sk-row.click { cursor: pointer; }
+.sk-row.click:hover, .sk-row.sel { background: var(--panel); }
+.sk-cell-piece { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.sk-gap { flex: none; width: 28px; }
+.sk-row .sk-free { font-size: 20px; }
+.sk-row .res { color: var(--ink); }
+.sk-row .tot { color: var(--ink-2); }
+.sk-members { background: var(--panel); border-top: 1px solid var(--line); padding: 2px 8px 6px; }
+.sk-members .sk-row { padding: 9px 0; border-bottom: 1px dashed var(--line); }
+.sk-members .sk-row:last-child { border-bottom: 0; }
+.sk-members .sk-row.click:hover, .sk-members .sk-row.sel { background: var(--panel-2); }
+.sk-members .sk-cell-piece { padding-left: 38px; position: relative; }
+.sk-members .sk-cell-piece::before { content: ""; position: absolute; left: 14px; top: -9px; bottom: 50%; width: 12px; border-left: 2px solid var(--line-2); border-bottom: 2px solid var(--line-2); border-bottom-left-radius: 6px; }
+.sk-members .sk-free { font-size: 17px; }
+.sk-members .sk-name b { display: inline; }
+.sk-lbl { display: none; }
+
+@media (max-width: 760px) {
+  .sk-head { display: none; }
+  .sk-row { grid-template-columns: repeat(4, minmax(0, 1fr)) 32px; row-gap: 8px; }
+  .sk-row > .sk-cell-piece { grid-column: 1 / 5; }
+  .sk-row > .sk-act { grid-column: 5; grid-row: 1; justify-self: end; }
+  .sk-row > .sk-state { grid-column: 1 / -1; }
+  .sk-row > .r { justify-self: start; text-align: left; }
+  .sk-row > .r.price { grid-column: 4 / 6; }
+  .sk-lbl { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink-2); letter-spacing: 0; }
+  .sk-gap { display: none; }
+  .sk-members .sk-cell-piece { padding-left: 30px; }
+  .sk-members .sk-cell-piece::before { left: 8px; }
+}
+
+/* Fichas. */
+.sk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.sk-card { border: 1px solid var(--line); border-radius: var(--r); padding: 14px; display: flex; flex-direction: column; gap: 12px; background: var(--bg); cursor: pointer; min-width: 0; }
+.sk-card:hover { border-color: var(--line-2); box-shadow: var(--sh-up); }
+.sk-card.sel { box-shadow: 0 0 0 2px var(--accent); border-color: transparent; }
+.sk-card-h { display: flex; align-items: flex-start; gap: 10px; }
+.sk-card-h .sk-name { flex: 1; }
+.sk-big { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.sk-big > span:first-child { display: flex; align-items: baseline; gap: 6px; color: var(--ink); font-weight: 500; }
+.sk-big .sk-free { font-size: 36px; line-height: 1; letter-spacing: -.04em; }
+.sk-big small { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.sk-bar { display: flex; gap: 2px; height: 6px; border-radius: 3px; overflow: hidden; background: var(--panel-2); }
+.sk-bar span { border-radius: 3px; min-width: 4px; }
+.sk-bar .f { background: var(--st-bar); }
+.sk-bar .a { background: var(--line-2); }
+.sk-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--ink-2); }
+.sk-foot > span:first-child { display: flex; align-items: center; gap: 6px; }
+.sk-foot > span:first-child::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--line-2); }
+.sk-foot b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.sk-vars { border-top: 1px dashed var(--line-2); padding-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+.sk-vars > div { font-size: 12.5px; font-weight: 600; color: var(--ink); }
+.sk-var { display: flex; align-items: center; gap: 8px; font-size: 13px; border: 0; background: none; padding: 3px 4px; margin: 0 -4px; border-radius: 6px; text-align: left; cursor: pointer; color: var(--ink); }
+.sk-var:hover, .sk-var.sel { background: var(--panel); }
+.sk-var .sk-dot { width: 12px; height: 12px; }
+.sk-var > span:nth-child(2) { flex: 1; min-width: 0; }
+.sk-var .sk-free { font-size: 13px; }
+@media (max-width: 560px) { .sk-grid { grid-template-columns: minmax(0, 1fr); } }
+
+.sk-more { display: flex; justify-content: center; margin-top: 14px; }
+
+/* The ronda-2 mockups paint "Disponible" green here (the global rule keeps it grey elsewhere). */
+.sk .pill.good { background: var(--green-soft); color: var(--green-ink); }
+.sk .pill { font-weight: 500; }
+@media (min-width: 761px) { .sk-tools .tb-r { flex-wrap: nowrap; } .sk-tools .search { width: 230px; } }

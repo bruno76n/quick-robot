@@ -3,6 +3,7 @@
 @import '../styles/tokens.css';
 
 * { box-sizing: border-box; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; }
 .fatal { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; padding: 32px 16px; text-align: center; }
 .fatal img { width: 72px; height: auto; }

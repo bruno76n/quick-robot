@@ -1,7 +1,7 @@
 // "Agregar rollo" (docs/06 §6, reference/mockup-textos.md › Diálogo · rollo nuevo). Material and color are picked
 // from lists so the spool always joins the same filament; the server decides and recalculates.
 import type { FieldError, FilamentListItem, Spool } from '@app/contract';
-import { canonicalEntry, defaultCatalog, filamentKey, findInCatalog, type CatalogEntry } from '@app/core';
+import { canonicalEntry, DEFAULT_COLORS, defaultCatalog, filamentKey, findInCatalog, type CatalogEntry } from '@app/core';
 import { useMemo, useState, type ReactNode } from 'react';
 import { Dialog } from '../../components/Dialog';
 import { Field } from '../../components/Field';
@@ -68,7 +68,7 @@ function SpoolForm({ filamentId, editing, filaments, onClose, onAdded, onDeleted
   const [materialNew, setMaterialNew] = useState('');
   const [color, setColor] = useState(preset?.color ?? '');
   const [colorNew, setColorNew] = useState('');
-  const [hex, setHex] = useState('#6b3fd4');
+  const [hex, setHex] = useState(DEFAULT_COLORS[0]![1]); // a new color starts on the first of the list, never on an interface color
   const [brand, setBrand] = useState(editing?.brand ?? '');
   const [brandNew, setBrandNew] = useState('');
   const [cost, setCost] = useState(editing ? String(editing.costCents / 100) : '');
@@ -88,7 +88,7 @@ function SpoolForm({ filamentId, editing, filaments, onClose, onAdded, onDeleted
   const C = canonicalEntry('color', catalog.color, color === OTHER ? colorNew : color, hex);
   const B = canonicalEntry('brand', catalog.brand, brand === OTHER ? brandNew : brand);
   const g = Math.max(0, parseNumber(weight));
-  const swatch = C.name && !C.isNew ? C.hex! : color === OTHER ? hex : '#d2d2da';
+  const swatch = C.name && !C.isNew ? C.hex! : color === OTHER ? hex : 'var(--line-2)';
   const existing = M.name && C.name ? filaments.find((f) => filamentKey(f.material, f.color) === filamentKey(M.name, C.name)) : undefined;
   const pay = parseNumber(cost) + parseNumber(shipping);
   const err = (field: string) => { const f = errs.find((e) => e.path.split(/[.[]/)[0] === field); return f ? fieldText('spool', f) : undefined; };

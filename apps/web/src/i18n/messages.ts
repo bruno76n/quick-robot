@@ -19,6 +19,7 @@ export const errors = {
   "CONFIRMATION_REQUIRED": "Falta confirmar la operación.",
   "PRODUCT_IN_ACTIVE_ORDERS": "Esta pieza está en {count} {count|pedido sin entregar|pedidos sin entregar} ({folios}). Primero deben entregarse o eliminarse.",
   "PRODUCT_HAS_STOCK": "No se puede eliminar: quedan {onHand} {onHand|pieza|piezas} en Existencias. Primero ajustar el conteo a 0.",
+  "PRODUCT_HAS_VARIANTS": "Esta pieza tiene {count} {count|variante|variantes}. Primero hay que eliminarlas.",
   "STOCK_TRACKING_HAS_STOCK": "Hay {onHand} en existencias: ajústalas a 0 en Existencias antes de desactivarlo.",
   "COLLECTION_EMPTY": "La colección necesita al menos una pieza.",
   "NO_PRODUCTS": "Primero crea una pieza en Productos.",

@@ -45,11 +45,11 @@ Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 2` · `t
 | Parte | Fase | Estado | Notas |
 |---|---|---|---|
 | Medición del rediseño | A | terminada | `docs/mejoras/informe-ronda2-a.md`: inventario, morado y marca, datos, línea base de rendimiento y plan de la B (24 pasos) |
-| Panel neutro (sin morado ni marca) | B | no iniciada | |
-| Datos y API (familias, `variant_label`, `severity`) | B | no iniciada | Migración aditiva con copia previa |
-| Productos (fichas y lista con variantes agrupadas) | B | no iniciada | |
-| Existencias (lista y fichas simplificadas) | B | no iniciada | |
-| Inicio (atención por prioridad, sin rollos) | B | no iniciada | |
+| Panel neutro (sin morado; la mascota se queda) | B | terminada | Tokens en un solo archivo, `--accent`, `--cost`; sin morado en pantalla (`e2e/no-purple.spec.ts`). La mascota volvió por decisión de la persona (2026-11-13, `086821c`) |
+| Datos y API (familias, `variant_label`, `severity`) | B | terminada | Migración aditiva 0007; `GET /products` y `/stock` por familias, `/products/options`, `severity`, `PRODUCT_HAS_VARIANTS`; `pnpm perf` en verde (`informe-ronda2-b.md`) |
+| Productos (fichas y lista con variantes agrupadas) | B | igual a la maqueta de la ronda 2 | 1440, 820 y 390; diferencias aceptadas en `informe-ronda2-b.md` |
+| Existencias (lista y fichas simplificadas) | B | igual a la maqueta de la ronda 2 | Móvil: filas en tarjeta; 820: fichas en 3 columnas (aceptado) |
+| Inicio (atención por prioridad, sin rollos) | B | igual a la maqueta de la ronda 2 | Fase B cerrada: `docs/mejoras/informe-ronda2-b.md`; sigue la fase C (medir clics) |
 | Medición de clics | C | no iniciada | `docs/mejoras/informe-ronda2-c.md` |
 | Mejoras de clics | D | no iniciada | “Agregar filamento” va primero; `docs/mejoras/informe-ronda2-d.md` |
 

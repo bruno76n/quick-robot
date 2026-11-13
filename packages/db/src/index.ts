@@ -12,3 +12,4 @@ export * from './repos/product-repo';
 export * from './repos/sell-repo';
 export * from './repos/workspace-data-repo';
 export * from './migrate-local';
+export * from './repos/product-family-repo';

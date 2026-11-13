@@ -18,3 +18,7 @@
 @keyframes skel { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
 @media (prefers-reduced-motion: reduce) { .skel-h, .skel-l, .skel-c { animation: none; } }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* Every checkbox and radio, not only .chk and .switch, takes the neutral accent (ronda-2 §2). */
+input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
+/* Grey placeholders when Ajustes has no name or trade (ronda-2 §2). */
+.ph-txt, .brand small.ph-txt { color: var(--ink-3); }

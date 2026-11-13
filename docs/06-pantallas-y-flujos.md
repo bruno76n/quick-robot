@@ -18,7 +18,7 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 | Elemento | Qué hace |
 |---|---|
-| **Barra lateral** | Arriba: un **monograma** (iniciales del nombre del negocio) con el **nombre y el giro del negocio** (datos de Ajustes; el mockup los traía fijos como “Quick Robot · Impresión 3D” y con la mascota: **ya no**, el panel es neutro, `mejoras/ronda-2.md §2`). Después: Inicio · *Vender*: Productos, Ventas, Pedidos · *Taller*: Filamentos, Insumos, Impresoras, Producción, Existencias, Compras · *Negocio*: Clientes, Gastos, Reportes, Ajustes. En pantallas pequeñas se oculta tras un botón de menú |
+| **Barra lateral** | Arriba: la **mascota** con el **nombre y el giro del negocio** (datos de Ajustes; el mockup los traía fijos como “Quick Robot · Impresión 3D”: ya no, el texto sale de Ajustes; la mascota se conserva por decisión de la persona del 2026-11-13, `mejoras/ronda-2.md §2`). Sin nombre ni giro, “Mi negocio” y “Giro del negocio” en gris. Después: Inicio · *Vender*: Productos, Ventas, Pedidos · *Taller*: Filamentos, Insumos, Impresoras, Producción, Existencias, Compras · *Negocio*: Clientes, Gastos, Reportes, Ajustes. En pantallas pequeñas se oculta tras un botón de menú |
 | **Buscar** (⌘/Ctrl + K) | Paleta de comandos: busca piezas, clientes, pedidos, ventas, filamentos y acciones; Enter abre el resultado |
 | **Atajos** (`?`) | Muestra la lista. `g` + letra navega (ir a pantalla); `⌘/Ctrl+Z` deshace; `⇧⌘Z` rehace |
 | **Cajón lateral** | Detalle de un elemento de una lista ancha (filamento, insumo, pieza de existencias) sin salir de la lista; Esc o clic fuera lo cierra |
@@ -42,7 +42,9 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 - Insumo agotado o en su mínimo.
 - Sin copia de seguridad descargada, o la última con más de **7 días**.
 
-**Prioridad de cada atención** (`severity`, `core › classifyAttention`): **Urgente** = pedido aceptado con faltante de filamento; pedido activo con entrega vencida, hoy o mañana. **Esta semana** = entrega en 2 días; venta con saldo; filamento con 150 g o menos; insumo agotado o en su mínimo. **Para revisar** = mantenimiento pendiente; precio por debajo del piso; copia de seguridad. Si un grupo pasa de 5, se muestran 5 y “Ver las N restantes” despliega el resto.
+**Prioridad de cada atención** (`severity`, `core › classifyAttention`): **Urgente** = pedido aceptado con faltante de filamento; pedido activo con entrega vencida, hoy o mañana. **Esta semana** = entrega en 2 días; venta con saldo; filamento con 150 g o menos; insumo agotado o en su mínimo. **Para revisar** = mantenimiento pendiente; precio por debajo del piso; copia de seguridad.
+
+**Cómo se ve la atención:** cada grupo lleva un punto de su color (rojo, ámbar, gris), su título y una nota (“Bloquea una impresión o vence hoy o mañana” · “Conviene resolverlo pronto” · “Sin prisa”). Arriba, chips con contador **Todas · Urgente · Esta semana · Para revisar**; el filtro no se guarda (al volver a Inicio está en “Todas”) y con un grupo elegido no se repite su título. Cada atención: ícono por tipo (filamento, pedido, cobro, mantenimiento, precio, insumo, copia) en el color de su grupo, el texto de siempre con lo importante en negrita y su botón de siempre. Dentro de un grupo se conserva el orden en que llegan. Si un grupo pasa de 5, se muestran 5 y “Ver las N restantes” agrega 50 más en el mismo lugar hasta acabar; abrir un grupo regresa los otros a 5 y la pantalla nunca pinta más de 200 atenciones (si un grupo pasa de ese número, se quedan a la vista las últimas que se abrieron). Sin atenciones: “Todo en orden”.
 
 **Acciones**
 | Botón | Caso de uso / efecto | Lleva a |
@@ -64,7 +66,7 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 | Nueva colección | — | Colección (nueva). Pide que existan piezas |
 | Fichas / Lista | Preferencia de vista | — |
 | Vender (en una pieza con libres) | — | Armar venta con esa pieza |
-| Variante · Nueva variante · Agregar variante de … (en una pieza) | Abre la calculadora con una **copia** de la original, título “Nueva variante de {pieza}” y el campo **Nombre de la variante** enfocado; al Guardar se crea con `saveProductAsVariant` (`parentId` = la original raíz) y se vuelve a Productos con su panel abierto | Calculadora |
+| Variante · Nueva variante · Agregar variante de … (en una pieza) | Abre la calculadora (`/productos/pieza?variante=<id>`) con una **copia** de la original, título “Nueva variante de {pieza}” y el campo **Nombre de la variante** vacío y enfocado (sin etiqueta no se guarda); al Guardar se crea con `saveProductAsVariant` (`parentId` = la original raíz) y se vuelve a Productos con su panel abierto (`?abierta=<id>`) | Calculadora |
 | N variantes (en una ficha) · flecha (en la lista) | Despliega o cierra las variantes de la pieza; un solo panel abierto a la vez en Fichas | — |
 | Abrir pieza / colección | — | Calculadora / Colección |
 
@@ -81,9 +83,11 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 | Cotizar | Diálogo de cotización rápida (cantidad → total y tiempo) | — |
 | Vender | — | Armar venta |
 | Guardar | `saveProduct` | Productos |
-| Guardar como variante nueva | `saveProductAsVariant` (copia con `parent_id` = la original raíz y `variant_label`) | Productos |
+| Guardar como variante nueva | Pasa al mismo flujo de “Nueva variante” con lo que hay en el formulario (título, campo de etiqueta vacío y enfocado); Guardar llama `saveProductAsVariant` (copia con `parent_id` = la original raíz y `variant_label`) | Productos con su panel abierto |
 | Eliminar | `deleteProduct` (soft) + Deshacer | Productos |
 | Cancelar | Descarta cambios | Productos |
+
+*Variante:* al editar una variante se ve “Variante de {pieza}” y su campo **Nombre de la variante** en lugar del nombre (el nombre que se muestra es `<original> · <etiqueta>`).
 
 *Cálculo en vivo:* el navegador usa `core` para la vista previa. Al guardar, el servidor recalcula; nunca confía en el costo enviado.
 
@@ -219,7 +223,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 ## 10. Existencias
 
-**Muestra:** piezas con existencias en **Lista** (por defecto) o **Fichas** (selector, se recuerda): Estado, Libres, Apartadas, Total y precio de lista, y sets armables; filtros por estado (Todas · Pocas · Todo apartado · Disponible · Agotadas) y buscador. Orden: menos libres primero. **Ronda 2:** una pieza con variantes es **una fila o ficha** con sus miembros desplegables y la suma de sus existencias; las fichas ya no dibujan un cuadrito por unidad (un número grande de libres y una barra de libres contra apartadas). El cajón con movimientos se abre desde la pieza o el miembro que tiene movimientos propios. Detalle en `mejoras/ronda-2.md §4`; maquetas `existencias-lista.html` y `existencias-fichas.html`.
+**Muestra:** piezas con existencias en **Lista** (por defecto) o **Fichas** (selector, se recuerda): Estado, Libres, Apartadas, Total y precio de lista, y sets armables; filtros por estado (Todas · Pocas · Todo apartado · Disponible · Agotadas) y buscador. Orden: menos libres primero. **Ronda 2:** una pieza con variantes es **una fila o ficha** con sus miembros desplegables y la suma de sus existencias; las fichas ya no dibujan un cuadrito por unidad (un número grande de libres y una barra de libres contra apartadas). El cajón con movimientos se abre desde la pieza o el miembro que tiene movimientos propios. Detalle en `mejoras/ronda-2.md §4`; maquetas `existencias-lista.html` y `existencias-fichas.html`. La vista se recuerda así: `?vista=fichas|lista` en la dirección y, sin ella, la última elegida en este navegador (`view.stock`); si no hay ninguna, Lista. En Lista, “Libres” en el encabezado alterna menos/más libres primero; la fila de una familia solo despliega sus variantes (la original primero, “Original”), y cada pieza simple o variante abre el cajón con “›” o tocando la fila. En Fichas, tocar la ficha abre la original (o la primera variante con existencias) y cada línea de variante abre la suya.
 | Botón | Caso de uso |
 |---|---|
 | Llevar existencias (en una pieza) | `enableStockTracking` (con conteo inicial) |

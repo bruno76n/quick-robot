@@ -1,5 +1,7 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { createMemoryHistory, createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { AppShell } from './AppShell';
 import { Banner } from './Banner';
 import { Button } from './Button';
 import { Dialog } from './Dialog';
@@ -106,5 +108,30 @@ describe('components', () => {
     expect(screen.queryByText('boom')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Volver al Inicio' }));
     expect(onHome).toHaveBeenCalledOnce();
+  });
+});
+
+describe('neutral sidebar (ronda-2 §2)', () => {
+  const shell = async (businessName: string, trade: string) => {
+    const root = createRootRoute({ component: () => <AppShell businessName={businessName} trade={trade}><p>vista</p></AppShell> });
+    render(<RouterProvider router={createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: ['/inicio'] }) })} />);
+    await waitFor(() => expect(screen.getByText('vista')).toBeTruthy());
+    return document.querySelector('.brand')!;
+  };
+
+  it('shows the mascot, the name and the trade from Ajustes', async () => {
+    const brand = await shell('Taller de Ana', 'Impresión 3D');
+    expect(brand.querySelector('img.mascot')).toBeTruthy();
+    expect(brand.querySelector('b')?.textContent).toBe('Taller de Ana');
+    expect(brand.querySelector('b')?.className ?? '').not.toContain('ph-txt');
+    expect(brand.querySelector('small')?.textContent).toBe('Impresión 3D');
+    expect(document.querySelector('.topbar img.mascot')).toBeTruthy();
+  });
+
+  it('without a name or trade shows "Mi negocio" and "Giro del negocio" in grey', async () => {
+    const brand = await shell('  ', '');
+    expect(brand.querySelector('b.ph-txt')?.textContent).toBe('Mi negocio');
+    expect(brand.querySelector('small.ph-txt')?.textContent).toBe('Giro del negocio');
+    expect(document.querySelector('.topbar .ph-txt')?.textContent).toBe('Mi negocio');
   });
 });

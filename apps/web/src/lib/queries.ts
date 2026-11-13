@@ -13,7 +13,8 @@ export const useSettings = () => useQuery({ queryKey: keys.settings, queryFn: as
 export const useSupplies = () => useQuery({ queryKey: [...keys.supplies, 'list'], queryFn: async ({ signal }) => (await api.supplies.list(signal)).data });
 export const useSuppliers = () => useQuery({ queryKey: keys.suppliers, queryFn: async () => (await api.suppliers.list()).data });
 export const usePrinters = () => useQuery({ queryKey: keys.printers, queryFn: async () => (await api.printers.list()).data });
-export const useProducts = () => useQuery({ queryKey: [...keys.products, 'list'], queryFn: async () => (await api.products.list()).data });
+/** Flat catalog for pickers (every piece, ordered by family): GET /products/options. */
+export const useProducts = () => useQuery({ queryKey: [...keys.products, 'options'], queryFn: async () => (await api.products.options()).data });
 export const useCollections = () => useQuery({ queryKey: [...keys.collections, 'list'], queryFn: async () => (await api.collections.list()).data });
 
 /** After a write, reload what it touched (and what depends on costs). */

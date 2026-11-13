@@ -2,8 +2,8 @@
 // launch secret is added by Electron or the Vite proxy, never by this code.
 import type {
   AddChannelInput, AddSpoolInput, AddSpoolOutput, ChannelView, CollectionDetail, CollectionListItem, CompleteMaintenanceInput, CreateSupplyInput, ErrorCode,
-  FilamentDetail, FilamentListItem, MaintenanceTaskInput, MaintenanceView, Page, PrinterInput, PrintersOutput, PrinterView, ProductDetail, ProductListItem,
-  SaveCollectionInput, SaveProductInput, SettingsOutput, SettingsView, Spool, SpoolMovementInput, SupplierInput, SupplierView, SupplyDetail, SupplyListItem,
+  FilamentDetail, FilamentListItem, MaintenanceTaskInput, MaintenanceView, Page, PrinterInput, PrintersOutput, PrinterView, ProductDetail, ProductFamilyFilter, ProductFamilyPage, ProductOptions,
+  SaveCollectionInput, SaveProductAsVariantInput, SaveProductInput, SettingsOutput, SettingsView, Spool, SpoolMovementInput, SupplierInput, SupplierView, SupplyDetail, SupplyListItem,
   SupplyMovementInput, SupplyPurchaseInput, UpdateChannelInput, UpdateSettingsInput, UpdateSpoolInput, UpdateSupplyInput, Warning,
 } from '@app/contract';
 
@@ -100,11 +100,15 @@ export const api = {
     completeTask: (id: string, taskId: string, input: CompleteMaintenanceInput) => request<{ task: MaintenanceView }>('POST', `/printers/${id}/maintenance/${taskId}/complete`, input),
   },
   products: {
-    list: () => request<Page<ProductListItem>>('GET', '/products'),
+    /** Families page (Productos, ronda 2). */
+    list: (q: { q?: string; filter?: ProductFamilyFilter; page?: number; pageSize?: number } = {}) => request<ProductFamilyPage>('GET', `/products${qs(q)}`),
+    /** Every live piece, flat and ordered by family: pickers, CSV (D-1). */
+    options: () => request<ProductOptions>('GET', '/products/options'),
     get: (id: string) => request<ProductDetail>('GET', `/products/${id}`),
     create: (input: SaveProductInput) => request<ProductDetail>('POST', '/products', input),
     update: (id: string, input: SaveProductInput) => request<ProductDetail>('PUT', `/products/${id}`, input),
-    variant: (id: string, input: SaveProductInput) => request<ProductDetail>('POST', `/products/${id}/variant`, input),
+    /** A copy of the piece as a new variant of its original (the calculator asks for the label). */
+    variant: (id: string, input: SaveProductAsVariantInput) => request<ProductDetail>('POST', `/products/${id}/variant`, input),
     remove: (id: string) => request<void>('DELETE', `/products/${id}`),
     restore: (id: string) => request<ProductDetail>('POST', `/products/${id}/restore`),
   },

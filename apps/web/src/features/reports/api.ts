@@ -1,4 +1,5 @@
 // Typed client for Reportes and Inicio (docs/12 §9). Types mirror packages/server/src/usecases/sell/reports.ts.
+import type { Attention } from '@app/contract';
 import { useQuery } from '@tanstack/react-query';
 import { qs, request } from '../../lib/api';
 import { keys } from '../../lib/queries';
@@ -25,8 +26,8 @@ export interface Report {
   ordersNow: { active: number; inProduction: number; ready: number; totalCents: number; paidCents: number; owedCents: number; profitCents: number; quotes: number; quotesCents: number };
 }
 
-export type AttentionKind = 'order_filament_short' | 'filament_low' | 'order_due' | 'sale_owed' | 'price_below_floor' | 'maintenance' | 'supply_low' | 'backup';
-export interface Attention { kind: AttentionKind; severity: 'bad' | 'warn' | 'info'; target: { type: 'order' | 'filament' | 'sale' | 'product' | 'collection' | 'printer' | 'supply' | 'settings'; id: string | null }; params: Record<string, unknown> }
+export type { Attention, AttentionSeverity } from '@app/contract';
+export type AttentionKind = Attention['kind'];
 export interface Home {
   stats: { incomeCents: number; profitCents: number; marginPct: number; sales: number; pieces: number; activeOrders: number; owedCents: number; inProduction: number; ready: number; printersBusy: number; printers: number; products: number };
   printingNow: { printerId: string; printer: string; id: string; orderId: string; orderNumber: number; text: string; minutes: number; remainingMinutes: number; progress: number; customer: string }[];

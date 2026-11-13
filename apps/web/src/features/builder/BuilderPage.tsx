@@ -80,7 +80,7 @@ function Builder({ search, edit }: { search: Search; edit: OrderForEdit | null }
   for (const it of edit?.items ?? []) for (const [pid, n] of Object.entries(it.freeNow)) freeNow.set(pid, n);
   const byProduct = new Map(products.map((p) => [p.id, p]));
   const defs: Defs = {
-    pieces: new Map(products.map((p) => [p.id, { id: p.id, name: p.name, list: p.listCents / 100, cost: p.costCents / 100, hours: p.hours, tracks: p.tracksStock, ...(filamentsOf.has(p.id) ? { filaments: filamentsOf.get(p.id)! } : {}) }])),
+    pieces: new Map(products.map((p) => [p.id, { id: p.id, name: p.displayName, list: p.listCents / 100, cost: p.costCents / 100, hours: p.hours, tracks: p.tracksStock, ...(filamentsOf.has(p.id) ? { filaments: filamentsOf.get(p.id)! } : {}) }])),
     sets: new Map(collections.map((c) => [c.id, { id: c.id, name: c.name, list: c.listCents / 100, cost: c.costCents / 100, parts: partsOf.get(c.id) ?? [] }])),
     free: (pid) => Math.max(0, freeNow.get(pid) ?? byProduct.get(pid)?.free ?? 0),
   };
@@ -212,7 +212,7 @@ function Builder({ search, edit }: { search: Search; edit: OrderForEdit | null }
               ) : <small>{L.refsEmpty}</small>}
             </div>
           </div>
-          <div id="b-dyn"><Summary C={C} order={B.order} accepted={B.accepted} channelName={channel?.name ?? ''} deposit={!B.order || edit ? 0 : Math.min(C.total, parseNumber(B.deposit))} names={(id) => byProduct.get(id)?.name ?? ''} filaments={filaments} purgePct={settings.purgePct} onToOrder={toOrder} /></div>
+          <div id="b-dyn"><Summary C={C} order={B.order} accepted={B.accepted} channelName={channel?.name ?? ''} deposit={!B.order || edit ? 0 : Math.min(C.total, parseNumber(B.deposit))} names={(id) => byProduct.get(id)?.displayName ?? ''} filaments={filaments} purgePct={settings.purgePct} onToOrder={toOrder} /></div>
           <div className="res-act">
             <Button variant="primary" block onClick={submit} busy={save.isPending} busyLabel={es.common.saving}>{saveLabel}</Button>
             <Button variant="ghost" block onClick={() => go(back)}>{L.discard}</Button>

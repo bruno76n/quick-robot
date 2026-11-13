@@ -6,7 +6,7 @@ import { itemFromStockCount, itemHours, itemLines, itemToPrintCount, type LineIt
 import { allowedFrom, nextStep, orderOwed, orderTotal, planDelivery, planReady } from '../src/orders';
 import { jobProgress, printRunEffects, printRunLock, proposeAssignment, queueMinutes, waitBefore } from '../src/production';
 import { saleCommission, saleOwed, saleProfit, salesTotals, type SaleData } from '../src/sales';
-import { buildableSets, filamentPurchase, free, physical, reserved, reserveForOrder, stockStatus, supplyPurchase, type OrderStockView } from '../src/stock';
+import { buildableSets, familyStockStatus, filamentPurchase, free, physical, reserved, reserveForOrder, stockStatus, supplyPurchase, type OrderStockView } from '../src/stock';
 
 const piece = (over: Partial<LineItemData> = {}): LineItemData => ({ kind: 'piece', productId: 'llavero', name: 'Llavero', qty: 1, price: 72, list: 72, cost: 35.9474, ...over });
 const sale = (over: Partial<SaleData> = {}): SaleData => ({ id: 's', items: [piece()], commissionPct: 0, payments: null, returned: null, ...over });
@@ -172,5 +172,25 @@ describe('purchases and expenses', () => {
     expect(expenseInRange({ on: '2026-09-01', amount: 380, recurring: false, endsOn: null }, '2026-10-03', '2026-11-01')).toBe(0);
     expect(expenseInRange({ on: '2026-01-01', amount: 1000, recurring: true, endsOn: '2026-09-01' }, '2026-10-03', '2026-11-01')).toBe(0);
     expect(fixedPerMonth([{ on: '2026-01-01', amount: 1200, recurring: true, endsOn: null }, { on: '2026-01-01', amount: 400, recurring: true, endsOn: '2026-10-01' }], '2026-11-01')).toBe(1200);
+  });
+});
+
+describe('family stock status (case 5.3)', () => {
+  const m = (physicalQty: number, reservedQty: number) => ({ physical: physicalQty, reserved: reservedQty });
+  it('free 1, 1, 2 (reserved 2, 0, 1) → sums free 4, reserved 3 · few', () => {
+    const fam = [m(3, 2), m(1, 0), m(3, 1)];
+    expect(fam.reduce((a, x) => a + free(x.physical, x.reserved), 0)).toBe(4);
+    expect(fam.reduce((a, x) => a + x.reserved, 0)).toBe(3);
+    expect(familyStockStatus(fam)).toBe('few');
+  });
+  it('free 3, 4, 6 → ok', () => expect(familyStockStatus([m(3, 0), m(4, 0), m(7, 1)])).toBe('ok'));
+  it('free 0, 0, 0 with physical > 0 → all_reserved', () => expect(familyStockStatus([m(2, 2), m(0, 0), m(1, 1)])).toBe('all_reserved'));
+  it('physical 0 in every member → out', () => expect(familyStockStatus([m(0, 0), m(0, 0), m(0, 1)])).toBe('out'));
+  it('mixed: one member out and the rest plenty → few (that member has 2 free or less)', () => {
+    expect(familyStockStatus([m(0, 0), m(9, 0), m(5, 0)])).toBe('few');
+  });
+  it('a single member follows case 5.2', () => {
+    expect(familyStockStatus([m(5, 2)])).toBe(stockStatus(5, 2));
+    expect(familyStockStatus([m(5, 3)])).toBe('few');
   });
 });

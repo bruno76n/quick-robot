@@ -12,6 +12,7 @@ import { applyMockupBackup } from '../dev-seed';
 import { uploadFile } from './files';
 import { ensureWorkspaceDefaults } from './settings';
 import { compareMockupSums } from './import-mockup';
+import { normalizeVariants } from './variants';
 
 export const EXPORT_FORMAT = 'workspace-export';
 const ISO_TS = /^\d{4}-\d{2}-\d{2}T/;
@@ -82,6 +83,13 @@ function validateTables(tables: Record<string, Record<string, unknown>[]>) {
   return out;
 }
 
+/** Backups made before variant_label (or with chains and orphans) are normalized like migration 0007. */
+function normalizeImportedProducts(rows: Record<string, unknown>[]) {
+  const str = (v: unknown) => (typeof v === 'string' ? v : null);
+  const fixed = normalizeVariants(rows.map((r) => ({ id: r.id as string, name: str(r.name) ?? '', parentId: str(r.parentId), deleted: r.deletedAt != null, label: str(r.variantLabel) })));
+  for (const r of rows) Object.assign(r, fixed.get(r.id as string));
+}
+
 export interface ImportResult { format: 'workspace' | 'mockup-v7'; counts: Record<string, number>; differences: string[]; notes: string[]; backupId: string | null }
 
 function parse(bytes: Uint8Array): unknown {
@@ -97,6 +105,7 @@ export async function importWorkspace(deps: Deps, ctx: Ctx, bytes: Uint8Array, o
     if (!r.success) throw invalid('shape');
     if (r.data.schemaVersion > schemaVersion()) throw new BusinessError('IMPORT_UNSUPPORTED_VERSION', { found: String(r.data.schemaVersion), supported: String(schemaVersion()) });
     const valid = validateTables(r.data.tables);
+    if (valid.product) normalizeImportedProducts(valid.product);
     // New ids for every row, with every reference remapped (columns and ids inside JSON: parts, fromStock, stockReserved):
     // the file can be restored in place or loaded into another business of the same database.
     const ids = new Map<string, string>();

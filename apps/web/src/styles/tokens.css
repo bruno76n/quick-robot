@@ -1,16 +1,29 @@
-/* Design tokens taken from the mockup (docs/07 › Sistema de diseño). Light mode only. */
+/* Design tokens (docs/07 › Sistema de diseño). Light mode only.
+   Every interface color lives here and nowhere else (tokens.test.ts): changing the accent of the panel is
+   changing --accent. Color with meaning: gris oscuro = costo, verde = ganancia; ámbar, rojo y gris = estados;
+   azul solo informativo. Data colors (the real color of each filament) come from the data, not from here. */
 :root {
-  /* Layout: barra lateral fija y área de trabajo. La calculadora se parte en dos (datos | resultado) y el resultado siempre pone el costo junto al precio: lo morado es costo, lo verde es ganancia. Estilo de marca Quick Robot: fondo blanco, tinta #121214, morado #6b3fd4, verde #00ae42, letra Geist. */
+  /* surfaces and ink */
   --bg: #ffffff; --panel: #f6f6f8; --panel-2: #ececf1;
-  --ink: #121214; --ink-2: #6a6a73; --ink-3: #777782;
+  --ink: #121214; --ink-2: #6a6a73; --ink-3: #777782; --doc-ink: #44444c; --on-dark: #ffffff;
   --line: #e7e7ec; --line-2: #d2d2da;
-  --purple: #6b3fd4; --purple-soft: #efe9fd; --btn: #121214; --btn-ink: #ffffff; --on-green: #121214;
+  /* main action, selection and focus ring */
+  --accent: #121214; --accent-ink: #ffffff;
+  --btn: var(--accent); --btn-ink: var(--accent-ink); --on-green: #121214;
+  /* cost (gris oscuro) and profit (verde) */
+  --cost: #5a5a65; --cost-soft: #f1f1f4;
   --green: #00ae42; --green-ink: #067a30; --green-soft: #e3f5e9;
+  /* states */
   --amber: #e9a817; --amber-ink: #86500a; --amber-soft: #fff1d3;
   --red: #d6334f; --red-ink: #b3223f; --red-soft: #fde8ec;
-  --blue: #3f86c9; --c-m: #4c28a8; --c-l: #6b3fd4; --c-q: #9b7de6; --c-t: #c4b2f2; --c-e: #e0d7f8; --c-f: #8b8b96;
-  --sh: 0 1px 2px rgba(18, 18, 20, .07);
-  --r: 5px;   /* radio de tarjetas y paneles: poco, como una pieza de taller */
+  --blue: #3f86c9;
+  /* layers of the cost breakdown (greys, darkest = material), failures reserve and business expenses */
+  --c-m: #2d2d35; --c-l: var(--cost); --c-q: #8b8b97; --c-t: #b9b9c3; --c-e: #dcdce3; --c-f: #d6a2ab; --c-legend: #9a9aa6; --sand: #cdb083;
+  /* printer timeline tags and pieces with no filament color */
+  --tg-sale: #4b4b55; --tg-queue: #b9b9c3; --tg-todo: #f0b429; --tg-done: #cfcfd8; --no-color: #c9c9d1;
+  /* shadows: neutral ink only */
+  --sh: 0 1px 2px rgba(18, 18, 20, .07); --sh-soft: 0 1px 2px rgba(18, 18, 20, .04); --sh-up: 0 10px 28px rgba(18, 18, 20, .10);
+  --r: 14px;  /* radio de tarjetas y paneles */
   --font-display: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color-scheme: light;

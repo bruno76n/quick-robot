@@ -12,6 +12,7 @@ import { deleteTask, getPrinter, getTask, insertTasks, listPrinters, listTasks, 
 import { getCollection, getProduct, insertProduct, listCollections, listProducts, replaceCollectionParts, replaceProductParts, setProductDeleted, updateCollection } from '../src/repos/product-repo';
 import { deleteChannel, getChannel, getFile, getSettings, listCatalog, listChannels, updateChannel } from '../src/repos/settings-repo';
 import { findSupplyByKey, getSuppliesByIds, getSupplier, getSupply, insertSupply, insertSupplyMovements, listSuppliers, listSupplies, listSupplyMovements, productsUsingSupply, setSupplierDeleted, updateSupply } from '../src/repos/supply-repo';
+import { countLiveVariants, listProductFamilies } from '../src/repos/product-family-repo';
 import { openTestDb } from '../src/testing';
 import { twoWorkspaces, uid, type WsData } from './fixtures';
 
@@ -143,5 +144,58 @@ describe('a repository without ctx fails before SQL', () => {
     ['insertSpoolMovements', () => insertSpoolMovements(conn.db, null as never, [])],
   ])('%s', async (_n, fn) => {
     await expect(fn()).rejects.toThrow(/ctx/);
+  });
+});
+
+describe('product families (docs/12 §5): ctx A never sees B, two queries of pieces per page', () => {
+  const TECH = ['PETG', 'ABS'];
+  let variantA: string;
+  beforeAll(async () => {
+    variantA = (await insertProduct(conn.db, A.ctx, { id: uid(0xa), name: 'Llavero (variante)', parentId: A.productId, variantLabel: 'Azul', mode: 'value', hours: 1 })).id;
+    // Only the variant has filament: a family is technical when any member is.
+    await replaceProductParts(conn.db, A.ctx, variantA, [{ id: uid(0xa), filamentId: A.filamentId, grams: 5 }], []);
+    await insertProduct(conn.db, B.ctx, { id: uid(0xb), name: 'Llavero azul', parentId: B.productId, variantLabel: 'Azul', mode: 'value', hours: 1 });
+    await insertProduct(conn.db, B.ctx, { id: uid(0xb), name: 'Solo de B', mode: 'value', hours: 1 });
+  });
+
+  it('a page has only its own originals and variants, also when searching or filtering', async () => {
+    for (const q of [undefined, 'llavero', 'azul']) for (const filter of ['all', 'with_variants'] as const) {
+      const r = await listProductFamilies(conn.db, A.ctx, { q, filter, page: 1, pageSize: 50, technicalPrefixes: TECH });
+      expect(r.roots.map((x) => x.id)).toEqual([A.productId]);
+      expect(r.variants.map((x) => x.id)).toEqual([variantA]);
+      expect(r.counts).toEqual({ families: 1, technical: 0, withVariants: 1 });
+    }
+    const tech = await listProductFamilies(conn.db, A.ctx, { filter: 'technical', page: 1, pageSize: 50, technicalPrefixes: ['pla'] });
+    expect([tech.total, tech.roots.map((x) => x.id)]).toEqual([1, [A.productId]]);
+    expect((await listProductFamilies(conn.db, A.ctx, { q: 'Solo de B', page: 1, pageSize: 50, technicalPrefixes: TECH })).total).toBe(0);
+    expect(await countLiveVariants(conn.db, A.ctx, B.productId)).toBe(0);
+    expect(await countLiveVariants(conn.db, A.ctx, A.productId)).toBe(1);
+  });
+
+  it('the number of queries does not grow with the page (no query per card)', async () => {
+    const tables: string[] = [];
+    const spy = new Proxy(conn.db, {
+      get(target, key) {
+        const v = Reflect.get(target, key) as unknown;
+        if (key !== 'select') return typeof v === 'function' ? (v as (...a: unknown[]) => unknown).bind(target) : v;
+        return (...args: unknown[]) => {
+          const b = (v as (...a: unknown[]) => { from: (t: Parameters<typeof getTableName>[0]) => unknown }).apply(target, args);
+          const from = b.from.bind(b);
+          b.from = (t) => { tables.push(getTableName(t)); return from(t); };
+          return b;
+        };
+      },
+    });
+    for (let i = 0; i < 6; i++) await insertProduct(conn.db, A.ctx, { id: uid(0xa), name: `Pieza ${i}`, mode: 'value', hours: 1 });
+    const runs: string[][] = [];
+    for (const pageSize of [1, 7]) {
+      tables.length = 0;
+      const r = await listProductFamilies(spy as typeof conn.db, A.ctx, { page: 1, pageSize, technicalPrefixes: TECH });
+      expect(r.roots).toHaveLength(pageSize);
+      runs.push([...tables]);
+    }
+    // counts, originals, variants (parent_id IN …), then their filaments and supplies.
+    expect(runs[0]).toEqual(['product', 'product', 'product', 'product_filament', 'product_supply']);
+    expect(runs[1]).toEqual(runs[0]);
   });
 });

@@ -1,4 +1,5 @@
 // Phase 3 operations of docs/12 §6–9 through HTTP: happy path and every error, with the numbers of docs/04.
+import { stockPage } from '@app/contract';
 import { schema } from '@app/db';
 import { inArray } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -238,5 +239,76 @@ describe('customers and expenses (docs/12 §9)', () => {
     expect((await call('PATCH', `/expenses/${e.id}`, { on: '2026-11-01', concept: 'Renta', category: 'Renta o espacio', amountCents: 1000, recurring: false })).data.recurring).toBe(false);
     expect((await call('DELETE', `/expenses/${e.id}`)).status).toBe(204);
     expect((await call('POST', `/expenses/${e.id}/restore`)).data.id).toBe(e.id);
+  });
+});
+
+describe('displayName of variants (mejoras/ronda-2.md §6)', () => {
+  it('a sale and an order keep the displayName of the moment; a new label does not rewrite them', async () => {
+    const root = await newPiece(5, { name: 'Dragón articulado' });
+    const d = (await call('GET', `/products/${root}`)).data;
+    const v = (await call('POST', `/products/${root}/variant`, { ...d, variantLabel: 'Silk morado' })).data;
+    await call('POST', `/stock/${v.id}/enable`, { initialCount: 3 });
+    const sale = (await call('POST', '/sales', { on: '2026-11-01', channelId: ch(), items: [piece(v.id, 1)] })).data;
+    expect(sale.items.map((it: J) => it.name)).toEqual(['Dragón articulado · Silk morado']);
+    const o = (await call('POST', '/orders', order([piece(v.id, 1)]))).data;
+    expect(o.items.map((it: J) => it.name)).toEqual(['Dragón articulado · Silk morado']);
+    await call('PUT', `/products/${v.id}`, { ...v, variantLabel: 'Morado mate' });
+    expect((await call('GET', `/sales/${sale.id}`)).data.items.map((it: J) => it.name)).toEqual(['Dragón articulado · Silk morado']);
+    expect((await call('GET', `/orders/${o.id}`)).data.items.map((it: J) => it.name)).toEqual(['Dragón articulado · Silk morado']);
+    // A new sale takes the new label; stock errors use displayName.
+    expect((await call('POST', '/sales', { on: '2026-11-01', channelId: ch(), items: [piece(v.id, 1)] })).data.items[0].name).toBe('Dragón articulado · Morado mate');
+    expect((await call('POST', '/sales', { on: '2026-11-01', channelId: ch(), items: [piece(v.id, 9)] })).details).toMatchObject({ name: 'Dragón articulado · Morado mate', requested: 9 });
+    expect((await call('POST', `/stock/${v.id}/adjust`, { mode: 'delta', value: -9 })).details).toMatchObject({ name: 'Dragón articulado · Morado mate' });
+    // Collections show their parts with displayName; search finds a variant by its label.
+    const col = (await call('POST', '/collections', { name: 'Dúo dragón', parts: [{ productId: root, qty: 1 }, { productId: v.id, qty: 1 }] })).data;
+    expect(col.parts.map((p: J) => p.name)).toEqual(['Dragón articulado', 'Dragón articulado · Morado mate']);
+    expect((await call('GET', '/search?q=morado mate')).data.products.map((p: J) => p.name)).toEqual(['Dragón articulado · Morado mate']);
+    // Reports: each variant counts on its own, with its displayName.
+    const top = (await call('GET', '/reports?period=all')).data.topProducts as J[];
+    expect(top.filter((x) => x.name.startsWith('Dragón articulado')).map((x) => [x.name, x.qty])).toEqual([['Dragón articulado · Morado mate', 2]]);
+  });
+});
+
+describe('GET /stock by families (docs/12 §8, docs/04 §5 case 5.3)', () => {
+  it('a family is one row with the sum of its members (original first); status, counts, order, search and printer', async () => {
+    const printer = first(s.a.printer);
+    const root = await newPiece(3, { name: 'Gato de estante', printerId: printer });
+    const d = (await call('GET', `/products/${root}`)).data;
+    const mk = async (label: string, count: number) => { const v = (await call('POST', `/products/${root}/variant`, { ...d, variantLabel: label })).data; await call('POST', `/stock/${v.id}/enable`, { initialCount: count }); return v.id as string; };
+    const azul = await mk('Azul', 1);
+    const rojo = await mk('Rojo', 6);
+    await mk('Sin existencias', 0).then((id) => call('POST', `/stock/${id}/adjust`, { mode: 'count', value: 0 }));
+    const solo = await newPiece(0, { name: 'Gato suelto' });
+    const page = stockPage.parse((await call('GET', '/stock?q=gato')).data);
+    expect(page.items.map((r) => [r.name, r.status, r.free, r.members.length])).toEqual([['Gato suelto', 'out', 0, 0], ['Gato de estante', 'few', 10, 4]]);
+    const fam = page.items[1]!;
+    expect([fam.physical, fam.reserved, fam.printerName]).toEqual([10, 0, Object.keys(s.a.printer)[0]]);
+    expect(fam.members.map((m) => [m.label, m.displayName, m.isOriginal, m.free, m.status])).toEqual([
+      [null, 'Gato de estante', true, 3, 'ok'],
+      ['Azul', 'Gato de estante · Azul', false, 1, 'few'],
+      ['Rojo', 'Gato de estante · Rojo', false, 6, 'ok'],
+      ['Sin existencias', 'Gato de estante · Sin existencias', false, 0, 'out'],
+    ]);
+    expect([fam.members[1]!.productId, fam.members[2]!.productId]).toEqual([azul, rojo]);
+    expect(page.counts).toEqual({ all: 2, few: 1, allReserved: 0, ok: 0, out: 1 });
+    expect(page.totals).toMatchObject({ units: 10, pieces: 2, free: 10, reserved: 0 });
+    // Status filter keeps the counts; free_desc flips the order; a label finds its family.
+    expect(stockPage.parse((await call('GET', '/stock?q=gato&status=out')).data).items.map((r) => r.productId)).toEqual([solo]);
+    expect(stockPage.parse((await call('GET', '/stock?q=gato&sort=free_desc')).data).items.map((r) => r.name)).toEqual(['Gato de estante', 'Gato suelto']);
+    expect(stockPage.parse((await call('GET', '/stock?q=rojo')).data).items.map((r) => r.productId)).toEqual([root]);
+    expect((await call('GET', '/stock?status=bad')).code).toBe('VALIDATION_ERROR');
+  });
+
+  it('a family with only one member that tracks stock is a simple row with its displayName; the whole list is free-first', async () => {
+    const root = await newPiece(undefined, { name: 'Búho sin existencias' });
+    const d = (await call('GET', `/products/${root}`)).data;
+    const v = (await call('POST', `/products/${root}/variant`, { ...d, variantLabel: 'Dorado' })).data;
+    await call('POST', `/stock/${v.id}/enable`, { initialCount: 4 });
+    const row = stockPage.parse((await call('GET', '/stock?q=búho')).data).items;
+    expect(row.map((r) => [r.productId, r.name, r.members.length, r.status])).toEqual([[v.id, 'Búho sin existencias · Dorado', 0, 'ok']]);
+    const all = stockPage.parse((await call('GET', '/stock?pageSize=200')).data);
+    expect(all.items.map((r) => r.free)).toEqual([...all.items.map((r) => r.free)].sort((a, b) => a - b));
+    expect(all.totals.pieces).toBe(all.counts.all);
+    expect(all.items.some((r) => r.members.some((m) => m.productId === r.productId && !m.isOriginal))).toBe(false);
   });
 });

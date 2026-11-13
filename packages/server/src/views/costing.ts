@@ -3,7 +3,7 @@
 import type { Breakdown, CollectionDetail, CollectionListItem, ProductDetail, ProductListItem } from '@app/contract';
 import {
   costProduct, effectiveMargin, filamentCostPerGram, floorPrice, isTechnicalMaterial, listPrice, looseSum, partQty, profitAt,
-  setCost, setPrice, suggestedPrice, toCents, type CostSettings, type PrinterCost, type SetPart,
+  setCost, setPrice, suggestedPrice, toCents, variantDisplayName, type CostSettings, type PrinterCost, type SetPart,
 } from '@app/core';
 import {
   getSettings, listAllFilaments, listChannels, listPrinters, listSpools, type CollectionFull, type Ctx, type Executor, type FilamentRow,
@@ -76,7 +76,14 @@ export function productListView(p: ProductFull, c: CostingContext, opts: Product
     technical: p.filaments.some((f) => isTechnicalMaterial(c.filaments.get(f.filamentId)?.material ?? '')), mode: p.mode as 'value' | 'formula',
     hexes: hexesOf(p, c), hours: p.hours, printerId: p.printerId,
     printerName: opts.printerName, parentName: opts.parentName, collections: opts.collections, sold: opts.sold, physical: opts.physical, reserved: opts.reserved,
+    displayName: variantDisplayName(p.name, p.parentId ? opts.parentName : null, p.variantLabel), variantLabel: p.parentId ? p.variantLabel : null,
   };
+}
+
+/** "PLA Silk Morado" (+ the other filaments): the Material column of the variants panel. */
+export function materialOf(p: ProductFull, c: CostingContext): string | null {
+  const names = [...new Set(p.filaments.map((f) => { const x = c.filaments.get(f.filamentId); return x ? `${x.material} ${x.color}` : ''; }).filter(Boolean))];
+  return names.length ? names.join(' + ') : null;
 }
 
 export function productDetailView(p: ProductFull, c: CostingContext, opts: ProductExtras): ProductDetail {
@@ -96,12 +103,21 @@ export function productDetailView(p: ProductFull, c: CostingContext, opts: Produ
   };
 }
 
+type Named = { id: string; name: string; parentId: string | null; variantLabel: string | null };
+/** "<original> · <label>" for a variant whose original is in the list, the name otherwise. */
+export const displayNameOf = (p: Named, byId: ReadonlyMap<string, { name: string }>) => variantDisplayName(p.name, p.parentId ? byId.get(p.parentId)?.name : null, p.variantLabel);
+/** id → displayName for a list of pieces (their originals must be in the same list). */
+export function displayNames(products: readonly Named[]): Map<string, string> {
+  const byId = new Map(products.map((p) => [p.id, p]));
+  return new Map(products.map((p) => [p.id, displayNameOf(p, byId)]));
+}
+
 export function setPartsOf(col: CollectionFull, products: ReadonlyMap<string, ProductFull>, c: CostingContext): (SetPart & { name: string })[] {
   return col.parts.flatMap((r) => {
     const p = products.get(r.productId);
     if (!p) return [];
     const total = costOf(p, c).total;
-    return [{ productId: p.id, name: p.name, qty: partQty(r.qty), listPrice: priceOf(p, c, total), cost: total }];
+    return [{ productId: p.id, name: displayNameOf(p, products), qty: partQty(r.qty), listPrice: priceOf(p, c, total), cost: total }];
   });
 }
 

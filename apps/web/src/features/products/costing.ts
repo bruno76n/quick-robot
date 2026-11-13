@@ -7,6 +7,8 @@ export interface Draft {
   name: string; tags: string[]; mode: 'value' | 'formula'; price: string; margin: string; printerId: string; hours: string; minutes: string;
   batch: string; extras: string; filaments: { filamentId: string; grams: string }[]; supplies: { supplyId: string; qty: string }[];
   spec: Record<string, string>; note: string; tracksStock: boolean; photoFileId: string | null; photoUrl: string | null; parentId: string | null;
+  /** Only for a variant: its label ("Silk morado"). */
+  variantLabel: string;
 }
 
 export const num = (v: string | number | undefined, d = 0) => { const x = Number.parseFloat(String(v ?? '').replace(/[,\s$]/g, '')); return Number.isFinite(x) ? x : d; };

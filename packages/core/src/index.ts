@@ -15,3 +15,5 @@ export * from './production';
 export * from './expenses';
 export * from './customers';
 export * from './reports';
+export * from './variants';
+export * from './attention';

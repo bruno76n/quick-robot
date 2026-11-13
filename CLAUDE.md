@@ -56,7 +56,7 @@ Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Libres, A
 
 ## Diseño
 
-Solo modo claro. Solo tipografía Geist. Tokens en `docs/07-frontend.md`, **neutros, sin morado y en un solo archivo**. Si algo se ve distinto del mockup (`reference/Quick Robot mockup.html`), el mockup tiene la razón hasta que se decida lo contrario, **salvo** en Productos, Existencias, Inicio y el color, donde mandan `docs/mejoras/ronda-2.md` y las maquetas de `reference/ronda-2/` (estructura y comportamiento; los radios y sombras son los del sistema). La marca (ícono, mascota) vive en `assets/` y **no aparece en la interfaz del panel**: la barra lateral muestra un monograma con el nombre y el giro de Ajustes. El logo con el texto “Quick Robot” es solo para uso externo.
+Solo modo claro. Solo tipografía Geist. Tokens en `docs/07-frontend.md`, **neutros, sin morado y en un solo archivo**. Si algo se ve distinto del mockup (`reference/Quick Robot mockup.html`), el mockup tiene la razón hasta que se decida lo contrario, **salvo** en Productos, Existencias, Inicio y el color, donde mandan `docs/mejoras/ronda-2.md` y las maquetas de `reference/ronda-2/` (estructura y comportamiento; los radios y sombras son los del sistema). La marca (ícono, mascota) vive en `assets/`; **la mascota sí aparece** en la barra lateral junto al nombre y el giro de Ajustes, en el título de Inicio y en los estados vacíos (decisión de la persona, 2026-11-13); sus colores son arte de marca, el resto de la interfaz es neutro. El logo con el texto “Quick Robot” es solo para uso externo.
 
 ## Datos
 

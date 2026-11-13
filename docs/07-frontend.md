@@ -60,7 +60,7 @@ features/orders/
 | Radio | tarjetas 20 px, botones/campos 10 px, diálogos 18 px, pastillas 99 px | |
 | Texto base | 15 px / 1.45; títulos con espaciado negativo | |
 
-**Regla de color con significado:** *gris oscuro = costo*, *verde = ganancia*. Se mantiene en toda la interfaz. **No se usa morado** (era el color de la marca de Quick Robot; D36–D37). Todo el color sale de estos tokens, definidos en un solo archivo, de modo que cambiar el color de acento de un negocio sea cambiar una variable. Los colores de **datos** (el swatch de un filamento) no son color de interfaz y no cambian.
+**Regla de color con significado:** *gris oscuro = costo*, *verde = ganancia*. Se mantiene en toda la interfaz. **No se usa morado** en la interfaz (era el color de la marca de Quick Robot; D36–D37). La mascota (`components/Mascot.tsx`, `styles/mascot.svg`) es arte de marca y conserva sus colores; se ve en la barra lateral, Inicio, estados vacíos y la página de falla (decisión de la persona, 2026-11-13). Todo el color sale de estos tokens, definidos en un solo archivo, de modo que cambiar el color de acento de un negocio sea cambiar una variable. Los colores de **datos** (el swatch de un filamento) no son color de interfaz y no cambian.
 
 **Componentes que ya existen en el mockup y se reconstruyen como componentes reales:**
 `Button` (primary / default / sm / link), `Field` (etiqueta + ayuda), `UnitInput` ($, g, h, %), `Segmented`, `Tag`, `Pill`/`Chip` (con punto de color), `Table` ancha (`xlist`, con columnas y fila clicable), `Drawer` (cajón), `Dialog`, `Toast` (con acción), `Stepper` del pedido, `Tabs`, `Details` plegable, `StatBand` (cifras), `KV` (listas de datos), `Calendar` (mes), `CommandPalette`, `DocumentSheet` (cotización/nota con estilos de impresión).

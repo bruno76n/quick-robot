@@ -40,15 +40,15 @@ const BUILT: Record<string, AnyRoute> = {
   '/ventas': route('/ventas', SalesPage, (s) => ({ ...idSearch('v')(s), ...(typeof s.q === 'string' ? { q: s.q.slice(0, 120) } : {}) })),
   '/pedidos': route('/pedidos', OrdersPage, (s) => ({ ...(['tablero', 'lista', 'calendario'].includes(String(s.vista)) ? { vista: String(s.vista) } : {}), ...(typeof s.mes === 'string' && /^\d{4}-\d{2}$/.test(s.mes) ? { mes: s.mes } : {}) })),
   '/produccion': route('/produccion', ProductionPage, (s) => (['stock', 'order', 'test'].includes(String(s.motivo)) ? { motivo: String(s.motivo) } : {})),
-  '/existencias': route('/existencias', StockPage, idSearch('p')),
+  '/existencias': route('/existencias', StockPage, (s) => ({ ...idSearch('p')(s), ...(['fichas', 'lista'].includes(String(s.vista)) ? { vista: String(s.vista) } : {}) })),
   '/compras': route('/compras', PurchasesPage),
   '/clientes': route('/clientes', CustomersPage),
   '/gastos': route('/gastos', ExpensesPage),
   '/reportes': route('/reportes', ReportsPage, (s) => (['7', '30', '90', 'todo'].includes(String(s.periodo)) ? { periodo: String(s.periodo) } : {})),
-  '/productos': route('/productos', ProductsPage, (s) => ({ ...(s.tab === 'colecciones' ? { tab: 'colecciones' } : {}), ...(s.vista === 'lista' ? { vista: 'lista' } : {}), ...(['tecnico', 'variante'].includes(String(s.filtro)) ? { filtro: String(s.filtro) } : {}) })),
+  '/productos': route('/productos', ProductsPage, (s) => ({ ...(s.tab === 'colecciones' ? { tab: 'colecciones' } : {}), ...(s.vista === 'lista' ? { vista: 'lista' } : {}), ...(['tecnico', 'con-variantes'].includes(String(s.filtro)) ? { filtro: String(s.filtro) } : {}), ...idSearch('abierta')(s) })),
 };
 const extra = [
-  route('/productos/pieza', ProductEditor, (s) => ({ ...idSearch('id')(s), ...(typeof s.de === 'string' && UUID.test(s.de) ? { de: s.de } : {}) })),
+  route('/productos/pieza', ProductEditor, (s) => ({ ...idSearch('id')(s), ...idSearch('variante')(s) })),
   route('/productos/coleccion', CollectionEditor, idSearch('id')),
   route('/pedidos/pedido', OrderPage, (s) => ({ ...idSearch('id')(s), ...(['articulos', 'pagos', 'produccion', 'datos'].includes(String(s.tab)) ? { tab: String(s.tab) } : {}) })),
   route('/clientes/cliente', CustomerPage, idSearch('id')),

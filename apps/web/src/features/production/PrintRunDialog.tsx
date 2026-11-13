@@ -120,7 +120,7 @@ function PrintRunForm({ productId, onClose, onDone, filaments, products, printer
         <small>{L.reasonHint}</small>
       </div>
       <div hidden={test}>
-        {products?.length ? <Field label={L.piece}><select name="prod" value={pieceId} onChange={(e) => setPieceId(e.target.value)}>{products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></Field> : null}
+        {products?.length ? <Field label={L.piece}><select name="prod" value={pieceId} onChange={(e) => setPieceId(e.target.value)}>{products.map((p) => <option key={p.id} value={p.id}>{p.displayName}</option>)}</select></Field> : null}
         <div className="grid2 mt"><Field label={L.qty} hint={L.qtyHint}><input name="cant" inputMode="numeric" value={qty} onChange={(e) => setQty(e.target.value)} /></Field></div>
       </div>
       <div hidden={!test}>

@@ -50,6 +50,13 @@
       "when": 1793612026465,
       "tag": "0006_fk_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794546758289,
+      "tag": "0007_variant_label",
+      "breakpoints": true
     }
   ]
 }

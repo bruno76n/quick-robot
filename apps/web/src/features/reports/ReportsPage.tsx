@@ -115,7 +115,7 @@ function ReportBody({ R }: { R: Report }) {
   ) : (
     <>
       <ul className="lg mt" aria-label={L.legend}>
-        <li><i style={{ '--c': 'var(--c-l)' } as CSSProperties} />{L.cost}</li><li><i style={{ '--c': 'var(--blue)' } as CSSProperties} />{L.commission}</li><li><i style={{ '--c': 'var(--green)' } as CSSProperties} />{L.profit}</li>
+        <li><i style={{ '--c': 'var(--cost)' } as CSSProperties} />{L.cost}</li><li><i style={{ '--c': 'var(--blue)' } as CSSProperties} />{L.commission}</li><li><i style={{ '--c': 'var(--green)' } as CSSProperties} />{L.profit}</li>
       </ul>
       <div className={`rk-chart${many ? ' many' : ''}`} role="img" aria-label={t('screens.reports.chartLabel', { unit })}>
         <div className="rk-y">{marks.map((v) => <span key={v} style={{ bottom: `${(v / yMax) * 100}%` }}>{centsTotal(v)}</span>)}</div>

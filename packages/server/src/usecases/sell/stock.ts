@@ -1,8 +1,8 @@
 // Existencias (docs/04 §5, docs/06 §11, docs/12 §8 › Producción y existencias).
 import { BusinessError, type AdjustStockInput, type EnableStockInput } from '@app/contract';
-import { buildableSets, soldCounts, stockStatus } from '@app/core';
+import { soldCounts, stockStatus, variantDisplayName } from '@app/core';
 import {
-  getProduct, insertStockMovements, listChannels, listCollections, listCustomers, listOrders, listProducts, listSales, listStockMovements, transaction, updateProduct,
+  getProduct, insertStockMovements, listChannels, listCustomers, listOrders, listSales, listStockMovements, transaction, updateProduct,
   type Ctx, type Executor,
 } from '@app/db';
 import type { Deps } from '../../deps';
@@ -36,25 +36,6 @@ export async function soldOf(ex: Executor, ctx: Ctx) {
   const ch = await childrenOf(ex, ctx, 'sale', sales.map((s) => s.id));
   const channels = await listChannels(ex, ctx);
   return soldCounts(sales.map((s) => saleData(s, ch.items(s.id), ch.payments(s.id), commissionOf(channels, s.channelId))));
-}
-
-export async function stockList(deps: Deps, ex: Executor, ctx: Ctx, q?: string) {
-  const products = await listProducts(ex, ctx);
-  const st = await loadStock(ex, ctx, products);
-  const c = await loadCostingContext(ex, ctx, supplyIdsOf(products));
-  const needle = q?.trim().toLocaleLowerCase('es');
-  const tracked = products.filter((p) => p.tracksStock && (!needle || p.name.toLocaleLowerCase('es').includes(needle)));
-  const items = await Promise.all(tracked.map(async (p) => {
-    const total = costOf(p, c).total;
-    return { productId: p.id, name: p.name, photoUrl: await photoUrl(deps, ctx, p.photoFileId), hexes: p.filaments.map((f) => c.filaments.get(f.filamentId)?.hex ?? '#c9c9d1'), listCents: Math.round(priceOf(p, c, total) * 100), costCents: Math.round(total * 100), ...level(st, p.id) };
-  }));
-  const cols = await listCollections(ex, ctx);
-  return {
-    items,
-    totals: { physical: items.reduce((a, x) => a + x.physical, 0), free: items.reduce((a, x) => a + x.free, 0), reserved: items.reduce((a, x) => a + x.reserved, 0) },
-    untracked: products.filter((p) => !p.tracksStock).map((p) => ({ id: p.id, name: p.name })),
-    sets: cols.map((col) => ({ id: col.id, name: col.name, buildableSets: buildableSets(col.parts, (id) => (st.tracks.get(id) ? st.free(id) : null)) })),
-  };
 }
 
 export async function stockDetail(deps: Deps, ex: Executor, ctx: Ctx, productId: string) {
@@ -94,7 +75,11 @@ export async function adjustStock(deps: Deps, ctx: Ctx, productId: string, input
     const delta = input.mode === 'count' ? input.value - physical : input.value;
     if (input.mode === 'count' && input.value < reserved) throw new BusinessError('VALIDATION_ERROR', { fields: [{ path: 'value', rule: 'too_small', params: { min: reserved } }] });
     if (delta === 0) throw new BusinessError('COUNT_UNCHANGED');
-    if (delta < 0 && -delta > free) throw new BusinessError('INSUFFICIENT_STOCK', { items: [{ productId, name: p.name, requested: -delta, free }], productId, name: p.name, requested: -delta, free });
+    if (delta < 0 && -delta > free) {
+      const parent = p.parentId ? await getProduct(tx, ctx, p.parentId) : undefined;
+      const name = variantDisplayName(p.name, parent?.name, p.variantLabel);
+      throw new BusinessError('INSUFFICIENT_STOCK', { items: [{ productId, name, requested: -delta, free }], productId, name, requested: -delta, free });
+    }
     await insertStockMovements(tx, ctx, [{ id: deps.ids.next(), productId, on: deps.clock.today(), kind: 'adjustment', qty: delta, note: input.note?.trim() ?? '' }]);
   });
   return stockDetail(deps, deps.db, ctx, productId);

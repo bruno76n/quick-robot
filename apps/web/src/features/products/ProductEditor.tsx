@@ -3,7 +3,7 @@ import type { ProductDetail, SaveProductInput } from '@app/contract';
 import { PRICE_TAGS } from '@app/core';
 import { useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '../../components/Button';
 import { ConfirmButton } from '../../components/ConfirmButton';
 import { Field } from '../../components/Field';
@@ -23,6 +23,7 @@ import { num, previewCost, priceOf, type Catalog, type Draft } from './costing';
 import { PieceResult } from './PieceResult';
 import { PhotoField } from './PhotoField';
 import { QuoteDialog } from './QuoteDialog';
+import './products.css';
 
 const L = es.screens.calculator;
 const SPEC: [string, string, string, string][] = [['layer', L.layer, 'mm', '0.20'], ['infill', L.infill, '%', '15'], ['walls', L.walls, '', '3']];
@@ -35,10 +36,10 @@ function fromDetail(p: ProductDetail): Draft {
     printerId: p.printerId ?? '', hours: h ? String(h) : '', minutes: Math.round((p.hours - h) * 60) ? String(Math.round((p.hours - h) * 60)) : '',
     batch: String(p.batchSize), extras: p.extrasCents ? String(p.extrasCents / 100) : '', filaments: p.filaments.length ? p.filaments.map((f) => ({ filamentId: f.filamentId, grams: String(f.grams) })) : [{ filamentId: '', grams: '' }],
     supplies: p.supplies.map((s) => ({ supplyId: s.supplyId, qty: String(s.qty) })), spec: Object.fromEntries(Object.entries(p.spec ?? {}).map(([k, v]) => [k, String(v ?? '')])),
-    note: p.note, tracksStock: p.tracksStock, photoFileId: p.photoFileId, photoUrl: p.photoUrl, parentId: p.parentId,
+    note: p.note, tracksStock: p.tracksStock, photoFileId: p.photoFileId, photoUrl: p.photoUrl, parentId: p.parentId, variantLabel: p.variantLabel ?? '',
   };
 }
-const blank = (printerId: string): Draft => ({ name: '', tags: [], mode: 'value', price: '', margin: '', printerId, hours: '', minutes: '', batch: '1', extras: '', filaments: [{ filamentId: '', grams: '' }], supplies: [], spec: {}, note: '', tracksStock: false, photoFileId: null, photoUrl: null, parentId: null });
+const blank = (printerId: string): Draft => ({ name: '', tags: [], mode: 'value', price: '', margin: '', printerId, hours: '', minutes: '', batch: '1', extras: '', filaments: [{ filamentId: '', grams: '' }], supplies: [], spec: {}, note: '', tracksStock: false, photoFileId: null, photoUrl: null, parentId: null, variantLabel: '' });
 
 function toInput(d: Draft, c: Catalog): SaveProductInput {
   const spec = Object.fromEntries(Object.entries(d.spec).filter(([, v]) => v.trim()));
@@ -50,43 +51,54 @@ function toInput(d: Draft, c: Catalog): SaveProductInput {
     filaments: d.filaments.filter((f) => f.filamentId && num(f.grams) > 0).map((f) => ({ filamentId: f.filamentId, grams: Math.round(num(f.grams) * 10) / 10 })),
     supplies: d.supplies.filter((s) => s.supplyId && num(s.qty) > 0).map((s) => ({ supplyId: s.supplyId, qty: num(s.qty) })),
     spec: Object.keys(spec).length ? spec : null, note: d.note, photoFileId: d.photoFileId,
+    ...(d.variantLabel.trim() ? { variantLabel: d.variantLabel.trim() } : {}),
   };
 }
 
+interface Root { id: string; name: string }
+
 export function ProductEditor() {
-  const search = useSearch({ strict: false }) as { id?: string; de?: string };
+  // ?id= edits a piece; ?variante= opens a copy of that piece as a new variant of its original (mejoras/ronda-2.md §3.4).
+  const search = useSearch({ strict: false }) as { id?: string; variante?: string };
   const editId = search.id;
-  const fromId = search.de;
+  const fromId = editId ? undefined : search.variante;
   const settings = useSettings().data;
   const printers = usePrinters().data?.items;
   const filaments = useFilaments().data?.items;
   const supplies = useSupplies().data?.items;
   const loadId = editId ?? fromId;
   const detail = useQuery({ queryKey: [...keys.products, 'detail', loadId], queryFn: async () => (await api.products.get(loadId!)).data, enabled: Boolean(loadId) });
-  const parentId = fromId ?? detail.data?.parentId ?? null;
-  const parentQ = useQuery({ queryKey: [...keys.products, 'detail', parentId], queryFn: async () => (await api.products.get(parentId!)).data, enabled: Boolean(parentId) && !fromId });
+  const parentId = detail.data?.parentId ?? null;
+  const parentQ = useQuery({ queryKey: [...keys.products, 'detail', parentId], queryFn: async () => (await api.products.get(parentId!)).data, enabled: Boolean(parentId) });
   const c: Catalog | null = settings && printers && filaments && supplies ? { settings: settings.settings, printers, filaments, supplies } : null;
-  if (!c || (loadId && !detail.data)) return <div className="skel" />;
+  if (!c || (loadId && !detail.data) || (parentId && !parentQ.data)) return <div className="skel" />;
   let initial: Draft;
   let parent: Draft | null = null;
+  let root: Root | null = null;
   if (!loadId) initial = blank(c.printers[0]?.id ?? '');
   else {
     const base = fromDetail(detail.data!);
-    if (fromId) { parent = base; initial = { ...base, name: t('screens.calculator.variantName', { name: base.name }), parentId: fromId, photoFileId: null, photoUrl: null }; } else {
-      initial = base;
-      parent = parentQ.data ? fromDetail(parentQ.data) : null;
-    }
+    const original = parentQ.data ?? (fromId ? detail.data! : null);
+    if (original) { root = { id: original.id, name: original.name }; parent = fromDetail(original); }
+    initial = fromId ? { ...base, name: root!.name, variantLabel: '', parentId: root!.id, photoFileId: null, photoUrl: null } : base;
   }
-  return <PieceForm key={`${loadId ?? 'new'}-${fromId ?? ''}`} initial={initial} parent={parent} c={c} editId={editId} fromId={fromId} />;
+  return <PieceForm key={`${loadId ?? 'new'}-${fromId ?? ''}`} initial={initial} parent={parent} root={root} c={c} editId={editId} fromId={fromId} />;
 }
 
-function PieceForm({ initial, parent, c, editId, fromId }: { initial: Draft; parent: Draft | null; c: Catalog; editId: string | undefined; fromId: string | undefined }) {
+function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draft; parent: Draft | null; root: Root | null; c: Catalog; editId: string | undefined; fromId: string | undefined }) {
   const [d, setD] = useState<Draft>(initial);
   const [spoolFor, setSpoolFor] = useState<number | null>(null);
   const [quote, setQuote] = useState(false);
-  const touches = ['products', 'collections', 'supplies'] as const;
-  const save = useWrite((input: SaveProductInput) => (editId ? api.products.update(editId, input) : fromId ? api.products.variant(fromId, input) : api.products.create(input)), { touches: [...touches], ok: () => (fromId ? es.toast['product.variantSaved'] : es.toast['product.saved']), onDone: () => go('/productos') });
-  const saveVariant = useWrite((input: SaveProductInput) => api.products.variant(editId!, input), { touches: [...touches], ok: () => es.toast['product.variantSaved'], onDone: () => go('/productos') });
+  // Creating a variant: from Productos (?variante=) or "Guardar como variante nueva" while editing (keeps the edits as the copy).
+  const [newOf, setNewOf] = useState<Root | null>(fromId ? root : null);
+  const isVariant = Boolean(newOf) || Boolean(editId && root);
+  const labelRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { if (newOf) labelRef.current?.focus(); }, [newOf]);
+  const touches = ['products', 'collections', 'supplies', 'stock'] as const;
+  const save = useWrite((input: SaveProductInput) => (newOf ? api.products.variant(fromId ?? editId!, { ...input, variantLabel: d.variantLabel.trim() }) : editId ? api.products.update(editId, input) : api.products.create(input)), {
+    touches: [...touches], ok: () => (newOf ? es.toast['product.variantSaved'] : es.toast['product.saved']),
+    onDone: (out) => go(newOf ? `/productos?abierta=${out.parentId ?? newOf.id}` : '/productos'),
+  });
   const del = useWrite(() => api.products.remove(editId!), {
     touches: [...touches], ok: () => es.toast['product.deleted'], onDone: () => go('/productos'),
     undo: () => () => api.products.restore(editId!),
@@ -95,6 +107,7 @@ function PieceForm({ initial, parent, c, editId, fromId }: { initial: Draft; par
   const total = previewCost(d, c).total;
   const price = priceOf(d, c, total);
   const valid = () => {
+    if (isVariant && !d.variantLabel.trim()) { labelRef.current?.focus(); return false; }
     if (!d.name.trim()) { toast(es.fields['product.name.required']); return false; }
     if (d.mode === 'value' && !(num(d.price) > 0)) { toast(es.fields['product.price.required']); return false; }
     return true;
@@ -104,11 +117,14 @@ function PieceForm({ initial, parent, c, editId, fromId }: { initial: Draft; par
   const sortedFil = [...c.filaments].sort((a, b) => a.material.localeCompare(b.material, 'es') || a.color.localeCompare(b.color, 'es'));
   return (
     <>
-      <nav className="crumbs"><a href="/productos" onClick={(e) => { e.preventDefault(); go('/productos'); }}>{es.screens.products.title}</a><span>/</span><span>{editId ? L.edit : L.new}</span></nav>
-      {parent && !editId ? <p className="banner">{t('screens.calculator.variantBanner', { name: parent.name })}</p> : null}
+      <nav className="crumbs"><a href="/productos" onClick={(e) => { e.preventDefault(); go('/productos'); }}>{es.screens.products.title}</a><span>/</span><span>{newOf ? t('screens.products.variants.editorTitle', { name: newOf.name }) : editId ? L.edit : L.new}</span></nav>
+      {newOf ? <h1 className="var-title">{t('screens.products.variants.editorTitle', { name: newOf.name })}</h1> : null}
+      {editId && root && !newOf ? <p className="banner" data-testid="variant-of">{t('screens.products.variantOf', { name: root.name })}</p> : null}
       <div className="ed">
         <div className="ed-form">
-          <label className="fld title-f"><span className="sr">{L.name}</span><input value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>
+          {isVariant
+            ? <label className="fld title-f var-label"><span>{es.screens.products.variants.labelField}</span><input ref={labelRef} value={d.variantLabel} required maxLength={60} onChange={(e) => set({ variantLabel: e.target.value })} /></label>
+            : <label className="fld title-f"><span className="sr">{L.name}</span><input value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>}
           <PhotoField fileId={d.photoFileId} url={d.photoUrl} hexes={d.filaments.map((f) => c.filaments.find((x) => x.id === f.filamentId)?.hex ?? '').filter(Boolean)} seed={editId ?? 'new'} onChange={(photoFileId, photoUrl) => set({ photoFileId, photoUrl })} />
           <fieldset className="blk"><legend>{L.printing}</legend>
             <div className="grid2">
@@ -187,15 +203,15 @@ function PieceForm({ initial, parent, c, editId, fromId }: { initial: Draft; par
           </div>
           <div id="r-dyn"><PieceResult d={d} c={c} parent={parent} onPrice={(v) => set({ price: String(v) })} onFormula={() => set({ mode: 'formula' })} /></div>
           <div className="res-act">
-            <Button variant="primary" block busy={save.isPending} busyLabel={es.common.saving} onClick={() => { if (valid()) save.mutate(toInput(d, c)); }}>{editId ? L.saveChanges : L.saveNew}</Button>
-            {editId ? <Button block busy={saveVariant.isPending} onClick={() => { if (valid()) saveVariant.mutate(toInput({ ...d, name: d.name }, c)); }}>{L.saveVariant}</Button> : null}
+            <Button variant="primary" block busy={save.isPending} busyLabel={es.common.saving} onClick={() => { if (valid()) save.mutate(toInput(d, c)); }}>{editId && !newOf ? L.saveChanges : L.saveNew}</Button>
+            {editId && !newOf ? <Button block onClick={() => { setNewOf(root ?? { id: editId, name: d.name }); setD({ ...d, variantLabel: '', photoFileId: null, photoUrl: null }); }}>{L.saveVariant}</Button> : null}
             <div className="row2"><Button block onClick={() => setQuote(true)}>{L.quote}</Button>{editId ? <Button block disabled>{L.sell}</Button> : null}</div>
-            {editId ? <ConfirmButton variant="ghost" danger block confirmText={es.confirm.tapAgainDelete} onConfirm={() => del.mutate(undefined)}>{L.deletePiece}</ConfirmButton> : <Button variant="ghost" block onClick={() => go('/productos')}>{L.discard}</Button>}
+            {editId && !newOf ? <ConfirmButton variant="ghost" danger block confirmText={es.confirm.tapAgainDelete} onConfirm={() => del.mutate(undefined)}>{L.deletePiece}</ConfirmButton> : <Button variant="ghost" block onClick={() => go('/productos')}>{L.discard}</Button>}
           </div>
         </aside>
       </div>
       {spoolFor !== null ? <SpoolDialog filaments={c.filaments} onClose={() => setSpoolFor(null)} onAdded={(id) => { const i = spoolFor; setSpoolFor(null); if (i >= 0) fil(i, { filamentId: id }); else set({ filaments: [...d.filaments, { filamentId: id, grams: '' }] }); }} /> : null}
-      {quote ? <QuoteDialog name={d.name} price={price} colors={d.filaments.map((f) => c.filaments.find((x) => x.id === f.filamentId)?.color.toLocaleLowerCase('es') ?? '').filter(Boolean)} attendedBy={c.settings.business.name} onClose={() => setQuote(false)} /> : null}
+      {quote ? <QuoteDialog name={isVariant && root ? `${root.name} · ${d.variantLabel.trim()}` : d.name} price={price} colors={d.filaments.map((f) => c.filaments.find((x) => x.id === f.filamentId)?.color.toLocaleLowerCase('es') ?? '').filter(Boolean)} attendedBy={c.settings.business.name} onClose={() => setQuote(false)} /> : null}
     </>
   );
 }

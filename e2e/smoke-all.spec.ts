@@ -31,3 +31,19 @@ test('14 menu screens and 5 detail screens in three widths', async ({ page, requ
   }
   expect(errors).toEqual([]);
 });
+
+test('focus ring and checkbox accent are the neutral --accent (ronda-2 §2)', async ({ page, request }) => {
+  const product = ((await (await request.get(`${server.url}/api/v1/products`)).json()) as { data: { items: { id: string }[] } }).data.items[0]!.id;
+  await page.goto(`${server.url}/productos/pieza?id=${product}`);
+  await expect(page.locator('#view')).not.toBeEmpty();
+  const accent = await page.evaluate(() => { const i = document.createElement('i'); i.style.color = 'var(--accent)'; document.body.append(i); const c = getComputedStyle(i).color; i.remove(); return c; });
+  expect(accent).toBe('rgb(18, 18, 20)');
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  const ring = await page.evaluate(() => { const a = document.activeElement as HTMLElement; const s = getComputedStyle(a); return { tag: a.tagName, color: s.outlineColor, style: s.outlineStyle }; });
+  expect(ring.tag).not.toBe('BODY');
+  expect(ring).toMatchObject({ color: accent, style: 'solid' });
+  const box = page.locator('input[type="checkbox"]').first();
+  await expect(box).toHaveCount(1);
+  expect(await box.evaluate((el) => getComputedStyle(el).accentColor)).toBe(accent);
+});

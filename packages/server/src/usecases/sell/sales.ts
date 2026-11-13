@@ -7,6 +7,7 @@ import {
 } from '@app/db';
 import type { Deps } from '../../deps';
 import { notFound } from '../../http';
+import { displayNames } from '../../views/costing';
 import { totalsOf } from './fast';
 import { assertStock, buildItems, cents, childrenOf, commissionOf, factSale, lineItemData, loadStock, needOf, saleData } from './common';
 
@@ -71,7 +72,7 @@ async function takeFromShelf(deps: Deps, tx: Executor, ctx: Ctx, saleId: string,
   const products = await listProducts(tx, ctx);
   const st = await loadStock(tx, ctx, products);
   const need = needOf(items);
-  assertStock(need, st, new Map(products.map((p) => [p.id, p.name])));
+  assertStock(need, st, displayNames(products));
   await insertStockMovements(tx, ctx, Object.entries(need).filter(([id, n]) => st.tracks.get(id) && n > 0)
     .map(([productId, n]) => ({ id: deps.ids.next(), productId, on, kind: 'sale', qty: -n, note: note || 'Venta', refId: saleId })));
 }

@@ -6,7 +6,7 @@ import {
   getCollection, listCollections, listLineItems, listOrders, listPayments, listProducts, physicalStock,
   type Ctx, type Executor, type LineItemRow, type OrderRow, type PaymentRow, type ProductFull, type SaleFact, type SaleRow,
 } from '@app/db';
-import { costOf, loadCostingContext, priceOf, setPartsOf, supplyIdsOf } from '../../views/costing';
+import { costOf, displayNames, loadCostingContext, priceOf, setPartsOf, supplyIdsOf } from '../../views/costing';
 import { notFound } from '../../http';
 
 export const ACTIVE: readonly OrderStatus[] = ['quoted', 'accepted', 'in_production', 'ready'];
@@ -72,6 +72,7 @@ export async function buildItems(ex: Executor, ctx: Ctx, inputs: readonly LineIt
   if (!inputs.length) throw new BusinessError('LINE_ITEMS_REQUIRED');
   const products = await listProducts(ex, ctx);
   const byId = new Map(products.map((p) => [p.id, p]));
+  const names = displayNames(products);
   const c = await loadCostingContext(ex, ctx, supplyIdsOf(products));
   const cols = new Map((await listCollections(ex, ctx)).map((x) => [x.id, x]));
   return Promise.all(inputs.map(async (it, position): Promise<NewItem> => {
@@ -81,7 +82,7 @@ export async function buildItems(ex: Executor, ctx: Ctx, inputs: readonly LineIt
       if (!p) throw notFound('product');
       const total = costOf(p, c).total;
       const fromStock = opts.keepFromStock && it.fromStock?.[p.id] ? { [p.id]: Math.min(it.qty, it.fromStock[p.id]!) } : null;
-      return { ...base, kind: 'piece', productId: p.id, collectionId: null, name: p.name, listCents: Math.round(priceOf(p, c, total) * 100), costCents: total * 100, extrasCents: 0, parts: null, fromStock };
+      return { ...base, kind: 'piece', productId: p.id, collectionId: null, name: names.get(p.id) ?? p.name, listCents: Math.round(priceOf(p, c, total) * 100), costCents: total * 100, extrasCents: 0, parts: null, fromStock };
     }
     const col = cols.get(it.collectionId!) ?? await getCollection(ex, ctx, it.collectionId!);
     if (!col) throw notFound('collection');

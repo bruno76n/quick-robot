@@ -15,7 +15,7 @@ import {
 import { listSupplies, insertSupplyMovements } from '../src/repos/supply-repo';
 import { schema } from '../src';
 
-export const LOAD = { sales: 25_000, items: 80_000, orders: 5_000, products: 500, customers: 2_000, printers: 20, spools: 400, filaments: 150, ledger: 150_000, printRuns: 20_000 };
+export const LOAD = { sales: 25_000, items: 80_000, orders: 5_000, products: 500, families: 50, variants: 125, customers: 2_000, printers: 20, spools: 400, filaments: 150, ledger: 150_000, printRuns: 20_000 };
 
 /** Small deterministic generator (mulberry32). */
 function rng(seed: number) {
@@ -42,8 +42,21 @@ export async function generateLoad(db: Db, ctx: Ctx, opts: { today: string; next
     const printers: string[] = [];
     for (let i = 0; i < n(LOAD.printers); i++) printers.push((await insertPrinter(tx, ctx, { id: id(), name: `Carga ${i}`, costCents: 800000, lifeHours: 5000, maintenanceCentsPerHour: 50, kw: 0.12, hours: 100 })).id);
     const products = existing.map((p) => p.id);
+    // Variant families (ronda 2): the first 50 generated pieces are originals; the next 125 are their variants,
+    // 1 to 4 per family (family k gets k % 4 + 1), about a third with stock. The total stays at 500 pieces.
+    const roots: { id: string; name: string }[] = [];
+    const variantOf: number[] = [];
+    for (let k = 0; variantOf.length < LOAD.variants; k = (k + 1) % LOAD.families) for (let v = 0; v <= k % 4 && variantOf.length < LOAD.variants; v++) variantOf.push(k);
+    const first = products.length;
     for (let i = products.length; i < n(LOAD.products); i++) {
-      const p = await insertProduct(tx, ctx, { id: id(), name: `Pieza de carga ${i}`, mode: 'value', priceCents: 5000 + (i % 40) * 1000, hours: 0.5 + (i % 6), printerId: pick(printers), tracksStock: i % 3 === 0 });
+      const g = i - first;
+      const root = g >= LOAD.families && g < LOAD.families + LOAD.variants ? roots[variantOf[g - LOAD.families]!] : undefined;
+      const label = root ? `Variante ${g - LOAD.families + 1}` : null;
+      const p = await insertProduct(tx, ctx, {
+        id: id(), name: root ? `${root.name} (${label})` : `Pieza de carga ${i}`, parentId: root?.id ?? null, variantLabel: label,
+        mode: 'value', priceCents: 5000 + (i % 40) * 1000, hours: 0.5 + (i % 6), printerId: pick(printers), tracksStock: i % 3 === 0,
+      });
+      if (g < LOAD.families) roots.push({ id: p.id, name: p.name });
       await replaceProductParts(tx, ctx, p.id, [{ id: id(), filamentId: pick(filaments), grams: 10 + (i % 90) }], supplies.length && i % 4 === 0 ? [{ id: id(), supplyId: pick(supplies).id, qty: 1 }] : []);
       products.push(p.id);
     }

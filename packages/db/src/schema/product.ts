@@ -13,7 +13,10 @@ export const product = pgTable('product', {
   id: idCol(),
   workspaceId: uuid('workspace_id').notNull().references(() => workspace.id),
   name: text('name').notNull(),
+  /** Variant: always the root original (one level, mejoras/ronda-2.md §3.1). */
   parentId: uuid('parent_id'),
+  /** Variant label (1–60), required when parent_id is set; displayName = "<original> · <label>". */
+  variantLabel: text('variant_label'),
   mode: text('mode').notNull(),
   priceCents: integer('price_cents').notNull().default(0),
   marginPct: pctCol('margin_pct'),
@@ -31,10 +34,12 @@ export const product = pgTable('product', {
 }, (t) => [
   unique('product_ws_id').on(t.workspaceId, t.id),
   index('product_ws_name').on(t.workspaceId, t.name),
+  index('product_ws_parent').on(t.workspaceId, t.parentId),
   foreignKey({ name: 'product_parent_fk', columns: [t.workspaceId, t.parentId], foreignColumns: [t.workspaceId, t.id] }),
   foreignKey({ name: 'product_printer_fk', columns: [t.workspaceId, t.printerId], foreignColumns: [printer.workspaceId, printer.id] }),
   foreignKey({ name: 'product_photo_fk', columns: [t.workspaceId, t.photoFileId], foreignColumns: [file.workspaceId, file.id] }),
   check('product_mode', sql`${t.mode} in ('value', 'formula')`),
+  check('product_variant_label', sql`(${t.variantLabel} is null or char_length(${t.variantLabel}) between 1 and 60) and (${t.parentId} is null or ${t.variantLabel} is not null)`),
 ]);
 
 export const productFilament = pgTable('product_filament', {

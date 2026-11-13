@@ -19,7 +19,7 @@ const filamentName = (f: FilamentListItem) => `${f.material} ${f.color}`.trim();
 export function Pick({ q, order, products, collections, free, onAdd }: { q: string; order: boolean; products: ProductListItem[]; collections: CollectionListItem[]; free: (id: string) => number; onAdd: (k: 'piece' | 'set', id: string, list: number) => void }) {
   const needle = q.trim().toLocaleLowerCase('es');
   const cols = collections.filter((c) => c.pieces > 0 && (!needle || c.name.toLocaleLowerCase('es').includes(needle)));
-  const pcs = products.filter((p) => !needle || p.name.toLocaleLowerCase('es').includes(needle));
+  const pcs = products.filter((p) => !needle || p.displayName.toLocaleLowerCase('es').includes(needle));
   if (!cols.length && !pcs.length) return <p className="kempty">{L.noResults}</p>;
   const stP = (p: ProductListItem) => {
     if (!p.tracksStock) return order ? null : <Pill tone="plain">{L.onlyOrder}</Pill>;
@@ -38,7 +38,7 @@ export function Pick({ q, order, products, collections, free, onAdd }: { q: stri
       {pcs.length ? <span className="pk-g">{L.groupPieces}</span> : null}
       {pcs.map((p) => (
         <button key={p.id} type="button" className="pk" data-testid="pick-piece" onClick={() => onAdd('piece', p.id, p.listCents / 100)}>
-          <span className="pk-n"><b>{p.name}</b><small className="blk"><span className="swstack">{p.hexes.map((h, i) => <Swatch key={i} hex={h} />)}</span>{p.collections.length ? t('screens.builder.inSets', { names: p.collections.map((c) => c.name).join(', ') }) : L.loosePiece} {stP(p)}</small></span>
+          <span className="pk-n"><b>{p.displayName}</b><small className="blk"><span className="swstack">{p.hexes.map((h, i) => <Swatch key={i} hex={h} />)}</span>{p.collections.length ? t('screens.builder.inSets', { names: p.collections.map((c) => c.name).join(', ') }) : L.loosePiece} {stP(p)}</small></span>
           <span className="pk-p num">{moneyTotal(p.listCents / 100)}</span><span className="pk-add"><Icon name="plus" size={14} /></span>
         </button>
       ))}
