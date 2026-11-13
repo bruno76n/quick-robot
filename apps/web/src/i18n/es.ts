@@ -387,7 +387,6 @@ export const es = {
       briefEmpty: 'Aún no hay ventas en los últimos 30 días. Al registrar una venta, aquí se cuenta cuánto se vendió y a dónde se fue cada peso.',
       top: 'Piezas con más ganancia', topLine: '{count} {count|vendida|vendidas} · precio ×{times} el costo', topTip: '{name}: {profit} de ganancia, {count} {count|vendida|vendidas}',
       topEmpty: 'Aún no hay ventas en los últimos 30 días. Al registrar una venta, aquí verás qué piezas dejan más ganancia.',
-      filament: 'Filamento', filamentAll: 'Ver los {count} filamentos', spoolTitle: '{name}: {grams} disponibles', spoolTitleNone: '{name}: sin rollos', noSpools: 'sin rollos',
       attention: {
         title: 'Atención',
         group: { urgent: 'Urgente', soon: 'Esta semana', review: 'Para revisar' },

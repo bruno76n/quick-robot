@@ -82,6 +82,24 @@ for (const width of [1440, 390]) {
       expect(await list(page).locator('li').count()).toBeLessThanOrEqual(200);
     });
 
+    test('Inicio shows no filament rolls and does not ask for /filaments', async ({ page }) => {
+      const asked: string[] = [];
+      page.on('request', (r) => { if (/\/api\/v1\/filaments/.test(r.url())) asked.push(r.url()); });
+      await page.goto(`${server.url}/inicio`);
+      await expect(list(page).locator('li')).toHaveCount(9);
+      await expect(page.getByRole('heading', { name: 'Impresoras' })).toBeVisible();
+      await page.waitForLoadState('networkidle');
+      expect(asked).toEqual([]);
+      await expect(page.getByRole('heading', { name: 'Filamento', exact: true })).toHaveCount(0);
+      await expect(page.locator('.spool, .spools')).toHaveCount(0);
+      // Atención first; Piezas con más ganancia and Impresoras beside it (desktop) or after it (phone).
+      const box = async (name: string) => (await page.getByRole('heading', { name, exact: true }).boundingBox())!;
+      const [att, top, prn] = [await box('Atención'), await box('Piezas con más ganancia'), await box('Impresoras')];
+      expect(top.y).toBeLessThan(prn.y);
+      if (width >= 1000) { expect(top.x).toBeGreaterThan(att.x); expect(top.y).toBeCloseTo(att.y, -1); }
+      else { expect(att.y).toBeLessThan(top.y); }
+    });
+
     test('each attention button still goes to its element', async ({ page }) => {
       const cases: [string, RegExp][] = [
         ['Agregar rollo', /\/filamentos\?f=/],
