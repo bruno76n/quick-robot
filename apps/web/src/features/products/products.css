@@ -96,3 +96,7 @@
   .tbl.fam .var-n { padding-left: 30px; }
   .tbl.fam .guide { top: -10px; left: 10px; }
 }
+
+/* Calculator for a variant: "Nueva variante de {pieza}" and the "Nombre de la variante" field. */
+.var-title { margin: 0 0 14px; font-family: var(--font-display); font-size: 28px; line-height: 1.1; font-weight: 600; letter-spacing: -.04em; }
+.title-f.var-label > span { font-size: 13px; color: var(--ink-2); font-weight: 500; }

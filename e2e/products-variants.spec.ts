@@ -100,3 +100,74 @@ test('search by a variant label opens its family; "Piezas N" and the chips count
   await expect(page.getByTestId('product-tile')).toHaveCount(1);
   await expect(panel(page)).toHaveCount(0);
 });
+
+test('a new variant from Productos: the calculator copy, its panel, the sale picker; edit shows its original', async ({ page }) => {
+  await page.goto(`${server.url}/productos`);
+  const salto = tile(page, 'Spider-Man · salto');
+  await salto.getByTestId('variants-toggle').click();
+  await panel(page).getByRole('button', { name: 'Nueva variante' }).click();
+  await expect(page).toHaveURL(/\/productos\/pieza\?variante=/);
+  await expect(page.getByRole('heading', { name: 'Nueva variante de Spider-Man · salto' })).toBeVisible();
+  const label = page.getByLabel('Nombre de la variante');
+  await expect(label).toBeFocused();
+  await expect(label).toHaveValue('');
+  await expect(page.locator('.frow select').first()).toHaveValue(/.+/);
+  // Saving without a label keeps the form and the focus on the field.
+  await page.getByRole('button', { name: 'Guardar en el catálogo' }).click();
+  await expect(page).toHaveURL(/\/productos\/pieza/);
+  await expect(label).toBeFocused();
+  await label.fill('Negro mate');
+  await page.locator('.frow select').first().selectOption({ label: 'PLA Negro' });
+  await page.getByRole('button', { name: 'Guardar en el catálogo' }).click();
+  await expect(page.getByRole('status')).toHaveText('Variante guardada en el catálogo');
+  await expect(page).toHaveURL(/\/productos\?abierta=/);
+  await expect(panel(page)).toContainText('Variantes de Spider-Man · salto');
+  await expect(panel(page).getByTestId('variant-row')).toHaveCount(3);
+  const row = panel(page).getByTestId('variant-row').filter({ hasText: 'Negro mate' });
+  await expect(row).toContainText('PLA Negro');
+  await expect(tile(page, 'Spider-Man · salto').getByTestId('variants-toggle')).toHaveText(/2 variantes/);
+  await expect(page.getByTestId('pieces-count')).toHaveText('8');
+  // Editar shows its original and its label; the old "(variante)" name is gone.
+  await row.getByRole('button', { name: 'Editar' }).click();
+  await expect(page.getByTestId('variant-of')).toHaveText('Variante de Spider-Man · salto');
+  await expect(page.getByLabel('Nombre de la variante')).toHaveValue('Negro mate');
+  await expect(page.locator('body')).not.toContainText('(variante)');
+  // The sale picker lists it flat with its displayName, after its original.
+  await page.goto(`${server.url}/armar?modo=venta`);
+  await page.locator('[data-b=q]').fill('salto');
+  await expect(page.getByTestId('pick-piece').locator('b')).toHaveText(['Spider-Man · salto', 'Spider-Man · salto · silk morado', 'Spider-Man · salto · Negro mate']);
+});
+
+test('sell a variant from its panel row', async ({ page }) => {
+  await page.goto(`${server.url}/productos`);
+  await tile(page, 'Spider-Man · salto').getByTestId('variants-toggle').click();
+  await panel(page).getByTestId('variant-row').filter({ hasText: 'silk morado' }).getByRole('button', { name: 'Vender' }).click();
+  await expect(page).toHaveURL(/\/armar\?.*modo=venta/);
+  const line = page.getByTestId('builder-line');
+  await expect(line).toHaveCount(1);
+  await expect(line).toContainText('Spider-Man · salto · silk morado');
+  await page.locator('[data-b=cobrado]').fill(await page.locator('#b-total').inputValue());
+  await page.locator('[data-b=nota]').fill('Variante e2e');
+  await page.locator('.res-act').getByRole('button', { name: 'Registrar venta' }).click();
+  await expect(page.locator('.toast')).toHaveText('Venta registrada. 1 pieza salió de Existencias.');
+  await expect(page.getByTestId('sale-row').filter({ hasText: 'Variante e2e' })).toContainText('Spider-Man · salto · silk morado');
+});
+
+test('390: "+ Variante" of a list row and "Guardar como variante nueva" open the same flow', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.goto(`${server.url}/productos?vista=lista`);
+  await page.getByTestId('family-row').filter({ hasText: 'Doctor Doom' }).getByRole('button', { name: 'Variante' }).click();
+  await expect(page.getByRole('heading', { name: 'Nueva variante de Doctor Doom · busto' })).toBeVisible();
+  await expect(page.getByLabel('Nombre de la variante')).toBeFocused();
+  await page.goto(`${server.url}/productos?vista=lista`);
+  await page.getByTestId('family-row').filter({ hasText: 'Hulk' }).click();
+  await page.getByRole('button', { name: 'Guardar como variante nueva' }).click();
+  await expect(page.getByRole('heading', { name: 'Nueva variante de Hulk · puño' })).toBeVisible();
+  await expect(page.getByLabel('Nombre de la variante')).toBeFocused();
+  await page.getByLabel('Nombre de la variante').fill('Verde');
+  await page.getByRole('button', { name: 'Guardar en el catálogo' }).click();
+  await expect(page.getByRole('status')).toHaveText('Variante guardada en el catálogo');
+  await expect(page).toHaveURL(/\/productos\?abierta=/);
+  await expect(panel(page)).toContainText('Variantes de Hulk · puño');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
+});

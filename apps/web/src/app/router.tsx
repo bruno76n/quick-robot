@@ -45,10 +45,10 @@ const BUILT: Record<string, AnyRoute> = {
   '/clientes': route('/clientes', CustomersPage),
   '/gastos': route('/gastos', ExpensesPage),
   '/reportes': route('/reportes', ReportsPage, (s) => (['7', '30', '90', 'todo'].includes(String(s.periodo)) ? { periodo: String(s.periodo) } : {})),
-  '/productos': route('/productos', ProductsPage, (s) => ({ ...(s.tab === 'colecciones' ? { tab: 'colecciones' } : {}), ...(s.vista === 'lista' ? { vista: 'lista' } : {}), ...(['tecnico', 'variante'].includes(String(s.filtro)) ? { filtro: String(s.filtro) } : {}) })),
+  '/productos': route('/productos', ProductsPage, (s) => ({ ...(s.tab === 'colecciones' ? { tab: 'colecciones' } : {}), ...(s.vista === 'lista' ? { vista: 'lista' } : {}), ...(['tecnico', 'con-variantes'].includes(String(s.filtro)) ? { filtro: String(s.filtro) } : {}), ...idSearch('abierta')(s) })),
 };
 const extra = [
-  route('/productos/pieza', ProductEditor, (s) => ({ ...idSearch('id')(s), ...(typeof s.de === 'string' && UUID.test(s.de) ? { de: s.de } : {}) })),
+  route('/productos/pieza', ProductEditor, (s) => ({ ...idSearch('id')(s), ...idSearch('variante')(s) })),
   route('/productos/coleccion', CollectionEditor, idSearch('id')),
   route('/pedidos/pedido', OrderPage, (s) => ({ ...idSearch('id')(s), ...(['articulos', 'pagos', 'produccion', 'datos'].includes(String(s.tab)) ? { tab: String(s.tab) } : {}) })),
   route('/clientes/cliente', CustomerPage, idSearch('id')),

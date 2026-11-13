@@ -227,7 +227,6 @@ export const es = {
     },
     calculator: {
       edit: 'Editar pieza', new: 'Nueva pieza', name: 'Nombre', namePlaceholder: 'Nombre de la pieza, por ejemplo: Llavero con nombre',
-      variantBanner: 'Variante de {name}. Cambia el filamento o el color y guarda; el precio se conserva salvo que se modifique.', variantName: '{name} (variante)',
       uploadPhoto: 'Subir foto', removePhoto: 'Quitar', photoSaved: 'Foto guardada.', noPhoto: 'Sin foto: se muestra la pieza dibujada en capas con el color de su filamento.',
       printing: 'Impresión', printer: 'Impresora de referencia', printerHint: 'Solo se usa para calcular el costo. La impresión puede hacerse en cualquier impresora.',
       anyPrinter: 'Cualquiera (promedio de mis impresoras)', averagePrinter: 'Promedio de mis impresoras', time: 'Tiempo de impresión', hoursLabel: 'Horas', minutesLabel: 'Minutos',

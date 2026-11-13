@@ -43,7 +43,8 @@ export function ProductsPage() {
   const items = pages.flatMap((p) => p.items);
   const counts = pages[0]?.counts ?? { families: 0, technical: 0, withVariants: 0 };
   const matched = needle ? items.find((f) => f.matchedByVariant)?.id ?? null : null;
-  useEffect(() => { if (matched) setOpen(matched); }, [matched]);
+  const [seenMatch, setSeenMatch] = useState<string | null>(null);
+  if (matched !== seenMatch) { setSeenMatch(matched); if (matched) setOpen(matched); }
   const collections = useCollections().data?.items ?? [];
   const nav = (next: { tab?: string; vista?: string; filtro?: string }) => {
     const p = new URLSearchParams();

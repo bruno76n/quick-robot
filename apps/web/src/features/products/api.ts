@@ -17,5 +17,5 @@ export function useProductFamilies(q: string, filter: ProductFamilyFilter) {
 }
 
 /** Where every "+ Variante" goes: the calculator with a copy of the original (mejoras/ronda-2.md §3.4). */
-export const newVariantPath = (rootId: string) => `/productos/pieza?de=${encodeURIComponent(rootId)}`;
+export const newVariantPath = (rootId: string) => `/productos/pieza?variante=${encodeURIComponent(rootId)}`;
 export const sellPath = (id: string, free: number) => `/armar?modo=${free > 0 ? 'venta' : 'pedido'}&pieza=${id}`;

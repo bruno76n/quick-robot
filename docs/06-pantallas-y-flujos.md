@@ -66,7 +66,7 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 | Nueva colección | — | Colección (nueva). Pide que existan piezas |
 | Fichas / Lista | Preferencia de vista | — |
 | Vender (en una pieza con libres) | — | Armar venta con esa pieza |
-| Variante · Nueva variante · Agregar variante de … (en una pieza) | Abre la calculadora con una **copia** de la original, título “Nueva variante de {pieza}” y el campo **Nombre de la variante** enfocado; al Guardar se crea con `saveProductAsVariant` (`parentId` = la original raíz) y se vuelve a Productos con su panel abierto | Calculadora |
+| Variante · Nueva variante · Agregar variante de … (en una pieza) | Abre la calculadora (`/productos/pieza?variante=<id>`) con una **copia** de la original, título “Nueva variante de {pieza}” y el campo **Nombre de la variante** vacío y enfocado (sin etiqueta no se guarda); al Guardar se crea con `saveProductAsVariant` (`parentId` = la original raíz) y se vuelve a Productos con su panel abierto (`?abierta=<id>`) | Calculadora |
 | N variantes (en una ficha) · flecha (en la lista) | Despliega o cierra las variantes de la pieza; un solo panel abierto a la vez en Fichas | — |
 | Abrir pieza / colección | — | Calculadora / Colección |
 
@@ -83,9 +83,11 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 | Cotizar | Diálogo de cotización rápida (cantidad → total y tiempo) | — |
 | Vender | — | Armar venta |
 | Guardar | `saveProduct` | Productos |
-| Guardar como variante nueva | `saveProductAsVariant` (copia con `parent_id` = la original raíz y `variant_label`) | Productos |
+| Guardar como variante nueva | Pasa al mismo flujo de “Nueva variante” con lo que hay en el formulario (título, campo de etiqueta vacío y enfocado); Guardar llama `saveProductAsVariant` (copia con `parent_id` = la original raíz y `variant_label`) | Productos con su panel abierto |
 | Eliminar | `deleteProduct` (soft) + Deshacer | Productos |
 | Cancelar | Descarta cambios | Productos |
+
+*Variante:* al editar una variante se ve “Variante de {pieza}” y su campo **Nombre de la variante** en lugar del nombre (el nombre que se muestra es `<original> · <etiqueta>`).
 
 *Cálculo en vivo:* el navegador usa `core` para la vista previa. Al guardar, el servidor recalcula; nunca confía en el costo enviado.
 
