@@ -59,6 +59,7 @@ describe('GET /products by families (docs/12 §5)', () => {
     const spider = pg.items.find((f) => f.name === SPIDER)!;
     expect([spider.variantCount, spider.displayName, spider.variantLabel, spider.matchedByVariant]).toEqual([1, SPIDER, null, false]);
     expect(spider.variants.map((v) => [v.name, v.label, v.displayName, v.material])).toEqual([[`${SPIDER} (silk morado)`, 'silk morado', `${SPIDER} · silk morado`, 'PLA Silk Morado']]);
+    expect(spider.material).toBe('PLA Blanco');
     expect(pg.items.filter((f) => f.name !== SPIDER).every((f) => f.variants.length === 0 && f.variantCount === 0)).toBe(true);
     expect(pg.items.some((f) => f.parentId)).toBe(false);
   });

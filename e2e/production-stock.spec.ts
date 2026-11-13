@@ -7,7 +7,9 @@ let server: LocalServer;
 test.beforeAll(async () => { server = await startServer(); });
 test.afterAll(async () => { await server.stop(); });
 const status = (page: Page) => page.getByRole('status');
-const card = (page: Page, name: string) => page.getByTestId('stock-card').filter({ has: page.getByText(name, { exact: true }) });
+// Existencias opens in Lista (ronda-2 §4): one row per piece; a simple piece opens its drawer.
+const card = (page: Page, name: string) => page.getByTestId('stock-row').filter({ has: page.getByText(name, { exact: true }) });
+const totalOf = (page: Page, name: string) => card(page, name).getByTestId('stock-total').first();
 const gramsIn = (s: string) => Number((/disponible ([\d,.]+) g/.exec(s)?.[1] ?? '0').replace(/,/g, ''));
 
 /** Opens "Registrar impresión" from the drawer of a piece and returns the first filament row text. */
@@ -24,7 +26,7 @@ async function openRegister(page: Page, piece: string) {
 test('print run for stock: +n in Existencias, filament goes down; undo puts both back', async ({ page }) => {
   const piece = 'Soporte de celular PETG';
   await page.goto(`${server.url}/existencias`);
-  await expect(card(page, piece)).toContainText('Total 2');
+  await expect(totalOf(page, piece)).toHaveText('2');
   let dlg = await openRegister(page, piece);
   await expect(dlg.locator('select[name=prod] option:checked')).toHaveText(piece);
   const before = gramsIn(await dlg.locator('.frow.ro').first().innerText());
@@ -34,7 +36,7 @@ test('print run for stock: +n in Existencias, filament goes down; undo puts both
   await dlg.getByRole('button', { name: 'Registrar impresión' }).click();
   await expect(status(page)).toContainText('Impresión registrada. Se descontaron');
   await expect(status(page)).toContainText('Se sumaron 2 piezas a Existencias.');
-  await expect(card(page, piece)).toContainText('Total 4');
+  await expect(totalOf(page, piece)).toHaveText('4');
 
   await page.keyboard.press('Escape');
   dlg = await openRegister(page, piece);
@@ -52,7 +54,7 @@ test('print run for stock: +n in Existencias, filament goes down; undo puts both
   await expect(status(page)).toContainText('Se quitaron 2 piezas de Existencias.');
 
   await page.goto(`${server.url}/existencias`);
-  await expect(card(page, piece)).toContainText('Total 2');
+  await expect(totalOf(page, piece)).toHaveText('2');
   dlg = await openRegister(page, piece);
   expect(gramsIn(await dlg.locator('.frow.ro').first().innerText())).toBeCloseTo(before, 1);
 });
@@ -84,7 +86,7 @@ test('Ajustar with a real count, and Llevar existencias de otra pieza', async ({
   await expect(dlg.locator('#aj-prev')).toHaveText('Total: de 3 a 5 piezas.');
   await dlg.getByRole('button', { name: 'Registrar' }).click();
   await expect(status(page)).toHaveText('Existencias de Hulk · puño: total 5.');
-  await expect(card(page, 'Hulk · puño')).toContainText('Total 5');
+  await expect(totalOf(page, 'Hulk · puño')).toHaveText('5');
   await expect(drawer.getByText('Conteo: Repisa')).toBeVisible();
 
   await page.keyboard.press('Escape');
@@ -93,6 +95,6 @@ test('Ajustar with a real count, and Llevar existencias de otra pieza', async ({
   await dlg.locator('input[name=n]').fill('3');
   await dlg.getByRole('button', { name: 'Llevar existencias' }).click();
   await expect(status(page)).toHaveText('Servilletero con logo ahora lleva existencias: total 3.');
-  await expect(card(page, 'Servilletero con logo')).toContainText('Total 3');
+  await expect(totalOf(page, 'Servilletero con logo')).toHaveText('3');
   await expect(drawer.getByRole('heading', { name: 'Servilletero con logo' })).toBeVisible();
 });

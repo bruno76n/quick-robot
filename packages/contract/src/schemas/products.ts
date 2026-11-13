@@ -51,6 +51,8 @@ export const productVariantItem = z.object({
   printerId: id.nullable(), printerName: z.string().nullable(), mode: z.enum(['value', 'formula']), hours: z.number(),
 });
 export const productFamily = productListItem.extend({
+  /** Material and color of the original's filaments (its row in the variants panel). */
+  material: z.string().nullable(),
   variantCount: z.number().int(), variants: z.array(productVariantItem),
   /** The search text matched only a variant (not the original): the screen opens its panel. */
   matchedByVariant: z.boolean(),

@@ -1,0 +1,54 @@
+/* Productos by families (ronda-2 §3; reference/ronda-2/productos-fichas.html and productos-lista.html). Colors only from tokens. */
+.cost { color: var(--cost); }
+
+/* Fichas: 4 → 2 → 1 columns; the open tile has the accent border; the panel spans the row under it. */
+.pt-grid.fam { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 1100px) { .pt-grid.fam { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .pt-grid.fam { grid-template-columns: minmax(0, 1fr); } }
+.pt.on { box-shadow: 0 0 0 2px var(--accent), var(--sh-soft); }
+.pt-st { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.vpill { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 99px; background: var(--panel-2); color: var(--ink); padding: 4px 10px 4px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.vpill:hover { background: var(--line-2); }
+.vpill svg { transition: transform .15s; }
+.vpill[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+.vpanel { grid-column: 1 / -1; position: relative; margin-top: 2px; border: 2px solid var(--accent); border-radius: var(--r); background: var(--bg); padding: 16px 20px 8px; }
+.vpanel::before { content: ""; position: absolute; top: -9px; left: calc(var(--notch, 50%) - 8px); width: 14px; height: 14px; background: var(--bg); border-left: 2px solid var(--accent); border-top: 2px solid var(--accent); transform: rotate(45deg); }
+.vp-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 10px; }
+.vp-h b { font-size: 16px; font-weight: 600; }
+.vp-r { display: grid; grid-template-columns: minmax(180px, 2.2fr) minmax(0, 1.4fr) repeat(3, minmax(0, .8fr)) minmax(0, 1.1fr) minmax(0, .7fr) 160px; column-gap: 12px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.vp-r:last-child { border-bottom: 0; }
+.vp-r .r { text-align: right; }
+.vp-hd { font-size: 12.5px; color: var(--ink-2); font-weight: 600; padding: 6px 0; }
+.vp-n { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.vp-n b { font-weight: 600; overflow-wrap: anywhere; }
+.vp-m { color: var(--ink-2); }
+.vp-g { font-weight: 600; }
+.vp-g.pos { color: var(--green-ink); }
+.vp-s small { color: var(--ink-2); font-size: 12.5px; }
+.vp-a { display: flex; gap: 6px; justify-content: flex-end; }
+@media (max-width: 1100px) {
+  .vp-r { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) repeat(3, minmax(0, .8fr)) minmax(0, 1fr) minmax(0, .6fr); }
+  .vp-a { grid-column: 1 / -1; justify-content: flex-start; padding-top: 6px; }
+  .vp-hd > :last-child { display: none; }
+}
+/* Móvil: name and material on top; cost, price and profit in one line; stock, sold and actions below. */
+@media (max-width: 560px) {
+  .vpanel { padding: 14px 14px 6px; }
+  .vp-hd { display: none; }
+  .vp-r { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 4px; grid-template-areas: "n n n" "m m m" "c p g" "s s v" "a a a"; }
+  .vp-n { grid-area: n; } .vp-m { grid-area: m; font-size: 13px; } .vp-c { grid-area: c; } .vp-p { grid-area: p; } .vp-g { grid-area: g; }
+  .vp-s { grid-area: s; text-align: left !important; } .vp-v { grid-area: v; } .vp-a { grid-area: a; }
+  .vp-c, .vp-p { text-align: left !important; }
+  .vp-c::before, .vp-p::before, .vp-g::before, .vp-v::before { display: block; font-size: 12px; color: var(--ink-2); font-weight: 500; content: attr(data-k); }
+}
+
+/* Lista: the piece column stays fixed while the table scrolls sideways. */
+.fam-tw > .tbl.fam { min-width: 980px; }
+.tbl.fam th.pc, .tbl.fam td.pc { position: sticky; left: 0; z-index: 1; background: var(--bg); min-width: 260px; }
+.tbl.fam tr.click:hover td.pc { background: var(--panel); }
+.fam-gap { flex: none; width: 28px; }
+.more-row { display: flex; justify-content: center; margin: 18px 0 4px; }
+
+/* Toolbar: search and Fichas | Lista on one line from tablet up (as in the mockup). */
+@media (min-width: 761px) { .prod-tb .tb-r { flex-wrap: nowrap; } .prod-tb .search { width: 230px; } }

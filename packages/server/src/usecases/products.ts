@@ -78,7 +78,7 @@ export async function productFamilies(deps: Deps, ex: Executor, ctx: Ctx, opts: 
     const variants = await Promise.all(own.map(async (v) => variantItem(v, productListView(v, c, await extras(v)), c)));
     const base = productListView(r, c, await extras(r));
     return {
-      ...base, technical: base.technical || variants.some((v) => v.technical), variantCount: own.length, variants,
+      ...base, material: materialOf(r, c), technical: base.technical || variants.some((v) => v.technical), variantCount: own.length, variants,
       matchedByVariant: Boolean(needle) && !matches(r, needle) && own.some((v) => matches(v, needle)),
     };
   }));

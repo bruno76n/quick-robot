@@ -40,7 +40,7 @@ const BUILT: Record<string, AnyRoute> = {
   '/ventas': route('/ventas', SalesPage, (s) => ({ ...idSearch('v')(s), ...(typeof s.q === 'string' ? { q: s.q.slice(0, 120) } : {}) })),
   '/pedidos': route('/pedidos', OrdersPage, (s) => ({ ...(['tablero', 'lista', 'calendario'].includes(String(s.vista)) ? { vista: String(s.vista) } : {}), ...(typeof s.mes === 'string' && /^\d{4}-\d{2}$/.test(s.mes) ? { mes: s.mes } : {}) })),
   '/produccion': route('/produccion', ProductionPage, (s) => (['stock', 'order', 'test'].includes(String(s.motivo)) ? { motivo: String(s.motivo) } : {})),
-  '/existencias': route('/existencias', StockPage, idSearch('p')),
+  '/existencias': route('/existencias', StockPage, (s) => ({ ...idSearch('p')(s), ...(['fichas', 'lista'].includes(String(s.vista)) ? { vista: String(s.vista) } : {}) })),
   '/compras': route('/compras', PurchasesPage),
   '/clientes': route('/clientes', CustomersPage),
   '/gastos': route('/gastos', ExpensesPage),
