@@ -61,6 +61,8 @@ test('agregar insumo a una pieza', async ({ page }) => {
   const rows = await page.locator('.irow').count();
   await page.getByRole('button', { name: 'Agregar insumo' }).click();
   await pickOpen(page, 'Caja de regalo');
+  await expect(page.locator('.irow .unit input').nth(rows)).toBeFocused();
+  await expect(page.locator('.irow .unit input').nth(rows)).toHaveValue('1');
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
   await expect(status(page)).toHaveText('Guardado en el catálogo');
   await c.expectBudget(BUDGET.addSupplyToPiece);
