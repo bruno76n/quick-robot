@@ -89,12 +89,14 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 | Eliminar | `deleteProduct` (soft) + Deshacer | Productos |
 | Cancelar | Descarta cambios | Productos |
 
+*Foco al abrir:* una pieza nueva abre con el foco en su nombre; una variante nueva, en “Nombre de la variante” (ronda 2 · D2).
+
 *Variante:* al editar una variante se ve “Variante de {pieza}” y su campo **Nombre de la variante** en lugar del nombre (el nombre que se muestra es `<original> · <etiqueta>`).
 
 *Cálculo en vivo:* el navegador usa `core` para la vista previa. Al guardar, el servidor recalcula; nunca confía en el costo enviado.
 
 ### 3.2 Colección
-Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), etiquetas, nota. Muestra costo, precio, ganancia, y cuántos **sets se pueden armar hoy** con los libres. Acciones: Agregar pieza (crea la fila con la lista de piezas abierta y el foco dentro, con búsqueda; al elegir, el foco pasa a la cantidad), Guardar (`saveCollection`), Eliminar, Vender, Cancelar.
+Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), etiquetas, nota. Muestra costo, precio, ganancia, y cuántos **sets se pueden armar hoy** con los libres. Una colección nueva abre con el foco en su nombre. Acciones: Agregar pieza (crea la fila con la lista de piezas abierta y el foco dentro, con búsqueda; al elegir, el foco pasa a la cantidad), Guardar (`saveCollection`), Eliminar, Vender, Cancelar.
 
 ---
 

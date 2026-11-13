@@ -18,6 +18,7 @@ test('nueva pieza completa: two filaments, a supply, time and price', async ({ p
   const c = await countedPage(page);
   await c.start(`${server.url}/productos`);
   await page.getByRole('button', { name: 'Nueva pieza' }).first().click();
+  await expect(page.getByPlaceholder('Nombre de la pieza, por ejemplo: Llavero con nombre')).toBeFocused();
   await c.fill(page.getByPlaceholder('Nombre de la pieza, por ejemplo: Llavero con nombre'), 'Maceta clics');
   await c.fill(page.getByLabel('Horas'), '3');
   await pick(page, page.locator('.frow .pick-b').first(), 'PLA Negro');
@@ -92,6 +93,7 @@ test('nueva colección with two pieces (P1 on "Agregar pieza")', async ({ page }
   const c = await countedPage(page);
   await c.start(`${server.url}/productos?tab=colecciones`);
   await page.getByRole('button', { name: 'Nueva colección' }).click();
+  await expect(page.getByPlaceholder('Nombre de la colección, por ejemplo: Colección Doomsday blanca')).toBeFocused();
   await c.fill(page.getByPlaceholder('Nombre de la colección, por ejemplo: Colección Doomsday blanca'), 'Dúo clics');
   await pick(page, page.locator('.cparte .pick-b').first(), 'Spider-Man · salto');
   await page.getByRole('button', { name: 'Agregar pieza' }).click();

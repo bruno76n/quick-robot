@@ -3,7 +3,7 @@ import type { CollectionDetail, ProductListItem } from '@app/contract';
 import { floorPrice, partQty, PRICE_TAGS } from '@app/core';
 import { useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Button } from '../../components/Button';
 import { ConfirmButton } from '../../components/ConfirmButton';
 import { Field } from '../../components/Field';
@@ -39,6 +39,9 @@ function CollectionForm({ id, initial, products, minMarginPct }: { id: string | 
   const [d, setD] = useState<CDraft>(initial);
   // Row just created by "Agregar pieza": its picker is born open (ronda-2 §12, D1).
   const [fresh, setFresh] = useState<number | null>(null);
+  // A new collection opens with its name focused (ronda-2 §12, D2).
+  const nameRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { if (!id) nameRef.current?.focus(); }, []); // eslint-disable-line react-hooks/exhaustive-deps -- on open only
   const search = { id };
   const touches = ['collections', 'products'] as const;
   const input = () => ({ name: d.name, tags: d.tags, parts: d.parts.filter((p) => p.productId).map((p) => ({ productId: p.productId, qty: partQty(num(p.qty, 1)) })), extrasCents: Math.round(num(d.extras) * 100), priceCents: num(d.price) > 0 ? Math.round(num(d.price) * 100) : null, note: d.note });
@@ -77,7 +80,7 @@ function CollectionForm({ id, initial, products, minMarginPct }: { id: string | 
       <nav className="crumbs"><a href="/productos" onClick={(e) => { e.preventDefault(); go('/productos'); }}>{es.screens.products.title}</a><span>/</span><a href="/productos?tab=colecciones" onClick={(e) => { e.preventDefault(); go('/productos?tab=colecciones'); }}>{es.screens.products.collections}</a><span>/</span><span>{search.id ? L.edit : L.new}</span></nav>
       <div className="ed">
         <div className="ed-form">
-          <label className="fld title-f"><span className="sr">{L.name}</span><input value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>
+          <label className="fld title-f"><span className="sr">{L.name}</span><input ref={nameRef} value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>
           <fieldset className="blk"><legend>{L.pieces}</legend>
             <div>{d.parts.map((p, i) => {
               const x = byId.get(p.productId);

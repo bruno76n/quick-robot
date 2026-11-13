@@ -96,7 +96,10 @@ function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draf
   const [newOf, setNewOf] = useState<Root | null>(fromId ? root : null);
   const isVariant = Boolean(newOf) || Boolean(editId && root);
   const labelRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   useEffect(() => { if (newOf) labelRef.current?.focus(); }, [newOf]);
+  // A new piece opens with its name focused (ronda-2 §12, D2).
+  useEffect(() => { if (!editId && !fromId) nameRef.current?.focus(); }, []); // eslint-disable-line react-hooks/exhaustive-deps -- on open only
   const touches = ['products', 'collections', 'supplies', 'stock'] as const;
   const save = useWrite((input: SaveProductInput) => (newOf ? api.products.variant(fromId ?? editId!, { ...input, variantLabel: d.variantLabel.trim() }) : editId ? api.products.update(editId, input) : api.products.create(input)), {
     touches: [...touches], ok: () => (newOf ? es.toast['product.variantSaved'] : es.toast['product.saved']),
@@ -135,7 +138,7 @@ function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draf
         <div className="ed-form">
           {isVariant
             ? <label className="fld title-f var-label"><span>{es.screens.products.variants.labelField}</span><input ref={labelRef} value={d.variantLabel} required maxLength={60} onChange={(e) => set({ variantLabel: e.target.value })} /></label>
-            : <label className="fld title-f"><span className="sr">{L.name}</span><input value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>}
+            : <label className="fld title-f"><span className="sr">{L.name}</span><input ref={nameRef} value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>}
           <PhotoField fileId={d.photoFileId} url={d.photoUrl} hexes={d.filaments.map((f) => c.filaments.find((x) => x.id === f.filamentId)?.hex ?? '').filter(Boolean)} seed={editId ?? 'new'} onChange={(photoFileId, photoUrl) => set({ photoFileId, photoUrl })} />
           <fieldset className="blk"><legend>{L.printing}</legend>
             <div className="grid2">

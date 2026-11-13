@@ -7,12 +7,12 @@ import type { ClickCount } from './counted';
 
 export const BUDGET = {
   // Productos
-  newPieceFull: { today: 8, fieldsClicked: 3 },
+  newPieceFull: { today: 8, fieldsClicked: 2 },
   addFilamentToPiece: { today: 4, fieldsClicked: 0 },
   addSupplyToPiece: { today: 4, fieldsClicked: 0 },
   newVariant: { today: 2, fieldsClicked: 0 },
   quote: { today: 3, fieldsClicked: 0 },
-  newCollection: { today: 6, fieldsClicked: 1 },
+  newCollection: { today: 6, fieldsClicked: 0 },
   // Ventas
   sellFromStock: { today: 3, fieldsClicked: 0 },
   sellFromProducts: { today: 2, fieldsClicked: 0 },
