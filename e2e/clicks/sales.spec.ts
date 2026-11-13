@@ -12,11 +12,11 @@ test.afterAll(async () => { await server.stop(); });
 const status = (page: Page) => page.locator('.toast[role=status]');
 const stockRow = (page: Page, name: string) => page.getByTestId('stock-row').filter({ has: page.getByText(name, { exact: true }) });
 
-test('vender una pieza de existencias: row → drawer → Vender → Registrar venta', async ({ page }) => {
+test('vender una pieza de existencias: Vender on the row → Registrar venta', async ({ page }) => {
   const c = await countedPage(page);
   await c.start(`${server.url}/existencias`);
-  await stockRow(page, 'Llavero con nombre').click();
-  await page.getByRole('complementary', { name: 'Detalle' }).getByRole('button', { name: 'Vender', exact: true }).click();
+  await stockRow(page, 'Llavero con nombre').getByRole('button', { name: 'Vender Llavero con nombre' }).click();
+  await expect(page).toHaveURL(/\/armar\?modo=venta&pieza=/);
   await expect(page.getByTestId('builder-line')).toHaveCount(1);
   await page.locator('.res-act').getByRole('button', { name: 'Registrar venta' }).click();
   await expect(status(page)).toHaveText('Venta registrada. 1 pieza salió de Existencias.');
@@ -49,12 +49,12 @@ test('registrar venta con varios artículos, a customer and a note', async ({ pa
   await c.expectBudget(BUDGET.saleSeveralItems);
 });
 
-test('registrar abono of a sale that owes', async ({ page }) => {
+test('registrar abono of a sale that owes: the "Debe" chip opens the payment', async ({ page }) => {
   const c = await countedPage(page);
   await c.start(`${server.url}/ventas`);
-  await page.getByTestId('sale-row').filter({ hasText: 'Colección completa y dos llaveros' }).click();
-  const dlg = page.getByRole('dialog');
-  await dlg.getByRole('button', { name: 'Registrar abono' }).click();
+  await page.getByTestId('sale-row').filter({ hasText: 'Colección completa y dos llaveros' }).getByRole('button', { name: /^Debe .*: registrar abono$/ }).click();
+  const dlg = page.getByRole('dialog', { name: 'Registrar abono' });
+  await expect(dlg.locator('input[name=monto]')).toBeFocused();
   await c.fill(dlg.locator('input[name=monto]'), '200');
   await dlg.getByRole('button', { name: 'Registrar abono' }).click();
   await expect(status(page)).toHaveText('Abono registrado. Faltan $300.');
@@ -65,8 +65,8 @@ test('registrar abono from Inicio (attention "Registrar abono")', async ({ page 
   const c = await countedPage(page);
   await c.start(`${server.url}/inicio`);
   await page.getByTestId('attentions').getByRole('link', { name: 'Registrar abono' }).first().click();
-  const dlg = page.getByRole('dialog');
-  await dlg.getByRole('button', { name: 'Registrar abono' }).click();
+  const dlg = page.getByRole('dialog', { name: 'Registrar abono' });
+  await expect(dlg.locator('input[name=monto]')).toBeVisible();
   await dlg.getByRole('button', { name: 'Registrar abono' }).click();
   await expect(status(page)).toContainText('Abono registrado.');
   await c.expectBudget(BUDGET.salePaymentFromHome);

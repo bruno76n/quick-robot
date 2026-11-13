@@ -37,8 +37,16 @@ export function ItemsList({ items, max = 3 }: { items: SaleListItem['items']; ma
   );
 }
 
+/** "Debe $X" opens the sale with its payment dialog already open (ronda-2 §12, D5). */
+function OwesChip({ id, owedCents }: { id: string; owedCents: number }) {
+  const text = t('screens.sales.owes', { amount: centsTotal(owedCents) });
+  return (
+    <button type="button" className="chip warn chip-btn" aria-label={t('screens.sales.owesPay', { owes: text })} onClick={(e) => { e.stopPropagation(); go(`/ventas?v=${id}&abono=1`); }} onKeyDown={(e) => e.stopPropagation()}>{text}</button>
+  );
+}
+
 export function SalesPage() {
-  const search = useSearch({ strict: false }) as { v?: string };
+  const search = useSearch({ strict: false }) as { v?: string; abono?: string };
   const today = todayLocal();
   const from = addDays(today, -59);
   const [channel, setChannel] = useState(ALL);
@@ -82,7 +90,7 @@ export function SalesPage() {
                   <td>{s.items ? <ItemsList items={s.items} /> : <ul className="itl"><li>{s.itemsText}</li></ul>}{det ? <small className="blk">{det}</small> : null}</td>
                   <td className="r num">
                     {s.returned ? <s className="mut">{centsTotal(s.totalCents)}</s> : <>{centsTotal(s.incomeCents)}{s.listCents ? <VsList list={s.listCents} price={s.incomeCents} /> : null}</>}
-                    {s.returned ? <small className="blk"><Pill tone="bad">{L.returned}</Pill></small> : s.owedCents > 0 ? <small className="blk"><Pill tone="warn">{t('screens.sales.owes', { amount: centsTotal(s.owedCents) })}</Pill></small> : null}
+                    {s.returned ? <small className="blk"><Pill tone="bad">{L.returned}</Pill></small> : s.owedCents > 0 ? <small className="blk"><OwesChip id={s.id} owedCents={s.owedCents} /></small> : null}
                   </td>
                   <td className={`r num ${s.returned ? 'mut' : s.profitCents >= 0 ? 'pos' : 'neg'}`}><b>{s.returned ? '—' : centsTotal(s.profitCents)}</b></td>
                 </tr>
@@ -92,7 +100,7 @@ export function SalesPage() {
           </tbody>
         </table>
       </div>
-      {search.v ? <SaleDialogs id={search.v} onClose={() => go('/ventas', true)} /> : null}
+      {search.v ? <SaleDialogs key={search.v} id={search.v} startWithPayment={search.abono === '1'} onClose={() => go('/ventas', true)} /> : null}
     </>
   );
 }

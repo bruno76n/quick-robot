@@ -8,6 +8,7 @@ import { Button } from '../../components/Button';
 import { ConfirmButton } from '../../components/ConfirmButton';
 import { Field } from '../../components/Field';
 import { Icon } from '../../components/Icon';
+import { Picker, type PickerOption } from '../../components/Picker';
 import { toast } from '../../components/Toast';
 import { UnitInput } from '../../components/UnitInput';
 import { es } from '../../i18n/es';
@@ -89,11 +90,16 @@ function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draf
   const [d, setD] = useState<Draft>(initial);
   const [spoolFor, setSpoolFor] = useState<number | null>(null);
   const [quote, setQuote] = useState(false);
+  // Row just created by "Agregar otro filamento" / "Agregar insumo": its picker is born open (ronda-2 §12, D1).
+  const [fresh, setFresh] = useState<{ kind: 'filament' | 'supply'; i: number } | null>(null);
   // Creating a variant: from Productos (?variante=) or "Guardar como variante nueva" while editing (keeps the edits as the copy).
   const [newOf, setNewOf] = useState<Root | null>(fromId ? root : null);
   const isVariant = Boolean(newOf) || Boolean(editId && root);
   const labelRef = useRef<HTMLInputElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
   useEffect(() => { if (newOf) labelRef.current?.focus(); }, [newOf]);
+  // A new piece opens with its name focused (ronda-2 §12, D2).
+  useEffect(() => { if (!editId && !fromId) nameRef.current?.focus(); }, []); // eslint-disable-line react-hooks/exhaustive-deps -- on open only
   const touches = ['products', 'collections', 'supplies', 'stock'] as const;
   const save = useWrite((input: SaveProductInput) => (newOf ? api.products.variant(fromId ?? editId!, { ...input, variantLabel: d.variantLabel.trim() }) : editId ? api.products.update(editId, input) : api.products.create(input)), {
     touches: [...touches], ok: () => (newOf ? es.toast['product.variantSaved'] : es.toast['product.saved']),
@@ -115,6 +121,14 @@ function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draf
   const fil = (i: number, patch: Partial<Draft['filaments'][number]>) => set({ filaments: d.filaments.map((f, k) => (k === i ? { ...f, ...patch } : f)) });
   const sup = (i: number, patch: Partial<Draft['supplies'][number]>) => set({ supplies: d.supplies.map((s, k) => (k === i ? { ...s, ...patch } : s)) });
   const sortedFil = [...c.filaments].sort((a, b) => a.material.localeCompare(b.material, 'es') || a.color.localeCompare(b.color, 'es'));
+  // The filaments already used in the piece (or in its original, for a variant) go first (P7).
+  const used = new Set([...d.filaments, ...(parent?.filaments ?? [])].map((f) => f.filamentId).filter(Boolean));
+  const filOption = (y: Catalog['filaments'][number], group?: string): PickerOption => ({ value: y.id, label: `${y.material} ${y.color}`, hex: y.hex, hint: fmtGrams(y.remainingGrams), ...(group ? { group } : {}) });
+  const filOptions = used.size && used.size < sortedFil.length
+    ? [...sortedFil.filter((y) => used.has(y.id)).map((y) => filOption(y, L.usedInPiece)), ...sortedFil.filter((y) => !used.has(y.id)).map((y) => filOption(y, L.otherFilaments))]
+    : sortedFil.map((y) => filOption(y));
+  const supOptions: PickerOption[] = c.supplies.map((o) => ({ value: o.id, label: o.name }));
+  const rowInput = (row: string) => (el: HTMLElement) => el.closest(row)?.querySelector<HTMLInputElement>('.unit input');
   return (
     <>
       <nav className="crumbs"><a href="/productos" onClick={(e) => { e.preventDefault(); go('/productos'); }}>{es.screens.products.title}</a><span>/</span><span>{newOf ? t('screens.products.variants.editorTitle', { name: newOf.name }) : editId ? L.edit : L.new}</span></nav>
@@ -124,7 +138,7 @@ function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draf
         <div className="ed-form">
           {isVariant
             ? <label className="fld title-f var-label"><span>{es.screens.products.variants.labelField}</span><input ref={labelRef} value={d.variantLabel} required maxLength={60} onChange={(e) => set({ variantLabel: e.target.value })} /></label>
-            : <label className="fld title-f"><span className="sr">{L.name}</span><input value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>}
+            : <label className="fld title-f"><span className="sr">{L.name}</span><input ref={nameRef} value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>}
           <PhotoField fileId={d.photoFileId} url={d.photoUrl} hexes={d.filaments.map((f) => c.filaments.find((x) => x.id === f.filamentId)?.hex ?? '').filter(Boolean)} seed={editId ?? 'new'} onChange={(photoFileId, photoUrl) => set({ photoFileId, photoUrl })} />
           <fieldset className="blk"><legend>{L.printing}</legend>
             <div className="grid2">
@@ -139,7 +153,7 @@ function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draf
               return (
                 <div className="frow" key={i}>
                   <span className="sw lg" style={{ ['--c' as string]: x?.hex ?? '#ccc' }} />
-                  <label className="fld"><span className="sr">{L.filament}</span><select value={f.filamentId} onChange={(e) => fil(i, { filamentId: e.target.value })}>{x ? null : <option value="">{L.chooseFilament}</option>}{sortedFil.map((y) => <option key={y.id} value={y.id}>{y.material} {y.color}</option>)}</select></label>
+                  <div className="fld"><Picker label={L.filament} value={f.filamentId} options={filOptions} placeholder={L.chooseFilament} onChange={(v) => fil(i, { filamentId: v })} autoOpen={fresh?.kind === 'filament' && fresh.i === i} next={rowInput('.frow')} /></div>
                   <label className="fld"><span className="sr">{L.grams}</span><UnitInput unit="g" inputMode="decimal" value={f.grams} onChange={(e) => fil(i, { grams: e.target.value })} placeholder="0" /></label>
                   <span className="fcost num">{money(g * (x?.costPerGram ?? 0))}</span>
                   <button type="button" className="btn ghost icon" onClick={() => set({ filaments: d.filaments.filter((_, k) => k !== i) })} aria-label={L.removeFilament} disabled={d.filaments.length < 2}><Icon name="x" size={16} /></button>
@@ -147,7 +161,7 @@ function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draf
                 </div>
               );
             })}</div>
-            <div className="btnrow"><Button size="sm" icon="plus" onClick={() => set({ filaments: [...d.filaments, { filamentId: '', grams: '' }] })}>{L.addFilament}</Button><Button size="sm" variant="ghost" onClick={() => setSpoolFor(d.filaments.findIndex((f) => !f.filamentId))}>{L.addSpoolOther}</Button></div>
+            <div className="btnrow"><Button size="sm" icon="plus" onClick={() => { setFresh({ kind: 'filament', i: d.filaments.length }); set({ filaments: [...d.filaments, { filamentId: '', grams: '' }] }); }}>{L.addFilament}</Button><Button size="sm" variant="ghost" onClick={() => setSpoolFor(d.filaments.findIndex((f) => !f.filamentId))}>{L.addSpoolOther}</Button></div>
             <p className="hint">{L.filamentsHint}</p>
           </fieldset>
           <fieldset className="blk"><legend>{L.supplies}</legend>
@@ -155,9 +169,9 @@ function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draf
               <>
                 {d.supplies.length ? d.supplies.map((s, i) => {
                   const x = c.supplies.find((y) => y.id === s.supplyId);
-                  return <div className="irow" key={i}><select value={s.supplyId} onChange={(e) => sup(i, { supplyId: e.target.value })} aria-label={L.supply}><option value="">{L.chooseSupply}</option>{c.supplies.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}</select><UnitInput unit={x?.unit || es.screens.supplies.pza} inputMode="decimal" value={s.qty} onChange={(e) => sup(i, { qty: e.target.value })} placeholder="1" aria-label={L.qtyPerPiece} /><b className="num icost">{x ? money((num(s.qty) * x.costCents) / 100) : ''}</b><button type="button" className="btn ghost icon" onClick={() => set({ supplies: d.supplies.filter((_, k) => k !== i) })} aria-label={L.removeSupply}><Icon name="x" size={16} /></button></div>;
+                  return <div className="irow" key={i}><Picker label={L.supply} value={s.supplyId} options={supOptions} placeholder={L.chooseSupply} onChange={(v) => sup(i, { supplyId: v })} autoOpen={fresh?.kind === 'supply' && fresh.i === i} next={rowInput('.irow')} /><UnitInput unit={x?.unit || es.screens.supplies.pza} inputMode="decimal" value={s.qty} onChange={(e) => sup(i, { qty: e.target.value })} placeholder="1" aria-label={L.qtyPerPiece} /><b className="num icost">{x ? money((num(s.qty) * x.costCents) / 100) : ''}</b><button type="button" className="btn ghost icon" onClick={() => set({ supplies: d.supplies.filter((_, k) => k !== i) })} aria-label={L.removeSupply}><Icon name="x" size={16} /></button></div>;
                 }) : <p className="hint">{L.noSupplies}</p>}
-                <div className="btnrow"><Button size="sm" icon="plus" onClick={() => set({ supplies: [...d.supplies, { supplyId: '', qty: '1' }] })}>{L.addSupply}</Button></div>
+                <div className="btnrow"><Button size="sm" icon="plus" onClick={() => { setFresh({ kind: 'supply', i: d.supplies.length }); set({ supplies: [...d.supplies, { supplyId: '', qty: '1' }] }); }}>{L.addSupply}</Button></div>
               </>
             ) : <p className="hint">{L.noSuppliesYet}</p>}
             <p className="hint">{L.suppliesHint}</p>

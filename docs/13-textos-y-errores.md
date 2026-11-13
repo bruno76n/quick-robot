@@ -394,6 +394,19 @@ Texto del botón de cada acción del mockup, para que `es.ts` use los mismos. (E
 
 Los textos nuevos de variantes agrupadas, Existencias (lista y fichas), Inicio (atención por prioridad) y la barra lateral neutra están en `mejoras/ronda-2.md §9` (claves de `es.ts` incluidas). Los demás textos de esas pantallas no cambian.
 
+## 9.2 Textos de la ronda 2 · fase D (menos clics)
+
+| Clave | Texto | Dónde |
+|---|---|---|
+| `common.picker.search` | Buscar | Nombre del campo de búsqueda del selector con búsqueda (`06 §1`), seguido del nombre del campo |
+| `common.picker.placeholder` | Escribir para buscar… | Campo de búsqueda del selector |
+| `common.picker.none` | Sin resultados. | Selector, cuando nada coincide con lo escrito |
+| `screens.calculator.usedInPiece` | En esta pieza | Grupo de la lista de filamentos: los que ya usa la pieza |
+| `screens.calculator.otherFilaments` | Los demás | Grupo de la lista de filamentos: el resto |
+| `screens.stock.sellOne` | Vender {name} | Nombre accesible del botón “Vender” de cada fila o ficha de Existencias |
+| `screens.sales.owesPay` | {owes}: registrar abono | Nombre accesible del chip “Debe $X” de la lista de Ventas, que abre el abono |
+| `screens.builder.newCustomerLink`, `screens.sales.newCustomerLink` | Nuevo cliente | Enlace bajo el selector de cliente de Armar venta o pedido y de Editar datos de la venta |
+
 ---
 
 ## 10. Cómo se prueba

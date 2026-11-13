@@ -27,14 +27,17 @@ test('F: list, copy per supplier, buy the supply → it leaves the list', async 
   }
 
   await group.getByTestId('purchase-line').filter({ hasText: 'Caja de regalo' }).getByRole('button', { name: 'Registrar compra' }).click();
-  await expect(page).toHaveURL(/\/insumos\?i=/);
+  // Ronda 2 · D9: the purchase opens directly, with the drawer of the supply behind it.
+  await expect(page).toHaveURL(/\/insumos\?i=[^&]+&compra=1$/);
   const drawer = page.getByRole('complementary', { name: 'Detalle' });
   await expect(drawer.getByRole('heading', { name: 'Caja de regalo' })).toBeVisible();
-  await drawer.getByRole('button', { name: 'Registrar compra' }).click();
   const dlg = page.getByRole('dialog');
+  await expect(dlg).toContainText('Caja de regalo');
   await dlg.locator('input[name=n]').fill('20');
   await dlg.getByRole('button', { name: 'Registrar' }).click();
   await expect(page.getByRole('status')).toHaveText('Compra registrada');
+  await expect(page).toHaveURL(/\/insumos\?i=[^&]+$/);
+  await expect(drawer.getByRole('heading', { name: 'Caja de regalo' })).toBeVisible();
 
   await page.goto(`${server.url}/compras`);
   await expect(page.getByText('Hay 3 cosas por comprar')).toBeVisible();

@@ -3,11 +3,12 @@ import type { CollectionDetail, ProductListItem } from '@app/contract';
 import { floorPrice, partQty, PRICE_TAGS } from '@app/core';
 import { useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
-import { useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { Button } from '../../components/Button';
 import { ConfirmButton } from '../../components/ConfirmButton';
 import { Field } from '../../components/Field';
 import { Icon } from '../../components/Icon';
+import { Picker } from '../../components/Picker';
 import { toast } from '../../components/Toast';
 import { UnitInput } from '../../components/UnitInput';
 import { es } from '../../i18n/es';
@@ -36,6 +37,11 @@ export function CollectionEditor() {
 
 function CollectionForm({ id, initial, products, minMarginPct }: { id: string | undefined; initial: CDraft; products: ProductListItem[]; minMarginPct: number }) {
   const [d, setD] = useState<CDraft>(initial);
+  // Row just created by "Agregar pieza": its picker is born open (ronda-2 §12, D1).
+  const [fresh, setFresh] = useState<number | null>(null);
+  // A new collection opens with its name focused (ronda-2 §12, D2).
+  const nameRef = useRef<HTMLInputElement>(null);
+  useEffect(() => { if (!id) nameRef.current?.focus(); }, []); // eslint-disable-line react-hooks/exhaustive-deps -- on open only
   const search = { id };
   const touches = ['collections', 'products'] as const;
   const input = () => ({ name: d.name, tags: d.tags, parts: d.parts.filter((p) => p.productId).map((p) => ({ productId: p.productId, qty: partQty(num(p.qty, 1)) })), extrasCents: Math.round(num(d.extras) * 100), priceCents: num(d.price) > 0 ? Math.round(num(d.price) * 100) : null, note: d.note });
@@ -47,6 +53,7 @@ function CollectionForm({ id, initial, products, minMarginPct }: { id: string | 
   const set = (patch: Partial<CDraft>) => setD({ ...d, ...patch });
   const part = (i: number, patch: Partial<CDraft['parts'][number]>) => set({ parts: d.parts.map((p, k) => (k === i ? { ...p, ...patch } : p)) });
   const byId = new Map<string, ProductListItem>(products.map((p) => [p.id, p]));
+  const pieceOptions = products.map((y) => ({ value: y.id, label: y.displayName }));
   const rows = d.parts.flatMap((p) => { const x = byId.get(p.productId); return x ? [{ x, qty: partQty(num(p.qty, 1)) }] : []; });
   const pieces = rows.reduce((a, r) => a + (r.x.costCents / 100) * r.qty, 0);
   const extras = num(d.extras);
@@ -73,21 +80,21 @@ function CollectionForm({ id, initial, products, minMarginPct }: { id: string | 
       <nav className="crumbs"><a href="/productos" onClick={(e) => { e.preventDefault(); go('/productos'); }}>{es.screens.products.title}</a><span>/</span><a href="/productos?tab=colecciones" onClick={(e) => { e.preventDefault(); go('/productos?tab=colecciones'); }}>{es.screens.products.collections}</a><span>/</span><span>{search.id ? L.edit : L.new}</span></nav>
       <div className="ed">
         <div className="ed-form">
-          <label className="fld title-f"><span className="sr">{L.name}</span><input value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>
+          <label className="fld title-f"><span className="sr">{L.name}</span><input ref={nameRef} value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>
           <fieldset className="blk"><legend>{L.pieces}</legend>
             <div>{d.parts.map((p, i) => {
               const x = byId.get(p.productId);
               const q = partQty(num(p.qty, 1));
               return (
                 <div className="frow cparte" key={i}>
-                  <label className="fld"><span className="sr">{L.piece}</span><select value={p.productId} onChange={(e) => part(i, { productId: e.target.value })}><option value="">{L.choosePiece}</option>{products.map((y) => <option key={y.id} value={y.id}>{y.displayName}</option>)}</select></label>
+                  <div className="fld"><Picker label={L.piece} value={p.productId} options={pieceOptions} placeholder={L.choosePiece} onChange={(v) => part(i, { productId: v })} autoOpen={fresh === i} next={(el) => el.closest('.cparte')?.querySelector<HTMLInputElement>('.unit input')} /></div>
                   <label className="fld"><span className="sr">{L.qtyInSet}</span><UnitInput unit="×" inputMode="numeric" value={p.qty} onChange={(e) => part(i, { qty: e.target.value })} aria-label={L.qtyInSet} /></label>
                   <span className="fcost num">{x ? moneyTotal((x.listCents / 100) * q) : ''}</span>
                   <button type="button" className="btn ghost icon" onClick={() => set({ parts: d.parts.filter((_, k) => k !== i) })} aria-label={L.removePiece} disabled={d.parts.length < 2}><Icon name="x" size={16} /></button>
                 </div>
               );
             })}</div>
-            <Button size="sm" icon="plus" onClick={() => set({ parts: [...d.parts, { productId: '', qty: '1' }] })}>{L.addPiece}</Button>
+            <Button size="sm" icon="plus" onClick={() => { setFresh(d.parts.length); set({ parts: [...d.parts, { productId: '', qty: '1' }] }); }}>{L.addPiece}</Button>
             <p className="hint">{L.piecesHint}</p>
           </fieldset>
           <fieldset className="blk"><legend>{L.box}</legend>

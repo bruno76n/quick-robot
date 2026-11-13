@@ -74,6 +74,14 @@ describe('components', () => {
     expect(screen.queryByText('Agregar')).toBeNull();
   });
 
+  it('Dialog initial focus (T1): the marked field first; else the first visible field that is not radio, checkbox or date', () => {
+    const { unmount } = render(<Dialog open title="Hecho" onClose={vi.fn()}><input type="radio" name="m" aria-label="Motivo" /><input type="date" aria-label="Fecha" /><div hidden><input aria-label="Oculto" /></div><input aria-label="Costo" /><input aria-label="Nota" /></Dialog>);
+    expect(document.activeElement).toBe(screen.getByLabelText('Costo'));
+    unmount();
+    render(<Dialog open title="Rollo" onClose={vi.fn()}><select aria-label="Motivo"><option>Uso</option></select><input aria-label="Cantidad" data-autofocus="" /></Dialog>);
+    expect(document.activeElement).toBe(screen.getByLabelText('Cantidad'));
+  });
+
   it('Drawer: content only while open, closes with Esc and with the button', () => {
     const onClose = vi.fn();
     const { rerender } = render(<Drawer open kind="Filamento" onClose={onClose}><p>dentro</p></Drawer>);

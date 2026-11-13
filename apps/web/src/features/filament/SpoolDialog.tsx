@@ -69,7 +69,10 @@ function SpoolForm({ filamentId, editing, filaments, onClose, onAdded, onDeleted
   const [color, setColor] = useState(preset?.color ?? '');
   const [colorNew, setColorNew] = useState('');
   const [hex, setHex] = useState(DEFAULT_COLORS[0]![1]); // a new color starts on the first of the list, never on an interface color
-  const [brand, setBrand] = useState(editing?.brand ?? '');
+  const [brand, setBrandChosen] = useState(editing?.brand ?? '');
+  // Until the person picks a brand, a new spool of a filament that exists proposes the brand of its last spool (D3).
+  const [brandTouched, setBrandTouched] = useState(Boolean(editing));
+  const setBrand = (v: string) => { setBrandTouched(true); setBrandChosen(v); };
   const [brandNew, setBrandNew] = useState('');
   const [cost, setCost] = useState(editing ? String(editing.costCents / 100) : '');
   const [shipping, setShipping] = useState(editing ? String(editing.shippingCents / 100) : '0');
@@ -86,10 +89,14 @@ function SpoolForm({ filamentId, editing, filaments, onClose, onAdded, onDeleted
 
   const M = canonicalEntry('material', catalog.material, material === OTHER ? materialNew : material);
   const C = canonicalEntry('color', catalog.color, color === OTHER ? colorNew : color, hex);
-  const B = canonicalEntry('brand', catalog.brand, brand === OTHER ? brandNew : brand);
   const g = Math.max(0, parseNumber(weight));
   const swatch = C.name && !C.isNew ? C.hex! : color === OTHER ? hex : 'var(--line-2)';
   const existing = M.name && C.name ? filaments.find((f) => filamentKey(f.material, f.color) === filamentKey(M.name, C.name)) : undefined;
+  const lastSpools = useFilament(!brandTouched && existing ? existing.id : null).data?.spools;
+  const proposed = !brandTouched && existing && lastSpools?.length ? [...lastSpools].sort((a, b) => b.purchasedOn.localeCompare(a.purchasedOn))[0]!.brand : '';
+  const brandValue = brandTouched ? brand : proposed;
+  const brandList = proposed && !findInCatalog(catalog.brand, proposed) ? [...catalog.brand, { name: proposed }] : catalog.brand;
+  const B = canonicalEntry('brand', brandList, brandValue === OTHER ? brandNew : brandValue);
   const pay = parseNumber(cost) + parseNumber(shipping);
   const err = (field: string) => { const f = errs.find((e) => e.path.split(/[.[]/)[0] === field); return f ? fieldText('spool', f) : undefined; };
 
@@ -164,15 +171,15 @@ function SpoolForm({ filamentId, editing, filaments, onClose, onAdded, onDeleted
               <span className="newc" hidden={color !== OTHER}><input name="color_n" placeholder={L.colorPlaceholder} aria-label={L.newColorLabel} value={colorNew} onChange={(e) => setColorNew(e.target.value)} /><input name="hex" type="color" value={hex} aria-label={L.colorOnScreen} hidden={Boolean(C.name && !C.isNew)} onChange={(e) => setHex(e.target.value)} /></span>
             </Field>
             <Field label={L.brand}>
-              <select name="marca" value={brand} onChange={(e) => setBrand(e.target.value)}><option value="">{es.common.noBrand}</option>{options(catalog.brand)}<option value={OTHER}>{L.otherBrand}</option></select>
-              <input name="marca_n" placeholder={L.brandPlaceholder} aria-label={L.newBrandLabel} hidden={brand !== OTHER} value={brandNew} onChange={(e) => setBrandNew(e.target.value)} />
+              <select name="marca" value={brandValue} onChange={(e) => setBrand(e.target.value)}><option value="">{es.common.noBrand}</option>{options(brandList)}<option value={OTHER}>{L.otherBrand}</option></select>
+              <input name="marca_n" placeholder={L.brandPlaceholder} aria-label={L.newBrandLabel} hidden={brandValue !== OTHER} value={brandNew} onChange={(e) => setBrandNew(e.target.value)} />
             </Field>
           </div>
         </div>
       </details>
       <p className={`note${linkOk ? ' ok' : ''}`}>{link}</p>
       <div className="grid2">
-        <Field label={L.cost} error={err('costCents')}><UnitInput unit="$" name="costo" inputMode="decimal" placeholder="350" value={cost} onChange={(e) => setCost(e.target.value)} autoFocus={Boolean(preset)} /></Field>
+        <Field label={L.cost} error={err('costCents')}><UnitInput unit="$" name="costo" inputMode="decimal" placeholder="350" value={cost} onChange={(e) => setCost(e.target.value)} data-autofocus={preset ? '' : undefined} /></Field>
         <Field label={L.shipping} hint={L.shippingHint} error={err('shippingCents')}><UnitInput unit="$" name="envio" inputMode="decimal" value={shipping} onChange={(e) => setShipping(e.target.value)} /></Field>
         <Field label={L.weight} error={err('grams')}><UnitInput unit="g" name="gramos" inputMode="numeric" value={weight} onChange={(e) => setWeight(e.target.value)} /></Field>
         <Field label={L.date} error={err('purchasedOn')}><input name="fecha" type="date" value={on} onChange={(e) => setOn(e.target.value)} /></Field>

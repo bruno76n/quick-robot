@@ -33,6 +33,7 @@ test('registrar impresión from the drawer of a piece (the piece comes chosen)',
   await drawer(page).getByRole('button', { name: 'Registrar impresión' }).click();
   const dlg = page.getByRole('dialog');
   await expect(dlg.locator('.frow.ro').first()).toBeVisible();
+  await expect(dlg.locator('input[name=cant]')).toBeFocused(); // T1: the dialog focuses the marked field
   await c.fill(dlg.locator('input[name=cant]'), '2');
   await dlg.getByRole('button', { name: 'Registrar impresión' }).click();
   await expect(status(page)).toContainText('Se sumaron 2 piezas a Existencias.');
@@ -45,7 +46,10 @@ test('ajustar existencias (one damaged piece, with a note)', async ({ page }) =>
   await stockRow(page, 'Llavero con nombre').click();
   await drawer(page).getByRole('button', { name: 'Ajustar' }).click();
   const dlg = page.getByRole('dialog');
-  await dlg.locator('select[name=tipo]').selectOption('damaged');
+  // D8: the four reasons at sight; one tap. The focus is on the quantity (T1), already 1.
+  await expect(dlg.getByRole('radiogroup', { name: 'Motivo' }).getByRole('radio')).toHaveCount(4);
+  await expect(dlg.locator('input[name=n]')).toBeFocused();
+  await dlg.getByRole('radio', { name: 'Dañada o defectuosa' }).check();
   await c.fill(dlg.locator('input[name=nota]'), 'Se rompió');
   await dlg.getByRole('button', { name: 'Registrar' }).click();
   await expect(status(page)).toContainText('Existencias de Llavero con nombre: total');
@@ -70,20 +74,23 @@ test('agregar rollo of a filament that exists (from its row)', async ({ page }) 
   await page.getByTestId('filament-row').filter({ hasText: 'PLA Blanco' }).click();
   await drawer(page).getByRole('button', { name: 'Agregar rollo de PLA Blanco' }).click();
   const dlg = page.getByRole('dialog');
+  await expect(dlg.locator('input[name=costo]')).toBeFocused(); // T1: the dialog focuses the marked field
   await c.fill(dlg.locator('input[name=costo]'), '350');
   await dlg.getByRole('button', { name: 'Agregar rollo' }).click();
   await expect(status(page)).toContainText('Rollo agregado a PLA Blanco.');
   await c.expectBudget(BUDGET.addSpoolExisting);
 });
 
-test('agregar rollo from the header (material, color and brand to choose)', async ({ page }) => {
+test('agregar rollo from the header (material and color to choose; the brand of its last spool is proposed)', async ({ page }) => {
   const c = await countedPage(page);
   await c.start(`${server.url}/filamentos`);
   await page.getByRole('button', { name: 'Agregar rollo' }).first().click();
   const dlg = page.getByRole('dialog');
   await dlg.locator('select[name=material]').selectOption('PLA');
   await dlg.locator('select[name=color]').selectOption('Negro');
-  await dlg.locator('select[name=marca]').selectOption('Polymaker');
+  // D3: PLA Negro exists; its last spool is eSUN, proposed and shown in the summary (still editable).
+  await expect(dlg.locator('select[name=marca]')).toHaveValue('eSUN');
+  await expect(dlg.locator('summary .fb-t small')).toHaveText('eSUN');
   await c.fill(dlg.locator('input[name=costo]'), '380');
   await dlg.getByRole('button', { name: 'Agregar rollo' }).click();
   await expect(status(page)).toContainText('Rollo agregado a PLA Negro.');
@@ -130,12 +137,14 @@ test('registrar compra de un insumo (Insumos: card → drawer → Registrar comp
   await c.expectBudget(BUDGET.supplyPurchase);
 });
 
-test('registrar compra from Compras (the list sends to Insumos)', async ({ page }) => {
+test('registrar compra from Compras (the purchase opens directly, its drawer behind)', async ({ page }) => {
   const c = await countedPage(page);
   await c.start(`${server.url}/compras`);
   await page.getByTestId('purchase-line').filter({ hasText: 'Caja de regalo' }).getByRole('button', { name: 'Registrar compra' }).click();
-  await drawer(page).getByRole('button', { name: 'Registrar compra' }).click();
+  await expect(page).toHaveURL(/\/insumos\?i=[^&]+&compra=1$/);
   const dlg = page.getByRole('dialog');
+  await expect(dlg).toContainText('Caja de regalo');
+  await expect(dlg.locator('input[name=n]')).toBeFocused();
   await c.fill(dlg.locator('input[name=n]'), '20');
   await c.fill(dlg.locator('input[name=tot]'), '200');
   await dlg.getByRole('button', { name: 'Registrar' }).click();
@@ -149,6 +158,7 @@ test('usar o ajustar un insumo (use 5)', async ({ page }) => {
   await page.getByTestId('supply-card').filter({ hasText: 'Imán de base' }).click();
   await drawer(page).getByRole('button', { name: 'Usar o ajustar' }).click();
   const dlg = page.getByRole('dialog');
+  await expect(dlg.locator('input[name=n]')).toBeFocused(); // T1: the dialog focuses the marked field
   await c.fill(dlg.locator('input[name=n]'), '5');
   await dlg.getByRole('button', { name: 'Guardar' }).click();
   await expect(status(page)).toContainText('Movimiento');

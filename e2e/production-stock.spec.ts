@@ -78,7 +78,8 @@ test('Ajustar with a real count, and Llevar existencias de otra pieza', async ({
   const drawer = page.getByRole('complementary', { name: 'Detalle' });
   await drawer.getByRole('button', { name: 'Ajustar' }).click();
   const dlg = page.getByRole('dialog');
-  await dlg.locator('select[name=tipo]').selectOption('count');
+  await expect(dlg.locator('input[name=n]')).toBeFocused();
+  await dlg.getByRole('radiogroup', { name: 'Motivo' }).getByRole('radio', { name: 'Conteo: total real' }).check();
   await dlg.locator('input[name=n]').fill('0');
   await expect(dlg.locator('#aj-prev')).toHaveText('El conteo no puede ser menor a 1 (apartadas para pedidos).');
   await dlg.locator('input[name=n]').fill('5');

@@ -15,6 +15,8 @@ type Reason = 'gift' | 'damaged' | 'extra' | 'count';
 const NOTE: Record<Reason, string> = { gift: L.noteGift, damaged: L.noteDamaged, extra: L.noteExtra, count: L.noteCount };
 const TOUCHES = ['stock', 'products', 'collections', 'home', 'reports'] as const;
 
+const REASONS: [Reason, 'reasonGift' | 'reasonDamaged' | 'reasonExtra' | 'reasonCount'][] = [['gift', 'reasonGift'], ['damaged', 'reasonDamaged'], ['extra', 'reasonExtra'], ['count', 'reasonCount']];
+
 export function AdjustDialog({ detail: s, onClose }: { detail: StockDetail; onClose: () => void }) {
   const [reason, setReason] = useState<Reason>('gift');
   const [qty, setQty] = useState('1');
@@ -34,12 +36,14 @@ export function AdjustDialog({ detail: s, onClose }: { detail: StockDetail; onCl
     <Dialog open title={t('screens.stock.adjustTitle', { name: s.name })} submitLabel={L.registerAdjust} onClose={onClose} busy={save.isPending}
       onSubmit={() => { if (problem) { toast(problem); return; } save.mutate(undefined); }}>
       <p>{tb('screens.stock.counts', { total: s.physical, free: s.free, reserved: s.reserved })}</p>
+      {/* The four reasons at sight, like "Motivo" of Registrar impresión (ronda-2 §12, D8): one tap, arrows move. */}
+      <div className="fld" role="radiogroup" aria-labelledby="aj-reason">
+        <span id="aj-reason">{L.reason}</span>
+        <div className="seg wide seg4">
+          {REASONS.map(([value, label]) => <label key={value} className="rad"><input type="radio" name="tipo" value={value} checked={reason === value} onChange={() => setReason(value)} /><span>{L[label]}</span></label>)}
+        </div>
+      </div>
       <div className="grid2">
-        <Field label={L.reason}>
-          <select name="tipo" value={reason} onChange={(e) => setReason(e.target.value as Reason)}>
-            <option value="gift">{L.reasonGift}</option><option value="damaged">{L.reasonDamaged}</option><option value="extra">{L.reasonExtra}</option><option value="count">{L.reasonCount}</option>
-          </select>
-        </Field>
         <Field label={reason === 'count' ? L.countLabel : L.qtyLabel}><input name="n" inputMode="numeric" value={qty} onChange={(e) => setQty(e.target.value)} /></Field>
       </div>
       <Field label={L.note}><input name="nota" value={note} onChange={(e) => setNote(e.target.value)} placeholder={L.notePlaceholder} /></Field>

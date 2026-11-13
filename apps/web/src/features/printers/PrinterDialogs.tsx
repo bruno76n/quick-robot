@@ -73,7 +73,7 @@ export function DoneDialog({ printer, task, onClose }: { printer: PrinterView; t
       <p>{t('screens.printers.doneIntro', { hours: number1(printer.hours) })}</p>
       <div className="grid2">
         <Field label={L.date}><input type="date" name="fecha" value={on} onChange={(e) => setOn(e.target.value)} /></Field>
-        <Field label={L.partsCost} hint={L.partsCostHint}><UnitInput unit="$" name="costo" inputMode="decimal" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="0" /></Field>
+        <Field label={L.partsCost} hint={L.partsCostHint}><UnitInput unit="$" name="costo" inputMode="decimal" value={cost} onChange={(e) => setCost(e.target.value)} placeholder="0" data-autofocus="" /></Field>
       </div>
     </Dialog>
   );

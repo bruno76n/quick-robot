@@ -44,7 +44,8 @@ export function PurchasesPage() {
     try { await navigator.clipboard.writeText(text); toast(L.copied); } catch { setShown(text); }
   };
   const edit = (id: string) => setDlg({ supplier: suppliers.find((s) => s.id === id) ?? null });
-  const goBuy = (x: PurchaseLine) => go(x.kind === 'filament' ? `/filamentos?f=${x.id}` : `/insumos?i=${x.id}`);
+  // A supply line opens its purchase directly, with its drawer behind (ronda-2 §12, D9); a filament opens its drawer.
+  const goBuy = (x: PurchaseLine) => go(x.kind === 'filament' ? `/filamentos?f=${x.id}` : `/insumos?i=${x.id}&compra=1`);
   const supplierSub = (g: PurchaseGroup) => {
     if (!g.supplier) return L.noSupplierHint;
     const full = suppliers.find((s) => s.id === g.supplier!.id);

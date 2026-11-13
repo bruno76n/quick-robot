@@ -15,6 +15,18 @@ export interface DialogProps {
   children: ReactNode;
 }
 
+const SKIP = ['hidden', 'radio', 'checkbox', 'date', 'file', 'color'];
+const visible = (el: HTMLElement) => (typeof el.checkVisibility === 'function' ? el.checkVisibility() : !el.closest('[hidden]'));
+
+/** Initial focus (ronda-2 §12, T1): the field marked `data-autofocus` (or `autofocus`); else the first visible field
+ *  that is not a radio, checkbox, date, file or color (those already carry a value the person rarely changes first). */
+export function initialFocus(d: HTMLElement): HTMLElement | undefined {
+  const marked = [...d.querySelectorAll<HTMLElement>('[data-autofocus], [autofocus]')].find(visible);
+  if (marked) return marked;
+  return [...d.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>('input, select, textarea')]
+    .find((el) => !el.disabled && !(el instanceof HTMLInputElement && SKIP.includes(el.type)) && !el.hidden && visible(el));
+}
+
 export function Dialog({ open, title, onClose, onSubmit, submitLabel, cancelLabel, busy, wide, children }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -22,8 +34,7 @@ export function Dialog({ open, title, onClose, onSubmit, submitLabel, cancelLabe
     if (!d) return;
     if (open && !d.open) {
       if (typeof d.showModal === 'function') d.showModal(); else d.setAttribute('open', '');
-      const first = d.querySelector<HTMLElement>('input:not([type=hidden]):not([hidden]),select,textarea');
-      first?.focus();
+      initialFocus(d)?.focus();
     }
     if (!open && d.open) { if (typeof d.close === 'function') d.close(); else d.removeAttribute('open'); }
   }, [open]);

@@ -22,7 +22,8 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 | **Buscar** (⌘/Ctrl + K) | Paleta de comandos: busca piezas, clientes, pedidos, ventas, filamentos y acciones; Enter abre el resultado |
 | **Atajos** (`?`) | Muestra la lista. `g` + letra navega (ir a pantalla); `⌘/Ctrl+Z` deshace; `⇧⌘Z` rehace |
 | **Cajón lateral** | Detalle de un elemento de una lista ancha (filamento, insumo, pieza de existencias) sin salir de la lista; Esc o clic fuera lo cierra |
-| **Diálogos** | Formularios cortos de alta/edición y confirmaciones; se cierran con Esc |
+| **Diálogos** | Formularios cortos de alta/edición y confirmaciones; se cierran con Esc. **Foco al abrir** (ronda 2 · T1): el campo marcado como el útil (`data-autofocus`); si no hay, el primer campo visible que no sea radio, casilla ni fecha. Marcados: “Cantidad impresa” cuando la pieza viene elegida (Registrar impresión), “Costo” del rollo cuando el filamento ya viene elegido, “Cantidad” en Usar o ajustar (insumo) y “Costo de piezas” en Mantenimiento hecho |
+| **Selector con búsqueda** (`components/Picker.tsx`, ronda 2 · D1) | Lo usan las filas de filamentos e insumos de la calculadora y las piezas de una colección. Un botón con el valor elegido abre una lista (`role=listbox`) con un campo “Escribir para buscar…” arriba. Teclado: Enter, Espacio o ↓ abren (escribir una letra sobre el botón abre con esa letra buscada); ↑ ↓ Inicio Fin se mueven; Enter o clic eligen; Esc cierra y devuelve el foco al botón; Tab cierra sin elegir. Al elegir, el foco pasa al campo siguiente de la fila (gramos o cantidad). Una fila nueva creada con “Agregar …” nace con la lista abierta y el foco dentro |
 | **Aviso emergente** | Confirma lo hecho; si fue una eliminación, trae "Deshacer" (devolver una venta y cancelar un pedido no se deshacen: mueven dinero y existencias, `D32`) |
 
 *Producto:* "Deshacer/Rehacer" por historial de estados no se porta tal cual. En el producto, toda eliminación es suave (`deleted_at`) y el aviso llama a `restore<Entidad>` (`12`). El rehacer general queda fuera de la primera versión. Las eliminaciones y cancelaciones piden **confirmación en dos toques** (el botón cambia a "Toca de nuevo para eliminar", `13 §7`), no un cuadro de diálogo.
@@ -76,8 +77,9 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 | Botón | Caso de uso | Lleva a |
 |---|---|---|
 | Modo (valor / fórmula) | Cambia cómo se fija el precio | — |
-| Agregar filamento | — (si no existe el rollo → "Agregar rollo") | Diálogo de rollo |
-| Agregar insumo | — | — |
+| Agregar otro filamento | Crea la fila con su lista de filamentos **ya abierta y el foco dentro** (selector con búsqueda, §1); arriba van los filamentos que ya usa la pieza (o su original, si es variante), después “Los demás”. Al elegir, el foco pasa a los gramos | — |
+| Agregar rollo de otro filamento | Si no existe el filamento → "Agregar rollo"; el nuevo queda elegido en la fila vacía (o en una fila nueva) | Diálogo de rollo |
+| Agregar insumo | Crea la fila con la lista de insumos abierta y el foco dentro; al elegir, el foco pasa a la cantidad | — |
 | Copiar ficha | Copia la ficha técnica como texto | — |
 | Quitar foto | Quita la imagen de la ficha | — |
 | Cotizar | Diálogo de cotización rápida (cantidad → total y tiempo) | — |
@@ -87,12 +89,14 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 | Eliminar | `deleteProduct` (soft) + Deshacer | Productos |
 | Cancelar | Descarta cambios | Productos |
 
+*Foco al abrir:* una pieza nueva abre con el foco en su nombre; una variante nueva, en “Nombre de la variante” (ronda 2 · D2).
+
 *Variante:* al editar una variante se ve “Variante de {pieza}” y su campo **Nombre de la variante** en lugar del nombre (el nombre que se muestra es `<original> · <etiqueta>`).
 
 *Cálculo en vivo:* el navegador usa `core` para la vista previa. Al guardar, el servidor recalcula; nunca confía en el costo enviado.
 
 ### 3.2 Colección
-Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), etiquetas, nota. Muestra costo, precio, ganancia, y cuántos **sets se pueden armar hoy** con los libres. Acciones: Agregar parte, Guardar (`saveCollection`), Eliminar, Vender, Cancelar.
+Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), etiquetas, nota. Muestra costo, precio, ganancia, y cuántos **sets se pueden armar hoy** con los libres. Una colección nueva abre con el foco en su nombre. Acciones: Agregar pieza (crea la fila con la lista de piezas abierta y el foco dentro, con búsqueda; al elegir, el foco pasa a la cantidad), Guardar (`saveCollection`), Eliminar, Vender, Cancelar.
 
 ---
 
@@ -104,6 +108,7 @@ Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), 
 |---|---|---|
 | Registrar venta | — | Armar venta |
 | Abrir venta | — | Diálogo de la venta |
+| Chip “Debe $X” (botón) | Abre la venta **con el diálogo “Registrar abono” ya abierto** (monto = saldo; `/ventas?v=<id>&abono=1`). Cancelar vuelve al diálogo de la venta; la confirmación con el monto se queda (ronda 2 · D5). “Registrar abono” de la Atención de Inicio usa la misma dirección. Una venta sin saldo o devuelta abre la venta normal | Diálogo del abono |
 
 ### 4.1 Diálogo de la venta
 Desglose por pieza (con dónde está cada una), cobro (pagos), nota de venta.
@@ -113,7 +118,7 @@ Desglose por pieza (con dónde está cada una), cobro (pagos), nota de venta.
 | Quitar pago | `deleteSalePayment` |
 | Nota de venta | Abre el documento (ver §14) |
 | Devolver venta | `returnSale` (con o sin regresar a existencias; reembolso y nota) |
-| Editar | `updateSale` (fecha, canal, cliente, nota) |
+| Editar | `updateSale` (fecha, canal, cliente, nota). Sin cliente elegido, el enlace “Nuevo cliente” bajo el selector crea uno y lo deja elegido (como en Armar venta) |
 | Eliminar | `deleteSale` + Deshacer (devuelve las piezas a existencias si salieron) |
 | Cliente / Pedido | Abre la ficha del cliente / el pedido |
 
@@ -125,6 +130,7 @@ Desglose por pieza (con dónde está cada una), cobro (pagos), nota de venta.
 | Agregar pieza / set | — | — |
 | Precio de lista / separar / descuento / piso | Ajustan el precio unitario | — |
 | Convertir en pedido | Cambia el modo; lo que hay en existencias se aparta y el resto se imprime | — |
+| Nuevo cliente (enlace bajo el selector de cliente, sin cliente elegido) | Abre el diálogo de cliente nuevo; al guardar queda elegido. La opción “＋ Cliente nuevo…” al final del selector se conserva (ronda 2 · D6) | — |
 | Guardar venta | `createSale` (descuenta existencias de las piezas con `tracks_stock`) | Ventas |
 | Guardar pedido | `createOrder` (+ `acceptOrder` si ya está aceptado; + pago de anticipo) | Pedido |
 | Cancelar | — | Ventas / Pedidos |
@@ -155,7 +161,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 | Siguiente paso (texto cambia) | `acceptOrder` / `startProduction` / `markOrderReady` / `deliverOrder` | Ver `04 §7`. Poner en producción abre diálogo de impresoras |
 | Poner en producción | `startProduction` | Diálogo: asignar impresora por artículo, ver plan y fecha de término, opción de descontar filamento, aviso de faltante |
 | Reasignar impresoras | `reassignPrinters` | Quita de las colas y vuelve a asignar |
-| Registrar pago | `recordOrderPayment` | Diálogo con monto máximo = saldo |
+| Registrar pago | `recordOrderPayment` | Diálogo con monto máximo = saldo. Está en la pestaña Cobro y, mientras el pedido está activo y tiene saldo, también **bajo la cifra “Saldo”** del encabezado en las demás pestañas (no se repite en Cobro; ronda 2 · D7) |
 | Quitar pago | `deleteOrderPayment` | |
 | Entregar y cobrar | `deliverOrder` | Diálogo con saldo a cobrar; crea la venta |
 | Editar | `updateOrder` | Abre el armador con el pedido |
@@ -173,7 +179,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 | Botón | Caso de uso |
 |---|---|
-| Agregar rollo | `addSpool` (crea el filamento si no existe; movimiento `purchase`) |
+| Agregar rollo | `addSpool` (crea el filamento si no existe; movimiento `purchase`). Si el material y color ya existen (o el diálogo se abre desde el filamento), la **marca** propone la de su último rollo (el de fecha de compra más reciente) hasta que la persona elige otra; se ve en el resumen y sigue editable (ronda 2 · D3) |
 | Editar rollo / Eliminar rollo | `updateSpool` / `deleteSpool` |
 | Movimiento (en el cajón) | `recordSpoolMovement` (consumo, fallo, merma, ajuste) con nota |
 | Ver filamento | Abre el cajón |
@@ -227,11 +233,12 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 | Botón | Caso de uso |
 |---|---|
 | Llevar existencias (en una pieza) | `enableStockTracking` (con conteo inicial) |
-| Ajustar | `adjustStock` (conteo real o corrección con nota) |
+| Ajustar | `adjustStock` (conteo real o corrección con nota). Los cuatro motivos (Regalo o muestra · Dañada o defectuosa · Piezas sin registrar · Conteo: total real) se ven como botones segmentados de dos en dos, como “Motivo” de Registrar impresión (un toque; las flechas los recorren); el foco empieza en la cantidad (ronda 2 · D8) |
 | Registrar impresión | Abre Producción con el diálogo (suma a existencias) |
 | Fichas / Lista | Preferencia de vista de Existencias (`view.stock`) | — |
 | Seleccionar pieza (o un miembro de una familia) | Abre el cajón | — |
 | Flecha de una familia | Despliega o cierra sus variantes | — |
+| Vender (en la fila de una pieza simple o de una variante con libres; en Fichas, en la ficha de una pieza simple con libres) | Lleva a Armar venta con esa pieza, como “Vender” del cajón (ronda 2 · D4). Sin libres no aparece: el cajón ofrece “Hacer pedido”. La fila de una familia solo despliega | Armar venta |
 
 ---
 
@@ -241,6 +248,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 | Botón | Caso de uso |
 |---|---|
 | Copiar lista | Texto para mandar por mensaje (por proveedor) |
+| Registrar compra (en una línea) | De un **insumo**: abre Insumos con su cajón y el diálogo de la compra **ya abierto** (`/insumos?i=<id>&compra=1`); al guardar o cancelar queda el cajón (ronda 2 · D9). De un **filamento**: abre su cajón en Filamentos |
 | Nuevo / Editar proveedor | `createSupplier` / `updateSupplier` |
 | Eliminar proveedor | `deleteSupplier` |
 

@@ -25,6 +25,8 @@ import { NotYet } from './NotYet';
 import { Root } from './Root';
 
 const UUID = /^[0-9a-f-]{36}$/i;
+/** `?abono=1`, `?compra=1`: open a dialog of the screen on arrival (ronda-2 §12, D5 and D9). */
+const flag = (key: string) => (s: Record<string, unknown>) => (s[key] === 1 || s[key] === '1' ? { [key]: '1' } : {});
 const idSearch = (key: string) => (s: Record<string, unknown>) => (typeof s[key] === 'string' && UUID.test(s[key] as string) ? { [key]: s[key] as string } : {});
 
 const rootRoute = createRootRoute({ component: Root });
@@ -33,11 +35,11 @@ const route = <P extends string>(path: P, component: () => React.ReactNode, vali
 
 const BUILT: Record<string, AnyRoute> = {
   '/filamentos': route('/filamentos', FilamentList, idSearch('f')),
-  '/insumos': route('/insumos', SuppliesPage, idSearch('i')),
+  '/insumos': route('/insumos', SuppliesPage, (s) => ({ ...idSearch('i')(s), ...flag('compra')(s) })),
   '/impresoras': route('/impresoras', PrintersPage),
   '/ajustes': route('/ajustes', SettingsPage),
   '/inicio': route('/inicio', HomePage),
-  '/ventas': route('/ventas', SalesPage, (s) => ({ ...idSearch('v')(s), ...(typeof s.q === 'string' ? { q: s.q.slice(0, 120) } : {}) })),
+  '/ventas': route('/ventas', SalesPage, (s) => ({ ...idSearch('v')(s), ...(typeof s.q === 'string' ? { q: s.q.slice(0, 120) } : {}), ...flag('abono')(s) })),
   '/pedidos': route('/pedidos', OrdersPage, (s) => ({ ...(['tablero', 'lista', 'calendario'].includes(String(s.vista)) ? { vista: String(s.vista) } : {}), ...(typeof s.mes === 'string' && /^\d{4}-\d{2}$/.test(s.mes) ? { mes: s.mes } : {}) })),
   '/produccion': route('/produccion', ProductionPage, (s) => (['stock', 'order', 'test'].includes(String(s.motivo)) ? { motivo: String(s.motivo) } : {})),
   '/existencias': route('/existencias', StockPage, (s) => ({ ...idSearch('p')(s), ...(['fichas', 'lista'].includes(String(s.vista)) ? { vista: String(s.vista) } : {}) })),

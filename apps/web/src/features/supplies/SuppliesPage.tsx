@@ -27,9 +27,12 @@ type Dlg = { kind: 'new' } | { kind: 'edit' | 'purchase' | 'use'; supply: Supply
 
 export function SuppliesPage() {
   const { data } = useSupplies();
-  const search = useSearch({ strict: false }) as { i?: string };
+  const search = useSearch({ strict: false }) as { i?: string; compra?: string };
   const [dlg, setDlg] = useState<Dlg>(null);
   const select = (id: string | null) => go(id ? `/insumos?i=${id}` : '/insumos', true);
+  // `?i=<id>&compra=1` ("Registrar compra" of a line in Compras): the purchase opens over its drawer (ronda-2 §12, D9).
+  const buying = search.compra === '1' && search.i ? search.i : null;
+  const { data: toBuy } = useQuery({ queryKey: [...keys.supplies, 'detail', buying], queryFn: async () => (await api.supplies.get(buying!)).data, enabled: Boolean(buying) });
   const items = data?.items ?? [];
   const low = items.filter((i) => i.stock <= i.minimum).length;
   const value = items.reduce((a, i) => a + Math.max(0, i.stock) * i.costCents, 0);
@@ -54,6 +57,7 @@ export function SuppliesPage() {
       <SupplyDrawer id={search.i ?? null} onClose={() => select(null)} open={(kind, supply) => setDlg({ kind, supply })} />
       {dlg?.kind === 'new' || dlg?.kind === 'edit' ? <SupplyDialog supply={dlg.kind === 'edit' ? dlg.supply : null} onClose={() => setDlg(null)} onSaved={(id) => { setDlg(null); select(id); }} onDeleted={() => { setDlg(null); select(null); }} /> : null}
       {dlg?.kind === 'purchase' ? <PurchaseDialog supply={dlg.supply} onClose={() => setDlg(null)} /> : null}
+      {buying && toBuy && !dlg ? <PurchaseDialog key={buying} supply={toBuy} onClose={() => select(buying)} /> : null}
       {dlg?.kind === 'use' ? <UseDialog supply={dlg.supply} onClose={() => setDlg(null)} /> : null}
     </>
   );

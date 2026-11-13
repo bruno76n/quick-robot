@@ -51,6 +51,21 @@ for (const width of [1440, 390]) {
       await expect(page.getByText('No hay piezas con ese filtro o búsqueda.')).toBeVisible();
     });
 
+    test('Vender on the row only when there are free units, also on a member and on its card (D4)', async ({ page }) => {
+      await page.goto(`${server.url}/existencias`);
+      await expect(row(page, 'Llavero con nombre').getByRole('button', { name: 'Vender Llavero con nombre' })).toBeVisible();
+      await expect(row(page, 'Spider-Man · trepando').getByRole('button', { name: /^Vender/ })).toHaveCount(0);
+      await expect(row(page, FAMILY).getByRole('button', { name: /^Vender/ })).toHaveCount(0); // the family row only unfolds
+      await row(page, FAMILY).getByText(FAMILY, { exact: true }).click();
+      await row(page, FAMILY).getByTestId('stock-member').first().getByRole('button', { name: /^Vender/ }).click();
+      await expect(page).toHaveURL(/\/armar\?modo=venta&pieza=/);
+      await expect(page.getByTestId('builder-line')).toHaveCount(1);
+      await page.goto(`${server.url}/existencias?vista=fichas`);
+      const card = page.getByTestId('stock-card').filter({ hasText: 'Llavero con nombre' });
+      await card.getByRole('button', { name: 'Vender Llavero con nombre' }).click();
+      await expect(page).toHaveURL(/\/armar\?modo=venta&pieza=/);
+    });
+
     test('a family shows the sum of its members and the drawer opens from a member, never from the family row', async ({ page }) => {
       await page.goto(`${server.url}/existencias`);
       const fam = row(page, FAMILY);

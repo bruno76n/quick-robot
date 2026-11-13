@@ -30,11 +30,13 @@
 .sk-open { width: 32px; height: 32px; border: 1px solid var(--line); background: var(--bg); border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; color: var(--ink-2); }
 .sk-open:hover, .sk-chev:hover { color: var(--ink); border-color: var(--line-2); }
 .sk-dot { flex: none; width: 14px; height: 14px; border-radius: 50%; background: var(--c, var(--no-color)); box-shadow: inset 0 0 0 1px rgba(18, 18, 20, .18); }
+.sk-act { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+.sk-foot-r { display: inline-flex; align-items: center; gap: 10px; }
 .sk-orig { background: var(--panel-2); color: var(--ink-2); border-radius: 99px; padding: 1px 9px; font-size: 12px; font-weight: 500; white-space: nowrap; }
 
 /* Lista. */
 .sk-table { min-width: 0; }
-.sk-row, .sk-head { display: grid; grid-template-columns: minmax(180px, 3fr) 130px minmax(56px, .8fr) minmax(76px, .9fr) minmax(44px, .7fr) minmax(96px, 1fr) 36px; column-gap: 12px; align-items: center; }
+.sk-row, .sk-head { display: grid; grid-template-columns: minmax(180px, 3fr) 130px minmax(56px, .8fr) minmax(76px, .9fr) minmax(44px, .7fr) minmax(96px, 1fr) 118px; column-gap: 12px; align-items: center; }
 .sk-head { padding: 8px; font-size: 12.5px; color: var(--ink-2); font-weight: 600; border-bottom: 1px solid var(--line); }
 .sk-head .r, .sk-row .r { text-align: right; justify-self: end; }
 .sk-sort { border: 0; background: none; padding: 0; font: inherit; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
@@ -57,11 +59,16 @@
 .sk-members .sk-name b { display: inline; }
 .sk-lbl { display: none; }
 
+/* Tablet: "Vender" on the row (ronda 2 · D4) takes room from the name; the state and action columns get tighter. */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .sk-row, .sk-head { grid-template-columns: minmax(150px, 3fr) 108px minmax(48px, .7fr) minmax(70px, .8fr) minmax(40px, .6fr) minmax(64px, .8fr) 104px; column-gap: 10px; }
+  .sk-sell { padding-left: 10px; padding-right: 10px; }
+}
 @media (max-width: 760px) {
   .sk-head { display: none; }
   .sk-row { grid-template-columns: repeat(4, minmax(0, 1fr)) 32px; row-gap: 8px; }
-  .sk-row > .sk-cell-piece { grid-column: 1 / 5; }
-  .sk-row > .sk-act { grid-column: 5; grid-row: 1; justify-self: end; }
+  .sk-row > .sk-cell-piece { grid-column: 1 / 4; }
+  .sk-row > .sk-act { grid-column: 4 / 6; grid-row: 1; justify-self: end; }
   .sk-row > .sk-state { grid-column: 1 / -1; }
   .sk-row > .r { justify-self: start; text-align: left; }
   .sk-row > .r.price { grid-column: 4 / 6; }
