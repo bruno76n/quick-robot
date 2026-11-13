@@ -23,24 +23,24 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 /* Grey placeholders when Ajustes has no name or trade (ronda-2 §2). */
 .ph-txt, .brand small.ph-txt { color: var(--ink-3); }
 
-/* Picker (components/Picker.tsx, ronda 2 · D1): looks like the field it replaces; its list floats below. */
-.pick { position: relative; min-width: 0; }
-.pick-b { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 38px; padding: 8px 30px 8px 10px; font: inherit; color: var(--ink); text-align: left; background: var(--bg); border: 1px solid var(--line-2); border-radius: 10px; cursor: pointer; position: relative; }
-.pick-b::after { content: ''; position: absolute; right: 12px; top: 50%; width: 7px; height: 7px; border: solid var(--ink-2); border-width: 0 1.5px 1.5px 0; transform: translateY(-70%) rotate(45deg); }
-.pick-b.empty .pick-v { color: var(--ink-3); }
-.pick-b[aria-expanded='true'] { border-color: var(--accent); }
-.pick-v { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pick-pop { position: absolute; z-index: 40; top: calc(100% + 4px); left: 0; min-width: 100%; width: max-content; max-width: min(380px, calc(100vw - 32px)); background: var(--bg); border: 1px solid var(--line-2); border-radius: 10px; box-shadow: var(--sh-up); overflow: hidden; }
-.pick-q { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; min-height: 40px; outline: none; }
-.pick-q:focus-visible { outline: none; box-shadow: inset 0 -2px 0 var(--accent); }
-.pick-box { max-height: min(46vh, 300px); overflow: auto; padding: 4px; }
-.pick-g { padding: 8px 10px 4px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
-.pick-o { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
-.pick-o.on { background: var(--panel-2); box-shadow: inset 2px 0 0 var(--accent); }
-.pick-o.cur .pick-l { font-weight: 600; }
-.pick-l { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pick-o small { color: var(--ink-3); font-size: 12px; white-space: nowrap; }
-.pick-e { padding: 12px 14px; margin: 0; color: var(--ink-3); font-size: 14px; }
+/* Picker (components/Picker.tsx, ronda 2 · D1): looks like the field it replaces; its list floats below. Prefix pkr-: .pick is the mockup piece list. */
+.pkr { position: relative; min-width: 0; }
+.pkr-b { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 38px; padding: 8px 30px 8px 10px; font: inherit; color: var(--ink); text-align: left; background: var(--bg); border: 1px solid var(--line-2); border-radius: 10px; cursor: pointer; position: relative; }
+.pkr-b::after { content: ''; position: absolute; right: 12px; top: 50%; width: 7px; height: 7px; border: solid var(--ink-2); border-width: 0 1.5px 1.5px 0; transform: translateY(-70%) rotate(45deg); }
+.pkr-b.empty .pkr-v { color: var(--ink-3); }
+.pkr-b[aria-expanded='true'] { border-color: var(--accent); }
+.pkr-v { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkr-pop { position: absolute; z-index: 40; top: calc(100% + 4px); left: 0; min-width: 100%; width: max-content; max-width: min(380px, calc(100vw - 32px)); background: var(--bg); border: 1px solid var(--line-2); border-radius: 10px; box-shadow: var(--sh-up); overflow: hidden; }
+.pkr-q { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; min-height: 40px; outline: none; }
+.pkr-q:focus-visible { outline: none; box-shadow: inset 0 -2px 0 var(--accent); }
+.pkr-box { max-height: min(46vh, 300px); overflow: auto; padding: 4px; }
+.pkr-g { padding: 8px 10px 4px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+.pkr-o { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
+.pkr-o.on { background: var(--panel-2); box-shadow: inset 2px 0 0 var(--accent); }
+.pkr-o.cur .pkr-l { font-weight: 600; }
+.pkr-l { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pkr-o small { color: var(--ink-3); font-size: 12px; white-space: nowrap; }
+.pkr-e { padding: 12px 14px; margin: 0; color: var(--ink-3); font-size: 14px; }
 
 /* "Debe $X" of a sale row is a button that opens the payment (ronda 2 · D5): the same chip, clickable. */
 .chip-btn { font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; border-top: 0; border-right: 0; border-bottom: 0; }

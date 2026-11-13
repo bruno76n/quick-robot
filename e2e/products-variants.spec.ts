@@ -112,14 +112,14 @@ test('a new variant from Productos: the calculator copy, its panel, the sale pic
   const label = page.getByLabel('Nombre de la variante');
   await expect(label).toBeFocused();
   await expect(label).toHaveValue('');
-  await expect(page.locator('.frow .pick-b').first()).not.toHaveClass(/empty/);
-  await expect(page.locator('.frow .pick-b').first()).toHaveAccessibleName(/^Filamento: \S/);
+  await expect(page.locator('.frow .pkr-b').first()).not.toHaveClass(/empty/);
+  await expect(page.locator('.frow .pkr-b').first()).toHaveAccessibleName(/^Filamento: \S/);
   // Saving without a label keeps the form and the focus on the field.
   await page.getByRole('button', { name: 'Guardar en el catálogo' }).click();
   await expect(page).toHaveURL(/\/productos\/pieza/);
   await expect(label).toBeFocused();
   await label.fill('Negro mate');
-  await pick(page, page.locator('.frow .pick-b').first(), 'PLA Negro');
+  await pick(page, page.locator('.frow .pkr-b').first(), 'PLA Negro');
   await page.getByRole('button', { name: 'Guardar en el catálogo' }).click();
   await expect(page.getByRole('status')).toHaveText('Variante guardada en el catálogo');
   await expect(page).toHaveURL(/\/productos\?abierta=/);

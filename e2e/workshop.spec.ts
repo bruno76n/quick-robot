@@ -17,7 +17,7 @@ test('catalog shows the mockup costs; the calculator saves the cost it shows', a
   await expect(page.getByTestId('product-tile').filter({ hasText: 'Doctor Doom' })).toContainText('Costo $41.56');
   await page.getByRole('button', { name: 'Nueva pieza' }).first().click();
   await page.getByPlaceholder('Nombre de la pieza, por ejemplo: Llavero con nombre').fill('Pieza de prueba');
-  await pick(page, page.locator('.frow .pick-b').first(), 'PLA Negro');
+  await pick(page, page.locator('.frow .pkr-b').first(), 'PLA Negro');
   await page.locator('.frow .unit input').first().fill('50');
   await page.getByLabel('Horas').fill('2');
   const shown = await page.locator('.res-top .big').first().textContent();
@@ -77,7 +77,7 @@ test('collection: new set with its price; spool: movement, edit and delete with 
   await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: 'Nueva colección' }).click();
   await page.getByPlaceholder('Nombre de la colección, por ejemplo: Colección Doomsday blanca').fill('Dúo arácnido');
-  await pick(page, page.locator('.cparte .pick-b').first(), 'Spider-Man · salto');
+  await pick(page, page.locator('.cparte .pkr-b').first(), 'Spider-Man · salto');
   await page.getByRole('button', { name: 'Agregar pieza' }).click();
   await pickOpen(page, 'Spider-Man · trepando');
   await expect(page.getByText('Las piezas sueltas suman $500.')).toBeVisible();

@@ -59,11 +59,16 @@
 .sk-members .sk-name b { display: inline; }
 .sk-lbl { display: none; }
 
+/* Tablet: "Vender" on the row (ronda 2 · D4) takes room from the name; the state and action columns get tighter. */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .sk-row, .sk-head { grid-template-columns: minmax(150px, 3fr) 108px minmax(48px, .7fr) minmax(70px, .8fr) minmax(40px, .6fr) minmax(64px, .8fr) 104px; column-gap: 10px; }
+  .sk-sell { padding-left: 10px; padding-right: 10px; }
+}
 @media (max-width: 760px) {
   .sk-head { display: none; }
-  .sk-row { grid-template-columns: repeat(4, minmax(0, 1fr)) auto; row-gap: 8px; }
-  .sk-row > .sk-cell-piece { grid-column: 1 / 5; }
-  .sk-row > .sk-act { grid-column: 5; grid-row: 1; justify-self: end; }
+  .sk-row { grid-template-columns: repeat(4, minmax(0, 1fr)) 32px; row-gap: 8px; }
+  .sk-row > .sk-cell-piece { grid-column: 1 / 4; }
+  .sk-row > .sk-act { grid-column: 4 / 6; grid-row: 1; justify-self: end; }
   .sk-row > .sk-state { grid-column: 1 / -1; }
   .sk-row > .r { justify-self: start; text-align: left; }
   .sk-row > .r.price { grid-column: 4 / 6; }

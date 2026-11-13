@@ -21,7 +21,7 @@ test('nueva pieza completa: two filaments, a supply, time and price', async ({ p
   await expect(page.getByPlaceholder('Nombre de la pieza, por ejemplo: Llavero con nombre')).toBeFocused();
   await c.fill(page.getByPlaceholder('Nombre de la pieza, por ejemplo: Llavero con nombre'), 'Maceta clics');
   await c.fill(page.getByLabel('Horas'), '3');
-  await pick(page, page.locator('.frow .pick-b').first(), 'PLA Negro');
+  await pick(page, page.locator('.frow .pkr-b').first(), 'PLA Negro');
   await expect(page.locator('.frow .unit input').first()).toBeFocused();
   await c.fill(page.locator('.frow .unit input').first(), '80');
   await page.getByRole('button', { name: 'Agregar otro filamento' }).click();
@@ -40,7 +40,7 @@ test('agregar filamento a una pieza (P1: the new row is born with its list open)
   const c = await countedPage(page);
   await c.start(`${server.url}/productos`);
   await tileName(page, 'Hulk · puño').click();
-  await expect(page.locator('.frow .pick-b').first()).toBeVisible();
+  await expect(page.locator('.frow .pkr-b').first()).toBeVisible();
   const rows = await page.locator('.frow').count();
   await page.getByRole('button', { name: 'Agregar otro filamento' }).click();
   // The filaments already in the piece come first.
@@ -95,7 +95,7 @@ test('nueva colección with two pieces (P1 on "Agregar pieza")', async ({ page }
   await page.getByRole('button', { name: 'Nueva colección' }).click();
   await expect(page.getByPlaceholder('Nombre de la colección, por ejemplo: Colección Doomsday blanca')).toBeFocused();
   await c.fill(page.getByPlaceholder('Nombre de la colección, por ejemplo: Colección Doomsday blanca'), 'Dúo clics');
-  await pick(page, page.locator('.cparte .pick-b').first(), 'Spider-Man · salto');
+  await pick(page, page.locator('.cparte .pkr-b').first(), 'Spider-Man · salto');
   await page.getByRole('button', { name: 'Agregar pieza' }).click();
   await pickOpen(page, 'Hulk · puño');
   await expect(page.locator('.cparte .unit input').nth(1)).toBeFocused();

@@ -52,7 +52,8 @@ export function Picker({ label, value, options, placeholder, onChange, autoOpen 
   const choose = (o: PickerOption | undefined) => { if (!o) return; if (o.value !== value) onChange(o.value); close('next'); };
 
   useEffect(() => {
-    if (open) { search.current?.focus(); return; }
+    // Opening: the focus goes to the search field and the whole list scrolls into view (a row low on a phone).
+    if (open) { search.current?.focus({ preventScroll: true }); search.current?.parentElement?.scrollIntoView?.({ block: 'nearest' }); return; }
     const to = after.current;
     after.current = null;
     if (to === 'next') (next?.(root.current!) ?? button.current)?.focus();
@@ -86,33 +87,33 @@ export function Picker({ label, value, options, placeholder, onChange, autoOpen 
     if (g && g.name === o.group) g.items.push({ o, i }); else groups.push({ name: o.group, items: [{ o, i }] });
   });
   const option = ({ o, i }: { o: PickerOption; i: number }) => (
-    <div key={o.value} id={`${id}-o${i}`} data-i={i} role="option" aria-selected={i === active} aria-label={o.hint ? `${o.label}, ${o.hint}` : undefined} className={`pick-o${i === active ? ' on' : ''}${o.value === value ? ' cur' : ''}`}
+    <div key={o.value} id={`${id}-o${i}`} data-i={i} role="option" aria-selected={i === active} aria-label={o.hint ? `${o.label}, ${o.hint}` : undefined} className={`pkr-o${i === active ? ' on' : ''}${o.value === value ? ' cur' : ''}`}
       onMouseMove={() => { if (i !== active) setActive(i); }} onClick={() => choose(o)}>
       {o.hex !== undefined ? <span className="sw" style={{ ['--c' as string]: o.hex || 'var(--no-color)' }} /> : null}
-      <span className="pick-l">{o.label}</span>
+      <span className="pkr-l">{o.label}</span>
       {o.hint ? <small>{o.hint}</small> : null}
     </div>
   );
 
   return (
-    <div className="pick" ref={root} onBlur={(e) => { if (open && !root.current?.contains(e.relatedTarget as Node | null)) close(null); }}>
-      <button ref={button} type="button" className={`pick-b${current ? '' : ' empty'}`} aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? `${id}-l` : undefined}
+    <div className="pkr" ref={root} onBlur={(e) => { if (open && !root.current?.contains(e.relatedTarget as Node | null)) close(null); }}>
+      <button ref={button} type="button" className={`pkr-b${current ? '' : ' empty'}`} aria-haspopup="listbox" aria-expanded={open} aria-controls={open ? `${id}-l` : undefined}
         onClick={() => (open ? close('button') : show())} onKeyDown={onButtonKey}>
         <span className="sr-only">{label}: </span>
         {current?.hex !== undefined ? <span className="sw" style={{ ['--c' as string]: current.hex || 'var(--no-color)' }} /> : null}
-        <span className="pick-v">{current ? current.label : placeholder}</span>
+        <span className="pkr-v">{current ? current.label : placeholder}</span>
       </button>
       {open ? (
-        <div className="pick-pop" onMouseDown={(e) => { if (e.target !== search.current) e.preventDefault(); }}>
-          <input ref={search} className="pick-q" type="text" role="combobox" aria-label={`${P.search} · ${label}`} placeholder={P.placeholder} autoComplete="off"
+        <div className="pkr-pop" onMouseDown={(e) => { if (e.target !== search.current) e.preventDefault(); }}>
+          <input ref={search} className="pkr-q" type="text" role="combobox" aria-label={`${P.search} · ${label}`} placeholder={P.placeholder} autoComplete="off"
             aria-expanded="true" aria-controls={`${id}-l`} aria-autocomplete="list" aria-activedescendant={shown.length ? `${id}-o${active}` : undefined}
             value={query} onChange={(e) => { setQuery(e.target.value); setActive(0); }} onKeyDown={onSearchKey} />
-          <div ref={list} id={`${id}-l`} role="listbox" aria-label={label} className="pick-box">
+          <div ref={list} id={`${id}-l`} role="listbox" aria-label={label} className="pkr-box">
             {groups.map((g, k) => (g.name
-              ? <div key={`g${k}`} role="group" aria-labelledby={`${id}-g${k}`}><div id={`${id}-g${k}`} className="pick-g" role="presentation">{g.name}</div>{g.items.map(option)}</div>
+              ? <div key={`g${k}`} role="group" aria-labelledby={`${id}-g${k}`}><div id={`${id}-g${k}`} className="pkr-g" role="presentation">{g.name}</div>{g.items.map(option)}</div>
               : g.items.map(option)))}
           </div>
-          {shown.length ? null : <p className="pick-e" role="status">{P.none}</p>}
+          {shown.length ? null : <p className="pkr-e" role="status">{P.none}</p>}
         </div>
       ) : null}
     </div>
