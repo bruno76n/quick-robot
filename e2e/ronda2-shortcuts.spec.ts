@@ -86,3 +86,31 @@ test('D9: Cancelar of a purchase opened from Compras leaves the drawer of the su
   await drawer.getByRole('button', { name: 'Registrar compra' }).click(); // the drawer's own button still works
   await expect(page.getByRole('dialog')).toContainText('Caja de regalo');
 });
+
+test('D1: the filament picker works with the keyboard alone, with a visible focus', async ({ page }) => {
+  await page.goto(`${server.url}/productos/pieza`);
+  const name = page.getByPlaceholder('Nombre de la pieza, por ejemplo: Llavero con nombre');
+  await expect(name).toBeFocused(); // D2
+  const first = page.locator('.frow .pkr-b').first();
+  await first.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  await expect(first).toBeFocused();
+  expect(await first.evaluate((el) => getComputedStyle(el).outlineStyle)).not.toBe('none');
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('listbox', { name: 'Filamento' })).toBeVisible();
+  await page.keyboard.type('negro');
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('listbox')).toHaveCount(0);
+  await expect(first).toHaveAccessibleName(/^Filamento: PLA Negro$/);
+  await expect(page.locator('.frow .unit input').first()).toBeFocused();
+  // Esc closes and returns the focus to the button.
+  await first.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(page.locator('.pkr-q')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('listbox')).toHaveCount(0);
+  await expect(first).toBeFocused();
+  await expect(page).toHaveURL(/\/productos\/pieza$/); // Esc did not leave the screen
+});
