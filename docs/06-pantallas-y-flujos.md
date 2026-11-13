@@ -177,7 +177,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 | Botón | Caso de uso |
 |---|---|
-| Agregar rollo | `addSpool` (crea el filamento si no existe; movimiento `purchase`) |
+| Agregar rollo | `addSpool` (crea el filamento si no existe; movimiento `purchase`). Si el material y color ya existen (o el diálogo se abre desde el filamento), la **marca** propone la de su último rollo (el de fecha de compra más reciente) hasta que la persona elige otra; se ve en el resumen y sigue editable (ronda 2 · D3) |
 | Editar rollo / Eliminar rollo | `updateSpool` / `deleteSpool` |
 | Movimiento (en el cajón) | `recordSpoolMovement` (consumo, fallo, merma, ajuste) con nota |
 | Ver filamento | Abre el cajón |

@@ -34,7 +34,7 @@ export const BUDGET = {
   adjustStock: { today: 5, fieldsClicked: 1 },
   enableStock: { today: 4, fieldsClicked: 1 },
   addSpoolExisting: { today: 3, fieldsClicked: 0 },
-  addSpoolHeader: { today: 8, fieldsClicked: 1 },
+  addSpoolHeader: { today: 6, fieldsClicked: 1 },
   filamentMovement: { today: 5, fieldsClicked: 1 },
   newSupply: { today: 4, fieldsClicked: 2 },
   supplyPurchase: { today: 3, fieldsClicked: 1 },

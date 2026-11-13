@@ -78,14 +78,16 @@ test('agregar rollo of a filament that exists (from its row)', async ({ page }) 
   await c.expectBudget(BUDGET.addSpoolExisting);
 });
 
-test('agregar rollo from the header (material, color and brand to choose)', async ({ page }) => {
+test('agregar rollo from the header (material and color to choose; the brand of its last spool is proposed)', async ({ page }) => {
   const c = await countedPage(page);
   await c.start(`${server.url}/filamentos`);
   await page.getByRole('button', { name: 'Agregar rollo' }).first().click();
   const dlg = page.getByRole('dialog');
   await dlg.locator('select[name=material]').selectOption('PLA');
   await dlg.locator('select[name=color]').selectOption('Negro');
-  await dlg.locator('select[name=marca]').selectOption('Polymaker');
+  // D3: PLA Negro exists; its last spool is eSUN, proposed and shown in the summary (still editable).
+  await expect(dlg.locator('select[name=marca]')).toHaveValue('eSUN');
+  await expect(dlg.locator('summary .fb-t small')).toHaveText('eSUN');
   await c.fill(dlg.locator('input[name=costo]'), '380');
   await dlg.getByRole('button', { name: 'Agregar rollo' }).click();
   await expect(status(page)).toContainText('Rollo agregado a PLA Negro.');
