@@ -466,8 +466,9 @@ export const es = {
     expenses: {
       title: 'Gastos', sub: 'Lo que no va en el costo de cada pieza.', newExpense: 'Registrar gasto', firstExpense: 'Registrar el primer gasto',
       empty: 'Anotar la renta, el internet, las herramientas o la publicidad y el sistema calcula la ganancia real y cuánto hay que vender para no perder. El filamento, la luz y la máquina no se capturan aquí: ya van en el costo de cada pieza.',
-      summary: 'En los últimos 30 días hubo {expenses} en gastos. Las ventas dejaron {profit} de ganancia, así que la ganancia real fue {real}. Los gastos fijos suman {fixed} al mes ({count} {count|se repite|se repiten}){goal}.',
-      summaryGoal: '; para no perder hay que vender {goal} cada 30 días', barLabel: 'De la ganancia de ventas: gastos y ganancia real', segExpenses: 'Gastos', segReal: 'Ganancia real',
+      figures: 'Gastos y ganancia neta de los últimos 30 días', k30: 'Gastos · últimos 30 días', kFixed: 'Fijos al mes', kFixedSub: '{count} {count|se repite|se repiten}',
+      kReal: 'Ganancia neta · 30 días', kRealSub: 'Las ventas dejaron {profit}',
+      colDate: 'Fecha', colConcept: 'Concepto', colType: 'Tipo', colAmount: 'Monto', fixedType: 'Fijo mensual', variableType: 'Variable',
       byCategory: 'Por categoría', noneInPeriod: 'Sin gastos en este periodo.',
       breakEven: 'Punto de equilibrio', breakEvenText: 'Con gastos de {expenses} y un margen de {margin} por venta, hay que vender {goal} en 30 días para que la ganancia cubra los gastos.',
       sold: 'Vendido {value}', goal: 'Meta {value}', reached: 'Superado: la ganancia ya cubre los gastos', missing: 'Faltan {value} en ventas',

@@ -271,7 +271,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 ## 13. Gastos y Reportes
 
-**Gastos:** lista con filtro de periodo, categorías, **fijos al mes** y total del periodo. Acciones: Nuevo / Editar / Eliminar gasto (`createExpense`, `updateExpense`, `deleteExpense`). Recurrente = se prorratea.
+**Gastos:** franja de cifras (gastos de los últimos 30 días, **fijos al mes**, ganancia neta de 30 días; ronda 3), tabla con filtro de periodo (Fecha · Concepto con su categoría · Tipo: Fijo mensual o Variable · Monto) y total del periodo; a su lado, **por categoría** del periodo (barras de un color) y el punto de equilibrio. Acciones: Nuevo / Editar / Eliminar gasto (`createExpense`, `updateExpense`, `deleteExpense`). Recurrente = se prorratea.
 
 **Reportes:** periodo (7 días, 30 días, 90 días, Todo); totales (Ventas, Costo, Ganancia, margen, piezas), por canal, ranking de piezas, gastos y **ganancia neta**, inversión recuperada. Acciones: cambiar periodo, **Copiar** (resumen como texto), Registrar venta.
 
