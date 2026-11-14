@@ -3,12 +3,12 @@
 import type { AddSpoolInput, AddSpoolOutput } from '@app/contract';
 import { canonicalEntry, filamentKey, nextSpoolNumbers, normalizeName, tidyName } from '@app/core';
 import {
-  addCatalogItems, findFilamentByKey, getFilament, getSupplier, insertFilament, insertSpool, insertSpoolMovements, listSpools, maxSpoolNumber, transaction,
+  addCatalogItems, findFilamentByKey, getFilament, getSupplier, insertFilament, insertSpool, insertSpoolMovements, maxSpoolNumber, transaction,
   type Ctx, type Executor, type FilamentRow,
 } from '@app/db';
 import type { Deps } from '../deps';
 import { notFound } from '../http';
-import { filamentListView, loadFilamentCosts, spoolView } from '../views/filament-view';
+import { filamentOut } from '../views/filament-view';
 import { loadCatalogs } from './settings';
 
 /** Adds the brand to the pick list when it is new; returns its official spelling. */
@@ -48,7 +48,7 @@ export async function addSpool(deps: Deps, ctx: Ctx, input: AddSpoolInput): Prom
       shippingCents: input.shippingCents, grams: input.grams, purchasedOn: input.purchasedOn, supplierId: input.supplierId ?? null,
     });
     await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: spool.id, on: input.purchasedOn, kind: 'purchase', grams: input.grams, note: input.note ?? '' }]);
-    const spools = await listSpools(tx, ctx, [filament.id]);
-    return { spool: spoolView(spools.find((s) => s.id === spool.id)!), filament: filamentListView(filament, spools, await loadFilamentCosts(tx, ctx)) };
+    const o = await filamentOut(tx, ctx, filament.id);
+    return { spool: o.spool(spool.id), filament: o.filament };
   });
 }

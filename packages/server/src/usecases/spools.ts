@@ -2,18 +2,17 @@
 import { BusinessError, type FilamentListItem, type Spool, type SpoolMovementInput, type UpdateSpoolInput } from '@app/contract';
 import { round1, tidyName } from '@app/core';
 import {
-  countSpoolMovements, getFilament, getSpool, getSpoolAny, getSupplier, insertSpoolMovements, listSpools, setSpoolDeleted, spoolRemainingGrams,
+  countSpoolMovements, getSpool, getSpoolAny, getSupplier, insertSpoolMovements, setSpoolDeleted, spoolRemainingGrams,
   transaction, updateSpool as updateRow, type Ctx, type Executor,
 } from '@app/db';
 import type { Deps } from '../deps';
 import { notFound } from '../http';
-import { filamentListView, loadFilamentCosts, spoolView } from '../views/filament-view';
+import { filamentOut } from '../views/filament-view';
 import { resolveFilament } from './add-spool';
 
 async function out(tx: Executor, ctx: Ctx, spoolId: string, filamentId: string): Promise<{ spool: Spool; filament: FilamentListItem }> {
-  const f = (await getFilament(tx, ctx, filamentId))!;
-  const spools = await listSpools(tx, ctx, [filamentId]);
-  return { spool: spoolView(spools.find((s) => s.id === spoolId)!), filament: filamentListView(f, spools, await loadFilamentCosts(tx, ctx)) };
+  const o = await filamentOut(tx, ctx, filamentId);
+  return { spool: o.spool(spoolId), filament: o.filament };
 }
 
 /**

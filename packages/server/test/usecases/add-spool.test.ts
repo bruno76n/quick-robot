@@ -10,8 +10,8 @@ afterAll(() => h.close());
 describe('addSpool', () => {
   it('creates filament + spool + purchase movement', async () => {
     const r = await addSpool(h.deps, h.A, validSpool());
-    expect(r.filament).toMatchObject({ material: 'PLA', color: 'Blanco', remainingGrams: 1000, spools: 1, costPerGram: 0.5, status: 'new' });
-    expect(r.spool).toMatchObject({ grams: 1000, remainingGrams: 1000, costCents: 45000, shippingCents: 5000, status: 'new' });
+    expect(r.filament).toMatchObject({ material: 'PLA', color: 'Blanco', remainingGrams: 1000, spoolCount: 1, costPerGram: 0.5, status: 'new' });
+    expect(r.spool).toMatchObject({ number: 1, noCost: false, grams: 1000, remainingGrams: 1000, costCents: 45000, shippingCents: 5000, status: 'new' });
     const movs = await listSpoolMovements(h.db, h.A, r.filament.id);
     expect(movs).toHaveLength(1);
     expect(movs[0]).toMatchObject({ kind: 'purchase', grams: 1000, on: '2026-11-01' });
@@ -20,7 +20,7 @@ describe('addSpool', () => {
   it('"pla  blanco" joins PLA Blanco and the cost per gram is weighted (case 1.1 shape)', async () => {
     const r = await addSpool(h.deps, h.A, validSpool({ filament: { material: 'pla ', color: ' blanco' }, costCents: 60000, shippingCents: 0 }));
     expect(r.filament.material).toBe('PLA');
-    expect(r.filament.spools).toBe(2);
+    expect(r.filament.spoolCount).toBe(2);
     expect(r.filament.remainingGrams).toBe(2000);
     expect(r.filament.costPerGram).toBe(0.55);
     expect((await listFilaments(h.db, h.A, { page: 1, pageSize: 50 })).total).toBe(1);
@@ -29,7 +29,7 @@ describe('addSpool', () => {
   it('adds to an existing filament by id; an id of another workspace is NOT_FOUND', async () => {
     const [f] = (await listFilaments(h.db, h.A, { page: 1, pageSize: 50 })).items;
     const r = await addSpool(h.deps, h.A, { ...validSpool({ filament: undefined }), filamentId: f!.id } as never);
-    expect(r.filament.spools).toBe(3);
+    expect(r.filament.spoolCount).toBe(3);
     await expect(addSpool(h.deps, h.B, { ...validSpool({ filament: undefined }), filamentId: f!.id } as never)).rejects.toMatchObject({ code: 'NOT_FOUND' });
   });
 
@@ -56,7 +56,7 @@ describe('cost per gram of ronda 4 (docs/04 §1, cases 1.1a and 1.1d)', () => {
     const gift = await spool('Gris', 0, '2026-09-15');
     const gray = await spool('Gris', 30000, '2026-11-05');
     expect(gray.filament.costPerGram).toBe(0.25);
-    expect(gift.filament.spools).toBe(3);
+    expect(gift.filament.spoolCount).toBe(3);
     const white = await spool('Blanco', 0, '2026-08-01');
     expect(white.filament.costPerGram).toBe(0.25);
     expect(white.filament.valueCents).toBe(0);

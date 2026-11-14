@@ -6,24 +6,12 @@ export const filamentStatus = z.enum(['no_spools', 'out', 'ending', 'low', 'new'
 export const spoolStatus = z.enum(['empty', 'new', 'in_use']);
 export const spoolMovementKind = z.enum(['purchase', 'consumption', 'failure', 'waste', 'adjustment']);
 
-export const filamentListItem = z.object({
-  id,
-  material: z.string(),
-  color: z.string(),
-  hex: z.string(),
-  remainingGrams: z.number(),
-  spools: z.number().int(),
-  costPerGram: z.number(),
-  status: filamentStatus,
-  /** Spools with material left (> 0.5 g), their brands and capacity (for the bar), and the value of what is left. */
-  activeSpools: z.number().int(),
-  brands: z.array(z.string()),
-  capacityGrams: z.number(),
-  valueCents: z.number().int(),
-});
+export const costSource = z.enum(['purchases', 'material', 'reference', 'none']);
 
 export const spool = z.object({
   id,
+  /** #1, #2…: per workspace, never reused (ronda-4 §2.4). */
+  number: z.number().int(),
   filamentId: id,
   brand: z.string(),
   costCents: z.number().int(),
@@ -31,9 +19,36 @@ export const spool = z.object({
   grams: z.number(),
   purchasedOn: calendarDate,
   supplierId: id.nullable(),
+  /** A gift or included with the printer: counts in grams, not in cost. */
+  noCost: z.boolean(),
   remainingGrams: z.number(),
+  /** Of this spool (0 if noCost); pieces use the cost per gram of the filament. */
   costPerGram: z.number(),
   status: spoolStatus,
+});
+
+export const filamentListItem = z.object({
+  id,
+  material: z.string(),
+  color: z.string(),
+  hex: z.string(),
+  remainingGrams: z.number(),
+  /** Live spools, in the order they are used and then the empty ones (newest first). */
+  spools: z.array(spool),
+  spoolCount: z.number().int(),
+  /** Cost per gram for pieces (docs/04 §1): where it comes from and the numbers of the spools in the average (newest first). */
+  costPerGram: z.number(),
+  costSource,
+  costSpoolNumbers: z.array(z.number().int()),
+  referenceCentsPerKg: z.number().int().nullable(),
+  status: filamentStatus,
+  /** Spools with material left (> 0.5 g), their brands and capacity (for the bar), and the value of what is left. */
+  activeSpools: z.number().int(),
+  /** No-cost spools with material left. */
+  noCostSpools: z.number().int(),
+  brands: z.array(z.string()),
+  capacityGrams: z.number(),
+  valueCents: z.number().int(),
 });
 
 export const spoolMovement = z.object({
@@ -47,8 +62,6 @@ export const spoolMovement = z.object({
 });
 
 export const filamentDetail = filamentListItem.extend({
-  spools: z.array(spool),
-  spoolCount: z.number().int(),
   movements: z.array(spoolMovement),
 });
 
@@ -72,6 +85,7 @@ export const addSpoolOutput = z.object({ spool, filament: filamentListItem });
 export type FilamentListItem = z.infer<typeof filamentListItem>;
 export type FilamentDetail = z.infer<typeof filamentDetail>;
 export type Spool = z.infer<typeof spool>;
+export type CostSource = z.infer<typeof costSource>;
 export type SpoolMovement = z.infer<typeof spoolMovement>;
 export type AddSpoolInput = z.infer<typeof addSpoolInput>;
 export type AddSpoolOutput = z.infer<typeof addSpoolOutput>;

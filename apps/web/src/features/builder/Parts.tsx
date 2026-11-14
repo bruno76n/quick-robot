@@ -144,7 +144,7 @@ export function Summary({ C, order, accepted, channelName, deposit, names, filam
               <div className="mats"><span className="k">{t('screens.builder.materialTitle', { pct: purgePct })}{C.useN ? L.materialOnlyPrinted : ''}</span>
                 {mats.map(({ f, need, rest }) => {
                   const bad = need > rest + 0.01;
-                  return <span key={f.id} className={`mrow${bad ? ' bad' : ''}`}><Swatch hex={f.hex} /><span>{filamentName(f)}{f.spools > 1 ? <>{' '}<small className="inl">{t('screens.builder.spools', { count: f.spools })}</small></> : null}</span><b className="num">{grams(need)}</b><small>{bad ? t('screens.builder.missing', { grams: grams(need - rest) }) : t('screens.builder.left', { grams: grams(rest - need) })}</small></span>;
+                  return <span key={f.id} className={`mrow${bad ? ' bad' : ''}`}><Swatch hex={f.hex} /><span>{filamentName(f)}{f.spoolCount > 1 ? <>{' '}<small className="inl">{t('screens.builder.spools', { count: f.spoolCount })}</small></> : null}</span><b className="num">{grams(need)}</b><small>{bad ? t('screens.builder.missing', { grams: grams(need - rest) }) : t('screens.builder.left', { grams: grams(rest - need) })}</small></span>;
                 })}
               </div>
             ) : null}

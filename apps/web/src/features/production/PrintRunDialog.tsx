@@ -32,7 +32,7 @@ export function PrintRunDialog(props: Props) {
   const filaments = useFilaments().data?.items;
   const products = useProducts().data?.items;
   const printers = usePrinters().data?.items;
-  const noSpools = filaments !== undefined && !filaments.some((f) => f.spools > 0);
+  const noSpools = filaments !== undefined && !filaments.some((f) => f.spoolCount > 0);
   const { onClose } = props;
   useEffect(() => { if (noSpools) { toast(es.errors.NO_SPOOLS); onClose(); } }, [noSpools, onClose]);
   if (!filaments || !products || !printers || noSpools) return null;
@@ -40,7 +40,7 @@ export function PrintRunDialog(props: Props) {
 }
 
 function PrintRunForm({ productId, onClose, onDone, filaments, products, printers }: Props & { filaments: Filaments; products: Products; printers: Printers }) {
-  const withSpools = filaments.filter((f) => f.spools > 0).sort((a, b) => a.material.localeCompare(b.material, 'es') || a.color.localeCompare(b.color, 'es'));
+  const withSpools = filaments.filter((f) => f.spoolCount > 0).sort((a, b) => a.material.localeCompare(b.material, 'es') || a.color.localeCompare(b.color, 'es'));
   const noPieces = !products.length;
   const [test, setTest] = useState(noPieces);
   const [pieceId, setPieceId] = useState(productId && products.some((p) => p.id === productId) ? productId : products[0]?.id ?? '');

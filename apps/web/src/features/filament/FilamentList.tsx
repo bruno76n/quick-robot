@@ -29,7 +29,7 @@ export function FilamentList() {
   const select = (id: string | null) => go(id ? `/filamentos?f=${id}` : '/filamentos', true);
   const items = [...(data?.items ?? [])].sort((a, b) => a.material.localeCompare(b.material, 'es') || a.color.localeCompare(b.color, 'es'));
   const totalGrams = items.reduce((a, f) => a + f.remainingGrams, 0);
-  const spools = items.reduce((a, f) => a + f.spools, 0);
+  const spools = items.reduce((a, f) => a + f.spoolCount, 0);
   const value = items.reduce((a, f) => a + f.valueCents, 0);
   const low = items.filter((f) => f.status === 'low').length;
   const critical = items.filter((f) => f.status === 'ending').length;

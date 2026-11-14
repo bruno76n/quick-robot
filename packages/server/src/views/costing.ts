@@ -39,7 +39,7 @@ export async function loadCostingContext(ex: Executor, ctx: Ctx, supplyIds: read
     },
     printers: new Map(printers.map((p) => [p.id, printerCost(p)])),
     allPrinters: printers.map(printerCost),
-    filamentCost: new Map([...filamentCostMap(filaments, spools)].map(([id, x]) => [id, x.costPerGram])),
+    filamentCost: new Map([...filamentCostMap(filaments, spools, s?.costAvgPurchases)].map(([id, x]) => [id, x.costPerGram])),
     filaments: new Map(filaments.map((f) => [f.id, f])),
     supplyCost: new Map(supplies.map((x) => [x.id, x.costCents / 100])),
     channels: (await listChannels(ex, ctx)).map((c) => ({ id: c.id, name: c.name, commissionPct: c.commissionPct })),

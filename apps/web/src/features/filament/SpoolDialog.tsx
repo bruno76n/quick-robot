@@ -106,7 +106,7 @@ function SpoolForm({ filamentId, editing, filaments, onClose, onAdded, onDeleted
     const name = `${M.name} ${C.name}`;
     if (editing && existing) {
       linkOk = true;
-      const others = Math.max(0, existing.spools - (existing.id === filamentId ? 1 : 0));
+      const others = Math.max(0, existing.spoolCount - (existing.id === filamentId ? 1 : 0));
       const without = existing.id === filamentId ? existing.remainingGrams - editing.remainingGrams : existing.remainingGrams;
       link = <Bold text={others ? t('screens.spoolDialog.belongsWith', { name, count: others, grams: fmtGrams(Math.max(0, without)) }) : t('screens.spoolDialog.belongsOnly', { name })} bold={[name]} />;
     } else if (existing && existing.activeSpools) {
