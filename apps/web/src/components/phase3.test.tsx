@@ -12,6 +12,8 @@ import { DocumentDialog, documentText } from './DocumentSheet';
 import { CommandLayer, GOTO, installShortcuts, ShortcutsDialog } from './Shortcuts';
 import { toast, useToast } from './Toast';
 import { LoadingSkeleton } from './LoadingSkeleton';
+import { isLoadFailure, LoadFailed, useFailedLoads } from './LoadFailed';
+import { ApiError } from '../lib/api';
 import { QueryClient as QC, useQuery } from '@tanstack/react-query';
 
 const went: string[] = [];
@@ -159,5 +161,37 @@ describe('loading skeleton', () => {
     await act(async () => { vi.advanceTimersByTime(400); });
     expect(screen.getByTestId('loading-skeleton')).toBeTruthy();
     vi.useRealTimers();
+  });
+});
+
+describe('a failed first load (docs/15 §5)', () => {
+  function Frame({ fn }: { fn: () => Promise<string[]> }) {
+    const q = useQuery({ queryKey: ['list'], queryFn: fn });
+    const failed = useFailedLoads();
+    return <div className="page">{failed.count ? <LoadFailed errorId={failed.errorId} /> : null}{q.data && !q.data.length ? <p>Sin registros</p> : null}{q.data?.map((x) => <p key={x}>{x}</p>)}</div>;
+  }
+
+  it('shows the card with Reintentar and the code, never the empty list; Reintentar brings the data', async () => {
+    let fail = true;
+    const fn = vi.fn(async () => { if (fail) throw new ApiError('INTERNAL_ERROR', 500, {}, 'abc-1'); return ['PLA Negro']; });
+    render(withQuery(<Frame fn={fn} />));
+    await waitFor(() => expect(screen.getByTestId('load-failed')).toBeTruthy());
+    expect(screen.getByTestId('load-failed').textContent).toContain('No se pudieron cargar los datos de esta pantalla. No se cambió ningún dato.');
+    expect(screen.getByTestId('load-failed').textContent).toContain('Código: abc-1');
+    expect(screen.queryByText('Sin registros')).toBeNull();
+    fail = false;
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar' }));
+    await waitFor(() => expect(screen.getByText('PLA Negro')).toBeTruthy());
+    expect(screen.queryByTestId('load-failed')).toBeNull();
+  });
+
+  it('a proxy 500 without body or the server not answering is a load failure; a NOT_FOUND is the screen\'s business', async () => {
+    expect(isLoadFailure(new ApiError('INTERNAL_ERROR', 500))).toBe(true);
+    expect(isLoadFailure(new ApiError('NETWORK_ERROR', 0))).toBe(true);
+    expect(isLoadFailure(new TypeError('x'))).toBe(true);
+    expect(isLoadFailure(new ApiError('NOT_FOUND', 404))).toBe(false);
+    render(withQuery(<Frame fn={async () => { throw new ApiError('NOT_FOUND', 404); }} />));
+    await new Promise((ok) => setTimeout(ok, 30));
+    expect(screen.queryByTestId('load-failed')).toBeNull();
   });
 });

@@ -160,6 +160,7 @@ Se muestran cuando la aplicación completa no puede seguir (`15 §5`). Cada una 
 | `fatal.migrationFailed` | No se pudo actualizar los datos. Se restauró la copia anterior; los datos están intactos. | Abrir de nuevo · Mostrar archivo de registro |
 | `fatal.dataFileUnreadable` | No se pudo abrir el archivo de datos. | Restaurar la copia más reciente · Elegir otra copia |
 | `fatal.screenCrashed` | Esta pantalla no se pudo mostrar. *(debajo, en gris:)* Código: {errorId} | Volver al Inicio |
+| `fatal.loadFailed` | No se pudieron cargar los datos de esta pantalla. No se cambió ningún dato. *(si hay `errorId`, debajo en gris:)* Código: {errorId} | Reintentar |
 | `fatal.offline` *(nube)* | Sin conexión. Lo escrito sigue aquí; se puede guardar cuando vuelva. | — |
 | `fatal.slow` | Tarda más de lo normal. | Reintentar |
 | `fatal.importing` | Importando… No cerrar la aplicación. | — |
@@ -242,6 +243,8 @@ Los que traen **Deshacer** (`undo: true`) llaman a `restore<Entidad>` (`12`). En
 | `maintenance.done` | Mantenimiento registrado | |
 | `printRun.recorded` | Impresión registrada. Se descontaron {grams}. | |
 | `printRun.testRecorded` | Prueba registrada. Se descontaron {grams}. | |
+
+*{grams} de `printRun.recorded` / `printRun.testRecorded` y de «Se descontaron {grams} de filamento.» al poner un pedido en producción = lo que bajan los rollos: **con la purga y sin lo que faltó** (`FILAMENT_SHORTFALL`). Una pieza de 50 g con 5 % de purga: «Se descontaron 52.5 g» (caso 1.5a de `04`). (Ronda 4 · D.)*
 | `printRun.deleted` | Registro eliminado. *(si devolvió filamento:)* Se devolvieron {grams} al inventario de filamento. *(si quitó piezas:)* Se quitaron {count} {count\|pieza\|piezas} de Existencias. | |
 | `stock.trackingEnabled` | {name} ahora lleva existencias | |
 | `stock.summary` | Existencias de {name}: total {physical}. | |
@@ -434,6 +437,121 @@ Los cuatro códigos nuevos de `12 §2` están en §3 › Taller (`SPOOL_NOT_IN_F
 |---|---|---|
 | Nota del movimiento de `finishSpool` (la escribe el servidor, como «Purga: …») | Rollo terminado | Se ve en Movimientos del rollo |
 | Pieza (calculadora), filamento con `costSource = none` (fase C) | Sin costo de referencia para {filamento} | Aviso junto al costo de la pieza |
+
+**Textos de pantalla de la ronda 4** (claves de `es.ts`; salen de las maquetas de `reference/ronda-4/` y de `mejoras/ronda-4.md §5`, con la regla de §1: sin segunda persona). Revisados en la fase D.
+
+| Clave | Texto | Dónde |
+|---|---|---|
+| `screens.spools.number` | #{number} | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.perGram` | {amount}/g | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.noCost` | Sin costo | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.beforeAfter` | {before} → {after} | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.source.purchases` | promedio de {numbers} | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.source.material` | promedio de {material} | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.source.reference` | precio de referencia | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.source.none` | sin costo de referencia | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.sourceLong.purchases` | Promedio de {count\|la última compra con costo\|las últimas compras con costo}: {numbers}. Los rollos sin costo no cuentan. | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.sourceLong.material` | Sin compras con costo de este color: promedio de las compras de {material} ({numbers}). | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.sourceLong.reference` | Sin compras con costo: precio de referencia de {price} por kilo. | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.sourceLong.none` | Sin costo de referencia para {filament}. | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.sourceAria` | De dónde sale el costo por gramo | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spools.info` | i | Compartidos (número, costo por gramo y de dónde sale) |
+| `screens.spoolUse.spool` | Rollo | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.spoolOf` | Rollo de {name} | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.suggested` | Sugerido | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.suggestedOpen` | Sugerido · abierto | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.from` | `{before} → ` | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.split` | Repartir entre dos rollos | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.oneSpool` | Usar un solo rollo | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.noSpools` | Sin rollos con material: se avisa el faltante. | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.need` | {pieceGrams} + {purgePct} de purga = {needGrams} | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.plusPurge` | + {purgePct} de purga = {needGrams} | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.spent` | se gastan {consumptionGrams} de la pieza y {purgeGrams} de purga | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.restFrom` | Lo que falta ({takenGrams}) sale del {number}: {before} → {after}. | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.missing` | Faltan {missingGrams}: se avisa como faltante. | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.total` | {name}: {beforeGrams} → {afterGrams}. El costo de la pieza no cambia con el rollo: {perGram}. | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.option` | {number} · {brand} · {leftGrams} | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.firstSpool` | Empezar con | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.fromIt` | Gramos de ese rollo | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.thenSpool` | Sigue con | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.theRest` | y lo que falte, de este. | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.ends` | se termina | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.continues` | sigue con este | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.startsHere` | empieza con este | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.startWith` | Empezar con el rollo | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.endsThen` | Al terminarse el {ended} sigue el {next}. | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.filamentAfter` | {name}: {beforeGrams} → {afterGrams}. | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.allItems` | Es el reparto de todos los artículos con este filamento. | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.spoolUse.take` | −{takenGrams} | Registrar impresión y Poner en producción (qué rollo se usa) |
+| `screens.filaments.valueSub` | lo que costó cada rollo | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.lowOrCritical` | Stock bajo o crítico | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.noCostSpools` | Rollos sin costo | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.noCostSub` | no entran al promedio | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.availableSub` | disponibles | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.emptyHidden` | {count} {count\|rollo vacío oculto\|rollos vacíos ocultos} | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.hideEmpty` | Ocultar los rollos vacíos | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.spoolLeft` | {leftGrams} de {totalGrams} | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.spoolAria` | Rollo {number} de {name} | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.spoolMenu` | Opciones del rollo {number} | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.menuDots` | ··· | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.weigh` | Pesar | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.finish` | Terminar rollo | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.spoolKind` | Rollo | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.spoolTitle` | {name} · {brand} | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.left` | Quedan | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.ofSpool` | Del rollo | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.cost` | Costo | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.spoolBought` | compra del {date} | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.noCostNote` | Sin costo: no entra al promedio. Para calcular piezas, {name} usa {perGram} ({source}). | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.costNote` | Para calcular piezas, {name} usa {perGram} ({source}), no el precio de un solo rollo. | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.weighTitle` | Pesar en báscula | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.scale` | Peso en la báscula | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.tare` | Carrete vacío | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.tareOf` | Carrete vacío ({brand}) | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.weighSame` | sin cambio | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.weighAdjust` | ajuste de {adjustmentGrams} | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.weighAsk` | escribir el peso de la báscula | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.weighMax` | El peso no cuadra con el rollo: puede quedar de 0 a {maxGrams}. | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.saveWeight` | Guardar peso | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.finishHint` | Terminar rollo registra lo que quede como merma y lo pasa a Vacío. | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.weighed` | Peso guardado: quedan {leftGrams}. | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.weighedAdjust` | Peso guardado: quedan {leftGrams} (ajuste de {adjustmentGrams}). | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.finishTitle` | Terminar rollo {number} | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.finishText` | Lo que queda ({leftGrams}) se registra como merma y el rollo pasa a Vacío. {name} queda con {afterGrams}. | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.finished` | Rollo {number} terminado. | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.filaments.noSpoolMovements` | Sin movimientos. | Filamentos (lista, franja, cajón del rollo, Pesar, Terminar rollo) |
+| `screens.order.deductHint` | Resta {grams} de los rollos, empezando por el rollo elegido de cada filamento. Al terminar, las impresiones se registran solas en Producción. | Poner en producción *(cambia)* |
+| `screens.settings.avgPurchases` | Compras para el promedio del filamento | Ajustes › Costos del taller |
+| `screens.settings.avgPurchasesUnit` | compras | Ajustes › Costos del taller |
+| `screens.settings.avgPurchasesHint` | De 1 a 10: el costo por gramo es el promedio de las últimas compras con costo | Ajustes › Costos del taller |
+| `screens.spoolDialog.titleEditNumber` | Editar rollo {number} | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.submitOne` | Agregar rollo {number} | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.submitMany` | Agregar {count} rollos | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.exists` | {name} ya existe: el rollo se agrega como uno nuevo, no se suma a los que ya hay. | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.existsMany` | {name} ya existe: los rollos se agregan como nuevos, no se suman a los que ya hay. | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.weightPerSpool` | Gramos por rollo | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.quantity` | Cantidad | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.spoolsUnit` | rollos | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.date` | Fecha | Agregar rollo / Editar rollo *(cambia)* |
+| `screens.spoolDialog.pricePerSpool` | Precio por rollo | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.orderShipping` | Envío del pedido | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.shippingSplitHint` | Se reparte entre los rollos. | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.supplier` | Proveedor | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.noSupplier` | Sin proveedor | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.noCost` | Sin costo (regalo o incluido con la impresora) | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.referencePerKg` | Precio de referencia por kilo | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.thisFilament` | este filamento | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.referenceHint` | No hay compras con costo de {name} ni de su material: con este precio se calculan sus piezas. | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.result` | Resultado | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.resultOne` | Rollo nuevo de {name} · {brand} · {perSpool} · {price} | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.resultMany` | {count} rollos nuevos de {name} · {brand} · {perSpool} cada uno · {price} | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.eachPrice` | {price} cada uno | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.resultEdit` | Rollo de {name} · {brand} · {perSpool} · {price} | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.chipNoCost` | {leftGrams} · sin costo | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.costForPieces` | Costo para piezas | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.arrow` | ` → ` | Agregar rollo / Editar rollo |
+| `screens.spoolDialog.notCounted` | ; {count\|el\|los} {numbers} no {count\|cuenta\|cuentan} | Agregar rollo / Editar rollo |
+| `screens.production.gramsHint` | Se descuentan del rollo elegido; si no alcanza, sigue con los demás. Los gramos son editables si el consumo fue distinto. | Registrar impresión *(cambia)* |
 
 ## 9.3 Vocabulario de la ronda 3 (`mejoras/ronda-3.md §5`)
 

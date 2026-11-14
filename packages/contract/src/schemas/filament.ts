@@ -93,6 +93,8 @@ export const spoolOutput = z.object({ spool, filament: filamentListItem });
 export const addSpoolOutput = spoolOutput.extend({ spools: z.array(spool) });
 
 export type FilamentListItem = z.infer<typeof filamentListItem>;
+/** GET /filaments: the page plus the number the next spool will get (deleted spools count; ronda 4 · D). */
+export type FilamentPage = { items: FilamentListItem[]; page: number; pageSize: number; total: number; nextSpoolNumber: number };
 export type FilamentDetail = z.infer<typeof filamentDetail>;
 export type Spool = z.infer<typeof spool>;
 export type CostSource = z.infer<typeof costSource>;

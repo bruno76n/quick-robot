@@ -54,3 +54,80 @@ describe('input limits (docs/15 §4)', () => {
     expect(r.json.details?.fields).toContainEqual(expect.objectContaining({ path: field, rule }));
   });
 });
+
+// Ronda 4 · D: the new inputs of spools (quantity, reference price, scale and empty-spool weight, chosen spools, purchases
+// for the average). The exact limit passes and one more fails with the right rule; ids that are not ids never reach SQL.
+describe('spool inputs of ronda 4 (limits and injection)', () => {
+  const spool = (over: Record<string, unknown>) => ({ filament: { material: 'PLA', color: 'Límites' }, costCents: 30000, grams: 1000, purchasedOn: '2026-11-01', ...over });
+  const fields = (r: Awaited<ReturnType<Harness['call']>>) => (r.json.details?.fields ?? []) as { path: string; rule: string }[];
+
+  it('quantity 1–20 and a reference price up to $1,000,000 per kilo', async () => {
+    const twenty = await h.call('POST', '/api/v1/spools', { body: spool({ quantity: 20 }) });
+    expect(twenty.status).toBe(201);
+    expect((twenty.json.data as { spools: unknown[] }).spools).toHaveLength(20);
+    for (const [quantity, rule] of [[21, 'too_big'], [0, 'too_small']] as const) {
+      const r = await h.call('POST', '/api/v1/spools', { body: spool({ quantity }) });
+      expect(r.status).toBe(422);
+      expect(fields(r)).toContainEqual(expect.objectContaining({ path: 'quantity', rule }));
+    }
+    const gift = (cents: number) => spool({ filament: { material: 'Nylon', color: `Ref ${cents}` }, costCents: 0, noCost: true, referenceCentsPerKg: cents });
+    expect((await h.call('POST', '/api/v1/spools', { body: gift(100_000_000) })).status).toBe(201);
+    const r = await h.call('POST', '/api/v1/spools', { body: gift(100_000_001) });
+    expect(r.status).toBe(422);
+    expect(fields(r)).toContainEqual(expect.objectContaining({ path: 'referenceCentsPerKg', rule: 'too_big' }));
+  });
+
+  it('weigh: empty-spool weight up to 10,000 g, scale up to 100,000 g with one decimal; out of the spool → WEIGHT_OUT_OF_RANGE', async () => {
+    const id = ((await h.call('POST', '/api/v1/spools', { body: spool({ filament: { material: 'PLA', color: 'Báscula' } }) })).json.data as { spool: { id: string } }).spool.id;
+    expect((await h.call('POST', `/api/v1/spools/${id}/weigh`, { body: { scaleGrams: 10_500, tareGrams: 10_000 } })).status).toBe(200);
+    for (const [body, path, rule] of [
+      [{ scaleGrams: 10_500, tareGrams: 10_001 }, 'tareGrams', 'too_big'],
+      [{ scaleGrams: 100_000.1, tareGrams: 0 }, 'scaleGrams', 'too_big'],
+      [{ scaleGrams: 500, tareGrams: 0, extra: "'; DROP TABLE spool; --" }, '', 'unrecognized_keys'],
+    ] as const) {
+      const r = await h.call('POST', `/api/v1/spools/${id}/weigh`, { body });
+      expect(r.status).toBe(422);
+      expect(r.json.code).toBe('VALIDATION_ERROR');
+      if (rule !== 'unrecognized_keys') expect(fields(r)).toContainEqual(expect.objectContaining({ path, rule }));
+    }
+    const far = await h.call('POST', `/api/v1/spools/${id}/weigh`, { body: { scaleGrams: 100_000, tareGrams: 0 } });
+    expect([far.status, far.json.code]).toEqual([422, 'WEIGHT_OUT_OF_RANGE']);
+    // An id that is not an id is refused before any query; the spool is unchanged.
+    for (const bad of ["1' OR '1'='1", '..%2F..%2Fetc', '00000000-0000-7000-8000-000000000000']) {
+      const r = await h.call('POST', `/api/v1/spools/${bad}/finish`, { body: {} });
+      expect([404, 422]).toContain(r.status);
+    }
+    expect((await h.call('POST', `/api/v1/spools/${id}/finish`, { body: { on: "2026-11-01'; --" } })).status).toBe(422);
+  });
+});
+
+describe('chosen spools and purchases for the average (ronda 4)', () => {
+  const fields = (r: Awaited<ReturnType<Harness['call']>>) => (r.json.details?.fields ?? []) as { path: string; rule: string }[];
+  const spool = (over: Record<string, unknown>) => ({ filament: { material: 'PLA', color: 'Límites' }, costCents: 30000, grams: 1000, purchasedOn: '2026-11-01', ...over });
+  it('chosen spools: up to 10 per filament, grams > 0 with one decimal, ids only', async () => {
+    const out = (await h.call('POST', '/api/v1/spools', { body: spool({ filament: { material: 'PLA', color: 'Elegidos' }, quantity: 11 }) })).json.data as { filament: { id: string }; spools: { id: string }[] };
+    const body = (spools: unknown[]) => ({ on: '2026-11-07', text: 'Prueba', qty: 1, result: 'ok', hours: 0, reason: 'test', filaments: [{ filamentId: out.filament.id, grams: 10, spools }] });
+    expect((await h.call('POST', '/api/v1/print-runs', { body: body(out.spools.slice(0, 10).map((s) => ({ spoolId: s.id, grams: 1 }))) })).status).toBe(201);
+    for (const spools of [
+      out.spools.map((s) => ({ spoolId: s.id, grams: 1 })),
+      [{ spoolId: out.spools[0]!.id, grams: 0 }],
+      [{ spoolId: out.spools[0]!.id, grams: 1.25 }],
+      [{ spoolId: "x' OR 1=1 --" }],
+    ]) {
+      const r = await h.call('POST', '/api/v1/print-runs', { body: body(spools) });
+      expect(r.status).toBe(422);
+      expect(r.json.code).toBe('VALIDATION_ERROR');
+    }
+  });
+
+  it('purchases for the average: 1–10, whole numbers', async () => {
+    expect((await h.call('PATCH', '/api/v1/settings', { body: { costAvgPurchases: 10 } })).status).toBe(200);
+    for (const [v, rule] of [[11, 'too_big'], [0, 'too_small'], [2.5, 'invalid_type']] as const) {
+      const r = await h.call('PATCH', '/api/v1/settings', { body: { costAvgPurchases: v } });
+      expect(r.status).toBe(422);
+      expect(fields(r).map((f) => f.path)).toContain('costAvgPurchases');
+      if (rule !== 'invalid_type') expect(fields(r)).toContainEqual(expect.objectContaining({ path: 'costAvgPurchases', rule }));
+    }
+    expect((await h.call('PATCH', '/api/v1/settings', { body: { costAvgPurchases: 3 } })).status).toBe(200);
+  });
+});

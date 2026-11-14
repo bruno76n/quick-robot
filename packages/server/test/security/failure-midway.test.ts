@@ -156,6 +156,33 @@ const WRITE_ROUTES: Record<string, Case> = {
   'POST /api/v1/backups/:id/restore': { setup: async (c) => (await createBackup(d0(), c)).id, run: (d, c, t) => restoreBackup(d, c, t, { confirm: true }) },
 };
 const MOCKUP = readFileSync(new URL('../../../../reference/mockup-backup-v7.json', import.meta.url));
+// Ronda 4 · D: the new writes with their options (several spools, no-cost with reference, chosen and split spools, the spool
+// an order starts with, purchases for the average).
+const twoSpools = async (c: Ctx) => {
+  const out = await addSpool(d0(), c, validSpool({ filament: { material: 'PLA', color: uniq('Reparto') }, grams: 100, quantity: 2 }));
+  return `${out.filament.id}|${out.spools[0]!.id}|${out.spools[1]!.id}`;
+};
+WRITE_ROUTES['POST /api/v1/spools (quantity 3 and shipping)'] = { run: (d, c) => addSpool(d, c, validSpool({ filament: { material: 'PETG', color: uniq('Tres') }, quantity: 3, shippingCents: 1000 })) };
+WRITE_ROUTES['POST /api/v1/spools (no cost with reference price)'] = { run: (d, c) => addSpool(d, c, validSpool({ filament: { material: uniq('Nylon'), color: 'Regalo' }, costCents: 0, shippingCents: 0, noCost: true, referenceCentsPerKg: 30000 })) };
+WRITE_ROUTES['POST /api/v1/print-runs (split between two chosen spools)'] = {
+  setup: twoSpools,
+  run: (d, c, t) => { const [f, a, b] = t.split('|') as [string, string, string]; return logPrintRun(d, c, { on: '2026-11-01', text: 'Prueba', qty: 1, result: 'ok', hours: 0, reason: 'test', filaments: [{ filamentId: f, grams: 150, spools: [{ spoolId: a }, { spoolId: b }] }] }); },
+};
+WRITE_ROUTES['POST /api/v1/orders/:id/start-production (start spools)'] = {
+  setup: (c) => orderOf(c, 'accepted'),
+  run: async (d, c, t) => {
+    const spools = await (await import('@app/db')).listSpools(d0().db, c, [first(s.a.filament)]);
+    const last = [...spools].sort((x, y) => y.remainingGrams - x.remainingGrams)[0]!;
+    return startProduction(d, c, t, { assignments: (await assignmentsOf(c, t)).map((a) => ({ ...a, startSpools: [{ filamentId: first(s.a.filament), spoolId: last.id }] })), deductFilament: true });
+  },
+};
+WRITE_ROUTES['PATCH /api/v1/settings (purchases for the average)'] = { run: (d, c) => updateSettings(d, c, { costAvgPurchases: 5, kwhPriceCents: 998 }) };
+// The cases that replace or clear the whole business run last (the ones above use its seeded data).
+for (const key of ['POST /api/v1/workspace/import', 'POST /api/v1/workspace/clear', 'POST /api/v1/backups', 'POST /api/v1/backups/:id/restore']) {
+  const kase = WRITE_ROUTES[key]!;
+  delete WRITE_ROUTES[key];
+  WRITE_ROUTES[key] = kase;
+}
 WRITE_ROUTES['POST /api/v1/workspace/import (mockup v7)'] = { run: (d, c) => importWorkspace(d, c, MOCKUP, { confirm: true, backupFirst: false }), maxN: 12 };
 
 /** Every row of workspace A in every table (the whole state of the business). */

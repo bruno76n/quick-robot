@@ -74,6 +74,12 @@ export async function lockSpoolsOfFilament(ex: Executor, ctx: Ctx, filamentId: s
 export async function maxSpoolNumber(ex: Executor, ctx: Ctx): Promise<number> {
   assertCtx(ctx);
   await ex.select({ id: workspace.id }).from(workspace).where(eq(workspace.id, ctx.workspaceId)).for('update');
+  return highestSpoolNumber(ex, ctx);
+}
+
+/** Highest spool number ever used (deleted spools included; 0 if none), without locking: for previews only. */
+export async function highestSpoolNumber(ex: Executor, ctx: Ctx): Promise<number> {
+  assertCtx(ctx);
   const [r] = await ex.select({ n: max(spool.number) }).from(spool).where(inWorkspace(spool.workspaceId, ctx));
   return r?.n ?? 0;
 }

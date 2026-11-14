@@ -1,6 +1,6 @@
 // Filaments and spools (docs/12 §8).
 import { addSpoolInput, finishSpoolInput, pageQuery, spoolMovementInput, updateSpoolInput, weighSpoolInput } from '@app/contract';
-import { getFilament, listFilaments, listSpoolMovements } from '@app/db';
+import { getFilament, highestSpoolNumber, listFilaments, listSpoolMovements } from '@app/db';
 import { body, idParam, notFound, ok, optionalBody, query } from '../http';
 import { deleteSpool, finishSpool, recordSpoolMovement, restoreSpool, updateSpool, weighSpool } from '../usecases/spools';
 import { addSpool } from '../usecases/add-spool';
@@ -13,7 +13,8 @@ export function filamentRoutes(r: Router) {
     const ctx = c.get('ctx');
     const q = query(c, pageQuery);
     const { items, total } = await listFilaments(db, ctx, q);
-    return ok(c, { items: await filamentListItems(db, ctx, items), page: q.page, pageSize: q.pageSize, total });
+    // nextSpoolNumber: for the preview of Agregar rollo (deleted spools keep their number; addSpool gives the real one).
+    return ok(c, { items: await filamentListItems(db, ctx, items), page: q.page, pageSize: q.pageSize, total, nextSpoolNumber: (await highestSpoolNumber(db, ctx)) + 1 });
   });
 
   r.get('/filaments/:id', 'filament.read', async (c) => {

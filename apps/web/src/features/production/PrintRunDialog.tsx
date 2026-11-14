@@ -79,14 +79,9 @@ function PrintRunForm({ productId, onClose, onDone, filaments, products, printer
 
   const save = useWriteWithWarnings((input: PrintRunInput) => productionApi.create(input), {
     touches: ['printRuns', 'filaments', 'stock', 'supplies', 'printers', 'purchases', 'home', 'products'],
-    ok: (_out, ws, input) => {
-      const used = input.filaments.reduce((a, f) => a + f.grams, 0);
-      const missing = ws.filter((w) => w.code === 'FILAMENT_SHORTFALL').reduce((a, w) => {
-        const d = w.details ?? {};
-        const items = Array.isArray(d.items) ? (d.items as { missingGrams?: number }[]) : [d as { missingGrams?: number }];
-        return a + items.reduce((x, it) => x + (Number(it.missingGrams) || 0), 0);
-      }, 0);
-      const head = t(input.reason === 'test' ? 'toast.printRun.testRecorded' : 'toast.printRun.recorded', { grams: fmtGrams(Math.max(0, used - missing)) });
+    ok: (out, ws, input) => {
+      // «Se descontaron» = what the spools actually lost: with purge, without what was missing (ronda 4 · D).
+      const head = t(input.reason === 'test' ? 'toast.printRun.testRecorded' : 'toast.printRun.recorded', { grams: fmtGrams(out.returnGrams) });
       const after = input.reason === 'test' ? '' : input.result === 'ok'
         ? `${t('screens.production.piecesAdded', { count: input.qty })}${ready && !ready.tracksStock ? ` ${L.nowTracks}` : ''}`
         : L.failedNoAddShort;

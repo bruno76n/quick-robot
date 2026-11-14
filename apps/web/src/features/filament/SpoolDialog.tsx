@@ -20,7 +20,7 @@ import { centsTotal, grams as fmtGrams } from '../../lib/format';
 import { parseNumber, todayLocal } from '../../lib/input';
 import { useWrite } from '../../lib/mutate';
 import { invalidate, useSettings, useSuppliers } from '../../lib/queries';
-import { useAddSpool } from './api';
+import { useAddSpool, useFilaments } from './api';
 import { costSourceShort, perGram, previewCost, spoolName, spoolNumbers, SpoolTag, toSpoolInput } from './spools';
 
 const L = es.screens.spoolDialog;
@@ -52,6 +52,7 @@ function SpoolForm({ filamentId, editing, filaments, onClose, onAdded, onDeleted
     };
   }, [filaments]);
   const n = useSettings().data?.settings.costAvgPurchases;
+  const nextNumber = useFilaments().data?.nextSpoolNumber;
   const suppliers = useSuppliers().data ?? [];
   const [material, setMaterial] = useState(preset?.material ?? '');
   const [materialNew, setMaterialNew] = useState('');
@@ -97,7 +98,9 @@ function SpoolForm({ filamentId, editing, filaments, onClose, onAdded, onDeleted
   const swatch = C.name && !C.isNew ? C.hex! : color === OTHER ? hex : 'var(--line-2)';
 
   // The result: numbers that are created, the spools of the filament after, and the cost for pieces before → after (core).
-  const numbers = editing ? [editing.number] : nextSpoolNumbers(filaments.flatMap((f) => f.spools.map((s) => s.number)), qtyOk ? count : 1);
+  // The next number comes from GET /filaments (it counts deleted spools, which keep theirs); the server gives the real one.
+  const known = filaments.flatMap((f) => f.spools.map((s) => s.number));
+  const numbers = editing ? [editing.number] : nextSpoolNumbers(nextNumber ? [...known, nextNumber - 1] : known, qtyOk ? count : 1);
   const ship = splitCents(shippingCents, numbers.length);
   const created: SpoolInput[] = numbers.map((num, i) => ({ id: `new-${num}`, number: num, purchasedOn: on || todayLocal(), grams: g, costPesos: costCents / 100, shippingPesos: (editing ? shippingCents : ship[i] ?? 0) / 100, remaining: editing ? Math.min(editing.remainingGrams, g) : g, noCost }));
   const kept = (existing?.spools ?? []).filter((s) => s.id !== editing?.id).map(toSpoolInput);

@@ -5,6 +5,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { OrderItem } from '../orders/api';
 import { startPlan } from '../orders/StartSpools';
+import { shortfallGrams } from '../production/write';
 import { CostInfo, costSourceLong, costSourceShort, perGram, previewCost, spoolNumbers, SpoolTag, toSpoolInput } from './spools';
 import { partsOf, planOf, spoolPicks, SpoolUse } from './SpoolUse';
 
@@ -116,5 +117,13 @@ describe('«Empezar con el rollo» (Poner en producción)', () => {
     expect(parts.get('s13')!.taken).toBe(535);
     expect(sp.startSpools('it1')).toEqual([{ filamentId: 'negro', spoolId: 's4' }]);
     expect(startPlan([item], data, () => [{ filamentId: 'negro', grams: 45 }], [negro], 5, {}).startSpools('it1')).toBeUndefined();
+  });
+});
+
+describe('«Se descontaron» says what the spools lose (ronda 4 · D)', () => {
+  it('the missing grams of FILAMENT_SHORTFALL (with purge) are not deducted, one item or several', () => {
+    expect(shortfallGrams([])).toBe(0);
+    expect(shortfallGrams([{ code: 'FILAMENT_SHORTFALL', details: { missingGrams: 12.5, name: 'PLA Gris' } }])).toBe(12.5);
+    expect(shortfallGrams([{ code: 'FILAMENT_SHORTFALL', details: { items: [{ missingGrams: 10 }, { missingGrams: 2.5 }] } }, { code: 'STOCK_SHORT', details: { missing: 2 } }])).toBe(12.5);
   });
 });

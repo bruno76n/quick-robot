@@ -135,6 +135,22 @@ describe('access matrix', () => {
     expect(await snapshotB()).toBe(before);
   });
 
+  it('a spool of B chosen in the body (Registrar impresión, Poner en producción) → 404 for the spool; nothing changes (ronda 4 · D)', async () => {
+    const before = await snapshotB();
+    const run = await s.h.call('POST', '/api/v1/print-runs', { body: { on: '2026-11-01', text: 'x', qty: 1, result: 'ok', hours: 0, reason: 'test', filaments: [{ filamentId: first(s.a.filament), grams: 1, spools: [{ spoolId: s.b.spool }] }] } });
+    expect([run.status, run.json.details?.entity]).toEqual([404, 'spool']);
+    // An order of A that can start, with a real item and printer of A: only the spool is of B.
+    const orders = (await s.h.call('GET', '/api/v1/orders?pageSize=200')).json.data as { items: { id: string; status: string }[] };
+    const order = orders.items.find((o) => o.status === 'accepted')!;
+    const detail = (await s.h.call('GET', `/api/v1/orders/${order.id}`)).json.data as { items: { id: string; toPrint: number }[] };
+    const item = detail.items.find((it) => it.toPrint > 0)!;
+    const printers = (await s.h.call('GET', '/api/v1/printers')).json.data as { items: { id: string }[] };
+    const start = await s.h.call('POST', `/api/v1/orders/${order.id}/start-production`, { body: { assignments: [{ lineItemId: item.id, printerId: printers.items[0]!.id, startSpools: [{ filamentId: first(s.a.filament), spoolId: s.b.spool }] }], deductFilament: true } });
+    expect([start.status, start.json.details?.entity]).toEqual([404, 'spool']);
+    expect((await s.h.call('GET', `/api/v1/orders/${order.id}`)).json.data).toMatchObject({ status: 'accepted' });
+    expect(await snapshotB()).toBe(before);
+  });
+
   it('lists of A never contain anything of B', async () => {
     for (const r of s.h.app.routes.filter((x) => x.method === 'GET' && !x.path.includes(':'))) {
       const text = JSON.stringify((await s.h.call('GET', r.path)).json);

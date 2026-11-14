@@ -52,10 +52,16 @@ for (const width of [1440, 390]) {
     await page.locator('input[name=bascula]').fill('900');
     found.push(...await violations(page, 'spool drawer'));
     await open(page, '/filamentos');
-    await page.getByTestId('spool-menu').first().click();
-    await expect(page.getByRole('menu')).toBeVisible();
-    found.push(...await violations(page, 'spool menu'));
-    await page.getByRole('menuitem', { name: 'Terminar rollo' }).click();
+    if (width > 760) {
+      await page.getByTestId('spool-menu').first().click();
+      await expect(page.getByRole('menu')).toBeVisible();
+      found.push(...await violations(page, 'spool menu'));
+      await page.getByRole('menuitem', { name: 'Terminar rollo' }).click();
+    } else {
+      // On a phone the menu is not drawn (ronda-4 mockup): Terminar rollo is in the spool drawer.
+      await page.getByTestId('spool-row').first().click();
+      await page.locator('.sdr').getByRole('button', { name: 'Terminar rollo' }).click();
+    }
     await expect(page.locator('dialog[open]')).toBeVisible();
     found.push(...await violations(page, 'Terminar rollo'));
     await open(page, '/filamentos');

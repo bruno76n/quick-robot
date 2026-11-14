@@ -1,4 +1,5 @@
 // Dialogs of an order (mockup pagoDlg, entregarDlg, empezarDlg, cancelarDlg). The server recalculates everything.
+import type { Warning } from '@app/contract';
 import { itemHours, proposeAssignment, type LineItemData } from '@app/core';
 import { useState } from 'react';
 import { Dialog } from '../../components/Dialog';
@@ -17,6 +18,7 @@ import { go } from '../../lib/nav';
 import { usePrinters, useProducts } from '../../lib/queries';
 import { ordersApi, ORDER_TOUCHES, useOrder, type OrderDetail, type OrderItem } from './api';
 import { MatRows, Shortfall, useMaterial } from './Material';
+import { shortfallGrams } from '../production/write';
 import { useStartSpools } from './StartSpools';
 import { tbc, warningText } from './parts';
 
@@ -119,6 +121,12 @@ export function ProductionDialog({ id, reassign, onClose }: { id: string; reassi
   return <ProductionForm o={o} printers={printers} reassign={reassign} onClose={onClose} />;
 }
 
+/** «Se descontaron» = what the spools lose: with purge, without what was missing (ronda 4 · D). */
+function startedText(folio: number, g: number, warnings: Warning[]): string {
+  const lost = Math.round((g - shortfallGrams(warnings)) * 10) / 10;
+  return [t('screens.order.inProductionToast', { folio }) + (lost > 0 ? `. ${t('screens.order.deductedToast', { grams: lost })}` : ''), ...(g > 0 ? warnings.map(warningText) : [])].join(' ');
+}
+
 function ProductionForm({ o, printers, reassign, onClose }: { o: OrderDetail; printers: NonNullable<ReturnType<typeof usePrinters>['data']>['items']; reassign: boolean; onClose: () => void }) {
   const hoursBy = new Map((useProducts().data?.items ?? []).map((p) => [p.id, p.hours]));
   const hoursOf = (pid: string) => hoursBy.get(pid) ?? 0;
@@ -137,8 +145,7 @@ function ProductionForm({ o, printers, reassign, onClose }: { o: OrderDetail; pr
   const assignments = its.map((it, k) => ({ lineItemId: it.id, printerId: chosen[k]!, ...spools.startSpools(it.id) }));
   const save = useWrite(async () => ({ data: reassign ? await ordersApi.reassign(o.id, { assignments }) : await ordersApi.start(o.id, { assignments, deductFilament: deduct && g > 0 }) }), {
     touches: [...ORDER_TOUCHES],
-    ok: ({ warnings }) => (reassign ? es.toast['order.printersUpdated']
-      : [t('screens.order.inProductionToast', { folio: o.number }) + (deduct && g > 0 ? `. ${t('screens.order.deductedToast', { grams: g })}` : ''), ...(deduct && g > 0 ? warnings.map(warningText) : [])].join(' ')),
+    ok: ({ warnings }) => (reassign ? es.toast['order.printersUpdated'] : startedText(o.number, deduct ? g : 0, warnings)),
     onDone: onClose,
   });
   // Plan per printer: when it starts and when it ends, against the end of the delivery day.
