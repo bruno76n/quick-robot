@@ -17,11 +17,18 @@
   .cli-t td:first-child, .cli-t th:first-child { padding-left: 0; }
   .cli-t td:last-child, .cli-t th:last-child { padding-right: 0; }
 }
-.cli-id { display: flex; gap: 14px; align-items: center; min-width: 0; }
-.cli-id .av { width: 52px; height: 52px; border-radius: var(--r-panel); font-size: 18px; flex: none; }
-.cli-g { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 36px; align-items: start; margin-top: 8px; }
+.cli-id { display: inline-flex; gap: 12px; align-items: center; min-width: 0; }
+.cli-id .av { width: 36px; height: 36px; border-radius: var(--r-field); font-size: 13px; letter-spacing: normal; font-family: var(--font-body); flex: none; }
+/* Cliente (ronda-3 D): the summary sentence, then contact and history in white panels, like the other screens. */
+.cli-ph { margin-bottom: 18px; }
+.cli-ph p { margin: 0; font-size: 17px; line-height: 1.45; font-weight: 500; letter-spacing: -.01em; text-wrap: pretty; }
+.cli-ph b { font-weight: 600; }
+.cli-ph b.g { color: var(--green-d); }
+.cli-ph b.r { color: var(--red); }
+.cli-g { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 18px; align-items: start; }
 .cli-s { display: grid; gap: 14px; }
-.cli-g section > h2 { margin-bottom: 10px; }
+.cli-h .tbl th:first-child, .cli-h .tbl td:first-child { padding-left: 0; }
+.cli-h .tbl th:last-child, .cli-h .tbl td:last-child { padding-right: 0; }
 @media (max-width: 900px) {
-  .cli-g { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .cli-g { grid-template-columns: minmax(0, 1fr); gap: 14px; }
 }

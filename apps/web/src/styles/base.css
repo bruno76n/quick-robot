@@ -444,13 +444,7 @@ dialog .refs { margin-top: 6px; }
   .pn-e .ed-res { padding-bottom: 0; }
   .pn-e .ed-res .res-act { position: sticky; bottom: 0; background: var(--bg); padding: 12px 0 18px; margin-top: 4px; border-top: 1px solid var(--line); z-index: 2; }
 }
-/* ---------- resumen en frase y "de cada $100" ---------- */
-.brf { background: var(--soft); border-radius: var(--r-panel); padding: 28px 30px 24px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 22px 48px; align-items: start; margin-bottom: 24px; }
-.brf.one { grid-template-columns: minmax(0, 1fr); }
-.brf-l { font-size: 25px; line-height: 1.3; font-weight: 500; letter-spacing: -.03em; text-wrap: pretty; max-width: 30em; }
-.brf-l b { font-weight: 600; }
-.brf-l b.g { color: var(--green-ink); }
-.brf-l b.r { color: var(--red); }
+/* ---------- split bar (Reportes, inventory) ---------- */
 .c100 { display: flex; gap: 2px; height: 46px; border-radius: var(--r-panel); overflow: hidden; background: var(--bg); }
 .c100.sm { height: 26px; border-radius: var(--r-in); margin-top: 14px; }
 .c100 i { display: flex; align-items: center; justify-content: center; min-width: 3px; background-color: var(--s); background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, .22) 0 1px, transparent 1px 3px); color: var(--on-dark); font-size: 12.5px; font-weight: 600; font-style: normal; transition: width .25s; overflow: hidden; }
@@ -463,21 +457,12 @@ dialog .refs { margin-top: 6px; }
 .c100-l b { font-weight: 600; }
 .c100-l li.gan .nm { color: var(--green-ink); font-weight: 600; }
 .c100-l li.gan b { color: var(--green-ink); }
-@media (max-width: 1100px) {
-  .brf { grid-template-columns: minmax(0, 1fr); }
-}
+
 @media (max-width: 700px) {
-  .brf { padding: 20px 18px; border-radius: var(--r-panel); }
-  .brf-l { font-size: 21px; }
   .c100 { height: 38px; }
   .c100-l { grid-template-columns: minmax(0, 1fr); }
 }
 /* ---------- suavizado de Ventas, Pedidos, Filamentos, Producción y Clientes ---------- */
-.brf.sm { padding: 20px 24px; margin-bottom: 20px; }
-.brf.sm .brf-l { font-size: 20px; line-height: 1.4; max-width: 46em; }
-.brf.sm .c100.sm { margin-top: 14px; }
-.brf.sm .c100-l { grid-template-columns: repeat(2, minmax(0, 240px)); }
-.brf.sm .hint { margin: 8px 0 0; }
 .tg { border-radius: 99px; padding: 1px 10px 1px 4px; background: var(--soft); }
 .tg:not(:has(b))::before { width: 8px; height: 8px; border-radius: 50%; align-self: center; margin: 0 6px 0 6px; }
 .tg b { border-radius: 99px; margin-right: 6px; }
@@ -487,11 +472,7 @@ dialog .refs { margin-top: 6px; }
 .stk { border-radius: 99px; }
 .stk i { border-radius: 99px; }
 .note { border-left: 0; border-radius: var(--r-panel); padding: 11px 14px; }
-@media (max-width: 700px) {
-  .brf.sm { padding: 16px 16px; }
-  .brf.sm .brf-l { font-size: 17px; }
-  .brf.sm .c100-l { grid-template-columns: minmax(0, 1fr); }
-}
+
 /* ---------- interfaz neutra: el color solo significa algo ----------
    Gris oscuro = costo y estructura · verde = ganancia y lo positivo · rojo = deuda, fallos · ámbar = aviso.
    El color de dato (cada filamento) es el único que no sale de los tokens. */
