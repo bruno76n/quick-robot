@@ -2,7 +2,10 @@
 import { itemHours, itemLines } from '@app/core';
 import { useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
-import { PageHead } from '../../components/AppShell';
+import { PageHead } from '../../components/PageHead';
+import { Meter } from '../../components/Meter';
+import { Panel } from '../../components/Panel';
+import { Steps } from '../../components/Steps';
 import { Button } from '../../components/Button';
 import { ConfirmButton } from '../../components/ConfirmButton';
 import { DocumentDialog, type DocumentKind } from '../../components/DocumentSheet';
@@ -11,12 +14,13 @@ import { Icon } from '../../components/Icon';
 import { Pill } from '../../components/Pill';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
-import { centsTotal, date, daysBetween, hours, money, queueDuration, relativeDay } from '../../lib/format';
+import { centsTotal, date, daysBetween, hours, money, pct, queueDuration, relativeDay } from '../../lib/format';
 import { todayLocal } from '../../lib/input';
 import { useWrite } from '../../lib/mutate';
 import { go } from '../../lib/nav';
 import { useProducts, useSettings } from '../../lib/queries';
 import { isActive, ordersApi, ORDER_TOUCHES, STEPS, useOrder, type OrderDetail } from './api';
+import { CustomerPanel } from './OrderSide';
 import { MatRows, Shortfall, useMaterial } from './Material';
 import { fromStockOf, lineData, piecesOf } from './OrderDialogs';
 import { NextStepButton, StepDialogs, useStepRunner, type StepRunner } from './OrderSteps';
@@ -32,68 +36,91 @@ export function OrderPage() {
   const search = useSearch({ strict: false }) as { id?: string; tab?: string };
   const q = useOrder(search.id);
   const runner = useStepRunner();
-  if (q.isError || !search.id) return <><Crumbs folio={null} /><div className="empty-box"><p>{L.notFound}</p></div></>;
+  if (q.isError || !search.id) return <><PageHead crumbs={CRUMBS} title={es.screens.orders.title} /><div className="panel empty-box"><p>{L.notFound}</p></div></>;
   if (!q.data) return null;
   return <Order o={q.data} runner={runner} tab={(search.tab ?? 'articulos') as Tab} />;
 }
 
-function Crumbs({ folio }: { folio: number | null }) {
-  return <nav className="crumbs"><a href="/pedidos" onClick={(e) => { e.preventDefault(); go('/pedidos'); }}>{es.screens.orders.title}</a><span>/</span>{folio !== null ? <span>{t('screens.order.crumb', { folio })}</span> : null}</nav>;
-}
+const CRUMBS = [{ label: es.screens.orders.title, to: '/pedidos' }];
 
 function Order({ o, runner, tab: asked }: { o: OrderDetail; runner: StepRunner; tab: Tab }) {
   const [doc, setDoc] = useState<DocumentKind | null>(null);
-  const today = todayLocal();
   const fin = o.status === 'delivered';
   const canc = o.status === 'cancelled';
   const T = o.totals;
-  const pieces = o.items.reduce((a, it) => a + piecesOf(it), 0);
   const prodHay = o.status === 'in_production' || (!fin && (o.material.needs.some((n) => n.grams > 0) || (fromStockOf(o) > 0 && (o.status === 'quoted' || o.status === 'accepted'))));
   const tab: Tab = asked === 'produccion' && !prodHay ? 'articulos' : asked;
   const setTab = (k: Tab) => go(`/pedidos/pedido?id=${o.id}${k === 'articulos' ? '' : `&tab=${k}`}`, true);
-  const n = daysBetween(today, o.dueOn);
   const k = STEPS.indexOf(o.status);
   const tabs: [Tab, string][] = [['articulos', L.tabPieces], ['pagos', T.owedCents > 0 ? t('screens.order.tabPaymentsOwed', { amount: centsTotal(T.owedCents) }) : L.tabPayments], ...(prodHay ? [['produccion', L.tabProduction] as [Tab, string]] : []), ['datos', L.tabData]];
   const customer = o.customer?.name ?? es.screens.orders.noCustomer;
-  const sub = fin ? t('screens.order.subDelivered', { folio: o.number, created: date(o.createdOn), delivered: date(o.deliveredOn ?? o.dueOn) }) : t('screens.order.sub', { folio: o.number, created: date(o.createdOn) });
+  const folio = t('screens.order.crumb', { folio: o.number });
   const c = o.cancellation;
+  // D-1: a date only under the steps whose date is stored (Aceptado has none).
+  const stepDate: Record<string, string | null> = { quoted: o.createdOn, accepted: null, in_production: o.productionOn, ready: o.readyOn, delivered: o.deliveredOn };
+  const steps = STEPS.map((st) => ({ key: st, label: es.status.order[st], date: k >= STEPS.indexOf(st) && stepDate[st] ? date(stepDate[st]!) : undefined }));
   return (
     <>
-      <Crumbs folio={o.number} />
-      <PageHead title={<><span>{customer}</span><StatusChip status={o.status} /></>} sub={sub} actions={<>
-        <NextStepButton order={o} runner={runner} primary />
+      <PageHead crumbs={CRUMBS} title={<><span>{folio}</span><StatusChip status={o.status} /></>} short={folio} sub={customer} actions={<>
         {o.status === 'quoted' || o.status === 'accepted' ? <Button icon="edit" onClick={() => go(`/armar?modo=pedido&id=${o.id}`)}>{L.edit}</Button> : null}
-        {canc ? null : <Button icon="copy" onClick={() => setDoc(fin ? 'order_note' : 'quote')} data-testid="doc-open">{fin ? L.saleNote : L.quote}</Button>}
+        <NextStepButton order={o} runner={runner} primary />
       </>} />
-      {canc && c ? (
-        <p className="status bad"><Icon name="warn" size={16} /><span>{[
-          c.reason ? t('screens.order.cancelledReason', { date: date(c.on), reason: c.reason }) : t('screens.order.cancelledOn', { date: date(c.on) }),
-          c.refundCents > 0 ? t('screens.order.refunded', { amount: centsTotal(c.refundCents) }) : '',
-          T.paidCents > 0 ? t('screens.order.kept', { amount: centsTotal(T.paidCents) }) : '', L.notSale].filter(Boolean).join(' ')}</span></p>
-      ) : (
-        <ol className="stp" aria-label={L.stepperAria}>{STEPS.map((s, i) => <li key={s} className={i < k ? 'done' : i === k ? 'now' : ''} aria-current={i === k ? 'step' : undefined}><i className="stp-b" /><span>{es.status.order[s]}</span></li>)}</ol>
-      )}
-      <section className="strip band slim" aria-label={L.bandAria}>
-        <div><span className="k">{L.total}</span><b className="v num">{centsTotal(T.totalCents)}</b><span className="s">{t('screens.order.piecesIn', { pieces, items: o.items.length })}</span></div>
-        <div><span className="k">{T.owedCents > 0 ? L.owed : canc ? L.collectedK : L.paid}</span><b className={`v num ${T.owedCents > 0 ? 'neg' : 'pos'}`}>{centsTotal(T.owedCents > 0 ? T.owedCents : canc ? T.paidCents : T.totalCents)}</b>
-          <span className="s">{T.owedCents > 0 ? t('screens.order.paidAmount', { amount: centsTotal(T.paidCents) }) : canc ? L.afterRefund : L.fullyPaid}</span>
-          {/* Ronda-2 §12, D7: the payment at hand from any tab (Cobro keeps its own button, so it is not repeated there). */}
-          {T.owedCents > 0 && isActive(o.status) && tab !== 'pagos' ? <Button size="sm" className="band-pay" onClick={() => runner.setDlg({ kind: 'pay', id: o.id })}>{L.recordPayment}</Button> : null}</div>
-        <div><span className="k">{fin ? L.deliveredK : L.dueK}</span><b className={`v num ${!fin && !canc && n <= 1 ? 'neg' : ''}`}>{date(fin ? o.deliveredOn ?? o.dueOn : o.dueOn)}</b><span className="s">{fin ? L.saleInSales : canc ? '' : relativeDay(o.dueOn, today)}</span></div>
-      </section>
-      <details className="more"><summary>{L.costProfit}</summary><div className="more-b">
-        <div><span className="k">{L.cost}</span><b className="num">{centsTotal(T.costCents)}</b><small>{T.commissionCents > 0 ? t('screens.order.plusCommission', { amount: centsTotal(T.commissionCents), channel: o.channel }) : L.costParts}</small></div>
-        <div><span className="k">{L.profit}</span><b className={`num ${T.profitCents >= 0 ? 'pos' : 'neg'}`}>{centsTotal(T.profitCents)}</b><small>{t('screens.order.marginOf', { pct: T.totalCents > 0 ? (T.profitCents / T.totalCents) * 100 : 0 })}</small></div>
-      </div></details>
-      <div className="seg tabs" role="tablist" aria-label={L.tabsAria}>
-        {tabs.map(([key, label]) => <button key={key} type="button" role="tab" className={tab === key ? 'on' : ''} aria-selected={tab === key} onClick={() => setTab(key)}>{label}</button>)}
-      </div>
-      <div className="ped-t">
-        {tab === 'articulos' ? <Pieces o={o} /> : tab === 'pagos' ? <Payments o={o} runner={runner} /> : tab === 'produccion' ? <div className="ed-form"><Production o={o} runner={runner} /><Material o={o} /></div> : <Data o={o} runner={runner} />}
+      <div className="ped-grid">
+        <div className="ped-main">
+          <section className="panel ped-card">
+            {canc && c ? (
+              <p className="status bad"><Icon name="warn" size={16} /><span>{[
+                c.reason ? t('screens.order.cancelledReason', { date: date(c.on), reason: c.reason }) : t('screens.order.cancelledOn', { date: date(c.on) }),
+                c.refundCents > 0 ? t('screens.order.refunded', { amount: centsTotal(c.refundCents) }) : '',
+                T.paidCents > 0 ? t('screens.order.kept', { amount: centsTotal(T.paidCents) }) : '', L.notSale].filter(Boolean).join(' ')}</span></p>
+            ) : <Steps label={L.stepperAria} current={fin ? STEPS.length : k} steps={steps} />}
+            <Figures o={o} runner={runner} tab={tab} />
+          </section>
+          <div className="seg tabs" role="tablist" aria-label={L.tabsAria}>
+            {tabs.map(([key, label]) => <button key={key} type="button" role="tab" className={tab === key ? 'on' : ''} aria-selected={tab === key} onClick={() => setTab(key)}>{label}</button>)}
+          </div>
+          <div className="ped-t">
+            {tab === 'articulos' ? <Pieces o={o} /> : tab === 'pagos' ? <Payments o={o} runner={runner} /> : tab === 'produccion' ? <><Production o={o} runner={runner} /><Material o={o} /></> : <Data o={o} runner={runner} />}
+          </div>
+        </div>
+        <div className="ped-side">
+          <CustomerPanel o={o} />
+          <Panel title={L.costProfit}>
+            <dl className="ped-kv">
+              <div><dt>{L.cost}</dt><dd className="num">{centsTotal(T.costCents)}</dd></div>
+              <div><dt>{L.profit}</dt><dd className={`num ${T.profitCents >= 0 ? 'g' : 'bad'}`}>{centsTotal(T.profitCents)}</dd></div>
+              <div><dt>{L.margin}</dt><dd className="num">{pct(T.totalCents > 0 ? (T.profitCents / T.totalCents) * 100 : 0)}</dd></div>
+            </dl>
+            <p className="meta">{T.commissionCents > 0 ? t('screens.order.plusCommission', { amount: centsTotal(T.commissionCents), channel: o.channel }) : L.costParts}</p>
+          </Panel>
+          {canc ? null : <Panel title={L.documents}><div className="btnrow"><Button icon="copy" onClick={() => setDoc(fin ? 'order_note' : 'quote')} data-testid="doc-open">{fin ? L.saleNote : L.quote}</Button></div></Panel>}
+        </div>
       </div>
       <StepDialogs runner={runner} />
       {doc ? <DocumentDialog kind={doc} id={o.id} onClose={() => setDoc(null)} /> : null}
     </>
+  );
+}
+
+/** The four figures of the order (mockup .ui-figs): Total, Pagado, Saldo with its payment button, Fecha de entrega. */
+function Figures({ o, runner, tab }: { o: OrderDetail; runner: StepRunner; tab: Tab }) {
+  const today = todayLocal();
+  const T = o.totals;
+  const fin = o.status === 'delivered';
+  const canc = o.status === 'cancelled';
+  const n = daysBetween(today, o.dueOn);
+  const pieces = o.items.reduce((a, it) => a + piecesOf(it), 0);
+  return (
+    <section className="ped-figs" aria-label={L.bandAria}><dl>
+      <div><dt>{L.total}</dt><dd className="num">{centsTotal(T.totalCents)}</dd><small>{t('screens.order.piecesIn', { pieces, items: o.items.length })}</small></div>
+      <div><dt>{canc ? L.collectedK : L.paid}</dt><dd className="num">{centsTotal(T.paidCents)}</dd>{canc ? <small>{L.afterRefund}</small> : null}</div>
+      <div className={T.owedCents > 0 ? 'f-due' : ''}><dt>{L.owed}</dt><dd className="num">{centsTotal(T.owedCents)}</dd>
+        {T.owedCents > 0 ? null : canc ? null : <small>{L.fullyPaid}</small>}
+        {/* Ronda-2 §12, D7: the payment at hand from any tab (Cobro keeps its own button, so it is not repeated there). */}
+        {T.owedCents > 0 && isActive(o.status) && tab !== 'pagos' ? <Button size="sm" className="band-pay" onClick={() => runner.setDlg({ kind: 'pay', id: o.id })}>{L.recordPayment}</Button> : null}</div>
+      <div className={!fin && !canc && n <= 2 ? (n < 0 ? 'f-due' : 'f-warn') : ''}><dt>{fin ? L.deliveredK : L.dueK}</dt><dd className="num">{date(fin ? o.deliveredOn ?? o.dueOn : o.dueOn)}</dd>
+        <small>{fin ? L.saleInSales : canc ? '' : relativeDay(o.dueOn, today)}</small></div>
+    </dl></section>
   );
 }
 
@@ -195,12 +222,7 @@ function Payments({ o, runner }: { o: OrderDetail; runner: StepRunner }) {
   const paidPct = T.totalCents > 0 ? Math.min(100, (T.paidCents / T.totalCents) * 100) : 0;
   return (
     <fieldset className="blk"><legend>{L.payments}</legend>
-      <div className="cobro">
-        <div><span className="k">{L.total}</span><b className="v num">{centsTotal(T.totalCents)}</b></div>
-        <div><span className="k">{L.paid}</span><b className="v num">{centsTotal(T.paidCents)}</b></div>
-        <div><span className="k">{L.owed}</span><b className={`v num ${T.owedCents > 0 ? 'neg' : 'pos'}`}>{centsTotal(T.owedCents)}</b></div>
-      </div>
-      <div className="prog thick" role="img" aria-label={t('screens.order.paidAria', { n: Math.round(paidPct) })}><i style={{ width: `${paidPct}%` }} /></div>
+      <Meter value={T.paidCents} max={T.totalCents} label={t('screens.order.paidAria', { n: Math.round(paidPct) })} className="ped-paid" />
       {o.payments.length ? (
         <ul className="pagos">{o.payments.map((p) => (
           <li key={p.id}><span className="mut">{date(p.on)}</span><span>{p.note}</span><b className="num">{centsTotal(p.amountCents)}</b>
@@ -228,7 +250,7 @@ function Production({ o, runner }: { o: OrderDetail; runner: StepRunner }) {
         <div className="pj" key={j.id}>
           <div className="pj-h"><b>{j.printerName}</b><Pill tone={j.position === 0 ? 'info' : ''}>{j.position === 0 ? L.printingChip : L.queuedChip}</Pill></div>
           <p>{j.text}</p>
-          {j.position === 0 ? <><div className="prog noz"><i style={{ width: `${j.progress}%` }} /></div><small>{t('screens.order.jobLeft', { n: j.progress, time: queueDuration(j.remainingMinutes) })} <span className="mut">{L.estimated}</span></small></>
+          {j.position === 0 ? <><Meter value={j.progress} /><small>{t('screens.order.jobLeft', { n: j.progress, time: queueDuration(j.remainingMinutes) })} <span className="mut">{L.estimated}</span></small></>
             : <small>{t('screens.order.waitLine', { time: queueDuration(j.waitMinutes), count: j.position })}</small>}
         </div>
       )) : <p className="note warn">{L.noPrinter}</p>}
@@ -272,28 +294,18 @@ function Data({ o, runner }: { o: OrderDetail; runner: StepRunner }) {
     onDone: () => go('/pedidos'),
   });
   const closed = !isActive(o.status);
-  const c = o.customer;
   return (
     <>
-      <div className="cols2 soft">
-        <fieldset className="blk"><legend>{L.deliveryChannel}</legend><div className="grid2">
-          <Field label={L.due} hint={closed ? undefined : dueText(o, today)}><input type="date" value={o.dueOn} disabled readOnly /></Field>
-          <Field label={L.channel}><select value={o.channelId} disabled>{(channels.some((x) => x.id === o.channelId) ? channels : [{ id: o.channelId, name: o.channel }]).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>
-        </div></fieldset>
-        <fieldset className="blk"><legend>{L.customer}</legend>
-          {c ? <>
-            <div className="cli-card">{c.logoUrl ? <span className="av logo"><img src={c.logoUrl} alt="" /></span> : <span className="av">{initials(c.name)}</span>}<div><b>{c.name}</b><small className="blk">{c.type} · {c.phone ? c.phone : <span className="neg">{L.noContact}</span>}{c.hasLogo ? L.withLogo : ''}</small></div></div>
-            <div className="btnrow"><Button size="sm" onClick={() => go(`/clientes/cliente?id=${c.id}`)}>{L.seeCustomer}</Button><Button size="sm" variant="ghost" onClick={() => go(`/clientes/cliente?id=${c.id}`)}>{L.editCustomer}</Button></div>
-          </> : <p className="note warn">{L.noCustomer}{o.status === 'quoted' || o.status === 'accepted' ? <> <button type="button" className="link" onClick={() => go(`/armar?modo=pedido&id=${o.id}`)}>{L.chooseCustomer}</button></> : null}</p>}
-        </fieldset>
-      </div>
+      <fieldset className="blk"><legend>{L.deliveryChannel}</legend><div className="grid2">
+        <Field label={L.due} hint={closed ? undefined : dueText(o, today)}><input type="date" value={o.dueOn} disabled readOnly /></Field>
+        <Field label={L.channel}><select value={o.channelId} disabled>{(channels.some((x) => x.id === o.channelId) ? channels : [{ id: o.channelId, name: o.channel }]).map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select></Field>
+      </div></fieldset>
       <fieldset className="blk"><legend>{L.notes}</legend><label className="fld"><span className="sr">{L.notesLabel}</span><textarea rows={2} value={o.note} readOnly disabled={closed} placeholder={L.noNotes} /></label>
         {closed ? null : <p className="hint">{L.dataHint}</p>}</fieldset>
-      <div className="det-z btnrow">
+      <div className="btnrow ped-z">
         {isActive(o.status) ? <Button onClick={() => runner.setDlg({ kind: 'cancel', id: o.id })} data-testid="cancel-order">{L.cancelOrder}</Button> : null}
         <ConfirmButton variant="ghost" danger confirmText={es.confirm.tapAgainDelete} onConfirm={() => del.mutate(undefined)}>{L.deleteOrder}</ConfirmButton>
       </div>
     </>
   );
 }
-const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '?';

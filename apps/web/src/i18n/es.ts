@@ -303,7 +303,7 @@ export const es = {
       kept: 'Quedaron {amount} cobrados que no se devolvieron.', notSale: 'No cuenta como venta.', stepperAria: 'Avance del pedido',
       bandAria: 'Resumen del pedido', total: 'Total', piecesIn: '{pieces} {pieces|pieza|piezas} en {items} {items|artículo|artículos}', owed: 'Saldo', collectedK: 'Cobrado', paid: 'Pagado',
       paidAmount: 'pagado {amount}', afterRefund: 'después del reembolso', fullyPaid: 'cobro completo', deliveredK: 'Entregado', dueK: 'Fecha de entrega', saleInSales: 'La venta ya está en Ventas',
-      costProfit: 'Costo y ganancia', cost: 'Costo', plusCommission: 'más comisión de {amount} ({channel})', costParts: 'material, luz y máquina', profit: 'Ganancia', marginOf: 'Margen {pct}',
+      costProfit: 'Costo y ganancia', margin: 'Margen', documents: 'Documentos', customerOrders: 'Pedidos', customerOwed: 'Saldo por cobrar', cost: 'Costo', plusCommission: 'más comisión de {amount} ({channel})', costParts: 'material, luz y máquina', profit: 'Ganancia', marginOf: 'Margen {pct}',
       tabsAria: 'Secciones del pedido', tabPieces: 'Piezas', tabPayments: 'Cobro', tabPaymentsOwed: 'Cobro · saldo {amount}', tabProduction: 'Producción', tabData: 'Datos',
       breakdown: 'Desglose por pieza', colPiece: 'Pieza', colQty: 'Cant.', colUnit: 'Precio c/u', colTotal: 'Total', colCost: 'Costo', colProfit: 'Ganancia', colWhere: 'Dónde está',
       setTag: 'Colección', setPieces: '{count} {count|pieza|piezas} · precio del set', sets: '{count|set|sets}', totalRow: 'Total', pieces: '{count|pieza|piezas}',

@@ -15,7 +15,8 @@ test('B: quoted → accepted → in production → ready from the printers → d
   const gramsBefore = filBefore.items.reduce((a, f) => a + f.remainingGrams, 0);
 
   await page.goto(`${server.url}/pedidos/pedido?id=${order.id}`);
-  await expect(page.getByRole('heading', { level: 1 })).toContainText(s.customerName);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(`Pedido #${order.number}`);
+  await expect(page.locator('.ph .sub')).toHaveText(s.customerName);
   await expect(page.locator('.ph .chip')).toHaveText('Cotizado');
 
   await page.getByTestId('next-step').click();
