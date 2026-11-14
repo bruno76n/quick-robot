@@ -17,7 +17,7 @@
  ".seg button:hover { color: var(--ink); }",
  ".seg button:hover, .seg2 button:hover { color: var(--ink); }",
  ".seg { display: inline-flex; flex-wrap: wrap; gap: 4px 22px; padding: 0; background: none; border-bottom: 1px solid var(--line-2); }",
- ".seg, .seg2 { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 4px; background: var(--soft); border: 0; border-radius: 99px; }",
+ ".seg, .seg2 { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 4px; background: var(--track); border: 0; border-radius: 99px; }",
  ".seg.tabs { margin: 6px 0 20px; max-width: 100%; overflow-x: auto; }",
  ".seg.wide > * { flex: 1; }",
  ".seg.wide { display: flex; gap: 4px 0; }",
