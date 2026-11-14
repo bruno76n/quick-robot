@@ -47,7 +47,7 @@ Prueba de las fronteras: un archivo de ejemplo que viola una regla debe **romper
 ```
 packages/core/package.json, tsconfig.json
 src/money.ts                      centavos ↔ pesos, round2, formato
-src/filament.ts                   costo por gramo, promedio ponderado, orden de rollos, descontar, faltante, estado del filamento y del rollo
+src/filament.ts                   costo por gramo (últimas compras), valor, número de rollo, orden y elección de rollos, descontar, faltante, pesar, terminar, estado
 src/index.ts
 test/money.test.ts
 test/filament.test.ts             casos 1.1, 1.2 y 1.3 de 04

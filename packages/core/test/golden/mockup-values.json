@@ -5,7 +5,8 @@
  "_notes": [
   "Las fechas del respaldo son absolutas; las pruebas deben pasar _today como 'hoy' a core (core no lee el reloj).",
   "inversion.gastos y fijosMes dependen de _today porque los gastos recurrentes se prorratean por días (docs/04 §10).",
-  "Los montos están en pesos; en la base de datos van en centavos (docs/04 convenciones y docs/05)."
+  "Los montos están en pesos; en la base de datos van en centavos (docs/04 convenciones y docs/05).",
+  "Ronda 4 (decisión del dueño): el costo por gramo de un filamento es el promedio de sus últimas 3 compras con costo (docs/04 §1). Cambian PLA Blanco (0.3784 → 0.38) y las piezas y colecciones que lo usan; la lista old → new está en docs/decisiones.md (2026-11-14 · Ronda 4 · Fase A). Las ventas guardan su costo del momento y no cambian."
  ],
  "productos": [
   {
@@ -40,57 +41,57 @@
    "id": "pr3",
    "nombre": "Spider-Man · salto",
    "modo": "valor",
-   "M": 15.8916,
+   "M": 15.96,
    "L": 1.62,
    "Q": 13.5,
    "E": 6,
-   "sub": 37.0116,
-   "F": 1.948,
-   "costo": 38.9596,
+   "sub": 37.08,
+   "F": 1.9516,
+   "costo": 39.0316,
    "precio": 250,
-   "piso": 55.6566
+   "piso": 55.7594
   },
   {
    "id": "pr4",
    "nombre": "Spider-Man · trepando",
    "modo": "valor",
-   "M": 15.097,
+   "M": 15.162,
    "L": 1.44,
    "Q": 12,
    "E": 6,
-   "sub": 34.537,
-   "F": 1.8177,
-   "costo": 36.3548,
+   "sub": 34.602,
+   "F": 1.8212,
+   "costo": 36.4232,
    "precio": 250,
-   "piso": 51.9354
+   "piso": 52.0331
   },
   {
    "id": "pr5",
    "nombre": "Doctor Doom · busto",
    "modo": "valor",
-   "M": 16.6862,
+   "M": 16.758,
    "L": 1.8,
    "Q": 15,
    "E": 6,
-   "sub": 39.4862,
-   "F": 2.0782,
-   "costo": 41.5644,
+   "sub": 39.558,
+   "F": 2.082,
+   "costo": 41.64,
    "precio": 250,
-   "piso": 59.3778
+   "piso": 59.4857
   },
   {
    "id": "pr6",
    "nombre": "Hulk · puño",
    "modo": "valor",
-   "M": 15.8916,
+   "M": 15.96,
    "L": 1.512,
    "Q": 12.6,
    "E": 6,
-   "sub": 36.0036,
-   "F": 1.8949,
-   "costo": 37.8986,
+   "sub": 36.072,
+   "F": 1.8985,
+   "costo": 37.9705,
    "precio": 250,
-   "piso": 54.1408
+   "piso": 54.2436
   },
   {
    "id": "pr8",
@@ -110,15 +111,15 @@
    "id": "pr9",
    "nombre": "Letrero de taquería",
    "modo": "valor",
-   "M": 33.2862,
+   "M": 33.3375,
    "L": 2.16,
    "Q": 18,
    "E": 12,
-   "sub": 65.4462,
-   "F": 3.4445,
-   "costo": 68.8908,
+   "sub": 65.4975,
+   "F": 3.4472,
+   "costo": 68.9447,
    "precio": 450,
-   "piso": 98.4154
+   "piso": 98.4925
   },
   {
    "id": "pr10",
@@ -139,18 +140,18 @@
   {
    "id": "c1",
    "nombre": "Colección Doomsday blanca",
-   "costo": 179.7774,
+   "costo": 180.0653,
    "precio": 1000,
    "sueltas": 1000,
-   "piso": 256.8248
+   "piso": 257.2361
   },
   {
    "id": "c2",
    "nombre": "Spider-Man · 2 poses",
-   "costo": 85.3144,
+   "costo": 85.4547,
    "precio": 450,
    "sueltas": 500,
-   "piso": 121.8777
+   "piso": 122.0782
   }
  ],
  "filamentos": [
@@ -158,7 +159,7 @@
    "id": "f1",
    "nombre": "PLA Blanco",
    "restante_g": 1720,
-   "costo_por_g": 0.3784
+   "costo_por_g": 0.38
   },
   {
    "id": "f2",

@@ -1,9 +1,10 @@
 // Golden values (docs/10 §2.1): the product must give the same costs and prices as the mockup (±0.01),
-// computed from the mockup's own example data.
+// computed from the mockup's own example data. Since ronda 4 the cost per gram of a filament is the average of its last
+// 3 purchases with cost (docs/04 §1, owner's decision); a mockup spool that cost $0 is a no-cost spool.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { costProduct, type PrinterCost } from '../src/costs';
-import { filamentCostPerGram, filamentRemaining, type SpoolInput } from '../src/filament';
+import { COST_AVG_PURCHASES, filamentCosts, filamentRemaining, type SpoolInput } from '../src/filament';
 import { floorPrice, listPrice, looseSum, setCost, setPrice, type SetPart } from '../src/pricing';
 import { maintenanceState } from '../src/printers';
 
@@ -13,17 +14,24 @@ const TOL = golden._tolerance as number;
 const close = (a: number, e: number) => expect(Math.abs(a - e)).toBeLessThanOrEqual(TOL);
 
 const settings = { kwhPrice: b.config.kwh, purgePct: b.config.purga, failurePct: b.config.fallos };
-const spoolsOf = (fid: string): SpoolInput[] => b.rollos.filter((r: { fil: string }) => r.fil === fid).map((r: { id: string; fecha: string; gramos: number; costo: number; envio: number }) => ({
-  id: r.id, purchasedOn: r.fecha, grams: r.gramos, costPesos: r.costo, shippingPesos: r.envio,
+type RawSpool = { id: string; fil: string; fecha: string; gramos: number; costo: number; envio: number };
+const toSpool = (r: RawSpool): SpoolInput & { filamentId: string } => ({
+  id: r.id, filamentId: r.fil, purchasedOn: r.fecha, grams: r.gramos, costPesos: r.costo, shippingPesos: r.envio, noCost: r.costo + r.envio === 0,
   remaining: b.movs.filter((m: { rollo: string }) => m.rollo === r.id).reduce((a: number, m: { g: number }) => a + m.g, 0),
-}));
+});
+const spoolsOf = (fid: string): SpoolInput[] => (b.rollos as RawSpool[]).filter((r) => r.fil === fid).map(toSpool);
+const filamentCost = filamentCosts(
+  (b.filamentos as { id: string; material: string }[]).map((f) => ({ id: f.id, material: f.material })),
+  (b.rollos as RawSpool[]).map(toSpool), COST_AVG_PURCHASES.default,
+);
+const costPerGram = (fid: string) => filamentCost.get(fid)?.costPerGram ?? 0;
 const printers = new Map<string, PrinterCost>(b.impresoras.map((p: { id: string; costo: number; vidaH: number; mantoH: number; kw: number }) => [p.id, { costPesos: p.costo, lifeHours: p.vidaH, maintenancePerHour: p.mantoH, kw: p.kw }]));
 const supplyCost = new Map<string, number>(b.insumos.map((i: { id: string; costo: number }) => [i.id, i.costo]));
 
 function costOf(p: { imp: string; horas: number; extras: number; filamentos: { fil: string; g: number }[]; insumos: { ins: string; cant: number }[] }) {
   return costProduct({
     hours: p.horas, extras: p.extras, printer: printers.get(p.imp) ?? null,
-    filaments: p.filamentos.map((f) => ({ grams: f.g, costPerGram: filamentCostPerGram(spoolsOf(f.fil)) })),
+    filaments: p.filamentos.map((f) => ({ grams: f.g, costPerGram: costPerGram(f.fil) })),
     supplies: (p.insumos ?? []).map((x) => ({ qty: x.cant, unitCost: supplyCost.get(x.ins) ?? 0 })),
   }, [...printers.values()], settings);
 }
@@ -59,7 +67,7 @@ describe('golden: filaments, supplies and maintenance', () => {
   it.each(golden.filamentos.map((g: { nombre: string }) => [g.nombre, g]) as [string, unknown][])('%s', (_n, g) => {
     const e = g as { id: string; restante_g: number; costo_por_g: number };
     close(filamentRemaining(spoolsOf(e.id)), e.restante_g);
-    close(filamentCostPerGram(spoolsOf(e.id)), e.costo_por_g);
+    close(costPerGram(e.id), e.costo_por_g);
   });
 
   it('supply stock is the sum of its ledger', () => {

@@ -4,7 +4,7 @@ import { getFilament, listFilaments, listSpoolMovements, listSpools } from '@app
 import { body, idParam, notFound, ok, query } from '../http';
 import { deleteSpool, recordSpoolMovement, restoreSpool, updateSpool } from '../usecases/spools';
 import { addSpool } from '../usecases/add-spool';
-import { filamentDetailView, filamentListItems } from '../views/filament-view';
+import { filamentDetailView, filamentListItems, loadFilamentCosts } from '../views/filament-view';
 import type { Router } from './router';
 
 export function filamentRoutes(r: Router) {
@@ -21,7 +21,7 @@ export function filamentRoutes(r: Router) {
     const ctx = c.get('ctx');
     const f = await getFilament(db, ctx, idParam(c, 'id', 'filament'));
     if (!f) throw notFound('filament');
-    return ok(c, filamentDetailView(f, await listSpools(db, ctx, [f.id]), await listSpoolMovements(db, ctx, f.id)));
+    return ok(c, filamentDetailView(f, await listSpools(db, ctx, [f.id]), await listSpoolMovements(db, ctx, f.id), await loadFilamentCosts(db, ctx)));
   });
 
   r.post('/spools', 'spool.create', async (c) => {

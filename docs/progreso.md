@@ -65,3 +65,14 @@ Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 3` · `t
 | Pantallas (17 pasos de §6) | C | terminada | [`mejoras/informe-ronda3-c.md`](mejoras/informe-ronda3-c.md): marco y 16 pantallas con el diseño nuevo; segmentados, cajón de filamento y mascota como antes (E1–E3); lo que la maqueta muestra y el sistema no tiene, en ese informe |
 | Marco (barra lateral, menú ≤ 1099, encabezado) | C1 | igual a la maqueta de la ronda 3 | Mascota en lugar de «EZ» (E3) y «Nueva pieza» (D-11); comparado a 1440, 820 y 390 |
 | Revisión visual, accesibilidad y textos | D | terminada | [`mejoras/informe-ronda3-d.md`](mejoras/informe-ronda3-d.md): 16 pantallas, cajón, pedido y diálogos revisados en 1440/820/390 con 12 correcciones; axe sin hallazgos serios (`e2e/a11y.spec.ts`); sin colores literales; limpieza de CSS y tokens. **Ronda 3 terminada** (resumen final en ese informe) |
+
+## Ronda 4 (`mejoras/ronda-4.md`)
+
+Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 4` · `terminada`.
+
+| Parte | Fase | Estado | Notas |
+|---|---|---|---|
+| Reglas en `core`, `04 §1` y golden | A | terminada | [`mejoras/informe-ronda4-a.md`](mejoras/informe-ronda4-a.md): reglas de §2 en `core` con sus casos (1.1a–g, 1.4, 1.5a–c, 1.6 en `04 §1`); costo por gramo = últimas 3 compras con costo (decisión del dueño); golden: solo PLA Blanco 0.3784 → 0.38 y sus 5 piezas y 2 colecciones; servidor ya cuesta con la regla nueva. Plan de B y C en el informe |
+| Migración y operaciones | B | no iniciada | |
+| Pantallas | C | no iniciada | Excepciones E1–E3 de la ronda 3 siguen |
+| Revisión y flujo nuevo | D | no iniciada | |

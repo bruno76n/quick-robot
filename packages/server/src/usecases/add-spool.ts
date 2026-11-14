@@ -8,7 +8,7 @@ import {
 } from '@app/db';
 import type { Deps } from '../deps';
 import { notFound } from '../http';
-import { filamentListView, spoolView } from '../views/filament-view';
+import { filamentListView, loadFilamentCosts, spoolView } from '../views/filament-view';
 import { loadCatalogs } from './settings';
 
 /** Adds the brand to the pick list when it is new; returns its official spelling. */
@@ -48,6 +48,6 @@ export async function addSpool(deps: Deps, ctx: Ctx, input: AddSpoolInput): Prom
     });
     await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: spool.id, on: input.purchasedOn, kind: 'purchase', grams: input.grams, note: input.note ?? '' }]);
     const spools = await listSpools(tx, ctx, [filament.id]);
-    return { spool: spoolView(spools.find((s) => s.id === spool.id)!), filament: filamentListView(filament, spools) };
+    return { spool: spoolView(spools.find((s) => s.id === spool.id)!), filament: filamentListView(filament, spools, await loadFilamentCosts(tx, ctx)) };
   });
 }

@@ -22,6 +22,7 @@ Sistema para negocios de impresión 3D. Un solo producto: web con suscripción; 
 | [14 · Convenciones y pruebas](14-convenciones-y-pruebas.md) | Cómo se nombra y se escribe el código, cómo se escribe una prueba, datos de prueba y cobertura mínima |
 | [15 · Rendimiento y errores](15-rendimiento-y-errores.md) | Presupuestos de tiempo, límites, y qué ve la persona cuando algo falla |
 | [prompts](prompts.md) | **Un prompt listo para pegar por cada fase**, plantilla de informe y qué hacer entre fases (incluye el de la ronda 2, §9) |
+| [mejoras/ronda-4](mejoras/ronda-4.md) | **Ronda 4, rollos de filamento:** número por rollo, rollos sin costo, costo por gramo de las últimas compras, elegir rollo al imprimir, pesar y terminar |
 | [mejoras/ronda-3](mejoras/ronda-3.md) | **Ronda 3, diseño visual del sistema:** tokens, componentes, gráficas, vocabulario y las 16 pantallas, en cuatro fases autónomas |
 | [mejoras/ronda-2](mejoras/ronda-2.md) | **Ronda 2 tras el uso real:** variantes agrupadas, Existencias, Inicio, panel neutro y menos clics, en cuatro fases autónomas |
 | [bitácora](bitacora.md) · [decisiones](decisiones.md) · [progreso](progreso.md) | Bitácora de la construcción y cómo seguir en la Mac; registro de decisiones y estado de cada pantalla (los llena Claude Code) |
@@ -36,6 +37,7 @@ Además: `CLAUDE.md` en la raíz del proyecto resume las reglas para quien progr
 | `reference/mockup-backup-v7.json` | Copia de seguridad del mockup con datos de ejemplo (semilla y prueba del importador) |
 | `reference/mockup-textos.md` | Texto visible de cada pantalla y diálogo del mockup (para llenar `es.ts`) |
 | `packages/core/test/golden/mockup-values.json` | Costos y precios esperados de cada pieza y colección del mockup (±0.01) |
+| `reference/ronda-4/` | Las 4 pantallas de la ronda 4 (usan el CSS de `ronda-3/`); ver su README |
 | `reference/ronda-3/` | Las 16 pantallas del diseño de la ronda 3 (HTML); ver su README |
 | `reference/ronda-2/` | Cinco maquetas HTML de la ronda 2 (Productos, Existencias, Inicio); ver su README |
 | `assets/` | Ícono de la app, logo y mascota (provisionales; ver su README) |

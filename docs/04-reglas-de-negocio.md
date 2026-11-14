@@ -13,23 +13,66 @@ Convenciones:
 
 ## 1. Filamento
 
-**Costo por gramo de un rollo** = `(costo + envío) / gramos`.
+Un **rollo** es una compra, siempre: «Agregar rollo» nunca suma gramos a un rollo que existe (con cantidad 2 crea dos rollos). Las reglas de esta sección vienen de `mejoras/ronda-4.md §2` (entre paréntesis, su número de caso).
 
-**Costo por gramo de un filamento** (material + color) = promedio **ponderado por lo que queda** de sus rollos con material. Si ya no queda nada (≤ 0.5 g en total), se usa el costo por gramo de la última compra.
+**Número de rollo** (2.4): correlativo por negocio, empieza en 1 y **nunca se reutiliza** (un rollo borrado conserva su número). Al crear: `max(número) + 1` del negocio, dentro de la transacción; con cantidad N, números consecutivos. El envío del pedido se reparte en partes iguales entre los N rollos, en centavos, y **el residuo de centavos va al primero** ($10.00 entre 3 → $3.34, $3.33, $3.33).
 
-> Caso 1.1 — Rollo A: 600 g restantes a $0.50/g. Rollo B: 400 g restantes a $0.60/g.
-> Costo por gramo del filamento = (600·0.50 + 400·0.60) / 1000 = **$0.54**.
+**Costo por gramo de un rollo** (2.1) = `(costo + envío) / gramos`. Un rollo **sin costo** (regalo o incluido con la impresora, `no_cost`) tiene costo 0; un rollo cuyo costo + envío es $0 se trata igual.
 
-**Orden en que se gastan los rollos**: primero el que ya está abierto (le falta algo), luego el más viejo por fecha; desempate por id.
+**Costo por gramo de un filamento** (2.2; material + color; es el que usan piezas, ventas y reportes) = `Σ (costo + envío) / Σ gramos` de sus **últimas N compras con costo**, N = «Compras para el promedio del filamento» de Ajustes (`cost_avg_purchases`, por defecto **3**, de 1 a 10). «Últimas» = por fecha de compra descendente; desempate por número de rollo descendente. Cuentan los rollos con costo **aunque ya estén vacíos** (es el precio de compra, no lo que queda); no cuentan los rollos sin costo ni los borrados. No depende de qué rollo se usa ni de cuánto le queda. Si el filamento no tiene ninguna compra con costo:
+1. el mismo cálculo con las últimas N compras con costo **del mismo material** (cualquier color; el material se compara como los nombres: sin mayúsculas, acentos ni espacios de más);
+2. si tampoco hay, el **precio de referencia** del filamento (`reference_cents_per_kg`, por kilo; se pide al registrar un rollo sin costo cuando 1 no da resultado);
+3. si tampoco hay, 0, y la pieza muestra el aviso «Sin costo de referencia para {filamento}».
+
+El resultado dice de dónde sale (`purchases` · `material` · `reference` · `none`) y qué rollos formaron el promedio. *Decisión del dueño (ronda 4): reemplaza al promedio ponderado por lo que queda en los rollos.*
+
+> Caso 1.1a (2.2a) — PLA Gris: #3 $200 (1,000 g, 20 sep), #5 $250 (1,000 g, 10 oct), #9 $300 (1,000 g, 5 nov), #7 sin costo (1,000 g, 15 sep). N = 3.
+> Costo = (200 + 250 + 300) / 3,000 = **$0.25/g**. Una pieza de 50 g: material sin purga = **$12.50**, imprima del #3, del #7 o del #9.
+>
+> Caso 1.1b (2.2b) — Se compra el #12 a $280 (1,000 g, 20 nov). Últimas 3: #12, #9, #5 → (280 + 300 + 250) / 3,000 = **$0.276667/g** (la pieza de 50 g: $13.83).
+>
+> Caso 1.1c (2.2c) — Rollos de distinto tamaño: TPU #20 $430 (500 g) y #21 $800 (1,000 g) → (430 + 800) / 1,500 = **$0.82/g**.
+>
+> Caso 1.1d (2.2d) — PLA Blanco solo tiene el #1 sin costo; PLA Gris es el del caso 1.1a → PLA Blanco usa el material PLA: **$0.25/g**.
+>
+> Caso 1.1e (2.2e) — PETG Naranja solo tiene un rollo sin costo y no hay compras de PETG; precio de referencia $300 por kg → **$0.30/g**.
+>
+> Caso 1.1f (2.2f) — Con N = 1, PLA Gris del caso 1.1a = el #9 = **$0.30/g**.
+>
+> Caso 1.1g (2.2g) — Envío: #30 $250 + $50 de envío (1,000 g) y #31 $250 sin envío → (300 + 250) / 2,000 = **$0.275/g**.
+
+**Valor del inventario** (2.3) = `Σ restante de cada rollo × costo por gramo de ese rollo` (los sin costo valen 0; un restante negativo cuenta 0). Es lo único que usa el precio de cada rollo.
+
+> Caso 1.4 (2.3) — PLA Gris del caso 1.1a con #3 vacío, #5 640 g, #7 100 g, #9 1,000 g → 640·0.25 + 100·0 + 1,000·0.30 = **$460.00**.
 
 **Lo que hay de un filamento** = suma de lo que queda en todos sus rollos, sean de la marca que sean. Un rollo nunca queda en negativo.
 
-**Descontar un trabajo**: para `g` gramos de consumo con purga `p %`, se necesita `g·(1+p/100)`. Se toma lo que alcance; el consumo y la purga se registran por separado (tipo `consumo` y tipo `merma`), cada uno redondeado a 0.1 g.
+**Qué rollo se gasta** (2.5):
+- **Sin elección** (orden automático): primero el que ya está abierto (le falta algo), luego el más viejo por fecha; desempate por número de rollo.
+- **Rollo sugerido** en los diálogos = el primero de ese orden que no esté vacío.
+- **Con elección**: por filamento, una lista de `{ rollo, gramos }` (gramos con purga; sin gramos = todo lo que tenga, hasta lo que falte). Cada parte ≤ lo que le queda a ese rollo (si no, `SPOOL_INSUFFICIENT`); un rollo que no es de ese filamento → `SPOOL_NOT_IN_FILAMENT`. Si las partes pasan de lo necesario, solo se toma lo necesario. Si no lo cubren, lo que falta se toma de los demás rollos en el orden automático y, si aún falta, de lo que les quede a los elegidos; si tampoco alcanza, aviso `FILAMENT_SHORTFALL` como siempre.
+- Al poner un pedido en producción se puede elegir **el rollo con que empieza** cada artículo: es la elección «ese rollo, todo lo que tenga» y lo demás en el orden automático.
+
+**Descontar un trabajo**: para `g` gramos de consumo con purga `p %`, se necesita `g·(1+p/100)`. Se toma lo que alcance, rollo por rollo. **En cada rollo**, consumo y purga por separado: `consumo = parte / (1 + p/100)` (tipo `consumo`) y `purga = parte − consumo` (tipo `merma`), cada uno redondeado a 0.1 g.
 
 > Caso 1.2 — Purga 5 %, quedan 50 g, el trabajo pide 100 g.
 > Se toman 50 g en total: consumo = 50/1.05 = 47.6 g, purga = 2.4 g. El inventario queda en 0. El sistema avisa "faltaron 55 g" y deja continuar.
+>
+> Caso 1.5a (2.5a) — Purga 5 %, pieza de 50 g, rollo #7 con 100 g → necesita 52.5 g. #7: **100 → 47.5 g** (consumo 50.0, purga 2.5). PLA Gris baja 52.5 g.
+>
+> Caso 1.5b (2.5b) — Igual, pero el #7 tiene 30 g y se elige «#7 lo que tenga + el resto del #5». #7: 30 → 0 (consumo 28.6, purga 1.4); #5: 640 → 617.5 (22.5 g: consumo 21.4, purga 1.1).
+>
+> Caso 1.5c (2.5c) — Pedido de 20 piezas de 45 g, purga 5 % → 945 g. Empieza con el #4 (410 g) → #4: 410 → 0; sigue el #13 (1,000 g) → 1,000 → 465 g.
 
 **Faltante**: antes de producir, para cada filamento `need = g·(1+purga/100)`; si `need > hay`, falta `need − hay`.
+
+**Terminar rollo** (2.6): registra un movimiento `merma` por todo lo que le queda, con nota «Rollo terminado»; el rollo queda `Vacío` y deja de salir en los selectores. Si ya está vacío (≤ 0.5 g): `SPOOL_ALREADY_EMPTY`.
+
+**Pesar** (2.7): `queda = peso en báscula − peso del carrete vacío`. Se registra un movimiento `ajuste` por `queda − restante` (si es 0 al décimo de gramo, no se registra nada). El peso del carrete vacío se guarda **por marca** (se propone el último usado con esa marca; se puede cambiar). Válido si `0 ≤ queda ≤ gramos del rollo × 1.05`; si no, `WEIGHT_OUT_OF_RANGE` (con el máximo).
+
+> Caso 1.6 (2.7) — Rollo #7 de 1,000 g con 100 g en el sistema; báscula 348 g, carrete Bambu Lab 248 g → queda 100 g, sin movimiento. Báscula 330 g → queda 82 g, ajuste de −18 g.
+
+**Lo que no cambia con los rollos** (2.8): estado del filamento y del rollo, faltante, compras sugeridas (siguen usando el último rollo para cantidad, marca y proveedor) y las ventas ya hechas (guardan su costo del momento).
 
 **Estado de un filamento** (la etiqueta de color en Filamentos), con `q` = lo que hay en total, evaluado en este orden: sin ningún rollo → `Sin rollos`; `q ≤ 0.5 g` → `Agotado`; `q ≤ 150 g` → `Se acaba`; `q ≤ 300 g` → `Poco`; `q` ≥ 95 % de los gramos de sus rollos con material → `Nuevo`; si no → `Normal`.
 
