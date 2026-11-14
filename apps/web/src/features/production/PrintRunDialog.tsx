@@ -151,7 +151,7 @@ function PrintRunForm({ productId, onClose, onDone, filaments, products, printer
       <div className="fld" hidden={test}>
         <span>{L.gramsUsed}</span>
         <div id="imp-fil" className="fsecs">
-          {ready ? (ready.filaments.length ? ready.filaments.map((f) => {
+          {ready && !test ? (ready.filaments.length ? ready.filaments.map((f) => {
             const x = fil(f.filamentId);
             const name = x ? `${x.material} ${x.color}` : '';
             const input = <UnitInput unit="g" className="g" inputMode="decimal" value={gramsOf(f.filamentId)} onChange={(e) => setTyped({ ...own, grams: { ...own.grams, [f.filamentId]: e.target.value } })} aria-label={t('screens.production.gramsOf', { name })} />;
