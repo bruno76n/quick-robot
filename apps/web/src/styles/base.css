@@ -124,7 +124,7 @@ input[type="checkbox"], input[type="radio"] { width: auto; min-height: 0; }
 .tag.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 /* State pills (ronda-3 §3, mockup .ui-pill): 22 px, radius 6, a dot of the color; the text always says the state.
    Components: Pill.tsx (.chip); .pill is the same look written by hand. */
-.chip, .pill { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border: 0; border-radius: var(--r-pill); font-size: 12px; font-weight: 500; line-height: 1; background: var(--line-soft); color: var(--cost); white-space: nowrap; }
+.chip, .pill { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border: 0; border-radius: var(--r-pill); font-size: 12px; font-weight: 500; line-height: 1; background: var(--line-soft); color: var(--cost); white-space: nowrap; font-family: var(--font-body); letter-spacing: normal; }
 .chip::before, .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 6px; flex: none; }
 .chip.good, .pill.good, .chip.ok, .pill.ok { background: var(--green-l); color: var(--green-ink); }
 .chip.warn, .pill.warn { background: var(--amber-l); color: var(--amber-d); }
