@@ -159,7 +159,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 | Botón | Caso de uso | Detalle |
 |---|---|---|
 | Siguiente paso (texto cambia) | `acceptOrder` / `startProduction` / `markOrderReady` / `deliverOrder` | Ver `04 §7`. Poner en producción abre diálogo de impresoras |
-| Poner en producción | `startProduction` | Diálogo: asignar impresora por artículo, ver plan y fecha de término, opción de descontar filamento, aviso de faltante |
+| Poner en producción | `startProduction` | Diálogo: asignar impresora por artículo, ver plan y fecha de término, opción de descontar filamento, aviso de faltante. Con «Descontar filamento», por artículo y filamento: lo que necesita con purga, **Empezar con el rollo** (viene el sugerido, `04 §1`) y, bajo el último artículo que usa ese filamento, **el reparto que resulta**: cada rollo con «antes → después», lo que se le toma y si «se termina» o «sigue con este», y «Al terminarse el #4 sigue el #13. PLA Negro: 1,410 g → 465 g.» (`reference/ronda-4/produccion-pedido.html`, caso 1.5c). Solo se mandan los rollos que la persona cambió (`startSpools`) |
 | Reasignar impresoras | `reassignPrinters` | Quita de las colas y vuelve a asignar |
 | Registrar pago | `recordOrderPayment` | Diálogo con monto máximo = saldo. Está en la pestaña Cobro y, mientras el pedido está activo y tiene saldo, también **bajo la cifra “Saldo”** del encabezado en las demás pestañas (no se repite en Cobro; ronda 2 · D7) |
 | Quitar pago | `deleteOrderPayment` | |

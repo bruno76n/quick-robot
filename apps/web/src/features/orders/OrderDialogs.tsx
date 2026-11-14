@@ -17,6 +17,7 @@ import { go } from '../../lib/nav';
 import { usePrinters, useProducts } from '../../lib/queries';
 import { ordersApi, ORDER_TOUCHES, useOrder, type OrderDetail, type OrderItem } from './api';
 import { MatRows, Shortfall, useMaterial } from './Material';
+import { useStartSpools } from './StartSpools';
 import { tbc, warningText } from './parts';
 
 const L = es.screens.order;
@@ -119,8 +120,7 @@ export function ProductionDialog({ id, reassign, onClose }: { id: string; reassi
 }
 
 function ProductionForm({ o, printers, reassign, onClose }: { o: OrderDetail; printers: NonNullable<ReturnType<typeof usePrinters>['data']>['items']; reassign: boolean; onClose: () => void }) {
-  const products = useProducts().data?.items ?? [];
-  const hoursBy = new Map(products.map((p) => [p.id, p.hours]));
+  const hoursBy = new Map((useProducts().data?.items ?? []).map((p) => [p.id, p.hours]));
   const hoursOf = (pid: string) => hoursBy.get(pid) ?? 0;
   const its = o.items.filter((it) => it.toPrint > 0);
   const itemH = its.map((it) => itemHours(lineData(it), hoursOf));
@@ -133,7 +133,8 @@ function ProductionForm({ o, printers, reassign, onClose }: { o: OrderDetail; pr
   const [deduct, setDeduct] = useState(true);
   const g = mat.total;
   const deEx = fromStockOf(o);
-  const assignments = its.map((it, k) => ({ lineItemId: it.id, printerId: chosen[k]! }));
+  const spools = useStartSpools(its, lineData, mat.purge, !reassign && deduct && g > 0); // ronda 4: «Empezar con el rollo»
+  const assignments = its.map((it, k) => ({ lineItemId: it.id, printerId: chosen[k]!, ...spools.startSpools(it.id) }));
   const save = useWrite(async () => ({ data: reassign ? await ordersApi.reassign(o.id, { assignments }) : await ordersApi.start(o.id, { assignments, deductFilament: deduct && g > 0 }) }), {
     touches: [...ORDER_TOUCHES],
     ok: ({ warnings }) => (reassign ? es.toast['order.printersUpdated']
@@ -146,7 +147,7 @@ function ProductionForm({ o, printers, reassign, onClose }: { o: OrderDetail; pr
   const name = (pid: string) => printers.find((p) => p.id === pid)?.name ?? '';
   const totalH = itemH.reduce((a, h) => a + h, 0);
   return (
-    <Dialog open wide title={t(reassign ? 'screens.order.reassignTitle' : 'screens.order.startTitle', { folio: o.number })} submitLabel={reassign ? L.reassignSubmit : L.startSubmit}
+    <Dialog open wide className="sheet r4w" title={t(reassign ? 'screens.order.reassignTitle' : 'screens.order.startTitle', { folio: o.number })} submitLabel={reassign ? L.reassignSubmit : L.startSubmit}
       busy={save.isPending} onClose={onClose} onSubmit={() => save.mutate(undefined)}>
       <p><b>{customerName(o)}</b> · {t('screens.order.startIntro', { date: date(o.dueOn), rel: relativeDay(o.dueOn, todayLocal()) })}</p>
       {deEx ? <p className="status good"><Icon name="store" size={16} /><span>{tb('screens.order.fromStockNote', { count: deEx })}</span></p> : null}
@@ -161,6 +162,7 @@ function ProductionForm({ o, printers, reassign, onClose }: { o: OrderDetail; pr
                 <select name={`imp${k}`} value={chosen[k]} onChange={(e) => setPick({ ...pick, [it.id]: e.target.value })} data-testid="printer-select">
                   {printers.map((p) => <option key={p.id} value={p.id}>{(base.get(p.id) ?? 0) > 0 ? t('screens.order.printerFreeIn', { name: p.name, time: queueDuration(base.get(p.id)!) }) : t('screens.order.printerFree', { name: p.name })}</option>)}
                 </select></label>
+              {spools.render(it)}
             </div>
           );
         })}

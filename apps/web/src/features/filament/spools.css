@@ -105,6 +105,8 @@ dialog.r4w { width: min(640px, calc(100vw - 32px)); }
 .fsec-h b { font-size: 14px; }
 .fsec-h .meta { margin-left: auto; }
 .fsecs { display: grid; gap: 12px; }
+.stsp { display: grid; gap: 10px; grid-column: 1 / -1; min-width: 0; }
+.stsp .grid2 { margin: 0; }
 .fsec-h .unit { width: 104px; }
 .fsec-h.sub { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 2px; }
 .fsec .lbl { font-size: 12.5px; color: var(--ink-2); }
