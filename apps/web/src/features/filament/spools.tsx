@@ -1,6 +1,7 @@
 // Spools in the screens of ronda 4 (docs/mejoras/ronda-4.md §5): the number tag, where the cost per gram of a filament comes
 // from, and the bridge from the API shapes to core (the dialogs preview with core; the server recalculates and decides).
 import type { FilamentListItem, Spool } from '@app/contract';
+import { useState } from 'react';
 import { filamentCost, normalizeName, type FilamentCost, type SpoolInput } from '@app/core';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
@@ -52,4 +53,16 @@ export function costSourceLong(f: Pick<Filament, 'material' | 'color' | 'costSou
   if (f.costSource === 'material') return t('screens.spools.sourceLong.material', { material: f.material, numbers });
   if (f.costSource === 'reference') return t('screens.spools.sourceLong.reference', { price: centsTotal(f.referenceCentsPerKg ?? 0) });
   return t('screens.spools.sourceLong.none', { filament: filamentName(f) });
+}
+
+/** The «i» next to a cost per gram (Pieza): tapping it says which purchases form it, or why there is none (ronda-4 §5). */
+export function CostInfo({ f }: { f: Pick<Filament, 'id' | 'material' | 'color' | 'costSource' | 'costSpoolNumbers' | 'referenceCentsPerKg'> }) {
+  const [open, setOpen] = useState(false);
+  const id = `ci-${f.id}`;
+  return (
+    <>
+      <button type="button" className={`ib${f.costSource === 'none' ? ' bad' : ''}`} aria-expanded={open} aria-controls={id} aria-label={L.sourceAria} onClick={() => setOpen(!open)} data-testid="cost-info">{L.info}</button>
+      {open ? <span id={id} className="ci-t" role="note">{costSourceLong(f)}</span> : null}
+    </>
+  );
 }

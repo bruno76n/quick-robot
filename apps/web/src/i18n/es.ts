@@ -157,7 +157,7 @@ export const es = {
         reference: 'Sin compras con costo: precio de referencia de {price} por kilo.',
         none: 'Sin costo de referencia para {filament}.',
       },
-      sourceAria: 'De dónde sale el costo por gramo',
+      sourceAria: 'De dónde sale el costo por gramo', info: 'i',
     },
     // Which spool a print uses (Registrar impresión, Poner en producción; reference/ronda-4/impresion.html, produccion-pedido.html).
     spoolUse: {

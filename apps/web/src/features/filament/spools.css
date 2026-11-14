@@ -78,6 +78,13 @@
 .fdr .roll.click:hover { background: var(--soft-2); }
 .fdr .roll-h .rnum { margin-right: 2px; }
 
+/* the «i» of the cost per gram (Pieza) */
+.ib { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 6px; padding: 0; border: 1px solid var(--line-2); border-radius: 50%;
+  background: var(--bg); color: var(--ink-2); font: inherit; font-size: 10.5px; font-weight: 700; font-style: italic; line-height: 1; vertical-align: 1px; cursor: pointer; }
+.ib:hover, .ib[aria-expanded="true"] { border-color: var(--ink); color: var(--ink); }
+.ib.bad { border-color: var(--red); color: var(--red); }
+.ci-t { display: block; margin-top: 4px; font-weight: 400; color: var(--ink-2); }
+
 /* ---------- dialogs ---------- */
 dialog.r4w { width: min(640px, calc(100vw - 32px)); }
 .selsw { position: relative; display: block; }

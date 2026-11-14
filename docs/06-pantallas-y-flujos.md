@@ -95,6 +95,8 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 *Cálculo en vivo:* el navegador usa `core` para la vista previa. Al guardar, el servidor recalcula; nunca confía en el costo enviado.
 
+*Costo por gramo (ronda 4):* junto al «Disponible: … · $0.38 por gramo» de cada filamento hay una **i**; al tocarla dice de dónde sale (`04 §1`): «Promedio de las últimas compras con costo: #1 y #8. Los rollos sin costo no cuentan.», el promedio del material, el precio de referencia o «Sin costo de referencia para {filamento}.». Si un filamento de la pieza no tiene ninguna forma de costearse (cuenta a $0), el resultado lo avisa debajo del costo con ese mismo texto.
+
 ### 3.2 Colección
 Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), etiquetas, nota. Muestra costo, precio, ganancia, y cuántos **sets se pueden armar hoy** con los disponibles. Una colección nueva abre con el foco en su nombre. Acciones: Agregar pieza (crea la fila con la lista de piezas abierta y el foco dentro, con búsqueda; al elegir, el foco pasa a la cantidad), Guardar (`saveCollection`), Eliminar, Vender, Cancelar.
 

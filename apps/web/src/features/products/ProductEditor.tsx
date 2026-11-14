@@ -22,6 +22,7 @@ import { go } from '../../lib/nav';
 import { keys, usePrinters, useSettings, useSupplies } from '../../lib/queries';
 import { useFilaments } from '../filament/api';
 import { SpoolDialog } from '../filament/SpoolDialog';
+import { CostInfo } from '../filament/spools';
 import { draftHours, num, previewCost, priceOf, type Catalog, type Draft } from './costing';
 import { PieceResult } from './PieceResult';
 import { PhotoField } from './PhotoField';
@@ -180,7 +181,7 @@ function PieceForm({ initial, parent, root, c, channels, editId, fromId }: { ini
                   <label className="fld"><span className="sr">{L.grams}</span><UnitInput unit="g" inputMode="decimal" value={f.grams} onChange={(e) => fil(i, { grams: e.target.value })} placeholder="0" /></label>
                   <span className="fcost num">{money(g * (x?.costPerGram ?? 0))}</span>
                   <button type="button" className="btn ghost icon" onClick={() => set({ filaments: d.filaments.filter((_, k) => k !== i) })} aria-label={L.removeFilament} disabled={d.filaments.length < 2}><Icon name="x" size={16} /></button>
-                  <small className={`stock${x && g > x.remainingGrams ? ' bad' : ''}`}>{x ? (g > x.remainingGrams ? t('screens.calculator.availableShort', { grams: fmtGrams(x.remainingGrams) }) : t('screens.calculator.available', { grams: fmtGrams(x.remainingGrams), count: x.activeSpools, perGram: money(x.costPerGram) })) : ''}</small>
+                  <small className={`stock${x && g > x.remainingGrams ? ' bad' : ''}`}>{x ? <>{g > x.remainingGrams ? t('screens.calculator.availableShort', { grams: fmtGrams(x.remainingGrams) }) : t('screens.calculator.available', { grams: fmtGrams(x.remainingGrams), count: x.activeSpools, perGram: money(x.costPerGram) })}<CostInfo f={x} /></> : ''}</small>
                 </div>
               );
             })}</div>
