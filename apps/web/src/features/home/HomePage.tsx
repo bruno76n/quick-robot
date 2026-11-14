@@ -18,6 +18,7 @@ import { todayLocal } from '../../lib/input';
 import { STATUS_TONE, type OrderStatus } from '../orders/api';
 import { useHome, useReport, type Home, type Report } from '../reports/api';
 import { bucketColumns, deltaPct } from '../reports/buckets';
+import { Delta } from '../reports/Delta';
 import { Attentions } from './Attentions';
 import './home.css';
 
@@ -25,13 +26,6 @@ const L = es.screens.home;
 const longDay = new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
 /** "Viernes 13 de noviembre". */
 const today = (iso: string) => { const s = longDay.format(new Date(`${iso}T12:00:00Z`)).replace(',', ''); return `${s[0]!.toUpperCase()}${s.slice(1)}`; };
-
-/** "▲ 14.6%" in green or "▼ 3%" in red (red when it moves the bad way). */
-export function Delta({ value, good = true }: { value: number | null; good?: boolean }) {
-  if (value === null) return null;
-  const up = value >= 0;
-  return <span className={up === good ? 'up' : 'down'}>{t(up ? 'screens.home.up' : 'screens.home.down', { pct: pct(Math.abs(value)) })}</span>;
-}
 
 function Summary({ R, home }: { R: Report; home: Home | undefined }) {
   const T = R.totals;

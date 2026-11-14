@@ -273,7 +273,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 **Gastos:** franja de cifras (gastos de los últimos 30 días, **fijos al mes**, ganancia neta de 30 días; ronda 3), tabla con filtro de periodo (Fecha · Concepto con su categoría · Tipo: Fijo mensual o Variable · Monto) y total del periodo; a su lado, **por categoría** del periodo (barras de un color) y el punto de equilibrio. Acciones: Nuevo / Editar / Eliminar gasto (`createExpense`, `updateExpense`, `deleteExpense`). Recurrente = se prorratea.
 
-**Reportes:** periodo (7 días, 30 días, 90 días, Todo); totales (Ventas, Costo, Ganancia, margen, piezas), por canal, ranking de piezas, gastos y **ganancia neta**, inversión recuperada. Acciones: cambiar periodo, **Copiar** (resumen como texto), Registrar venta.
+**Reportes:** periodo (7 días, 30 días, 90 días, Todo); cinco cifras (Ventas, Ganancia bruta, Gastos, **Ganancia neta** y Margen neto, con el cambio contra el periodo anterior), ventas por semana (o día o mes; gris las ventas, verde la ganancia bruta, con “Ver como tabla”), distribución de cada $100 vendidos, productos con más ganancia, por canal (tabla con total), clientes, colecciones, impresoras, filamento, estado actual e inversión recuperada (ronda 3). Acciones: cambiar periodo, **Copiar** (resumen como texto), Registrar venta.
 
 ---
 

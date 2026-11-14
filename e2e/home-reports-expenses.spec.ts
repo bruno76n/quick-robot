@@ -44,7 +44,9 @@ test('Inicio shows the brief and the attentions; each button goes to its element
 test('Reportes: "Todo" shows the mockup totals and the period can change', async ({ page }) => {
   await page.goto(`${server.url}/reportes?periodo=todo`);
   const brief = page.getByTestId('brief');
-  await expect(brief).toContainText('Se vendieron $13,170 en 25 ventas.');
+  // Ronda 3 (§6): five figures instead of the sentence.
+  await expect(brief).toContainText('$13,170');
+  await expect(brief).toContainText('25 ventas');
   await page.getByText('Ver como tabla').click();
   await expect(page.locator('tr.tot')).toContainText('$13,170');
   await expect(page.locator('tr.tot')).toContainText('$10,575');
@@ -52,8 +54,8 @@ test('Reportes: "Todo" shows the mockup totals and the period can change', async
 
   await page.getByRole('button', { name: '30 días' }).click();
   await expect(page).toHaveURL(/periodo=(%22)?30/);
-  await expect(brief).toContainText('Se vendieron $6,270 en 13 ventas.');
-  await expect(brief).toContainText('Ventas ▲ 14.6%');
+  await expect(brief).toContainText('$6,270');
+  await expect(brief).toContainText('▲ 14.6%');
   await expect(page.getByRole('heading', { name: 'Ventas por semana' })).toBeVisible();
 
   await page.getByRole('button', { name: '7 días' }).click();
