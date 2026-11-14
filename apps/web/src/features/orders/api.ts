@@ -62,6 +62,6 @@ export const ORDER_TOUCHES = ['orders', 'stock', 'printers', 'filaments', 'print
 
 /** Mockup class names of each status (e-cotizado, …) and the chip tone. */
 export const STATUS_CLASS: Record<OrderStatus, string> = { quoted: 'cotizado', accepted: 'aceptado', in_production: 'produccion', ready: 'listo', delivered: 'entregado', cancelled: 'cancelado' };
-export const STATUS_TONE = { quoted: '', accepted: 'info', in_production: 'warn', ready: 'good', delivered: '', cancelled: 'bad' } as const;
+export const STATUS_TONE = { quoted: '', accepted: '', in_production: 'info', ready: 'ok', delivered: '', cancelled: 'bad' } as const;
 export const STEPS: OrderStatus[] = ['quoted', 'accepted', 'in_production', 'ready', 'delivered'];
 export const isActive = (s: OrderStatus) => s !== 'delivered' && s !== 'cancelled';

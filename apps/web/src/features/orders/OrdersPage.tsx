@@ -2,7 +2,10 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
 import { useState, type KeyboardEvent } from 'react';
-import { PageHead } from '../../components/AppShell';
+import { Kpis } from '../../components/Kpis';
+import { Meter } from '../../components/Meter';
+import { PageHead } from '../../components/PageHead';
+import { Count, Panel } from '../../components/Panel';
 import { Button } from '../../components/Button';
 import { Icon } from '../../components/Icon';
 import { Mascot } from '../../components/Mascot';
@@ -14,8 +17,8 @@ import { go } from '../../lib/nav';
 import { keys } from '../../lib/queries';
 import { isActive, ordersApi, STATUS_CLASS, useOrderList, type OrderListItem, type OrderStatus } from './api';
 import { NextStepButton, StepDialogs, useStepRunner } from './OrderSteps';
-import { itemRows, originsOf, countTags, sumCounts, originLabel } from './origins';
-import { Capas, StatusChip, tbc } from './parts';
+import { itemRows, originsOf, originLabel } from './origins';
+import { StatusChip, tbc } from './parts';
 import './orders.css';
 
 const L = es.screens.orders;
@@ -34,7 +37,7 @@ export function OrdersPage() {
   const empty = board.data && !board.data.items.length;
   return (
     <>
-      <PageHead title={L.title} actions={<Button variant="primary" icon="plus" onClick={() => go('/armar?modo=pedido')}>{L.newOrder}</Button>} />
+      <PageHead title={L.title} sub={board.data && active.length ? t('screens.orders.inProgress', { count: active.length }) : undefined} actions={<Button variant="primary" icon="plus" onClick={() => go('/armar?modo=pedido')}>{L.newOrder}</Button>} />
       {empty ? (
         <div className="empty-box"><Mascot size={56} /><p>{L.empty}</p><Button variant="primary" onClick={() => go('/armar?modo=pedido')}>{L.emptyButton}</Button></div>
       ) : board.data ? (
@@ -57,18 +60,14 @@ function Strip({ active, today }: { active: OrderListItem[]; today: string }) {
   const owed = active.reduce((a, o) => a + o.owedCents, 0);
   const profit = active.reduce((a, o) => a + o.profitCents, 0);
   const n7 = active.filter((o) => daysBetween(today, o.dueOn) <= 7).length;
-  const n1 = active.filter((o) => daysBetween(today, o.dueOn) <= 1).length;
-  if (!active.length) return <section className="brf one sm"><div><p className="brf-l">{L.summaryEmpty}</p></div></section>;
   return (
-    <section className="brf one sm"><div>
-      <p className="brf-l">
-        {tbc('screens.orders.summaryLead', { count: active.length, total: centsTotal(total), owed: centsTotal(owed) }, { owed: owed > 0 ? 'r' : 'g' })}{' '}
-        {n7 ? tbc(n1 ? 'screens.orders.summaryNextToday' : 'screens.orders.summaryNext', { n7, n1 }, {}, ['n1']) : L.summaryNoNext}{' '}
-        {tbc('screens.orders.summaryProfit', { profit: centsTotal(profit) }, { profit: 'g' })}
-      </p>
-      <div className="rk-b big mt" role="img" aria-label={t('screens.orders.collectedAria', { n: total ? Math.round(((total - owed) / total) * 100) : 0 })}><i style={{ width: `${total ? (Math.max(0, total - owed) / total) * 100 : 0}%` }} /></div>
-      <p className="hint">{t('screens.orders.collected', { paid: centsTotal(total - owed), total: centsTotal(total) })}</p>
-    </div></section>
+    <Kpis label={L.kpisAria} items={[
+      { label: L.kInProgress, value: active.length },
+      { label: L.kTotal, value: centsTotal(total) },
+      { label: L.kOwed, value: centsTotal(owed), tone: owed > 0 ? 'bad' : '' },
+      { label: L.kDue7, value: n7 },
+      { label: L.kProfit, value: centsTotal(profit), tone: 'net' },
+    ]} />
   );
 }
 
@@ -83,14 +82,10 @@ function Board({ items, today, onSeeDelivered }: { items: OrderListItem[]; today
       {COLS.map(([k, label, sts]) => {
         let ps = items.filter((o) => sts.includes(o.status));
         ps = k === 'entregado' ? ps.sort((a, b) => (b.deliveredOn ?? b.dueOn).localeCompare(a.deliveredOn ?? a.dueOn)) : ps.sort((a, b) => a.dueOn.localeCompare(b.dueOn));
-        const total = ps.reduce((a, o) => a + o.totalCents, 0);
-        const nQ = ps.filter((o) => o.status === 'quoted').length;
-        const nA = ps.filter((o) => o.status === 'accepted').length;
-        const sub = k === 'pend' && ps.length ? [nQ ? t('screens.orders.quotedCount', { count: nQ }) : '', nA ? t('screens.orders.acceptedCount', { count: nA }) : ''].filter(Boolean).join(' · ') : '';
         const count = k === 'entregado' ? Math.max(delivered.data ?? 0, ps.length) : ps.length;
         return (
           <section key={k} className={`kcol k-${k}`} aria-label={label}>
-            <header><div><h2>{label}</h2>{sub ? <small>{sub}</small> : null}</div><span>{ps.length ? t('screens.orders.colCount', { count: ps.length, total: centsTotal(total) }) : ''}</span></header>
+            <header><h2>{label}</h2><Count n={count} light /></header>
             {ps.length ? ps.map((o) => <Card key={o.id} o={o} today={today} runner={runner} />) : <p className="kempty">{k === 'pend' ? L.emptyPending : L.emptyCol}</p>}
             {count > ps.length ? <button type="button" className="link" onClick={onSeeDelivered}>{t('screens.orders.seeDelivered', { count })}</button> : null}
           </section>
@@ -108,35 +103,33 @@ export function dueText(o: { status: OrderStatus; dueOn: string; deliveredOn: st
 }
 
 function Card({ o, today, runner }: { o: OrderListItem; today: string; runner: ReturnType<typeof useStepRunner> }) {
-  const fin = o.status === 'delivered';
+  const fin = !isActive(o.status);
   const n = daysBetween(today, o.dueOn);
-  const rows = o.items.map((it) => itemRows(it, o.status, o.jobs));
-  const all = rows.flat();
-  const pieces = all.reduce((a, r) => a + r.qty, 0);
-  const oris = originsOf(all);
-  const names = oris.length > 1 && new Set(all.map((r) => r.name)).size > 1;
-  const count = sumCounts(rows.map(countTags));
+  const all = o.items.flatMap((it) => itemRows(it, o.status, o.jobs));
+  const oris = fin ? [] : originsOf(all);
+  const mixed = oris.length > 1 || oris.some((x) => x.k === 'stock' || x.k === 'warn');
   const jobs = o.status === 'in_production' ? [...o.jobs].sort((a, b) => a.position - b.position) : [];
   const customer = o.customer || L.noCustomer;
   return (
     <article className={`kcard e-${STATUS_CLASS[o.status]}`} tabIndex={0} aria-label={t('screens.orders.cardAria', { folio: o.number, customer })} onClick={() => open(o.id)} onKeyDown={onKey(o.id)} data-testid="order-card">
-      <div className="kc-h"><div><b>{customer}</b><small className="blk">{t('screens.orders.cardSub', { folio: o.number, count: pieces })}</small></div><StatusChip status={o.status} /></div>
+      <div className="kc-h"><div><b>{customer}</b><span className="meta">{t('screens.orders.cardSub', { folio: o.number })}</span></div><StatusChip status={o.status} /></div>
       <ul className="kc-l">
-        {o.items.slice(0, 4).map((it, i) => {
-          const per = it.kind === 'set' ? it.parts.reduce((a, p) => a + p.qty, 0) : 0;
-          return <li key={i}><span className="num">{it.qty} ×</span><span className="kc-nm">{it.name}{it.kind === 'set' ? <small className="blk">{t('screens.orders.setPieces', { count: per })}</small> : null}</span><b className="num">{centsTotal(it.totalCents)}</b></li>;
-        })}
+        {o.items.slice(0, 4).map((it, i) => (
+          <li key={i}><span className="num">{it.qty} ×</span> {it.name}{it.kind === 'set' ? <small> · {t('screens.orders.setPieces', { count: it.parts.reduce((a, p) => a + p.qty, 0) })}</small> : null}</li>
+        ))}
         {o.items.length > 4 ? <li className="mut">{t('screens.orders.more', { count: o.items.length - 4 })}</li> : null}
+        {mixed ? <li className="kc-s">{oris.map((x) => t('screens.orders.originCount', { label: originLabel(x.k, x.n), n: x.n })).join(' · ')}</li> : null}
       </ul>
-      {fin ? null : <>
-        <ul className="kc-o">{oris.map((x) => <li key={x.k}><span className={`tg ${x.k}`}><b className="num">{x.n}</b>{originLabel(x.k, x.n)}</span>{names ? <small>{Object.entries(x.pz).map(([nm, c]) => (c > 1 ? `${c} × ` : '') + nm).join(', ')}</small> : null}</li>)}</ul>
-        {Object.keys(count).length > 1 ? <Capas count={count} sm /> : null}
-      </>}
-      {jobs.map((j) => j.position === 0
-        ? <div className="kc-j" key={j.printerId}><span>{j.printerName}</span><div className="prog noz"><i style={{ width: `${j.progress}%` }} /></div><small>{t('screens.orders.jobLeft', { n: j.progress, time: queueDuration(j.remainingMinutes) })}</small></div>
-        : <div className="kc-j" key={j.printerId}><span>{j.printerName}</span><small>{t('screens.orders.jobQueued', { time: queueDuration(j.waitMinutes) })}</small></div>)}
-      {o.status === 'in_production' && !jobs.length ? <p className="note warn">{L.noPrinter} <button type="button" className="link" onClick={(e) => { e.stopPropagation(); go(`/pedidos/pedido?id=${o.id}&tab=produccion`); }}>{L.assign}</button></p> : null}
-      <span className={`due ${!fin && n <= 1 ? 'hot' : ''}`}><Icon name="clock" size={13} />{dueText(o, today)}</span>
+      {jobs.length ? (
+        <div className="kc-p">{jobs.map((j) => (
+          <div key={j.printerId}>
+            <span className="meta"><Icon name="printer" size={13} />{j.printerName}<em>{j.position === 0 ? t('screens.orders.jobLeft', { n: j.progress, time: queueDuration(j.remainingMinutes) }) : t('screens.orders.jobQueued', { time: queueDuration(j.waitMinutes) })}</em></span>
+            {j.position === 0 ? <Meter value={j.progress} /> : null}
+          </div>
+        ))}</div>
+      ) : null}
+      {o.status === 'in_production' && !jobs.length ? <p className="kc-a">{L.noPrinter} <button type="button" className="link" onClick={(e) => { e.stopPropagation(); go(`/pedidos/pedido?id=${o.id}&tab=produccion`); }}>{L.assign}</button></p> : null}
+      <p className={`due${!fin && n < 0 ? ' late' : !fin && n <= 2 ? ' warn' : ''}`}><Icon name="clock" size={13} />{dueText(o, today)}</p>
       <dl>
         <div><dt>{L.total}</dt><dd className="num">{centsTotal(o.totalCents)}</dd></div>
         <div><dt>{o.owedCents > 0 ? L.owed : L.paid}</dt><dd className={`num ${o.owedCents > 0 ? 'neg' : ''}`}>{centsTotal(o.owedCents > 0 ? o.owedCents : o.totalCents)}</dd></div>
@@ -159,7 +152,7 @@ function ListView({ filter, setFilter, today }: { filter: string; setFilter: (f:
       <div className="tags" role="group" aria-label={L.filterAria}>
         {FILTERS.map((f) => <button key={f[0]} type="button" className={`tag${sel[0] === f[0] ? ' on' : ''}`} aria-pressed={sel[0] === f[0]} onClick={() => setFilter(f[0])}>{f[1]} {all.filter((o) => !f[2] || f[2].includes(o.status)).length}</button>)}
       </div>
-      <div className="tw"><table className="tbl">
+      <Panel flush><div className="tw"><table className="tbl">
         <thead><tr><th>{L.colOrder}</th><th>{L.colStatus}</th><th>{L.colDue}</th><th className="r">{L.colTotal}</th><th className="r">{L.colOwed}</th></tr></thead>
         <tbody>
           {rows.map((o) => {
@@ -177,7 +170,7 @@ function ListView({ filter, setFilter, today }: { filter: string; setFilter: (f:
           })}
           {!rows.length ? <tr><td colSpan={5} className="empty-td"><p>{L.listEmpty}</p></td></tr> : null}
         </tbody>
-      </table></div>
+      </table></div></Panel>
     </>
   );
 }
@@ -211,7 +204,7 @@ function CalendarView({ month, active, today, onMonth }: { month: string | undef
   const cells = Array.from({ length: weeks * 7 }, (_, i) => new Date(Date.UTC(y, mo - 1, 1 - lead + i)));
   return (
     <>
-      <div className="cal-h">
+      <Panel className="cal-panel"><div className="cal-h">
         <div><h2>{Title}</h2><p className="muted">
           {inMonth.length ? tbc('screens.orders.calPending', { count: inMonth.length, total: centsTotal(tot) }) : L.calNone}
           {late ? <> {tbc('screens.orders.calLate', { count: late }, { count: 'r' })}</> : null}
@@ -239,7 +232,7 @@ function CalendarView({ month, active, today, onMonth }: { month: string | undef
             </div>
           );
         })}</div>
-      </div>
+      </div></Panel>
     </>
   );
 }
