@@ -183,6 +183,8 @@ export const es = {
     },
     supplies: {
       title: 'Insumos', summary: '{count} {count|insumo|insumos} · Valor en inventario: {value} · Por reponer: {low}.', subEmpty: 'Argollas, cajas, imanes, bolsas.',
+      sub: '{count} {count|insumo|insumos} · Valor en inventario: {value}', filterAria: 'Filtrar por estado', all: 'Todos', noMatch: 'No hay insumos con ese estado.',
+      colSupply: 'Insumo', colStock: 'Existencia', colMinimum: 'Mínimo', colCost: 'Costo', colStatus: 'Estado',
       newSupply: 'Nuevo insumo', pza: 'pza', perUnit: '{cost} por {unit}', available: 'Disponible', availableUnits: '{unit} disponibles', warnAt: 'aviso en {min}',
       empty: 'Aquí van las cosas que no son filamento pero cuestan y se acaban: argollas, cajas, imanes, bolsas. Al ligarlas a una pieza, su costo entra solo en el precio.',
       emptyButton: 'Crear el primer insumo', drawerKind: 'Insumo', warnWhen: 'Aviso cuando queden', value: 'Valor en inventario', usedIn: 'Usado en',
