@@ -2,7 +2,7 @@
 import type { CollectionListItem, ProductFamilyFilter } from '@app/contract';
 import { useSearch } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
-import { PageHead } from '../../components/AppShell';
+import { PageHead } from '../../components/PageHead';
 import { Button } from '../../components/Button';
 import { Mascot } from '../../components/Mascot';
 import { Pill, Swatch } from '../../components/Pill';
@@ -13,9 +13,10 @@ import { centsTotal, money } from '../../lib/format';
 import { go } from '../../lib/nav';
 import { useCollections } from '../../lib/queries';
 import { useProductFamilies } from './api';
-import { FamilyTiles } from './FamilyTiles';
+import { Figures, FamilyTiles } from './FamilyTiles';
 import { FamilyTable } from './FamilyTable';
-import { MarginBar, Piece3d } from './Piece3d';
+import { MarginBar } from './Piece3d';
+import { PieceThumb } from '../../components/PieceThumb';
 import './products.css';
 
 const L = es.screens.products;
@@ -62,17 +63,22 @@ export function ProductsPage() {
   const anyPieces = counts.families > 0 || Boolean(needle) || filter !== 'todo';
   return (
     <>
-      <PageHead title={L.title} sub={isCol ? L.subCollections : L.subPieces} actions={<>
-        <Button variant={isCol ? 'green' : 'default'} icon={isCol ? 'plus' : undefined} onClick={newCollection}>{L.newCollection}</Button>
-        <Button variant={isCol ? 'default' : 'green'} icon={isCol ? undefined : 'plus'} onClick={() => go('/productos/pieza')}>{L.newPiece}</Button>
+      <PageHead title={L.title} sub={families.data ? t('screens.products.summary', { pieces: counts.families, sets: collections.length }) : undefined} actions={<>
+        <Button variant={isCol ? 'primary' : 'default'} icon={isCol ? 'plus' : undefined} onClick={newCollection}>{L.newCollection}</Button>
+        <Button variant={isCol ? 'default' : 'primary'} icon={isCol ? undefined : 'plus'} onClick={() => go('/productos/pieza')}>{L.newPiece}</Button>
       </>} />
       <div className="toolbar prod-tb">
         <div className="seg" role="group" aria-label={L.catalogView}>
           <button type="button" className={!isCol ? 'on' : ''} onClick={() => nav({ tab: 'piezas' })}>{L.pieces} <small data-testid="pieces-count">{counts.families}</small></button>
           <button type="button" className={isCol ? 'on' : ''} onClick={() => nav({ tab: 'colecciones' })}>{L.collections} <small>{collections.length}</small></button>
         </div>
-        <div className="tb-r">
-          <label className="search"><span className="sr">{es.common.search}</span><input type="search" placeholder={isCol ? L.searchCollection : L.searchPiece} value={q} onChange={(e) => setQ(e.target.value)} /></label>
+        <label className="search"><span className="sr">{es.common.search}</span><input type="search" placeholder={isCol ? L.searchCollection : L.searchPiece} value={q} onChange={(e) => setQ(e.target.value)} /></label>
+        {!isCol ? (
+          <div className="tags" role="group" aria-label={L.filter.aria}>
+            {FILTERS.map(([k, l, c]) => <button key={k} type="button" className={`tag${filter === k ? ' on' : ''}`} aria-pressed={filter === k} onClick={() => nav({ filtro: k })}>{l} <small className="num">{counts[c]}</small></button>)}
+          </div>
+        ) : null}
+        <div className="tb-end">
           <div className="seg2" role="group" aria-label={L.howToSee}>
             {(['fichas', 'lista'] as const).map((k) => <button key={k} type="button" className={view === k ? 'on' : ''} aria-pressed={view === k} onClick={() => nav({ vista: k })}>{k === 'fichas' ? L.tiles : L.list}</button>)}
           </div>
@@ -80,19 +86,16 @@ export function ProductsPage() {
       </div>
       {isCol ? (
         <>
-          {view === 'lista' ? <CollectionTable items={shownC} total={collections.length} onNew={newCollection} /> : <div className="pt-grid">{shownC.map((c) => <CollectionTile key={c.id} c={c} />)}{!shownC.length ? <div className="empty-card"><Mascot size={64} /><p>{collections.length ? L.noCollectionMatch : L.emptyCollectionsTile}</p><Button variant="green" icon="plus" onClick={newCollection}>{L.createCollection}</Button></div> : null}</div>}
-          <p className="foot-note">{L.collectionsFoot}</p>
+          {view === 'lista' ? <CollectionTable items={shownC} total={collections.length} onNew={newCollection} /> : <div className="pt-grid">{shownC.map((c) => <CollectionTile key={c.id} c={c} />)}{!shownC.length ? <div className="empty-card"><Mascot size={64} /><p>{collections.length ? L.noCollectionMatch : L.emptyCollectionsTile}</p><Button variant="primary" icon="plus" onClick={newCollection}>{L.createCollection}</Button></div> : null}</div>}
+          {view === 'lista' ? <p className="foot-note">{L.collectionsFoot}</p> : null}
         </>
       ) : (
         <>
-          <div className="tags" role="group" aria-label={L.filter.aria}>
-            {FILTERS.map(([k, l, c]) => <button key={k} type="button" className={`tag${filter === k ? ' on' : ''}`} aria-pressed={filter === k} onClick={() => nav({ filtro: k })}>{l} {counts[c]}</button>)}
-          </div>
           {!families.data ? <div className="skel" /> : view === 'lista'
             ? <FamilyTable items={items} anyPieces={anyPieces} open={open} onToggle={toggle} />
-            : <FamilyTiles items={items} open={open} onToggle={toggle} empty={<div className="empty-card"><Mascot size={64} /><p>{anyPieces ? L.noPieceMatchTile : L.emptyPiecesTile}</p><Button variant="green" icon="plus" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></div>} />}
+            : <FamilyTiles items={items} open={open} onToggle={toggle} empty={<div className="empty-card"><Mascot size={64} /><p>{anyPieces ? L.noPieceMatchTile : L.emptyPiecesTile}</p><Button variant="primary" icon="plus" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></div>} />}
           {families.hasNextPage ? <div className="more-row"><Button busy={families.isFetchingNextPage} onClick={() => void families.fetchNextPage()}>{L.showMore}</Button></div> : null}
-          <p className="foot-note">{L.piecesFoot}</p>
+          {view === 'lista' ? <p className="foot-note">{L.piecesFoot}</p> : null}
         </>
       )}
     </>
@@ -107,17 +110,14 @@ const diffText = (c: CollectionListItem, long: boolean) => {
 };
 
 function CollectionTile({ c }: { c: CollectionListItem }) {
-  const gain = c.listCents - c.costCents;
   return (
     <article className="pt pt-col" tabIndex={0} onClick={() => openCol(c.id)} onKeyDown={(e) => { if (e.key === 'Enter') openCol(c.id); }}>
-      <div className="pt-top"><span className="lay-row">{c.partHexes.slice(0, 4).map((h, i) => <Piece3d key={i} hexes={h} id={`${c.id}${i}`} cls={`z${i}`} />)}</span></div>
+      <div className="pt-top set">{c.partHexes.slice(0, 4).map((h, i) => <PieceThumb key={i} hexes={h} size={58} />)}</div>
       <div className="pt-b">
         <div className="pt-n">{c.name}</div><small className="pt-s">{t('screens.products.setPieces', { count: c.pieces, names: c.partNames.join(', ') })}</small>
-        <div className="pt-pr"><b className="pt-p num">{centsTotal(c.listCents)}</b><span className={`pt-g num ${gain >= 0 ? 'pos' : 'neg'}`}>{t(gain >= 0 ? 'screens.products.youGain' : 'screens.products.youLose', { amount: centsTotal(Math.abs(gain)) })}</span></div>
-        <MarginBar cost={c.costCents} price={c.listCents} />
-        <div className="pt-f"><span>{t('screens.products.cost', { cost: money(c.costCents / 100) })}</span><span>{t('screens.products.soldSets', { count: c.sold })}</span></div>
-        <small className="pt-s">{diffText(c, true)}</small>
-        <div className="pt-st">{c.buildableSets > 0 ? <span className="pill good">{t('screens.products.setsReady', { count: c.buildableSets })}</span> : <span className="pill">{L.noFullSet}</span>}</div>
+        <Figures price={c.listCents} cost={c.costCents} priceLabel={L.colSetPrice} />
+        <small className="pt-s pt-d">{diffText(c, true)}</small>
+        <div className="pt-st">{c.buildableSets > 0 ? <span className="pill good">{t('screens.products.setsReady', { count: c.buildableSets })}</span> : <span className="meta">{L.noFullSet}</span>}</div>
       </div>
       <div className="pt-a" onClick={(e) => e.stopPropagation()}><Button size="sm" onClick={() => go(`/armar?modo=${c.buildableSets > 0 ? 'venta' : 'pedido'}&coleccion=${c.id}`)}>{c.buildableSets > 0 ? L.sell : L.order}</Button></div>
     </article>
@@ -126,7 +126,7 @@ function CollectionTile({ c }: { c: CollectionListItem }) {
 
 function CollectionTable({ items, total, onNew }: { items: CollectionListItem[]; total: number; onNew: () => void }) {
   return (
-    <div className="tw"><table className="tbl prods"><thead><tr><th>{L.colCollection}</th><th className="r">{L.colCost}</th><th className="r">{L.colSetPrice}</th><th className="r">{L.colLoose}</th><th className="bar-th"><span className="sr">{L.costVsPrice}</span></th><th className="r">{L.colProfit}</th><th className="r">{L.colSoldSets}</th><th /></tr></thead>
+    <div className="panel flush tw"><table className="tbl prods"><thead><tr><th>{L.colCollection}</th><th className="r">{L.colCost}</th><th className="r">{L.colSetPrice}</th><th className="r">{L.colLoose}</th><th className="bar-th"><span className="sr">{L.costVsPrice}</span></th><th className="r">{L.colProfit}</th><th className="r">{L.colSoldSets}</th><th /></tr></thead>
       <tbody>
         {items.map((c) => {
           const gain = c.listCents - c.costCents;
@@ -143,7 +143,7 @@ function CollectionTable({ items, total, onNew }: { items: CollectionListItem[];
             </tr>
           );
         })}
-        {!items.length ? <tr><td colSpan={8} className="empty-td"><Mascot size={48} /><p>{total ? L.noCollectionMatch : L.emptyCollections}</p><Button variant="green" onClick={onNew}>{L.createCollection}</Button></td></tr> : null}
+        {!items.length ? <tr><td colSpan={8} className="empty-td"><Mascot size={48} /><p>{total ? L.noCollectionMatch : L.emptyCollections}</p><Button variant="primary" onClick={onNew}>{L.createCollection}</Button></td></tr> : null}
       </tbody></table></div>
   );
 }

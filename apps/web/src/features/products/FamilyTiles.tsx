@@ -1,15 +1,16 @@
-// Productos › Fichas by families (mejoras/ronda-2.md §3.2; reference/ronda-2/productos-fichas.html):
+// Productos › Fichas by families (mejoras/ronda-2.md §3.2) in ronda-3 style (reference/ronda-3/productos.html .prod):
 // a tile per original; "N variantes" opens one panel at a time, full width under the tile's row.
 import type { ProductFamily } from '@app/contract';
+import { stockStatus } from '@app/core';
 import { Fragment, useLayoutEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import { Button } from '../../components/Button';
 import { Swatch } from '../../components/Pill';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
-import { centsTotal, money, number1 } from '../../lib/format';
+import { centsTotal, hours, money, number1 } from '../../lib/format';
+import { PieceThumb } from '../../components/PieceThumb';
 import { go } from '../../lib/nav';
 import { newVariantPath, sellPath } from './api';
-import { MarginBar, Piece3d } from './Piece3d';
 
 const L = es.screens.products;
 export const openPiece = (id: string) => go(`/productos/pieza?id=${id}`);
@@ -20,11 +21,13 @@ export function Chevron({ dir = 'down' }: { dir?: 'down' | 'right' }) {
   return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={dir === 'down' ? 'm6 9 6 6 6-6' : 'm9 6 6 6-6 6'} /></svg>;
 }
 
-function stockPill(p: ProductFamily) {
-  if (!p.tracksStock) return <span className="pill">{L.onlyToOrder}</span>;
-  const apt = Math.min(p.physical, p.reserved);
-  if (p.free > 0) return <span className="pill good">{t('screens.products.free', { count: p.free })}{apt ? ` · ${t('screens.products.reserved', { count: apt })}` : ''}</span>;
-  return <span className="pill warn">{apt ? es.status.stock.all_reserved : L.noStock}</span>;
+/** Stock line of a tile (mockup .prod-f): "Disponibles: N" (amber when only one or two), "Apartado", "Sin existencias" or "Solo por pedido". */
+export function stockState(p: { tracksStock: boolean; free: number; physical: number; reserved: number }) {
+  if (!p.tracksStock) return <span className="meta">{L.onlyToOrder}</span>;
+  const st = stockStatus(p.physical, p.reserved);
+  if (st === 'out') return <span className="meta">{L.noStock}</span>;
+  if (st === 'all_reserved') return <span className="pill">{es.status.stock.all_reserved}</span>;
+  return <span className={`pill ${st === 'few' ? 'warn' : 'good'}`}>{t('screens.products.freeShort', { count: p.free })}</span>;
 }
 
 /** One member of a family as a row (the panel and the list share it). */
@@ -77,16 +80,13 @@ export function FamilyTiles({ items, open, onToggle, empty }: { items: ProductFa
 }
 
 function FamilyTile({ p, isOpen, onToggle }: { p: ProductFamily; isOpen: boolean; onToggle: (id: string) => void }) {
-  const gain = p.listCents - p.costCents;
   return (
     <article className={`pt${isOpen ? ' on' : ''}`} tabIndex={0} onClick={() => openPiece(p.id)} onKeyDown={(e) => { if (e.key === 'Enter' && e.target === e.currentTarget) openPiece(p.id); }} data-testid="product-tile">
-      <div className={`pt-top${p.photoUrl ? ' has-img' : ''}`}>{p.photoUrl ? <img className="pt-img" src={p.photoUrl} alt="" /> : <Piece3d hexes={p.hexes} id={p.id} />}<span className="pt-tags">{p.technical ? <span className="pill">{L.technicalTag}</span> : null}</span></div>
+      <div className="pt-top"><PieceThumb photoUrl={p.photoUrl} hexes={p.hexes} shape="wide" />{p.technical ? <span className="pt-tags"><span className="pill">{L.technicalTag}</span></span> : null}</div>
       <div className="pt-b">
-        <div className="pt-n">{p.name}</div><small className="pt-s">{printerOf(p)}</small>
-        <div className="pt-pr"><b className="pt-p num">{centsTotal(p.listCents)}</b><span className={`pt-g num ${gain >= 0 ? 'pos' : 'neg'}`}>{t(gain >= 0 ? 'screens.products.youGain' : 'screens.products.youLose', { amount: centsTotal(Math.abs(gain)) })} · {ratio(p.listCents, p.costCents)}</span></div>
-        <MarginBar cost={p.costCents} price={p.listCents} />
-        <div className="pt-f"><span className="cost">{t('screens.products.cost', { cost: money(p.costCents / 100) })}</span><span>{t('screens.products.sold', { count: number1(p.sold) })}</span></div>
-        <div className="pt-st">{stockPill(p)}
+        <div className="pt-n">{p.name}</div><small className="pt-s">{metaOf(p)}</small>
+        <Figures price={p.listCents} cost={p.costCents} />
+        <div className="pt-st">{stockState(p)}
           {p.variantCount ? <button type="button" className="vpill" aria-expanded={isOpen} data-testid="variants-toggle" onClick={(e) => { e.stopPropagation(); onToggle(p.id); }} onKeyDown={(e) => e.stopPropagation()}>{t('screens.products.variants.count', { count: p.variantCount })}<Chevron /></button> : null}
         </div>
       </div>
@@ -95,6 +95,24 @@ function FamilyTile({ p, isOpen, onToggle }: { p: ProductFamily; isOpen: boolean
         <Button size="sm" variant="ghost" icon="plus" onClick={() => go(newVariantPath(p.id))}>{L.variants.add}</Button>
       </div>
     </article>
+  );
+}
+
+/** Print time as the mockup writes it: "25 min", "4 h", "2 h 30 min". */
+const duration = (h: number) => (h < 1 ? `${Math.max(1, Math.round(h * 60))} min` : hours(h));
+
+/** "material · time" under the name (mockup .prod-b .ui-meta); the printer when there is no material. */
+const metaOf = (p: ProductFamily) => [p.material ?? printerOf(p), p.hours > 0 ? duration(p.hours) : ''].filter(Boolean).join(' · ');
+
+/** Price · Cost · Profit in three columns (mockup .prod-k); profit in green, a loss in red. */
+export function Figures({ price, cost, priceLabel = L.colPrice }: { price: number; cost: number; priceLabel?: string }) {
+  const gain = price - cost;
+  return (
+    <dl className="pt-k">
+      <div><dt>{priceLabel}</dt>{' '}<dd className="num">{centsTotal(price)}</dd></div>
+      <div><dt>{L.colCost}</dt>{' '}<dd className="num">{money(cost / 100)}</dd></div>
+      <div className={gain >= 0 ? 'g' : 'l'}><dt>{L.colProfit}</dt>{' '}<dd className="num">{money(gain / 100)}</dd></div>
+    </dl>
   );
 }
 

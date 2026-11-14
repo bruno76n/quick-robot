@@ -199,7 +199,7 @@ export const es = {
       reasonWaste: 'Se perdió o se dañó', reasonCount: 'Conteo real (corregir el total)', qty: 'Cantidad', usePlaceholder: 'Para qué se usó', countChange: 'El total pasa de {from} a {to}.',
     },
     products: {
-      title: 'Productos', subPieces: 'Piezas con su costo y su precio de lista.', subCollections: 'Conjuntos de piezas que se venden juntas.',
+      title: 'Productos', summary: '{pieces} {pieces|pieza|piezas} · {sets} {sets|colección|colecciones}', subPieces: 'Piezas con su costo y su precio de lista.', subCollections: 'Conjuntos de piezas que se venden juntas.',
       newCollection: 'Nueva colección', newPiece: 'Nueva pieza', catalogView: 'Vista del catálogo', pieces: 'Piezas', collections: 'Colecciones',
       searchPiece: 'Buscar pieza', searchCollection: 'Buscar colección', howToSee: 'Forma de ver', tiles: 'Fichas', list: 'Lista',
       filter: { aria: 'Filtrar', withVariants: 'Con variantes' }, all: 'Todas', technical: 'Técnicas', technicalTag: 'Técnica',
@@ -209,7 +209,7 @@ export const es = {
       },
       colVariant: 'Variante', colMaterial: 'Material', colPrice: 'Precio', showMore: 'Ver más',
       variantOf: 'Variante de {name}', anyPrinter: 'Cualquier impresora', onlyToOrder: 'Solo por pedido', onlyToOrderLower: 'solo por pedido', noStock: 'Sin existencias',
-      free: '{count} {count|disponible|disponibles}', reserved: '{count} {count|apartada|apartadas}',
+      free: '{count} {count|disponible|disponibles}', freeShort: 'Disponibles: {count}', reserved: '{count} {count|apartada|apartadas}',
       youGain: 'Ganas {amount}', youLose: 'Pierdes {amount}', cost: 'Costo {cost}', sold: '{count} vendidas', soldSets: '{count} vendidos',
       sell: 'Vender', order: 'Pedido',
       colPiece: 'Pieza', colInStock: 'En existencia', colCost: 'Costo', colList: 'Precio de lista', costVsPrice: 'Costo contra precio', colProfit: 'Ganancia',

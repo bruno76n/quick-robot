@@ -16,7 +16,7 @@ const L = es.screens.products;
 
 export function FamilyTable({ items, anyPieces, open, onToggle }: { items: ProductFamily[]; anyPieces: boolean; open: string | null; onToggle: (id: string) => void }) {
   return (
-    <div className="tw fam-tw"><table className="tbl prods fam"><thead><tr><th className="pc">{L.colPiece}</th><th className="r">{L.colInStock}</th><th className="r">{L.colCost}</th><th className="r">{L.colList}</th><th className="bar-th"><span className="sr">{L.costVsPrice}</span></th><th className="r">{L.colProfit}</th><th className="r nw">{L.colTimes}</th><th className="r">{L.colSold}</th><th><span className="sr">{es.common.detail}</span></th></tr></thead>
+    <div className="panel flush tw fam-tw"><table className="tbl prods fam"><thead><tr><th className="pc">{L.colPiece}</th><th className="r">{L.colInStock}</th><th className="r">{L.colCost}</th><th className="r">{L.colList}</th><th className="bar-th"><span className="sr">{L.costVsPrice}</span></th><th className="r">{L.colProfit}</th><th className="r nw">{L.colTimes}</th><th className="r">{L.colSold}</th><th><span className="sr">{es.common.detail}</span></th></tr></thead>
       <tbody>
         {items.map((p) => {
           const gain = p.listCents - p.costCents;
@@ -39,7 +39,7 @@ export function FamilyTable({ items, anyPieces, open, onToggle }: { items: Produ
             </Fragment>
           );
         })}
-        {!items.length ? <tr><td colSpan={9} className="empty-td"><Mascot size={48} /><p>{anyPieces ? L.noPieceMatch : L.emptyPieces}</p><Button variant="green" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></td></tr> : null}
+        {!items.length ? <tr><td colSpan={9} className="empty-td"><Mascot size={48} /><p>{anyPieces ? L.noPieceMatch : L.emptyPieces}</p><Button variant="primary" onClick={() => go('/productos/pieza')}>{L.createPiece}</Button></td></tr> : null}
       </tbody></table></div>
   );
 }
