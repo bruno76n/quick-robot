@@ -1,8 +1,10 @@
 // updateSpool, deleteSpool, restoreSpool, recordSpoolMovement, finishSpool, weighSpool (docs/04 §1, docs/06 §6, docs/12 §8).
-import { BusinessError, type FilamentListItem, type FinishSpoolInput, type Spool, type SpoolMovementInput, type UpdateSpoolInput } from '@app/contract';
-import { finishSpool as finishRule, round1, tidyName } from '@app/core';
 import {
-  countSpoolMovements, getSpool, getSpoolAny, getSupplier, insertSpoolMovements, setSpoolDeleted, spoolRemainingGrams,
+  BusinessError, type FilamentListItem, type FinishSpoolInput, type Spool, type SpoolMovementInput, type UpdateSpoolInput, type WeighSpoolInput, type WeighSpoolOutput,
+} from '@app/contract';
+import { finishSpool as finishRule, normalizeName, round1, tidyName, weighSpool as weighRule } from '@app/core';
+import {
+  countSpoolMovements, getSpool, getSpoolAny, getSupplier, insertSpoolMovements, saveBrandTare, setSpoolDeleted, spoolRemainingGrams,
   transaction, updateSpool as updateRow, type Ctx, type Executor,
 } from '@app/db';
 import type { Deps } from '../deps';
@@ -86,5 +88,23 @@ export async function finishSpool(deps: Deps, ctx: Ctx, id: string, input: Finis
     if (!r.ok) throw new BusinessError(r.code);
     await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: id, on: input.on ?? deps.clock.today(), kind: 'waste', grams: r.grams, note: 'Rollo terminado' }]);
     return out(tx, ctx, id, s.filamentId);
+  });
+}
+
+/**
+ * "Pesar" (docs/04 §1): left = scale − empty spool; an adjustment for left − what the ledger says (none when it is 0).
+ * The empty-spool weight is kept for the brand of the spool, to propose it next time. Out of 0…grams × 1.05 → WEIGHT_OUT_OF_RANGE.
+ */
+export async function weighSpool(deps: Deps, ctx: Ctx, id: string, input: WeighSpoolInput): Promise<WeighSpoolOutput> {
+  return transaction(deps.db, async (tx) => {
+    const s = await getSpool(tx, ctx, id, { forUpdate: true });
+    if (!s) throw notFound('spool');
+    const r = weighRule({ grams: s.grams, remaining: await spoolRemainingGrams(tx, ctx, id) }, input.scaleGrams, input.tareGrams);
+    if (!r.ok) throw new BusinessError(r.code, { maxGrams: r.maxGrams });
+    if (r.adjustmentGrams !== null) {
+      await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: id, on: input.on ?? deps.clock.today(), kind: 'adjustment', grams: r.adjustmentGrams, note: '' }]);
+    }
+    if (s.brand) await saveBrandTare(tx, ctx, { id: deps.ids.next(), name: s.brand, nameKey: normalizeName(s.brand) }, input.tareGrams);
+    return { ...(await out(tx, ctx, id, s.filamentId)), leftGrams: r.leftGrams, adjustmentGrams: r.adjustmentGrams };
   });
 }

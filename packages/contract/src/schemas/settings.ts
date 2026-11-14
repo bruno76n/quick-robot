@@ -11,7 +11,8 @@ export const settingsView = z.object({
   business, lastBackupOn: calendarDate.nullable(),
 });
 export const channelView = z.object({ id, name: z.string(), commissionPct: z.number(), position: z.number().int() });
-export const catalogEntry = z.object({ name: z.string(), hex: z.string().nullable().optional() });
+/** `tareGrams`: brands only, the weight of their empty spool saved by weighSpool (ronda-4 §2.7). */
+export const catalogEntry = z.object({ name: z.string(), hex: z.string().nullable().optional(), tareGrams: z.number().int().nullable().optional() });
 export const catalogs = z.object({
   materials: z.array(catalogEntry), colors: z.array(catalogEntry), brands: z.array(catalogEntry),
   customerTypes: z.array(catalogEntry), expenseCategories: z.array(catalogEntry),

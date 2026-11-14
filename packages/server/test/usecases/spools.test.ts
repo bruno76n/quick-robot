@@ -1,9 +1,9 @@
 // Spool operations of ronda 4 (docs/12 §8, docs/04 §1): updateSpool with noCost, finishSpool and weighSpool.
 // Happy path, each error, failure midway and another workspace (404).
-import { listSpoolMovements } from '@app/db';
+import { listCatalog, listSpoolMovements } from '@app/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { addSpool } from '../../src/usecases/add-spool';
-import { finishSpool, recordSpoolMovement, updateSpool } from '../../src/usecases/spools';
+import { finishSpool, recordSpoolMovement, updateSpool, weighSpool } from '../../src/usecases/spools';
 import { B_TOKEN, failOnWrite, makeHarness, validSpool, type Harness } from '../harness';
 
 let h: Harness;
@@ -88,5 +88,77 @@ describe('finishSpool (docs/04 §1, terminar rollo)', () => {
     const s = await gray({ filament: { material: 'PETG', color: 'Mitad' }, costCents: 30000 });
     await expect(finishSpool({ ...h.deps, db: failOnWrite(h.db, 1) }, h.A, s.spool.id, {})).rejects.toThrow(/injected/);
     expect(await listSpoolMovements(h.db, h.A, s.filament.id)).toHaveLength(1);
+  });
+});
+
+describe('weighSpool (docs/04 §1, pesar · case 1.6)', () => {
+  const at100 = async (color: string, brand = 'Bambu Lab') => {
+    const s = await gray({ filament: { material: 'PLA', color }, brand, costCents: 30000 });
+    await recordSpoolMovement(h.deps, h.A, s.spool.id, { kind: 'consumption', grams: -900, on: '2026-11-02' });
+    return s;
+  };
+  const tareOf = async (brand: string) => (await listCatalog(h.db, h.A, ['brand'])).find((b) => b.name === brand)?.spoolTareGrams;
+
+  it('scale 348 g − Bambu Lab 248 g = 100 g, the same as the ledger: no movement; the tare is kept for the brand', async () => {
+    const s = await at100('Pesar 1');
+    const r = await weighSpool(h.deps, h.A, s.spool.id, { scaleGrams: 348, tareGrams: 248 });
+    expect([r.leftGrams, r.adjustmentGrams, r.spool.remainingGrams]).toEqual([100, null, 100]);
+    expect(await listSpoolMovements(h.db, h.A, s.filament.id)).toHaveLength(2);
+    expect(await tareOf('Bambu Lab')).toBe(248);
+    const settings = await h.call('GET', '/api/v1/settings');
+    expect((settings.json.data as { catalogs: { brands: { name: string; tareGrams?: number | null }[] } }).catalogs.brands.find((b) => b.name === 'Bambu Lab')?.tareGrams).toBe(248);
+  });
+
+  it('scale 330 g → 82 g left: an adjustment of −18 g (through the route)', async () => {
+    const s = await at100('Pesar 2');
+    const res = await h.call('POST', `/api/v1/spools/${s.spool.id}/weigh`, { body: { scaleGrams: 330, tareGrams: 248, on: '2026-11-04' } });
+    expect(res.status).toBe(200);
+    expect(res.json.data).toMatchObject({ leftGrams: 82, adjustmentGrams: -18, spool: { remainingGrams: 82 }, filament: { remainingGrams: 82 } });
+    expect((await listSpoolMovements(h.db, h.A, s.filament.id))[0]).toMatchObject({ kind: 'adjustment', grams: -18, on: '2026-11-04' });
+  });
+
+  it('a new tare replaces the one of the brand; a brand not in the list is added; a spool without brand keeps nothing', async () => {
+    const s = await at100('Pesar 3');
+    await weighSpool(h.deps, h.A, s.spool.id, { scaleGrams: 350, tareGrams: 250 });
+    expect(await tareOf('Bambu Lab')).toBe(250);
+    const other = await at100('Pesar 4', 'Marca Rara');
+    await weighSpool(h.deps, h.A, other.spool.id, { scaleGrams: 300, tareGrams: 200 });
+    expect(await tareOf('Marca Rara')).toBe(200);
+    const plain = await at100('Pesar 5', '');
+    const before = await listCatalog(h.db, h.A, ['brand']);
+    expect((await weighSpool(h.deps, h.A, plain.spool.id, { scaleGrams: 300, tareGrams: 200 })).leftGrams).toBe(100);
+    expect(await listCatalog(h.db, h.A, ['brand'])).toEqual(before);
+  });
+
+  it.each([
+    ['below 0', 200, 248],
+    ['above grams × 1.05', 1400, 248],
+  ])('%s → WEIGHT_OUT_OF_RANGE 422 with maxGrams, nothing written', async (_n, scaleGrams, tareGrams) => {
+    const s = await at100(`Fuera ${scaleGrams}`, 'Sin tara');
+    const res = await h.call('POST', `/api/v1/spools/${s.spool.id}/weigh`, { body: { scaleGrams, tareGrams } });
+    expect([res.status, res.json.code, res.json.details]).toEqual([422, 'WEIGHT_OUT_OF_RANGE', { maxGrams: 1050 }]);
+    expect(await listSpoolMovements(h.db, h.A, s.filament.id)).toHaveLength(2);
+    expect(await tareOf('Sin tara')).toBeNull();
+  });
+
+  it('the edge: exactly grams × 1.05 is valid', async () => {
+    const s = await at100('Borde');
+    expect((await weighSpool(h.deps, h.A, s.spool.id, { scaleGrams: 1300, tareGrams: 250 })).leftGrams).toBe(1050);
+  });
+
+  it('invalid input → 422; a spool of another workspace → 404', async () => {
+    const s = await at100('Validar');
+    for (const body of [{ scaleGrams: -1, tareGrams: 0 }, { scaleGrams: 100, tareGrams: 1.5 }, { scaleGrams: 100.25, tareGrams: 0 }, { scaleGrams: 100 }, { scaleGrams: 100, tareGrams: 10_001 }]) {
+      expect((await h.call('POST', `/api/v1/spools/${s.spool.id}/weigh`, { body })).status).toBe(422);
+    }
+    expect((await h.call('POST', `/api/v1/spools/${s.spool.id}/weigh`, { token: B_TOKEN, body: { scaleGrams: 300, tareGrams: 200 } })).status).toBe(404);
+    await expect(weighSpool(h.deps, h.B, s.spool.id, { scaleGrams: 300, tareGrams: 200 })).rejects.toMatchObject({ code: 'NOT_FOUND' });
+  });
+
+  it.each([1, 2])('failing on write #%i leaves the ledger and the tare as they were', async (n) => {
+    const s = await at100(`Mitad ${n}`, `Tara ${n}`);
+    await expect(weighSpool({ ...h.deps, db: failOnWrite(h.db, n) }, h.A, s.spool.id, { scaleGrams: 280, tareGrams: 200 })).rejects.toThrow(/injected/);
+    expect(await listSpoolMovements(h.db, h.A, s.filament.id)).toHaveLength(2);
+    expect(await tareOf(`Tara ${n}`)).toBeNull();
   });
 });

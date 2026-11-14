@@ -1,8 +1,8 @@
 // Filaments and spools (docs/12 §8).
-import { addSpoolInput, finishSpoolInput, pageQuery, spoolMovementInput, updateSpoolInput } from '@app/contract';
+import { addSpoolInput, finishSpoolInput, pageQuery, spoolMovementInput, updateSpoolInput, weighSpoolInput } from '@app/contract';
 import { getFilament, listFilaments, listSpoolMovements } from '@app/db';
 import { body, idParam, notFound, ok, optionalBody, query } from '../http';
-import { deleteSpool, finishSpool, recordSpoolMovement, restoreSpool, updateSpool } from '../usecases/spools';
+import { deleteSpool, finishSpool, recordSpoolMovement, restoreSpool, updateSpool, weighSpool } from '../usecases/spools';
 import { addSpool } from '../usecases/add-spool';
 import { filamentDetailView, filamentListItems, loadFilamentData } from '../views/filament-view';
 import type { Router } from './router';
@@ -33,4 +33,5 @@ export function filamentRoutes(r: Router) {
   r.post('/spools/:id/restore', 'spool.delete', async (c) => ok(c, await restoreSpool(c.get('deps'), c.get('ctx'), idParam(c, 'id', 'spool'))));
   r.post('/spools/:id/movements', 'spool.movement', async (c) => ok(c, await recordSpoolMovement(c.get('deps'), c.get('ctx'), idParam(c, 'id', 'spool'), await body(c, spoolMovementInput)), 201));
   r.post('/spools/:id/finish', 'spool.movement', async (c) => ok(c, await finishSpool(c.get('deps'), c.get('ctx'), idParam(c, 'id', 'spool'), await optionalBody(c, finishSpoolInput))));
+  r.post('/spools/:id/weigh', 'spool.movement', async (c) => ok(c, await weighSpool(c.get('deps'), c.get('ctx'), idParam(c, 'id', 'spool'), await body(c, weighSpoolInput))));
 }
