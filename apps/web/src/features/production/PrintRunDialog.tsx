@@ -146,7 +146,7 @@ function PrintRunForm({ productId, onClose, onDone, filaments, products, printer
         <div id="imp-fil">
           {ready ? (ready.filaments.length ? ready.filaments.map((f) => {
             const x = fil(f.filamentId);
-            return <GramsRow key={f.filamentId} name={x ? `${x.material} ${x.color}` : ''} left={x?.remainingGrams ?? 0} hex={x?.hex ?? '#ccc'} value={gramsOf(f.filamentId)} onChange={(v) => setTyped({ ...own, grams: { ...own.grams, [f.filamentId]: v } })} />;
+            return <GramsRow key={f.filamentId} name={x ? `${x.material} ${x.color}` : ''} left={x?.remainingGrams ?? 0} hex={x?.hex ?? 'var(--no-color)'} value={gramsOf(f.filamentId)} onChange={(v) => setTyped({ ...own, grams: { ...own.grams, [f.filamentId]: v } })} />;
           }) : <p className="muted">{L.noPieceFilaments}</p>) : null}
         </div>
         <small>{L.gramsHint}</small>

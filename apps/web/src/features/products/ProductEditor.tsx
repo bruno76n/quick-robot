@@ -152,7 +152,7 @@ function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draf
               const g = num(f.grams);
               return (
                 <div className="frow" key={i}>
-                  <span className="sw lg" style={{ ['--c' as string]: x?.hex ?? '#ccc' }} />
+                  <span className="sw lg" style={{ ['--c' as string]: x?.hex ?? 'var(--no-color)' }} />
                   <div className="fld"><Picker label={L.filament} value={f.filamentId} options={filOptions} placeholder={L.chooseFilament} onChange={(v) => fil(i, { filamentId: v })} autoOpen={fresh?.kind === 'filament' && fresh.i === i} next={rowInput('.frow')} /></div>
                   <label className="fld"><span className="sr">{L.grams}</span><UnitInput unit="g" inputMode="decimal" value={f.grams} onChange={(e) => fil(i, { grams: e.target.value })} placeholder="0" /></label>
                   <span className="fcost num">{money(g * (x?.costPerGram ?? 0))}</span>

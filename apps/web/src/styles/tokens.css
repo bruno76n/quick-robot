@@ -28,10 +28,9 @@
   /* printer timeline tags and pieces with no filament color */
   --tg-sale: #4b4b55; --tg-queue: #b9b9c3; --tg-todo: #f0b429; --tg-done: #cfcfd8; --no-color: #c9c9d1;
   /* shadows: only floating things (popover, drawer, dialog); panels have none */
-  --sh-soft: 0 1px 2px rgba(18, 18, 20, .04); --sh-up: 0 10px 28px rgba(18, 18, 20, .10);
-  /* radii (ronda-3 §2): button 7, field 8, panel 12, state pill 6, inner block 10 */
-  --r-btn: 7px; --r-field: 8px; --r-panel: 12px; --r-pill: 6px; --r-in: 10px;
-  --r: 14px;  /* legacy card radius; replaced by --r-* in B2 */
+  --sh-up: 0 10px 28px rgba(18, 18, 20, .10);
+  /* radii (ronda-3 §2): button 7, field 8, panel 12, state pill 6, inner block 10, small marks (legend keys, thin bars) 3 */
+  --r-btn: 7px; --r-field: 8px; --r-panel: 12px; --r-pill: 6px; --r-in: 10px; --r-xs: 3px;
   --font-display: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color-scheme: light;

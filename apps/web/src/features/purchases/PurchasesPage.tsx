@@ -77,7 +77,7 @@ export function PurchasesPage() {
             <ul className="cmp">
               {g.lines.map((x) => (
                 <li key={`${x.kind}-${x.id}`} data-testid="purchase-line">
-                  {x.kind === 'filament' ? <span className="dot" style={{ background: x.hex ?? '#c9c9d1' }} /> : <span className="dot sq" />}
+                  {x.kind === 'filament' ? <span className="dot" style={{ background: x.hex ?? 'var(--no-color)' }} /> : <span className="dot sq" />}
                   <div><b>{x.name}</b>{x.brand ? <> <small>{x.brand}</small></> : null}<small className="blk">{reasonText(x)}</small></div>
                   <div className="cmp-q"><b className="num">{qtyText(x)}</b><small>{x.estimatedCents > 0 ? t('screens.purchases.estimate', { amount: centsTotal(x.estimatedCents) }) : ''}</small></div>
                   <Button size="sm" onClick={() => goBuy(x)}>{L.registerPurchase}</Button>

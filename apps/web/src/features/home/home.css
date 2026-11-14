@@ -21,7 +21,7 @@
 .atn-gh > span:last-child { font-size: 13px; color: var(--ink-2); }
 .atn-g ul { list-style: none; margin: 0; padding: 0; }
 .atn-g li { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 4px; border-bottom: 1px solid var(--line); font-size: 14.5px; }
-.atn-g .ai { flex: none; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--ib); color: var(--ii); }
+.atn-g .ai { flex: none; width: 36px; height: 36px; border-radius: var(--r-in); display: grid; place-items: center; background: var(--ib); color: var(--ii); }
 .atn-g .at { flex: 1 1 260px; min-width: 0; line-height: 1.35; }
 .atn-g .at b { font-weight: 600; }
 .atn-g a.btn { flex: none; white-space: nowrap; text-decoration: none; }

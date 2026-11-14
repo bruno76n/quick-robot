@@ -181,7 +181,7 @@ function ReportBody({ R }: { R: Report }) {
   const filament = !W.filaments.length ? <p className="muted mt">{L.noFilament}</p> : (
     <>
       <ul className="hb">{W.filaments.map((x) => (
-        <li key={x.filamentId}><span className="hb-l"><span className="sw" style={{ '--c': x.hex || '#9a9aa6' } as CSSProperties} />{x.name}</span><span className="hb-t"><i className="pu" style={{ width: `${Math.max(2, (x.grams / umax) * 100)}%`, '--fc': x.hex || '#8b8b97' } as CSSProperties} title={`${x.name}: ${grams(x.grams)}`} tabIndex={0} /></span><span className="hb-v">{grams(x.grams)}</span></li>
+        <li key={x.filamentId}><span className="hb-l"><span className="sw" style={{ '--c': x.hex || 'var(--no-color)' } as CSSProperties} />{x.name}</span><span className="hb-t"><i className="pu" style={{ width: `${Math.max(2, (x.grams / umax) * 100)}%`, '--fc': x.hex || 'var(--no-color)' } as CSSProperties} title={`${x.name}: ${grams(x.grams)}`} tabIndex={0} /></span><span className="hb-v">{grams(x.grams)}</span></li>
       ))}</ul>
       <p className={`note mt ${high ? 'warn' : ''}`}>
         {rt('screens.reports.failNote', { real: pct(real) }, { real: '' })}{W.runs ? t('screens.reports.failNoteRuns', { fails: W.failures, runs: W.runs }) : ''}{t('screens.reports.failNoteReserve', { reserve: pct(W.failurePct) })}

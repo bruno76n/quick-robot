@@ -67,9 +67,35 @@ describe('design tokens', () => {
     // A token named as a value from a component ([label, cents, '--c-m']) must be a real token.
     const named = all.filter(([p]) => p.endsWith('.tsx')).flatMap(([p, text]) => [...text.matchAll(/['"](--[\w-]+)['"](?!\s*(?:as string\]\s*)?:)/g)].map((m) => [p, m[1]!] as const));
     expect(named.filter(([, v]) => !tokens.has(v)).map(([p, v]) => `${rel(p)}: ${v}`)).toEqual([]);
-    const REMOVED = ['--panel', '--panel-2', '--green-soft', '--amber-ink', '--amber-soft', '--red-ink', '--red-soft', '--blue', '--cost-soft', '--sh', '--c-legend'];
+    const REMOVED = ['--r', '--sh-soft', '--panel', '--panel-2', '--green-soft', '--amber-ink', '--amber-soft', '--red-ink', '--red-soft', '--blue', '--cost-soft', '--sh', '--c-legend'];
     const hits = all.flatMap(([p, text]) => REMOVED.filter((r) => new RegExp(`${r}(?![\\w-])`).test(text)).map((r) => `${rel(p)}: ${r}`));
     expect(hits).toEqual([]);
+  });
+
+  it('no hex color in a component: data fallbacks use var(--no-color)', () => {
+    const bad = [...sources.keys()].filter((p) => p.endsWith('.tsx')).flatMap((p) => [...read(p).matchAll(/['"`]#[0-9a-f]{3,8}\b/gi)].map((m) => `${rel(p)}: ${m[0]}`));
+    expect(bad).toEqual([]);
+  });
+
+  // Rules of every stylesheet, as [selector, body]; the segmented switches are guarded byte by byte elsewhere (exception 1).
+  const rulesOf = (p: string) => [...read(p).replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => [m[1]!.trim(), m[2]!] as const);
+  const SEG = /\.(seg|seg2|rad)\b/;
+  const notSeg = css.filter((p) => p !== TOKENS).flatMap((p) => rulesOf(p).filter(([sel]) => !SEG.test(sel)).map(([sel, body]) => [p, sel, body] as const));
+
+  it('border-radius only from a --r-* token, 0, a percentage or 99px', () => {
+    const ok = (term: string) => /^(0|\d+%|99px|var\(--r-[a-z]+\)|\/)$/.test(term);
+    const bad = notSeg.flatMap(([p, sel, body]) => [...body.matchAll(/border(?:-[a-z]+-[a-z]+)?-radius:\s*([^;]+)/g)]
+      .filter((m) => !(m[1]!.trim().match(/var\([^)]*\)|[^\s]+/g) ?? []).every(ok)).map((m) => `${rel(p)} ${sel}: ${m[1]!.trim()}`));
+    expect(bad).toEqual([]);
+  });
+
+  it('box-shadow: panels have none; only floating things take var(--sh-up), plus rings and inner lines', () => {
+    // A layer is fine when it is none, the floating token, an inner line (inset) or a ring with no offset and no blur.
+    const layer = (l: string) => /^(none|var\(--sh-up\)|inset\s.+|0 0 0 [\d.]+px\s.+)$/.test(l.trim());
+    const bad = notSeg.flatMap(([p, sel, body]) => [...body.matchAll(/box-shadow:\s*([^;]+)/g)]
+      .filter((m) => !m[1]!.split(/,(?![^(]*\))/).every(layer)).map((m) => `${rel(p)} ${sel}: ${m[1]!.trim()}`));
+    expect(bad).toEqual([]);
+    expect(read(TOKENS)).toMatch(/--sh-up:/);
   });
 
   it('the focus ring and the accent of checkboxes and radios use --accent, in the app and on the fatal page', () => {

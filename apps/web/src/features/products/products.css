@@ -5,14 +5,14 @@
 .pt-grid.fam { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 @media (max-width: 1100px) { .pt-grid.fam { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .pt-grid.fam { grid-template-columns: minmax(0, 1fr); } }
-.pt.on { box-shadow: 0 0 0 2px var(--accent), var(--sh-soft); }
+.pt.on { box-shadow: 0 0 0 2px var(--accent); }
 .pt-st { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
 .vpill { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 99px; background: var(--soft-2); color: var(--ink); padding: 4px 10px 4px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
 .vpill:hover { background: var(--line-2); }
 .vpill svg { transition: transform .15s; }
 .vpill[aria-expanded="true"] svg { transform: rotate(180deg); }
 
-.vpanel { grid-column: 1 / -1; position: relative; margin-top: 2px; border: 2px solid var(--accent); border-radius: var(--r); background: var(--bg); padding: 16px 20px 8px; }
+.vpanel { grid-column: 1 / -1; position: relative; margin-top: 2px; border: 2px solid var(--accent); border-radius: var(--r-panel); background: var(--bg); padding: 16px 20px 8px; }
 .vpanel::before { content: ""; position: absolute; top: -9px; left: calc(var(--notch, 50%) - 8px); width: 14px; height: 14px; background: var(--bg); border-left: 2px solid var(--accent); border-top: 2px solid var(--accent); transform: rotate(45deg); }
 .vp-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 10px; }
 .vp-h b { font-size: 16px; font-weight: 600; }
@@ -54,7 +54,7 @@
 @media (min-width: 761px) { .prod-tb .tb-r { flex-wrap: nowrap; } .prod-tb .search { width: 230px; } }
 
 /* Lista: arrow, variant rows with a guide to their piece, and "+ Agregar variante de …". */
-.fam-chev { flex: none; width: 28px; height: 28px; border: 1px solid var(--line-2); background: var(--soft); border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; color: var(--ink); }
+.fam-chev { flex: none; width: 28px; height: 28px; border: 1px solid var(--line-2); background: var(--soft); border-radius: var(--r-btn); display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; color: var(--ink); }
 .fam-chev svg { transition: transform .15s; }
 .fam-chev[aria-expanded="true"] svg { transform: rotate(90deg); }
 .tbl.fam .pn { align-items: flex-start; }
@@ -65,7 +65,7 @@
 .tbl.fam .var-n { position: relative; padding-left: 36px; align-items: center; gap: 8px; }
 .tbl.fam .var-n .sw { margin-top: 0; }
 .tbl.fam .var-n small { color: var(--ink-2); font-size: 13px; }
-.tbl.fam .guide { position: absolute; left: 13px; top: -14px; bottom: 50%; width: 14px; border-left: 2px solid var(--line-2); border-bottom: 2px solid var(--line-2); border-bottom-left-radius: 6px; }
+.tbl.fam .guide { position: absolute; left: 13px; top: -14px; bottom: 50%; width: 14px; border-left: 2px solid var(--line-2); border-bottom: 2px solid var(--line-2); border-bottom-left-radius: var(--r-pill); }
 .tbl.fam tr.var-add td { background: var(--soft); border-bottom: 1px solid var(--line); }
 .var-add-in { padding-left: 36px; }
 .btn.dashed { border-style: dashed; background: transparent; font-weight: 600; }
