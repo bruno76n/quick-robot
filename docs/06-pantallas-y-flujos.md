@@ -102,7 +102,7 @@ Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), 
 
 ## 4. Ventas
 
-**Muestra:** lista de **4 columnas**: Fecha · Artículos (con cliente, pedido, canal y nota) · Total (con chips Saldo / Devuelta) · Ganancia. Filtro por canal.
+**Muestra:** franja de cifras de los últimos 60 días (Ventas con su número, Ganancia bruta, Comisiones y Saldo por cobrar con el número de ventas que deben; ronda 3) y lista de **5 columnas**: Fecha · Artículos (con cliente, pedido y nota) · Canal (en celular va debajo de los artículos) · Total (con chips Saldo / Devuelta) · Ganancia. Filtro por canal (las cifras siguen el filtro).
 
 | Botón | Caso de uso | Lleva a |
 |---|---|---|

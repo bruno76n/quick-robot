@@ -24,12 +24,6 @@ export interface SaleDetail {
   totals: { grossCents: number; incomeCents: number; commissionCents: number; costCents: number; profitCents: number; paidCents: number; owedCents: number };
 }
 
-/** The part of a report the Ventas summary uses (docs/12 §8). */
-export interface ReportConcepts {
-  totals: { incomeCents: number; costCents: number; commissionCents: number; profitCents: number };
-  costConcepts: { materialCents: number; powerCents: number; machineCents: number; extrasCents: number; failureReserveCents: number };
-}
-
 export const salesApi = {
   list: (p: { from?: string; to?: string; channelId?: string; customerId?: string; pageSize?: number }) => request<SalePage>('GET', `/sales${qs(p)}`),
   get: (id: string) => request<SaleDetail>('GET', `/sales/${id}`),
@@ -40,5 +34,4 @@ export const salesApi = {
   pay: (id: string, input: PaymentInput) => request<SaleDetail>('POST', `/sales/${id}/payments`, input),
   removePayment: (id: string, paymentId: string) => request<SaleDetail>('DELETE', `/sales/${id}/payments/${paymentId}`),
   giveBack: (id: string, input: ReturnSaleInput) => request<SaleDetail>('POST', `/sales/${id}/return`, input),
-  concepts: (from: string, to: string) => request<ReportConcepts>('GET', `/reports${qs({ from, to })}`),
 };

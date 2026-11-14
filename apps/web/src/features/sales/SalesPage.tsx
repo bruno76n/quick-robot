@@ -1,4 +1,5 @@
-// Ventas (docs/06 §4, mockup vVentas): last 60 days, summary, channel filter and the sale dialog.
+// Ventas (docs/06 §4; ronda-3 §6, reference/ronda-3/ventas.html): last 60 days, the strip of figures, the channel
+// filter (segmented switch as before, exception 1) and the table with Saldo or Devuelta next to the total.
 import { addDays } from '@app/core';
 import { useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
@@ -6,7 +7,10 @@ import { useState } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
 import { Mascot } from '../../components/Mascot';
+import { Kpis } from '../../components/Kpis';
+import { Panel } from '../../components/Panel';
 import { Pill } from '../../components/Pill';
+import { Table, Td, Th } from '../../components/Table';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { todayLocal } from '../../lib/input';
@@ -15,9 +19,7 @@ import { go } from '../../lib/nav';
 import { keys, useSettings } from '../../lib/queries';
 import { salesApi, type SaleListItem } from './api';
 import { VsList } from './Breakdown';
-import { rich } from './rich';
 import { SaleDialogs } from './SaleDialogs';
-import { SalesBrief } from './SalesBrief';
 import './sales.css';
 
 const L = es.screens.sales;
@@ -38,11 +40,11 @@ export function ItemsList({ items, max = 3 }: { items: SaleListItem['items']; ma
   );
 }
 
-/** "Debe $X" opens the sale with its payment dialog already open (ronda-2 §12, D5). */
+/** "Saldo $X" opens the sale with its payment dialog already open (ronda-2 §12, D5). */
 function OwesChip({ id, owedCents }: { id: string; owedCents: number }) {
   const text = t('screens.sales.owes', { amount: centsTotal(owedCents) });
   return (
-    <button type="button" className="chip warn chip-btn" aria-label={t('screens.sales.owesPay', { owes: text })} onClick={(e) => { e.stopPropagation(); go(`/ventas?v=${id}&abono=1`); }} onKeyDown={(e) => e.stopPropagation()}>{text}</button>
+    <button type="button" className="chip bad chip-btn" aria-label={t('screens.sales.owesPay', { owes: text })} onClick={(e) => { e.stopPropagation(); go(`/ventas?v=${id}&abono=1`); }} onKeyDown={(e) => e.stopPropagation()}>{text}</button>
   );
 }
 
@@ -53,54 +55,58 @@ export function SalesPage() {
   const [channel, setChannel] = useState(ALL);
   const channels = useSettings().data?.channels ?? [];
   const { data } = useQuery({ queryKey: [...keys.sales, 'list', from, today], queryFn: async () => (await salesApi.list({ from, to: today, pageSize: 200 })).data });
-  const { data: rep } = useQuery({ queryKey: [...keys.reports, 'sales-brief', from, today], queryFn: async () => (await salesApi.concepts(from, today)).data });
   const all = data?.items ?? [];
   const shown = all.filter((s) => channel === ALL || s.channelId === channel);
   const live = shown.filter((s) => !s.returned);
-  const T = {
-    count: live.length, income: live.reduce((a, s) => a + s.incomeCents, 0) / 100, cost: live.reduce((a, s) => a + s.costCents, 0) / 100,
-    commission: live.reduce((a, s) => a + s.commissionCents, 0) / 100, profit: live.reduce((a, s) => a + s.profitCents, 0) / 100,
-  };
-  // Cost by concept comes from the report (all channels); a channel gets its share by cost (estimate, like the mockup).
-  const c = rep?.costConcepts;
-  const share = rep && rep.totals.costCents > 0 ? (T.cost * 100) / rep.totals.costCents : 0;
-  const K = c ? { M: (c.materialCents * share) / 100, L: (c.powerCents * share) / 100, Q: (c.machineCents * share) / 100, E: (c.extrasCents * share) / 100, F: (c.failureReserveCents * share) / 100 } : { M: 0, L: 0, Q: 0, E: T.cost, F: 0 };
+  const sum = (f: (s: SaleListItem) => number) => live.reduce((a, s) => a + f(s), 0);
   const owing = shown.filter((s) => s.owedCents > 0);
-  const chName = channels.find((x) => x.id === channel)?.name ?? '';
+  const owed = owing.reduce((a, s) => a + s.owedCents, 0);
+  const profit = sum((s) => s.profitCents);
   const open = (id: string) => go(`/ventas?v=${id}`);
   const newSale = () => go('/armar?modo=venta');
   return (
     <>
       <PageHead title={L.title} sub={L.sub} actions={<Button variant="primary" icon="plus" onClick={newSale}>{L.register}</Button>} />
-      {data ? <SalesBrief T={T} K={K} when={channel === ALL ? L.when : t('screens.sales.whenChannel', { channel: chName })} /> : <div className="skel" />}
-      {owing.length ? <p className="note warn">{rich(L.owedNote, { count: owing.length }, { count: <b>{owing.length}</b>, amount: <b>{centsTotal(owing.reduce((a, s) => a + s.owedCents, 0))}</b> })}</p> : null}
+      {data ? (
+        <div data-testid="sales-figures"><Kpis label={L.figures} items={[
+          { label: L.kSales, value: centsTotal(sum((s) => s.incomeCents)), sub: t('screens.sales.kCount', { count: live.length }) },
+          { label: L.kGross, value: centsTotal(profit), tone: profit < 0 ? 'bad' : 'net' },
+          { label: L.kCommissions, value: centsTotal(sum((s) => s.commissionCents)) },
+          { label: L.kOwed, value: centsTotal(owed), tone: owed > 0 ? 'bad' : '', sub: t('screens.sales.kCount', { count: owing.length }) },
+        ]} /></div>
+      ) : <div className="skel" />}
       <div className="toolbar">
         <div className="seg" role="group" aria-label={L.channelGroup}>
           {[{ id: ALL, name: L.allChannels }, ...channels].map((x) => <button key={x.id} type="button" className={channel === x.id ? 'on' : undefined} aria-pressed={channel === x.id} onClick={() => setChannel(x.id)}>{x.name}</button>)}
         </div>
       </div>
-      <div className="tw">
-        <table className="tbl">
-          <thead><tr><th>{L.colDate}</th><th>{L.colItems}</th><th className="r">{L.colTotal}</th><th className="r">{L.colProfit}</th></tr></thead>
-          <tbody>
-            {shown.map((s) => {
-              const det = [s.customer, s.orderNumber !== null ? t('screens.sales.orderRef', { folio: s.orderNumber }) : '', s.channel, s.note].filter(Boolean).join(' · ');
-              return (
-                <tr key={s.id} className="click" tabIndex={0} data-testid="sale-row" onClick={() => open(s.id)} onKeyDown={(e) => { if (e.key === 'Enter') open(s.id); }}>
-                  <td className="nw">{date(s.on)}</td>
-                  <td>{s.items ? <ItemsList items={s.items} /> : <ul className="itl"><li>{s.itemsText}</li></ul>}{det ? <small className="blk">{det}</small> : null}</td>
-                  <td className="r num">
-                    {s.returned ? <s className="mut">{centsTotal(s.totalCents)}</s> : <>{centsTotal(s.incomeCents)}{s.listCents ? <VsList list={s.listCents} price={s.incomeCents} /> : null}</>}
-                    {s.returned ? <small className="blk"><Pill tone="bad">{L.returned}</Pill></small> : s.owedCents > 0 ? <small className="blk"><OwesChip id={s.id} owedCents={s.owedCents} /></small> : null}
-                  </td>
-                  <td className={`r num ${s.returned ? 'mut' : s.profitCents >= 0 ? 'pos' : 'neg'}`}><b>{s.returned ? '—' : centsTotal(s.profitCents)}</b></td>
-                </tr>
-              );
-            })}
-            {data && !shown.length ? <tr><td colSpan={4} className="empty-td"><Mascot size={48} /><p>{L.empty}</p><Button variant="primary" onClick={newSale}>{L.registerFirst}</Button></td></tr> : null}
-          </tbody>
-        </table>
-      </div>
+      <Panel flush className="sales-p">
+        <Table fit className="big" head={<><Th>{L.colDate}</Th><Th>{L.colItems}</Th><Th hideSm>{L.colChannel}</Th><Th r>{L.colTotal}</Th><Th r>{L.colProfit}</Th></>}>
+          {shown.map((s) => {
+            const det = [s.customer, s.orderNumber !== null ? t('screens.sales.orderRef', { folio: s.orderNumber }) : '', s.note].filter(Boolean).join(' · ');
+            return (
+              <tr key={s.id} className="click" tabIndex={0} data-testid="sale-row" onClick={() => open(s.id)} onKeyDown={(e) => { if (e.key === 'Enter') open(s.id); }}>
+                <Td className="nw num">{date(s.on)}</Td>
+                <Td>
+                  {s.items ? <ItemsList items={s.items} /> : <ul className="itl"><li><b>{s.itemsText}</b></li></ul>}
+                  {det ? <span className="meta">{det}</span> : null}
+                  <span className="meta sale-ch">{s.channel}</span>
+                </Td>
+                <Td hideSm>{s.channel}</Td>
+                <Td r className="sale-tot">
+                  <span className="sale-amt">
+                    {s.returned ? <s className="mut num">{centsTotal(s.totalCents)}</s> : <span className="num">{centsTotal(s.incomeCents)}</span>}
+                    {s.returned ? <Pill>{L.returned}</Pill> : s.owedCents > 0 ? <OwesChip id={s.id} owedCents={s.owedCents} /> : null}
+                  </span>
+                  {!s.returned && s.listCents ? <VsList list={s.listCents} price={s.incomeCents} /> : null}
+                </Td>
+                <Td r className={`num sale-g ${s.returned ? 'mut' : s.profitCents >= 0 ? 'pos' : 'neg'}`}>{s.returned ? '—' : centsTotal(s.profitCents)}</Td>
+              </tr>
+            );
+          })}
+          {data && !shown.length ? <tr><td colSpan={5} className="empty-td"><Mascot size={48} /><p>{L.empty}</p><Button variant="primary" onClick={newSale}>{L.registerFirst}</Button></td></tr> : null}
+        </Table>
+      </Panel>
       {search.v ? <SaleDialogs key={search.v} id={search.v} startWithPayment={search.abono === '1'} onClose={() => go('/ventas', true)} /> : null}
     </>
   );
