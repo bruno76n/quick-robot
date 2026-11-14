@@ -1,26 +1,5 @@
-/* Filamentos (ronda-3 C8, reference/ronda-3/filamentos.html). Colors only from tokens.css. */
+/* Filamentos (ronda-3 C8; ronda 4: the list of filaments with their spools lives in spools.css). Colors only from tokens.css. */
 .fil-k { margin-bottom: 18px; }
-.fil-k.has-low .kp:nth-child(3) dd { color: var(--amber-d); }
-.fil-p .tbl td { padding-top: 12px; padding-bottom: 12px; }
-.fil-t .pn { gap: 10px; }
-.fil-t .pn b { display: block; font-size: 13.5px; }
-.fil-t .pn .meta { font-size: 12.5px; }
-.fil-q { width: 34%; min-width: 120px; }
-.fil-q .meter { max-width: 204px; margin-bottom: 4px; }
-.fil-q .meta { font-size: 12.5px; }
-.fil-t .chip { margin-left: 8px; }
-@media (max-width: 760px) {
-  .fil-q { width: 38%; min-width: 0; }
-  .fil-t td, .fil-t th { padding-left: 6px; padding-right: 6px; }
-  .fil-t td:first-child, .fil-t th:first-child { padding-left: 0; }
-  .fil-t td:last-child, .fil-t th:last-child { padding-right: 0; }
-}
-@media (max-width: 480px) {
-  .fil-q { width: auto; }
-  .fil-q .meter { width: 72px; }
-  .fil-t td.r .chip { margin-left: 0; padding: 0 6px; }
-}
-
 /* drawer of a filament (exception 2: overlay drawer; content like the mockup's aside) */
 .fdr-h { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
 .fdr-h > div { flex: 1; min-width: 0; }

@@ -34,7 +34,7 @@ const route = <P extends string>(path: P, component: () => React.ReactNode, vali
   createRoute({ getParentRoute: () => rootRoute, path, component, ...(validateSearch ? { validateSearch } : {}) });
 
 const BUILT: Record<string, AnyRoute> = {
-  '/filamentos': route('/filamentos', FilamentList, idSearch('f')),
+  '/filamentos': route('/filamentos', FilamentList, (s) => ({ ...idSearch('f')(s), ...idSearch('r')(s), ...(['pesar', 'movimientos'].includes(String(s.a)) ? { a: String(s.a) } : {}) })),
   '/insumos': route('/insumos', SuppliesPage, (s) => ({ ...idSearch('i')(s), ...flag('compra')(s) })),
   '/impresoras': route('/impresoras', PrintersPage),
   '/ajustes': route('/ajustes', SettingsPage),

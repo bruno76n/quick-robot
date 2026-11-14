@@ -175,16 +175,20 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 ## 6. Filamentos
 
-**Muestra:** lista ancha de filamentos (material + color) con lo que queda, rollos, costo por gramo, y estado (Sin rollos · Agotado · Crítico · Stock bajo · Nuevo · Normal, `04 §1`). Seleccionar uno abre el **cajón** con sus rollos y movimientos.
+**Muestra** (ronda 4, `reference/ronda-4/filamentos.html`): franja de cuatro cifras — **Disponible** (kg), **Valor del inventario** («lo que costó cada rollo», `04 §1` caso 1.4), **Stock bajo o crítico** (filamentos en Stock bajo, Crítico o Agotado) y **Rollos sin costo** («no entran al promedio») — y cada filamento (material + color) como un bloque con su encabezado y **sus rollos abajo**:
+- *Encabezado:* color, nombre, «N rollos · marcas», gramos disponibles, **costo por gramo** con tres decimales (`$0.250/g`) y de dónde sale («promedio de #3, #5 y #9», «promedio de PLA», «precio de referencia» o «sin costo de referencia», `04 §1`), y el estado (Sin rollos · Agotado · Crítico · Stock bajo · Nuevo · Normal).
+- *Rollo:* número (`#7`, la etiqueta del contenedor), marca, fecha de compra, lo que costó o «Sin costo», barra, «x g de y g», estado del rollo (En uso · Nuevo · Vacío) y su menú **···** (Pesar, Terminar rollo, Editar, Movimientos). Los rollos vacíos se ocultan: «N rollo(s) vacío(s) oculto(s)» los muestra al tocarlo.
+- Tocar el **encabezado** abre el cajón del filamento (cifras, todos sus rollos con su número, todos sus movimientos, Registrar movimiento, Agregar rollo de …). Tocar un **rollo** abre el **cajón del rollo** (ronda 3 · excepción 2: no la columna fija de la maqueta): Quedan · Del rollo · Costo, la nota de qué costo usan las piezas («Para calcular piezas, PLA Gris usa $0.250/g (promedio de #3, #5 y #9)»; un rollo sin costo dice que no entra al promedio), **Pesar en báscula** (peso en la báscula y carrete vacío, propuesto con el último de esa marca; «Quedan» se calcula al escribir: «sin cambio», «ajuste de −18 g» o el rango válido), **Guardar peso**, **Terminar rollo** (con confirmación), **Editar** y sus movimientos con **Registrar movimiento**.
 
 | Botón | Caso de uso |
 |---|---|
-| Agregar rollo | `addSpool` (crea el filamento si no existe; movimiento `purchase`). Si el material y color ya existen (o el diálogo se abre desde el filamento), la **marca** propone la de su último rollo (el de fecha de compra más reciente) hasta que la persona elige otra; se ve en el resumen y sigue editable (ronda 2 · D3) |
+| Agregar rollo | `addSpool` (ver «Agregar rollo» abajo). Si el material y color ya existen (o el diálogo se abre desde el filamento), la **marca** propone la de su último rollo (el de fecha de compra más reciente) hasta que la persona elige otra; sigue editable (ronda 2 · D3) |
 | Editar rollo / Eliminar rollo | `updateSpool` / `deleteSpool` |
-| Movimiento (en el cajón) | `recordSpoolMovement` (consumo, fallo, merma, ajuste) con nota |
-| Ver filamento | Abre el cajón |
-
----
+| Pesar · Guardar peso | `weighSpool` (`WEIGHT_OUT_OF_RANGE` si el peso no cuadra; la vista previa ya lo avisa) |
+| Terminar rollo | `finishSpool` tras confirmar («Lo que queda (x g) se registra como merma y el rollo pasa a Vacío»); no se ofrece en un rollo vacío |
+| Movimientos (menú del rollo) | Abre el cajón del rollo en sus movimientos |
+| Registrar movimiento (en el cajón) | `recordSpoolMovement` (consumo, fallo, merma, ajuste) con nota |
+| Ver filamento / Ver rollo | Abre el cajón |
 
 ## 7. Insumos
 

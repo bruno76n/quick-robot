@@ -4,7 +4,7 @@ import type {
   AddChannelInput, AddSpoolInput, AddSpoolOutput, SpoolOutput, ChannelView, CollectionDetail, CollectionListItem, CompleteMaintenanceInput, CreateSupplyInput, ErrorCode,
   FilamentDetail, FilamentListItem, MaintenanceTaskInput, MaintenanceView, Page, PrinterInput, PrintersOutput, PrinterView, ProductDetail, ProductFamilyFilter, ProductFamilyPage, ProductOptions,
   SaveCollectionInput, SaveProductAsVariantInput, SaveProductInput, SettingsOutput, SettingsView, Spool, SpoolMovementInput, SupplierInput, SupplierView, SupplyDetail, SupplyListItem,
-  SupplyMovementInput, SupplyPurchaseInput, UpdateChannelInput, UpdateSettingsInput, UpdateSpoolInput, UpdateSupplyInput, Warning,
+  SupplyMovementInput, SupplyPurchaseInput, UpdateChannelInput, UpdateSettingsInput, UpdateSpoolInput, UpdateSupplyInput, Warning, WeighSpoolInput, WeighSpoolOutput, FinishSpoolInput,
 } from '@app/contract';
 
 export type ClientCode = ErrorCode | 'NETWORK_ERROR';
@@ -63,6 +63,8 @@ export const api = {
     remove: (id: string) => request<{ movements: number }>('DELETE', `/spools/${id}`),
     restore: (id: string) => request<{ spool: Spool; filament: FilamentListItem }>('POST', `/spools/${id}/restore`),
     move: (id: string, input: SpoolMovementInput) => request<SpoolOutput>('POST', `/spools/${id}/movements`, input),
+    finish: (id: string, input: FinishSpoolInput = {}) => request<SpoolOutput>('POST', `/spools/${id}/finish`, input),
+    weigh: (id: string, input: WeighSpoolInput) => request<WeighSpoolOutput>('POST', `/spools/${id}/weigh`, input),
   },
   settings: {
     get: () => request<SettingsOutput>('GET', '/settings'),
