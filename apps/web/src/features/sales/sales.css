@@ -26,4 +26,7 @@
   .sales-p .tbl td { white-space: normal; }
   .sales-p .tbl td.nw { white-space: nowrap; }
   .sales-p .itl small.blk { overflow-wrap: anywhere; }
+  /* narrow column: "2 × name" flows as one line of text instead of two flex items */
+  .sales-p .itl li { display: block; }
+  .sales-p .itl li small.blk { display: block; }
 }
