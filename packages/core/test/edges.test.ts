@@ -1,7 +1,7 @@
 // Edge branches of the filament and catalog rules (keep core at 90 % branches, docs/14 §4).
 import { describe, expect, it } from 'vitest';
 import { normalizeName, tidyName } from '../src/catalog';
-import { filamentCostPerGram, planDeduction, spoolUseOrder } from '../src/filament';
+import { filamentCost, planDeduction, spoolUseOrder } from '../src/filament';
 import { aSpool } from './builders';
 
 describe('edges', () => {
@@ -10,11 +10,12 @@ describe('edges', () => {
     expect(tidyName(null as unknown as string)).toBe('');
   });
 
-  it('last purchase: same date breaks the tie by id', () => {
-    const a = aSpool({ id: 'a', purchasedOn: '2026-05-01', costPesos: 100, shippingPesos: 0, remaining: 0 });
-    const b = aSpool({ id: 'b', purchasedOn: '2026-05-01', costPesos: 900, shippingPesos: 0, remaining: 0 });
-    expect(filamentCostPerGram([a, b])).toBeCloseTo(0.9, 10);
-    expect(filamentCostPerGram([b, a])).toBeCloseTo(0.9, 10);
+  it('cost per gram: a spool with no grams does not count; the material fallback ignores no-cost spools too', () => {
+    const zero = aSpool({ id: 'z', grams: 0, costPesos: 100, shippingPesos: 0 });
+    const real = aSpool({ id: 'r', purchasedOn: '2026-01-01', costPesos: 400, shippingPesos: 0 });
+    expect(filamentCost([zero, real])).toMatchObject({ costPerGram: 0.4, spoolIds: ['r'] });
+    const gift = aSpool({ id: 'g', noCost: true });
+    expect(filamentCost([gift], { materialSpools: [gift], referenceCentsPerKg: 45000 })).toMatchObject({ source: 'reference', costPerGram: 0.45 });
   });
 
   it('use order: full spools after opened ones; same date by id either way', () => {

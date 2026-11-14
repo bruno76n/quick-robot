@@ -122,7 +122,7 @@ Bajar un umbral requiere anotarlo en `docs/decisiones.md` con la razón.
 
 | Caso | Regla | Archivo de prueba | Fase |
 |---|---|---|---|
-| 1.1 · 1.2 · 1.3 | Costo por gramo ponderado; descontar con purga y faltante | `core/test/filament.test.ts` | 1 |
+| 1.1a–g · 1.2 · 1.3 · 1.4 · 1.5a–c · 1.6 | Costo por gramo de las últimas compras; descontar con purga, rollo elegido y faltante; estado; valor del inventario; pesar y terminar rollo (ronda 4) | `core/test/filament.test.ts`, `spool-use.test.ts` | 1 · ronda 4 |
 | 2.1 | Costo de una pieza (M, L, Q, E, fallos) | `core/test/costs.test.ts` | 2 |
 | 3.1 · 3.2 · 3.3 | Sugerido, piso, lista; sets; reparto | `core/test/pricing.test.ts` | 2 |
 | 11.1 · 11.2 | Mantenimiento; inversión recuperada | `core/test/printers.test.ts` | 2 |
