@@ -51,10 +51,10 @@
 .pp-t { display: inline-flex; align-items: center; gap: 6px; }
 
 /* next deliveries */
-.du li { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; column-gap: 10px; padding: 9px 0; border-top: 1px solid var(--line-soft); }
-.du li:first-child { border-top: 0; padding-top: 0; }
-.du li.click { cursor: pointer; }
-.du li.click:hover .du-c b, .du li.click:focus-visible .du-c b { text-decoration: underline; text-underline-offset: 3px; }
+.du .du-r { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; column-gap: 10px; padding: 9px 0; border-top: 1px solid var(--line-soft); }
+.du .du-r:first-child { border-top: 0; padding-top: 0; }
+.du .du-r.click { cursor: pointer; }
+.du .du-r.click:hover .du-c b, .du .du-r.click:focus-visible .du-c b { text-decoration: underline; text-underline-offset: 3px; }
 .du-d { font-size: 12.5px; font-weight: 600; }
 .du-c { min-width: 0; }
 .du-c b { display: block; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

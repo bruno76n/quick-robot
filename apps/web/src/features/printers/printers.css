@@ -34,7 +34,7 @@
 .pc-kv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 8px; }
 .pc-kv dt { font-size: 12px; color: var(--ink-2); }
 .pc-kv dd { margin: 2px 0 0; font-size: 15px; font-weight: 600; }
-.pc-kv small { font-size: 11.5px; color: var(--ink-2); }
+.pc-kv small { display: block; font-size: 11.5px; font-weight: 400; color: var(--ink-2); }
 @media (max-width: 480px) {
   .mt-l li { grid-template-columns: minmax(0, 1fr) auto; }
   .mt-l .meter { grid-column: 1 / -1; grid-row: 2; margin-top: 4px; }

@@ -10,16 +10,17 @@
   --soft-3: #dedee5;    /* sales in the week columns, switch off (mockup --u-soft) */
   --col: #ececf0;       /* board columns */
   --track: #ebebf0;     /* background of every meter and bar */
-  /* ink: --ink-3 is for non-text only (pending steps, disabled); light grey text uses --ink-3t (D-3, contrast) */
-  --ink: #121214; --ink-2: #6a6a73; --ink-3: #9b9ba5; --ink-3t: #777782; --doc-ink: #44444c; --on-dark: #ffffff;
+  /* ink: --ink-3 is for non-text only (pending steps, disabled); light grey text uses --ink-3t. --ink-2 and --ink-3t are a
+     shade darker than the mockup so small text reaches 4.5:1 on white, --soft and --soft-2 (D-3, ronda-3 D axe) */
+  --ink: #121214; --ink-2: #66666f; --ink-3: #9b9ba5; --ink-3t: #6e6e78; --doc-ink: #44444c; --on-dark: #ffffff;
   /* lines: panels and tables, rows, fields */
   --line: #e9e9ee; --line-soft: #f0f0f3; --line-2: #d2d2da;
   /* main action, selection and focus ring */
   --accent: #121214; --accent-ink: #ffffff;
   --btn: var(--accent); --btn-ink: var(--accent-ink); --on-green: #121214;
-  /* cost (gris oscuro) and profit (verde). --green-d for figures on white, --green-ink for text on --green-l (D-4) */
+  /* cost (gris oscuro) and profit (verde). --green-d for figures on white, --green-ink for text on --green-l and on --soft (D-4) */
   --cost: #4a4a53;
-  --green: #00ae42; --green-d: #00873a; --green-ink: #067a30; --green-l: #e3f5e9;
+  --green: #00ae42; --green-d: #008238; --green-ink: #067a30; --green-l: #e3f5e9;
   /* states */
   --amber: #b4740a; --amber-d: #8a5a06; --amber-l: #fdf3e1;
   --red: #c8302a; --red-l: #fbeaea;

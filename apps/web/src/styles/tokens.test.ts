@@ -47,10 +47,10 @@ describe('design tokens', () => {
   it('declares the ronda-3 token values (ronda-3 §2, informe-ronda3-a §1.3)', () => {
     const t = read(TOKENS);
     const want: Record<string, string> = {
-      '--accent': '#121214', '--ink': '#121214', '--ink-2': '#6a6a73', '--ink-3': '#9b9ba5', '--ink-3t': '#777782',
+      '--accent': '#121214', '--ink': '#121214', '--ink-2': '#66666f', '--ink-3': '#9b9ba5', '--ink-3t': '#6e6e78',
       '--soft': '#f6f6f8', '--soft-2': '#e9e9ef', '--soft-3': '#dedee5', '--col': '#ececf0', '--track': '#ebebf0',
       '--line': '#e9e9ee', '--line-soft': '#f0f0f3', '--cost': '#4a4a53',
-      '--green': '#00ae42', '--green-d': '#00873a', '--green-ink': '#067a30', '--green-l': '#e3f5e9',
+      '--green': '#00ae42', '--green-d': '#008238', '--green-ink': '#067a30', '--green-l': '#e3f5e9',
       '--amber': '#b4740a', '--amber-d': '#8a5a06', '--amber-l': '#fdf3e1', '--red': '#c8302a', '--red-l': '#fbeaea',
       '--r-btn': '7px', '--r-field': '8px', '--r-panel': '12px', '--r-pill': '6px', '--r-in': '10px',
     };
