@@ -13,7 +13,7 @@ export const channelView = (c: ChannelRow): ChannelView => ({ id: c.id, name: c.
 function settingsView(s: SettingsRow): SettingsView {
   return {
     kwhPriceCents: s.kwhPriceCents, failurePct: s.failurePct, purgePct: s.purgePct, minMarginPct: s.minMarginPct, formulaMarginPct: s.formulaMarginPct,
-    business: s.business, lastBackupOn: s.lastBackupOn ?? null,
+    business: s.business, lastBackupOn: s.lastBackupOn ?? null, costAvgPurchases: s.costAvgPurchases,
   };
 }
 
