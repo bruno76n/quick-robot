@@ -99,7 +99,11 @@ describe('spool inputs of ronda 4 (limits and injection)', () => {
     }
     expect((await h.call('POST', `/api/v1/spools/${id}/finish`, { body: { on: "2026-11-01'; --" } })).status).toBe(422);
   });
+});
 
+describe('chosen spools and purchases for the average (ronda 4)', () => {
+  const fields = (r: Awaited<ReturnType<Harness['call']>>) => (r.json.details?.fields ?? []) as { path: string; rule: string }[];
+  const spool = (over: Record<string, unknown>) => ({ filament: { material: 'PLA', color: 'Límites' }, costCents: 30000, grams: 1000, purchasedOn: '2026-11-01', ...over });
   it('chosen spools: up to 10 per filament, grams > 0 with one decimal, ids only', async () => {
     const out = (await h.call('POST', '/api/v1/spools', { body: spool({ filament: { material: 'PLA', color: 'Elegidos' }, quantity: 11 }) })).json.data as { filament: { id: string }; spools: { id: string }[] };
     const body = (spools: unknown[]) => ({ on: '2026-11-07', text: 'Prueba', qty: 1, result: 'ok', hours: 0, reason: 'test', filaments: [{ filamentId: out.filament.id, grams: 10, spools }] });

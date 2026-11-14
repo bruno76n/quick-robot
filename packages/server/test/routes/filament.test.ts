@@ -62,7 +62,9 @@ describe('filament routes', () => {
     const health = await h.call('GET', '/api/v1/health', { token: null });
     expect(health.json.data).toMatchObject({ ok: true, version: 'test', schemaVersion: schemaVersion() });
   });
+});
 
+describe('next spool number', () => {
   it('GET /filaments says the next spool number; a deleted last spool keeps its number (preview of Agregar rollo, ronda 4 · D)', async () => {
     const next = async (token?: string) => ((await h.call('GET', '/api/v1/filaments', token ? { token } : {})).json.data as { nextSpoolNumber: number }).nextSpoolNumber;
     const before = await next();
