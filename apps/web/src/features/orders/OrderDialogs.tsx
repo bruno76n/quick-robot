@@ -17,6 +17,7 @@ import { go } from '../../lib/nav';
 import { usePrinters, useProducts } from '../../lib/queries';
 import { ordersApi, ORDER_TOUCHES, useOrder, type OrderDetail, type OrderItem } from './api';
 import { MatRows, Shortfall, useMaterial } from './Material';
+import { shortfallGrams } from '../production/write';
 import { useStartSpools } from './StartSpools';
 import { tbc, warningText } from './parts';
 
@@ -137,8 +138,12 @@ function ProductionForm({ o, printers, reassign, onClose }: { o: OrderDetail; pr
   const assignments = its.map((it, k) => ({ lineItemId: it.id, printerId: chosen[k]!, ...spools.startSpools(it.id) }));
   const save = useWrite(async () => ({ data: reassign ? await ordersApi.reassign(o.id, { assignments }) : await ordersApi.start(o.id, { assignments, deductFilament: deduct && g > 0 }) }), {
     touches: [...ORDER_TOUCHES],
-    ok: ({ warnings }) => (reassign ? es.toast['order.printersUpdated']
-      : [t('screens.order.inProductionToast', { folio: o.number }) + (deduct && g > 0 ? `. ${t('screens.order.deductedToast', { grams: g })}` : ''), ...(deduct && g > 0 ? warnings.map(warningText) : [])].join(' ')),
+    ok: ({ warnings }) => {
+      if (reassign) return es.toast['order.printersUpdated'];
+      // «Se descontaron» = what the spools lose: with purge, without what was missing (ronda 4 · D).
+      const lost = Math.round((g - shortfallGrams(warnings)) * 10) / 10;
+      return [t('screens.order.inProductionToast', { folio: o.number }) + (deduct && lost > 0 ? `. ${t('screens.order.deductedToast', { grams: lost })}` : ''), ...(deduct && g > 0 ? warnings.map(warningText) : [])].join(' ');
+    },
     onDone: onClose,
   });
   // Plan per printer: when it starts and when it ends, against the end of the delivery day.

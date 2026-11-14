@@ -17,6 +17,15 @@ export function warningTexts(ws: readonly Warning[]): string[] {
   });
 }
 
+/** Grams that FILAMENT_SHORTFALL says were missing (with purge, like what the spools lose): not deducted. */
+export function shortfallGrams(ws: readonly Warning[]): number {
+  return ws.filter((w) => w.code === 'FILAMENT_SHORTFALL').reduce((a, w) => {
+    const d = w.details ?? {};
+    const items = Array.isArray(d.items) ? (d.items as { missingGrams?: number }[]) : [d as { missingGrams?: number }];
+    return a + items.reduce((x, it) => x + (Number(it.missingGrams) || 0), 0);
+  }, 0);
+}
+
 export function useWriteWithWarnings<I, O>(fn: (input: I) => Promise<Result<O>>, opts: { touches: (keyof typeof keys)[]; ok: (out: O, warnings: Warning[], input: I) => string; onDone?: (out: O) => void }) {
   const qc = useQueryClient();
   return useMutation({

@@ -66,7 +66,7 @@ test('a print from the chosen spool (not the suggested one): only that spool goe
   await expect(sec.locator('.after-h')).toContainText('1,000 g → 947.5 g');
   await expect(sec).toContainText('PLA Negro: 2,410 g → 2,357.5 g. El costo de la pieza no cambia con el rollo: $0.363/g.');
   await dlg.getByRole('button', { name: 'Registrar impresión' }).click();
-  await expect(status(page)).toContainText('Prueba registrada. Se descontaron 50 g.');
+  await expect(status(page)).toContainText('Prueba registrada. Se descontaron 52.5 g.');
   await page.goto(`${server.url}/filamentos`);
   await expect(row(page, 9)).toContainText('947.5 g de 1,000 g');
   await expect(row(page, 2)).toContainText('410 g de 1,000 g');
@@ -86,7 +86,7 @@ test('split between two spools: #2 gives all it has and ends, #10 continues', as
   await expect(alloc.nth(1)).toContainText('1,000 g → 885 g');
   await expect(alloc.nth(1)).toContainText('−115 g');
   await dlg.getByRole('button', { name: 'Registrar impresión' }).click();
-  await expect(status(page)).toContainText('Prueba registrada. Se descontaron 500 g.');
+  await expect(status(page)).toContainText('Prueba registrada. Se descontaron 525 g.');
   await page.goto(`${server.url}/filamentos`);
   const g = group(page, 'PLA Negro');
   await expect(g.getByTestId('spool-row')).toHaveCount(2);

@@ -243,6 +243,8 @@ Los que traen **Deshacer** (`undo: true`) llaman a `restore<Entidad>` (`12`). En
 | `maintenance.done` | Mantenimiento registrado | |
 | `printRun.recorded` | Impresión registrada. Se descontaron {grams}. | |
 | `printRun.testRecorded` | Prueba registrada. Se descontaron {grams}. | |
+
+*{grams} de `printRun.recorded` / `printRun.testRecorded` y de «Se descontaron {grams} de filamento.» al poner un pedido en producción = lo que bajan los rollos: **con la purga y sin lo que faltó** (`FILAMENT_SHORTFALL`). Una pieza de 50 g con 5 % de purga: «Se descontaron 52.5 g» (caso 1.5a de `04`). (Ronda 4 · D.)*
 | `printRun.deleted` | Registro eliminado. *(si devolvió filamento:)* Se devolvieron {grams} al inventario de filamento. *(si quitó piezas:)* Se quitaron {count} {count\|pieza\|piezas} de Existencias. | |
 | `stock.trackingEnabled` | {name} ahora lleva existencias | |
 | `stock.summary` | Existencias de {name}: total {physical}. | |
