@@ -73,6 +73,17 @@ describe('design tokens', () => {
     expect(hits).toEqual([]);
   });
 
+  it('no literal color outside tokens.css: no named colors, hsl() or rgb() in stylesheets and components (ronda-3 §8)', () => {
+    const NAMED = /(?<![\w-])(white|black|red|green|blue|yellow|orange|purple|violet|gray|grey|silver|pink|brown|navy|teal|olive|maroon|lime|aqua|cyan|magenta|fuchsia|gold|indigo|crimson|tomato|coral|salmon|beige|ivory|khaki|lavender|plum|orchid|tan|wheat|whitesmoke|gainsboro|lightgray|lightgrey|darkgray|darkgrey|dimgray|dimgrey)(?![\w-])/i;
+    const COLOR_PROP = /(?:^|;|\{)\s*((?:background|background-color|color|border(?:-[a-z]+)*|outline(?:-color)?|fill|stroke|box-shadow|text-decoration-color|accent-color|caret-color|column-rule-color)\s*:\s*[^;}]+)/gi;
+    const inCss = css.filter((p) => p !== TOKENS).flatMap((p) => {
+      const text = read(p).replace(/\/\*[\s\S]*?\*\//g, '');
+      return [...text.matchAll(COLOR_PROP)].map((m) => m[1]!).filter((d) => NAMED.test(d.replace(/var\([^)]*\)/g, '')) || /hsla?\(/i.test(d)).map((d) => `${rel(p)}: ${d.trim()}`);
+    });
+    const inTsx = [...sources.keys()].filter((p) => p.endsWith('.tsx')).flatMap((p) => [...read(p).matchAll(/['"`](?:rgba?|hsla?)\([^'"`]*['"`]/gi)].map((m) => `${rel(p)}: ${m[0]}`));
+    expect([...inCss, ...inTsx]).toEqual([]);
+  });
+
   it('no hex color in a component: data fallbacks use var(--no-color)', () => {
     const bad = [...sources.keys()].filter((p) => p.endsWith('.tsx')).flatMap((p) => [...read(p).matchAll(/['"`]#[0-9a-f]{3,8}\b/gi)].map((m) => `${rel(p)}: ${m[0]}`));
     expect(bad).toEqual([]);
