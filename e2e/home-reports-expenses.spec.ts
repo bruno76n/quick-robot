@@ -12,7 +12,12 @@ const status = (page: Page) => page.getByRole('status');
 test('Inicio shows the brief and the attentions; each button goes to its element', async ({ page }) => {
   await page.goto(`${server.url}/inicio`);
   await expect(page.getByRole('heading', { name: 'Inicio' })).toBeVisible();
-  await expect(page.getByTestId('brief')).toContainText('Se vendieron $6,270 en 13 ventas en los últimos 30 días.');
+  // Ronda 3 (§6): the sentence became the big figure with its strip.
+  const sum = page.getByTestId('brief');
+  await expect(sum).toContainText('Ventas · últimos 30 días');
+  await expect(sum).toContainText('$6,270');
+  await expect(sum).toContainText('13 ventas');
+  await expect(sum).toContainText('▲ 14.6%');
   const att = page.getByTestId('attentions');
   // Ronda 2: every attention is shown, grouped by priority (the "Y 3 avisos más." line is gone).
   await expect(att.locator('li')).toHaveCount(9);

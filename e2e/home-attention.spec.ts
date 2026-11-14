@@ -1,5 +1,5 @@
 // Ronda 2 · Inicio with attention by priority (ronda-2 §5, §10): filters, "Ver las N restantes", no filament rolls,
-// column order and each attention button, at desktop and phone widths, against the development seed.
+// column order (ronda 3: alerts beside printing and deliveries) and each attention button, at desktop and phone widths, against the development seed.
 import { expect, test, type Page } from './support/test';
 import { startServer, type LocalServer } from './support/server';
 
@@ -87,17 +87,17 @@ for (const width of [1440, 390]) {
       page.on('request', (r) => { if (/\/api\/v1\/filaments/.test(r.url())) asked.push(r.url()); });
       await page.goto(`${server.url}/inicio`);
       await expect(list(page).locator('li')).toHaveCount(9);
-      await expect(page.getByRole('heading', { name: 'Impresoras' })).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'En impresión' })).toBeVisible();
       await page.waitForLoadState('networkidle');
       expect(asked).toEqual([]);
       await expect(page.getByRole('heading', { name: 'Filamento', exact: true })).toHaveCount(0);
       await expect(page.locator('.spool, .spools')).toHaveCount(0);
-      // Alertas first; Productos con más ganancia and Impresoras beside it (desktop) or after it (phone).
+      // Ronda 3 (§6): Alertas first; En impresión and Próximas entregas beside it (desktop) or after it (phone).
       const box = async (name: string) => (await page.getByRole('heading', { name, exact: true }).boundingBox())!;
-      const [att, top, prn] = [await box('Alertas'), await box('Productos con más ganancia'), await box('Impresoras')];
-      expect(top.y).toBeLessThan(prn.y);
-      if (width >= 1000) { expect(top.x).toBeGreaterThan(att.x); expect(top.y).toBeCloseTo(att.y, -1); }
-      else { expect(att.y).toBeLessThan(top.y); }
+      const [att, prn, due] = [await box('Alertas'), await box('En impresión'), await box('Próximas entregas')];
+      expect(prn.y).toBeLessThan(due.y);
+      if (width >= 1000) { expect(prn.x).toBeGreaterThan(att.x); expect(prn.y).toBeCloseTo(att.y, -1); }
+      else { expect(att.y).toBeLessThan(prn.y); }
     });
 
     test('each attention button still goes to its element', async ({ page }) => {

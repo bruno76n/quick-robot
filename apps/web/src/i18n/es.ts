@@ -385,10 +385,10 @@ export const es = {
     },
     home: {
       title: 'Inicio', newOrder: 'Nuevo pedido', newSale: 'Registrar venta', newPiece: 'Nueva pieza',
-      when: 'en los últimos 30 días',
-      briefEmpty: 'Aún no hay ventas en los últimos 30 días. Al registrar una venta, aquí se cuenta cuánto se vendió y a dónde se fue cada peso.',
-      top: 'Productos con más ganancia', topLine: '{count} {count|vendida|vendidas} · precio ×{times} el costo', topTip: '{name}: {profit} de ganancia, {count} {count|vendida|vendidas}',
-      topEmpty: 'Aún no hay ventas en los últimos 30 días. Al registrar una venta, aquí verás qué piezas dejan más ganancia.',
+      salesLabel: 'Ventas · últimos 30 días', salesAria: 'Ventas de los últimos 30 días', up: '▲ {pct}', down: '▼ {pct}', vsPrev: 'contra el periodo anterior',
+      salesCount: '{count} {count|venta|ventas}', grossProfit: 'Ganancia bruta', expenses: 'Gastos', netProfit: 'Ganancia neta', owed: 'Por cobrar',
+      briefEmpty: 'Aún no hay ventas en los últimos 30 días. Al registrar una venta, aquí se cuenta cuánto se vendió y cuánto quedó.',
+      weekly: 'Ventas por semana', weeklyAria: 'Ventas por semana con su ganancia bruta',
       attention: {
         title: 'Alertas',
         group: { urgent: 'Urgente', soon: 'Esta semana', review: 'Para revisar' },
@@ -397,8 +397,10 @@ export const es = {
       },
       allOk: 'Todo en orden',
       allOkText: 'No hay filamentos por acabarse ni entregas urgentes. Cuando algo necesite atención, aparecerá aquí.',
-      printers: 'Impresoras', bayFree: 'Disponible, lista para imprimir', bayLine: '{printer} · quedan {time}', bayOrder: ' · pedido #{number}', bayQueue: ' · {count} en cola',
+      printing: 'En impresión', printingOf: '{busy} de {count} {count|impresora|impresoras}', printingNone: 'Ninguna impresora está imprimiendo ahora.',
+      printOrder: ' · Pedido #{number}', remaining: 'Tiempo restante: {time}',
       printersEmpty: 'Agregar impresoras para ver aquí qué está imprimiendo cada una.', goPrinters: 'Ir a Impresoras',
+      upcoming: 'Próximas entregas', upcomingOrder: 'Pedido #{number}', upcomingEmpty: 'Sin pedidos por entregar.',
       att: {
         order_filament_short: 'Pedido {number} de {customer}: faltan {missing} de {filament} (disponible {available}).',
         filament_low: '{name}: stock bajo, disponible {grams}.',
