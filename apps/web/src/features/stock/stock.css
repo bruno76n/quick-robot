@@ -130,3 +130,4 @@
 .sk .pill.good { background: var(--green-l); color: var(--green-ink); }
 .sk .pill { font-weight: 500; }
 @media (min-width: 761px) { .sk-tools .tb-r { flex-wrap: nowrap; } .sk-tools .search { width: 230px; } }
+@media (max-width: 760px) { .sk-tools .tb-r { width: 100%; } .sk-tools .search { flex: 1 1 100%; max-width: none; width: auto; } }

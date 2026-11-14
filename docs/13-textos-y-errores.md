@@ -438,3 +438,13 @@ Palabras de un sistema en lugar de frases coloquiales. Los valores internos (`fr
 | Inicio y Reportes (`screens.home.top`, `screens.reports.summary.top`) | Piezas con más ganancia | Productos con más ganancia |
 
 **Marco de la ronda 3 (C1).** Textos nuevos del marco (solo para lectores de pantalla): `common.breadcrumb` «Ruta» (nombre de la ruta de un detalle) y los contadores grises del menú (D-6), `nav.ordersCount` «{count} en curso» y `nav.purchasesCount` «{count} artículo(s) por comprar»; en pantalla solo se ve el número. La barra de tableta y celular muestra el título de la pantalla (el mismo de su encabezado) y «+» con el nombre accesible «Nueva pieza».
+
+**Pantallas de la ronda 3 (fase C).** Textos nuevos que dibujan las maquetas:
+
+| Clave | Texto | Dónde |
+|---|---|---|
+| `screens.orders.kProfit` | Ganancia estimada | Última cifra de la franja de Pedidos (`06 §5`) |
+| `screens.printers.nowLabel` | Imprimiendo ahora | Bloque del trabajo actual en la tarjeta de cada impresora |
+| `screens.printers.queueEmpty` | Cola vacía. | Tarjeta de impresora sin trabajos en cola |
+
+El dato corto bajo el título va sin punto final (es un dato, no una frase): `screens.sales.sub` «Últimos 60 días» (fase D).

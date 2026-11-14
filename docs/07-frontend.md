@@ -56,7 +56,7 @@ features/orders/
 | `--green`, `--green-d`, `--green-ink`, `--green-l` | `#00ae42`, `#00873a`, `#067a30`, `#e3f5e9` | **Solo ganancia** y estado correcto; `--green-d` cifras sobre blanco, `--green-ink` texto sobre `--green-l` (D-4) |
 | `--amber`, `--amber-d`, `--amber-l` | `#b4740a`, `#8a5a06`, `#fdf3e1` | Stock bajo, próximo, fecha de entrega cercana |
 | `--red`, `--red-l` | `#c8302a`, `#fbeaea` | Crítico, vencido, fallida, saldo, urgente |
-| `--c-m … --c-f`, `--sand` | grises (y tonos neutros) | Capas de la barra de desglose del costo (la fase C de la ronda 3 las cambia por gráficas de un color) |
+| `--tg-sale`, `--tg-queue`, `--tg-todo`, `--tg-done`, `--no-color` | grises y ámbar | Etiquetas de origen de cada pieza de un pedido (vendida, en cola, por imprimir, hecha); pieza sin color de filamento |
 | `--sh-up` | sombra neutra | Solo lo que flota (globo, cajón, diálogo); los paneles van sin sombra |
 | Radio | `--r-btn` 7, `--r-field` 8, `--r-panel` 12, `--r-pill` 6, `--r-in` 10 | Botón, campo, panel, estado, bloque interno (`ronda-3 §2`) |
 | Texto base | 15 px / 1.45; títulos con espaciado negativo | |

@@ -112,14 +112,14 @@ function Figures({ o, runner, tab }: { o: OrderDetail; runner: StepRunner; tab: 
   const pieces = o.items.reduce((a, it) => a + piecesOf(it), 0);
   return (
     <section className="ped-figs" aria-label={L.bandAria}><dl>
-      <div><dt>{L.total}</dt><dd className="num">{centsTotal(T.totalCents)}</dd><small>{t('screens.order.piecesIn', { pieces, items: o.items.length })}</small></div>
-      <div><dt>{canc ? L.collectedK : L.paid}</dt><dd className="num">{centsTotal(T.paidCents)}</dd>{canc ? <small>{L.afterRefund}</small> : null}</div>
+      <div><dt>{L.total}</dt><dd className="num">{centsTotal(T.totalCents)}</dd><dd className="x"><small>{t('screens.order.piecesIn', { pieces, items: o.items.length })}</small></dd></div>
+      <div><dt>{canc ? L.collectedK : L.paid}</dt><dd className="num">{centsTotal(T.paidCents)}</dd>{canc ? <dd className="x"><small>{L.afterRefund}</small></dd> : null}</div>
       <div className={T.owedCents > 0 ? 'f-due' : ''}><dt>{L.owed}</dt><dd className="num">{centsTotal(T.owedCents)}</dd>
-        {T.owedCents > 0 ? null : canc ? null : <small>{L.fullyPaid}</small>}
+        {T.owedCents > 0 ? null : canc ? null : <dd className="x"><small>{L.fullyPaid}</small></dd>}
         {/* Ronda-2 §12, D7: the payment at hand from any tab (Cobro keeps its own button, so it is not repeated there). */}
-        {T.owedCents > 0 && isActive(o.status) && tab !== 'pagos' ? <Button size="sm" className="band-pay" onClick={() => runner.setDlg({ kind: 'pay', id: o.id })}>{L.recordPayment}</Button> : null}</div>
+        {T.owedCents > 0 && isActive(o.status) && tab !== 'pagos' ? <dd className="x"><Button size="sm" className="band-pay" onClick={() => runner.setDlg({ kind: 'pay', id: o.id })}>{L.recordPayment}</Button></dd> : null}</div>
       <div className={!fin && !canc && n <= 2 ? (n < 0 ? 'f-due' : 'f-warn') : ''}><dt>{fin ? L.deliveredK : L.dueK}</dt><dd className="num">{date(fin ? o.deliveredOn ?? o.dueOn : o.dueOn)}</dd>
-        <small>{fin ? L.saleInSales : canc ? '' : relativeDay(o.dueOn, today)}</small></div>
+        <dd className="x"><small>{fin ? L.saleInSales : canc ? '' : relativeDay(o.dueOn, today)}</small></dd></div>
     </dl></section>
   );
 }

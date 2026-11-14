@@ -47,10 +47,10 @@ describe('design tokens', () => {
   it('declares the ronda-3 token values (ronda-3 §2, informe-ronda3-a §1.3)', () => {
     const t = read(TOKENS);
     const want: Record<string, string> = {
-      '--accent': '#121214', '--ink': '#121214', '--ink-2': '#6a6a73', '--ink-3': '#9b9ba5', '--ink-3t': '#777782',
+      '--accent': '#121214', '--ink': '#121214', '--ink-2': '#66666f', '--ink-3': '#9b9ba5', '--ink-3t': '#6e6e78',
       '--soft': '#f6f6f8', '--soft-2': '#e9e9ef', '--soft-3': '#dedee5', '--col': '#ececf0', '--track': '#ebebf0',
       '--line': '#e9e9ee', '--line-soft': '#f0f0f3', '--cost': '#4a4a53',
-      '--green': '#00ae42', '--green-d': '#00873a', '--green-ink': '#067a30', '--green-l': '#e3f5e9',
+      '--green': '#00ae42', '--green-d': '#008238', '--green-ink': '#067a30', '--green-l': '#e3f5e9',
       '--amber': '#b4740a', '--amber-d': '#8a5a06', '--amber-l': '#fdf3e1', '--red': '#c8302a', '--red-l': '#fbeaea',
       '--r-btn': '7px', '--r-field': '8px', '--r-panel': '12px', '--r-pill': '6px', '--r-in': '10px',
     };
@@ -65,12 +65,23 @@ describe('design tokens', () => {
     const tokens = new Set([...read(TOKENS).matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]!));
     const used = all.flatMap(([p, text]) => [...text.matchAll(/var\(\s*(--[\w-]+)/g)].map((m) => [p, m[1]!] as const));
     expect(used.filter(([, v]) => !declared.has(v)).map(([p, v]) => `${rel(p)}: ${v}`)).toEqual([]);
-    // A token named as a value from a component ([label, cents, '--c-m']) must be a real token.
+    // A token named as a value from a component ([label, cents, '--cost']) must be a real token.
     const named = all.filter(([p]) => p.endsWith('.tsx')).flatMap(([p, text]) => [...text.matchAll(/['"](--[\w-]+)['"](?!\s*(?:as string\]\s*)?:)/g)].map((m) => [p, m[1]!] as const));
     expect(named.filter(([, v]) => !tokens.has(v)).map(([p, v]) => `${rel(p)}: ${v}`)).toEqual([]);
-    const REMOVED = ['--r', '--sh-soft', '--panel', '--panel-2', '--green-soft', '--amber-ink', '--amber-soft', '--red-ink', '--red-soft', '--blue', '--cost-soft', '--sh', '--c-legend'];
+    const REMOVED = ['--r', '--sh-soft', '--panel', '--panel-2', '--green-soft', '--amber-ink', '--amber-soft', '--red-ink', '--red-soft', '--blue', '--cost-soft', '--sh', '--c-legend', '--c-m', '--c-l', '--c-q', '--c-t', '--c-e', '--c-f', '--sand'];
     const hits = all.flatMap(([p, text]) => REMOVED.filter((r) => new RegExp(`${r}(?![\\w-])`).test(text)).map((r) => `${rel(p)}: ${r}`));
     expect(hits).toEqual([]);
+  });
+
+  it('no literal color outside tokens.css: no named colors, hsl() or rgb() in stylesheets and components (ronda-3 §8)', () => {
+    const NAMED = /(?<![\w-])(white|black|red|green|blue|yellow|orange|purple|violet|gray|grey|silver|pink|brown|navy|teal|olive|maroon|lime|aqua|cyan|magenta|fuchsia|gold|indigo|crimson|tomato|coral|salmon|beige|ivory|khaki|lavender|plum|orchid|tan|wheat|whitesmoke|gainsboro|lightgray|lightgrey|darkgray|darkgrey|dimgray|dimgrey)(?![\w-])/i;
+    const COLOR_PROP = /(?:^|;|\{)\s*((?:background|background-color|color|border(?:-[a-z]+)*|outline(?:-color)?|fill|stroke|box-shadow|text-decoration-color|accent-color|caret-color|column-rule-color)\s*:\s*[^;}]+)/gi;
+    const inCss = css.filter((p) => p !== TOKENS).flatMap((p) => {
+      const text = read(p).replace(/\/\*[\s\S]*?\*\//g, '');
+      return [...text.matchAll(COLOR_PROP)].map((m) => m[1]!).filter((d) => NAMED.test(d.replace(/var\([^)]*\)/g, '')) || /hsla?\(/i.test(d)).map((d) => `${rel(p)}: ${d.trim()}`);
+    });
+    const inTsx = [...sources.keys()].filter((p) => p.endsWith('.tsx')).flatMap((p) => [...read(p).matchAll(/['"`](?:rgba?|hsla?)\([^'"`]*['"`]/gi)].map((m) => `${rel(p)}: ${m[0]}`));
+    expect([...inCss, ...inTsx]).toEqual([]);
   });
 
   it('no hex color in a component: data fallbacks use var(--no-color)', () => {

@@ -92,8 +92,8 @@ function PrinterCard({ p, kwh, open }: { p: PrinterView; kwh: number; open: (d: 
       </div>
       <div className="pc-sec">
         <dl className="pc-kv">
-          <div><dt>{L.costPerHour}</dt><dd className="num">{money(machine + power)}</dd><small>{t('screens.printers.costSplit', { machine: money(machine), power: money(power) })}</small></div>
-          <div><dt>{L.lifeUsed}</dt><dd className="num">{pct(life)}</dd><small>{t('screens.printers.ofHours', { hours: number1(p.lifeHours) })}</small></div>
+          <div><dt>{L.costPerHour}</dt><dd className="num">{money(machine + power)}<small>{t('screens.printers.costSplit', { machine: money(machine), power: money(power) })}</small></dd></div>
+          <div><dt>{L.lifeUsed}</dt><dd className="num">{pct(life)}<small>{t('screens.printers.ofHours', { hours: number1(p.lifeHours) })}</small></dd></div>
         </dl>
         <div><Button size="sm" onClick={() => open({ kind: 'printer', printer: p })}>{L.editCosts}</Button></div>
       </div>

@@ -85,13 +85,13 @@ function Upcoming({ home }: { home: Home }) {
   return (
     <Panel title={L.upcoming}>
       {home.upcoming.length ? (
-        <ul className="du">{home.upcoming.map((o) => (
-          <li key={o.id} className="click" role="link" tabIndex={0} onClick={() => go(`/pedidos/pedido?id=${o.id}`)} onKeyDown={(e) => { if (e.key === 'Enter') go(`/pedidos/pedido?id=${o.id}`); }}>
+        <div className="du">{home.upcoming.map((o) => (
+          <div key={o.id} className="du-r click" role="link" tabIndex={0} onClick={() => go(`/pedidos/pedido?id=${o.id}`)} onKeyDown={(e) => { if (e.key === 'Enter') go(`/pedidos/pedido?id=${o.id}`); }}>
             <span className="du-d num">{date(o.dueOn)}</span>
             <span className="du-c"><b>{o.customer || es.screens.orders.noCustomer}</b><span className="meta">{t('screens.home.upcomingOrder', { number: o.number })}</span></span>
             <Pill tone={STATUS_TONE[o.status as OrderStatus] ?? ''}>{es.status.order[o.status as OrderStatus] ?? o.status}</Pill>
-          </li>
-        ))}</ul>
+          </div>
+        ))}</div>
       ) : <p className="meta">{L.upcomingEmpty}</p>}
     </Panel>
   );

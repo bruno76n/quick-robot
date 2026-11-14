@@ -57,14 +57,6 @@
 
 /* kept from before: tooltips of other screens */
 .tip { position: fixed; z-index: 80; pointer-events: none; background: var(--ink); color: var(--bg); padding: 5px 10px; border-radius: var(--r-field); font-size: 12.5px; max-width: 260px; line-height: 1.3; }
-.sc { background: var(--soft); border-radius: var(--r-panel); padding: 18px 20px; display: grid; gap: 4px; align-content: start; min-width: 0; }
-.sc .k { font-size: 13.5px; color: var(--ink-2); font-weight: 500; }
-.sc .v { font-size: 34px; font-weight: 600; letter-spacing: -.045em; line-height: 1.05; font-variant-numeric: tabular-nums; }
-.sc .v small { font-size: 16px; font-weight: 500; color: var(--ink-2); letter-spacing: 0; }
-.sc .s { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
-.sc.warn { background: var(--amber-l); }
-.sc .s .rk-b { height: 8px; background: var(--bg); margin-top: 2px; }
-.sc .s2 { display: block; margin-top: 6px; font-size: 13px; }
 
 @media (max-width: 1099px) {
   .rp-grid { grid-template-columns: minmax(0, 1fr); }
@@ -75,8 +67,6 @@
   .rkx li .hb-track { grid-column: 1 / -1; order: 3; }
   .hb li { grid-template-columns: 1fr auto; }
   .hb .hb-t { grid-column: 1 / -1; order: 3; }
-  .sc { padding: 14px 16px; }
-  .sc .v { font-size: 27px; }
 }
 @media (max-width: 560px) {
   .rep-bar .seg { gap: 4px 16px; }

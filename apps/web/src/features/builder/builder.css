@@ -64,3 +64,10 @@
   .sx-l::before { content: "Disponibles "; color: var(--ink-3t); font-weight: 400; }
 }
 .pk:hover, .pk:focus-visible { background: var(--soft); border-color: var(--line-2); }
+/* ronda-3 D: the form blocks in white panels, like the piece editor (.pz) and the collection editor */
+.ed.bd { gap: 18px; }
+.bd .ed-form { gap: 14px; }
+.bd fieldset.blk { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-panel); padding: 16px 18px 18px; }
+.bd fieldset.blk legend { font-family: var(--font-body); font-size: 14px; font-weight: 600; letter-spacing: -.01em; margin-bottom: 12px; padding: 0; }
+.bd .ed-res { border: 1px solid var(--line); border-radius: var(--r-panel); box-shadow: none; }
+@media (max-width: 560px) { .bd fieldset.blk { padding: 14px; } }

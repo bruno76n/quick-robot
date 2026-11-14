@@ -5,6 +5,8 @@ import { useSearch } from '@tanstack/react-router';
 import { useEffect, useState } from 'react';
 import { Button } from '../../components/Button';
 import { ConfirmButton } from '../../components/ConfirmButton';
+import { PageHead } from '../../components/PageHead';
+import { Panel } from '../../components/Panel';
 import { Pill, type Tone } from '../../components/Pill';
 import { toast } from '../../components/Toast';
 import { es } from '../../i18n/es';
@@ -49,18 +51,15 @@ export function CustomerPage() {
   const rows = c.history.filter((h) => h.kind === 'order' || !h.orderId);
   return (
     <>
-      <nav className="crumbs"><a href="/clientes" onClick={(e) => { e.preventDefault(); go('/clientes'); }}>{L.title}</a><span>/</span><span>{c.name}</span></nav>
-      <header className="ph">
-        <div className="cli-id"><Avatar c={c} /><div><h1>{c.name}</h1><p className="sub">{t('screens.customers.since', { type: c.type, date: date(c.createdOn) })}</p></div></div>
-        <div className="ph-a">
-          <Button variant="primary" onClick={() => go(`/armar?modo=pedido&cliente=${c.id}`)}>{L.newOrder}</Button>
-          <Button onClick={() => go(`/armar?modo=venta&cliente=${c.id}`)}>{L.newSale}</Button>
+      <PageHead crumbs={[{ label: L.title, to: '/clientes' }]} title={<span className="cli-id"><Avatar c={c} /><span>{c.name}</span></span>} short={c.name}
+        sub={t('screens.customers.since', { type: c.type, date: date(c.createdOn) })} actions={<>
           <Button variant="ghost" onClick={() => setEditing(true)}>{L.edit}</Button>
-        </div>
-      </header>
-      <section className="brf one sm"><div><p className="brf-l">{phrase}</p></div></section>
+          <Button onClick={() => go(`/armar?modo=venta&cliente=${c.id}`)}>{L.newSale}</Button>
+          <Button variant="primary" onClick={() => go(`/armar?modo=pedido&cliente=${c.id}`)}>{L.newOrder}</Button>
+        </>} />
+      <Panel className="cli-ph"><p>{phrase}</p></Panel>
       <div className="cli-g">
-        <aside className="cli-s">
+        <aside className="panel cli-s">
           <dl className="dl one">
             <div><dt>{L.contact}</dt><dd>{c.phone ? <>{c.phone}{' '}<button type="button" className="link" onClick={copy}>{L.copy}</button></> : <span className="mut">{L.noContact}</span>}</dd></div>
             <div><dt>{L.logo}</dt><dd>{logo}</dd></div>
@@ -72,8 +71,7 @@ export function CustomerPage() {
               : <p className="hint">{t('screens.customers.cantDelete', { orders: st.orders, sales: st.sales })}</p>}
           </div>
         </aside>
-        <section>
-          <h2>{L.history}</h2>
+        <Panel title={L.history} className="cli-h">
           {rows.length ? (
             <>
               <div className="tw">
@@ -98,7 +96,7 @@ export function CustomerPage() {
               {rows.length > 12 ? <p className="hint">{t('screens.customers.hShowing', { count: rows.length })}</p> : null}
             </>
           ) : <p className="muted">{L.noHistory}</p>}
-        </section>
+        </Panel>
       </div>
       {editing ? <CustomerDialog customer={c} onClose={() => setEditing(false)} onSaved={() => setEditing(false)} /> : null}
     </>

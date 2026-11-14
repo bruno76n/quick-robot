@@ -26,6 +26,7 @@
   "devDependencies": {
     "@app/db": "workspace:*",
     "@app/server": "workspace:*",
+    "@axe-core/playwright": "4.14.0",
     "@eslint/js": "9.39.5",
     "@hono/node-server": "1.19.17",
     "@playwright/test": "1.63.0",

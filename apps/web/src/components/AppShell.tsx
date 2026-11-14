@@ -78,7 +78,7 @@ const Sidebar = forwardRef<HTMLElement, { businessName: string; trade: string; s
           <span className="mk"><Mascot size={36} /></span>
           <div><b className={name ? undefined : 'ph-txt'}>{name || es.sidebar.businessPlaceholder}</b>{trade.trim() ? <small>{trade}</small> : <small className="ph-txt">{es.sidebar.industryPlaceholder}</small>}</div>
         </div>
-        <button type="button" className="srch" onClick={onSearch} aria-label={es.common.searchAll}><Icon name="search" size={15} /><span>{es.common.search}</span><kbd>{es.common.searchShortcut}</kbd></button>
+        <button type="button" className="srch" onClick={onSearch} aria-label={es.common.searchAll}><Icon name="search" size={15} /><span>{es.common.search}</span><kbd aria-hidden="true" data-k={es.common.searchShortcut} /></button>
         <button type="button" className="btn primary block new-b" onClick={onNewPiece} disabled={!onNewPiece}><Icon name="plus" size={14} />{es.nav.newPiece}</button>
         <nav className="nav" aria-label={es.common.screens}>
           {NAV.map(([group, items]) => (

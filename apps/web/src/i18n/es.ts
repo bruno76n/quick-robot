@@ -57,7 +57,7 @@ export const es = {
       },
     },
     sales: {
-      title: 'Ventas', sub: 'Últimos 60 días.', register: 'Registrar venta', registerFirst: 'Registrar la primera venta',
+      title: 'Ventas', sub: 'Últimos 60 días', register: 'Registrar venta', registerFirst: 'Registrar la primera venta',
       allChannels: 'Todos los canales', channelGroup: 'Canal', colDate: 'Fecha', colItems: 'Artículos', colChannel: 'Canal', colTotal: 'Total', colProfit: 'Ganancia',
       figures: 'Cifras de los últimos 60 días', kSales: 'Ventas', kCount: '{count} {count|venta|ventas}', kGross: 'Ganancia bruta', kCommissions: 'Comisiones', kOwed: 'Saldo por cobrar',
       empty: 'Sin ventas en este canal.', collection: 'Colección', more: '+ {count} más', returned: 'Devuelta', owes: 'Saldo {amount}', owesPay: '{owes}: registrar abono',

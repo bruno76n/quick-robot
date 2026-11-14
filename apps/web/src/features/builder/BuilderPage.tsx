@@ -7,6 +7,7 @@ import { useQueries, useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
 import { useState } from 'react';
 import { Button } from '../../components/Button';
+import { PageHead } from '../../components/PageHead';
 import { Mascot } from '../../components/Mascot';
 import { toast } from '../../components/Toast';
 import { UnitInput } from '../../components/UnitInput';
@@ -141,9 +142,8 @@ function Builder({ search, edit }: { search: Search; edit: OrderForEdit | null }
   const gPctShown = focus.gPct ?? (C.rows.length ? fmtNum(B.gPct) : '');
   return (
     <>
-      <nav className="crumbs"><a href={back} onClick={(e) => { e.preventDefault(); go(B.order ? '/pedidos' : '/ventas'); }}>{B.order ? L.orders : L.sales}</a><span>/</span><span>{title}</span></nav>
-      <header className="ph"><div><h1>{title}</h1><p className="sub">{B.order ? L.subOrder : L.subSale}</p></div><div className="ph-a" /></header>
-      <div className="ed">
+      <PageHead crumbs={[{ label: B.order ? L.orders : L.sales, to: B.order ? '/pedidos' : '/ventas' }]} title={title} sub={B.order ? L.subOrder : L.subSale} />
+      <div className="ed bd">
         <div className="ed-form">
           <fieldset className="blk">
             <legend>{B.order ? L.legendOrder : L.legendSale}</legend>
