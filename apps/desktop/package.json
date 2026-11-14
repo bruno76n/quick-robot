@@ -19,7 +19,7 @@
     "@app/db": "workspace:*",
     "@app/server": "workspace:*",
     "@hono/node-server": "1.19.17",
-    "electron": "42.11.15",
+    "electron": "42.11.18",
     "electron-builder": "26.17.0",
     "esbuild": "0.28.2"
   }
