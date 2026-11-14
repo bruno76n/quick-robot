@@ -34,7 +34,7 @@ test('A. quick sale of a piece in stock', async ({ page }) => {
   const row = page.getByTestId('sale-row').filter({ hasText: 'Venta rápida e2e' });
   await expect(row).toHaveCount(1);
   await expect(row).toContainText('Llavero con nombre');
-  await expect(row).not.toContainText('Debe');
+  await expect(row).not.toContainText('Saldo');
   expect(await freeOf(page, 'Llavero con nombre')).toBe(before - 1);
   // The sale dialog shows the breakdown and that it was charged in full.
   await row.click();

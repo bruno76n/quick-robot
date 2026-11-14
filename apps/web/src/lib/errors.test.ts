@@ -10,8 +10,8 @@ describe('error texts', () => {
   });
   it('one line per item of INSUFFICIENT_STOCK and the reason of PRINT_RUN_LOCKED', () => {
     const e = errorText(new ApiError('INSUFFICIENT_STOCK', 409, { items: [{ productId: 'p', name: 'Llavero', requested: 3, free: 1 }] }));
-    expect(e.lines).toEqual(['Llavero: se piden 3, hay 1 libres.']);
-    expect(errorText(new ApiError('PRINT_RUN_LOCKED', 409, { reason: 'pieces_unavailable', pieces: 1 })).text).toContain('esa pieza libre');
+    expect(e.lines).toEqual(['Llavero: se piden 3, hay 1 disponibles.']);
+    expect(errorText(new ApiError('PRINT_RUN_LOCKED', 409, { reason: 'pieces_unavailable', pieces: 1 })).text).toContain('esa pieza disponible');
   });
   it('desktop texts for connection problems', () => {
     expect(errorText(new ApiError('NETWORK_ERROR', 0)).text).toContain('No hay conexión');

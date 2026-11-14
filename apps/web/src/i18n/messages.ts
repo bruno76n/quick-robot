@@ -66,11 +66,11 @@ export const errorVariants = {
 /** Extra lines of some errors: per item, per reason, or a gray detail. */
 export const errorParts = {
   "INSUFFICIENT_STOCK": {
-    "item": "{name}: se piden {requested}, hay {free} libres."
+    "item": "{name}: se piden {requested}, hay {free} disponibles."
   },
   "PRINT_RUN_LOCKED": {
     "order_history": "Este registro se creó solo al terminar un pedido. Se conserva como historial.",
-    "pieces_unavailable": "Esta impresión sumó {pieces} {pieces|pieza|piezas} a Existencias y ya no hay {pieces|esa pieza libre|tantas libres}: se vendieron o están apartadas. Primero debe corregirse Existencias."
+    "pieces_unavailable": "Esta impresión sumó {pieces} {pieces|pieza|piezas} a Existencias y ya no hay {pieces|esa pieza disponible|tantas disponibles}: se vendieron o están apartadas. Primero debe corregirse Existencias."
   },
   "IMPORT_INVALID_FILE": {
     "detail": "{reason}"
@@ -104,7 +104,7 @@ export const toast = {
   "order.updated": "Pedido #{folio} actualizado",
   "order.accepted": "Pedido #{folio} aceptado.",
   "order.readyFromStock": "Pedido #{folio} listo para entregar: todo salió de existencias.",
-  "order.ready": "Pedido #{folio} listo para entregar. Impresoras libres.",
+  "order.ready": "Pedido #{folio} listo para entregar. Impresoras disponibles.",
   "order.delivered": "Pedido #{folio} entregado. La venta se registró sola.",
   "order.cancelled": "Pedido #{folio} cancelado.",
   "order.deleted": "Pedido #{folio} eliminado.",

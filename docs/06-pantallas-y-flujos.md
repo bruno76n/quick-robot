@@ -8,7 +8,7 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 **Convenciones del mockup que se conservan**
 - Solo modo claro. Solo tipografía Geist.
-- Vocabulario fijo: Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Libres, Apartadas, Artículos.
+- Vocabulario fijo: Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Disponibles, Apartadas, Artículos.
 - Botones y títulos sin segunda persona ("Registrar venta", no "Registra tu venta"); los mensajes que explican algo siguen la regla de `13 §1`. Los documentos para clientes sí pueden hablar directo.
 - Las eliminaciones se pueden **deshacer** (en el producto: restaurar el borrado suave) y avisan con un aviso emergente que trae el botón "Deshacer".
 
@@ -32,14 +32,14 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 ## 2. Inicio
 
-**Muestra:** resumen compacto del taller (el "brief"): cifras clave del periodo, qué se está imprimiendo ahora, y las **atenciones** agrupadas por prioridad, cada una con un botón que lleva al elemento. **Ronda 2:** “Atención” es la columna principal, las atenciones se agrupan en **Urgente · Esta semana · Para revisar** con chips de filtro, y **se quitó la cuadrícula de rollos de filamento** (`mejoras/ronda-2.md §5`, maqueta `reference/ronda-2/inicio.html`). Las atenciones se generan con estas reglas:
+**Muestra:** resumen compacto del taller (el "brief"): cifras clave del periodo, qué se está imprimiendo ahora, y las **atenciones** agrupadas por prioridad, cada una con un botón que lleva al elemento. **Ronda 2:** “Atención” (“Alertas” desde la ronda 3) es la columna principal, las atenciones se agrupan en **Urgente · Esta semana · Para revisar** con chips de filtro, y **se quitó la cuadrícula de rollos de filamento** (`mejoras/ronda-2.md §5`, maqueta `reference/ronda-2/inicio.html`). Las atenciones se generan con estas reglas:
 
 - Pedido **aceptado** sin descontar filamento y con faltante → "falta tanto de tal filamento".
 - Filamento con rollos y **150 g o menos** disponibles.
 - Pedido activo con entrega en **2 días o menos** (o vencido).
 - Venta con saldo por cobrar.
 - Pieza o colección con precio fijo **por debajo del piso** (margen mínimo).
-- Mantenimiento pendiente ("Pronto" o "Toca ya"), hasta 3.
+- Mantenimiento pendiente ("Próximo" o "Vencido"), hasta 3.
 - Insumo agotado o en su mínimo.
 - Sin copia de seguridad descargada, o la última con más de **7 días**.
 
@@ -59,14 +59,14 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 ## 3. Productos
 
-**Muestra:** dos pestañas con contador, **Piezas** y **Colecciones**; buscador; forma de ver en **Fichas** o **Lista**; en Piezas, filtros **Todas · Técnicas · Con variantes**. Cada pieza muestra precio, costo, ganancia y libres en Existencias. **Ronda 2:** las variantes viven **dentro de su pieza original** (una familia): el botón “N variantes” de la ficha despliega un panel debajo de su fila, y en la lista una flecha despliega sus filas. “Piezas N” cuenta familias. Detalle en `mejoras/ronda-2.md §3`; maquetas `productos-fichas.html` y `productos-lista.html`.
+**Muestra:** dos pestañas con contador, **Piezas** y **Colecciones**; buscador; forma de ver en **Fichas** o **Lista**; en Piezas, filtros **Todas · Técnicas · Con variantes**. Cada pieza muestra precio, costo, ganancia y disponibles en Existencias. **Ronda 2:** las variantes viven **dentro de su pieza original** (una familia): el botón “N variantes” de la ficha despliega un panel debajo de su fila, y en la lista una flecha despliega sus filas. “Piezas N” cuenta familias. Detalle en `mejoras/ronda-2.md §3`; maquetas `productos-fichas.html` y `productos-lista.html`.
 
 | Botón | Efecto | Lleva a |
 |---|---|---|
 | Nueva pieza | — | Calculadora |
 | Nueva colección | — | Colección (nueva). Pide que existan piezas |
 | Fichas / Lista | Preferencia de vista | — |
-| Vender (en una pieza con libres) | — | Armar venta con esa pieza |
+| Vender (en una pieza con disponibles) | — | Armar venta con esa pieza |
 | Variante · Nueva variante · Agregar variante de … (en una pieza) | Abre la calculadora (`/productos/pieza?variante=<id>`) con una **copia** de la original, título “Nueva variante de {pieza}” y el campo **Nombre de la variante** vacío y enfocado (sin etiqueta no se guarda); al Guardar se crea con `saveProductAsVariant` (`parentId` = la original raíz) y se vuelve a Productos con su panel abierto (`?abierta=<id>`) | Calculadora |
 | N variantes (en una ficha) · flecha (en la lista) | Despliega o cierra las variantes de la pieza; un solo panel abierto a la vez en Fichas | — |
 | Abrir pieza / colección | — | Calculadora / Colección |
@@ -96,19 +96,19 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 *Cálculo en vivo:* el navegador usa `core` para la vista previa. Al guardar, el servidor recalcula; nunca confía en el costo enviado.
 
 ### 3.2 Colección
-Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), etiquetas, nota. Muestra costo, precio, ganancia, y cuántos **sets se pueden armar hoy** con los libres. Una colección nueva abre con el foco en su nombre. Acciones: Agregar pieza (crea la fila con la lista de piezas abierta y el foco dentro, con búsqueda; al elegir, el foco pasa a la cantidad), Guardar (`saveCollection`), Eliminar, Vender, Cancelar.
+Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), etiquetas, nota. Muestra costo, precio, ganancia, y cuántos **sets se pueden armar hoy** con los disponibles. Una colección nueva abre con el foco en su nombre. Acciones: Agregar pieza (crea la fila con la lista de piezas abierta y el foco dentro, con búsqueda; al elegir, el foco pasa a la cantidad), Guardar (`saveCollection`), Eliminar, Vender, Cancelar.
 
 ---
 
 ## 4. Ventas
 
-**Muestra:** lista de **4 columnas**: Fecha · Artículos (con cliente, pedido, canal y nota) · Total (con chips Debe / Devuelta) · Ganancia. Filtro por canal.
+**Muestra:** lista de **4 columnas**: Fecha · Artículos (con cliente, pedido, canal y nota) · Total (con chips Saldo / Devuelta) · Ganancia. Filtro por canal.
 
 | Botón | Caso de uso | Lleva a |
 |---|---|---|
 | Registrar venta | — | Armar venta |
 | Abrir venta | — | Diálogo de la venta |
-| Chip “Debe $X” (botón) | Abre la venta **con el diálogo “Registrar abono” ya abierto** (monto = saldo; `/ventas?v=<id>&abono=1`). Cancelar vuelve al diálogo de la venta; la confirmación con el monto se queda (ronda 2 · D5). “Registrar abono” de la Atención de Inicio usa la misma dirección. Una venta sin saldo o devuelta abre la venta normal | Diálogo del abono |
+| Chip “Saldo $X” (botón) | Abre la venta **con el diálogo “Registrar abono” ya abierto** (monto = saldo; `/ventas?v=<id>&abono=1`). Cancelar vuelve al diálogo de la venta; la confirmación con el monto se queda (ronda 2 · D5). “Registrar abono” de la Atención de Inicio usa la misma dirección. Una venta sin saldo o devuelta abre la venta normal | Diálogo del abono |
 
 ### 4.1 Diálogo de la venta
 Desglose por pieza (con dónde está cada una), cobro (pagos), nota de venta.
@@ -142,7 +142,7 @@ Desglose por pieza (con dónde está cada una), cobro (pagos), nota de venta.
 **Muestra:** franja de resumen (pedidos en curso, por cobrar, entregas próximas, ganancia si se entregan todos) y tres vistas, que se cambian con un selector:
 
 - **Tablero** (la que abre por defecto): cuatro columnas — **Pendientes** (cotizados y aceptados, con su conteo), **En producción**, **Listos para entregar**, **Entregados** (solo los 3 más recientes y el enlace "Ver los N entregados"). Cada tarjeta trae cliente, folio, artículos, dónde está cada pieza (existencias / por imprimir), avance de impresión, fecha de entrega, Total · Saldo o Pagado · Ganancia, y el botón del siguiente paso.
-- **Lista**: **5 columnas** — Pedido · Estado · Entrega · Total · Saldo; filtros **Todos · Pendientes · En producción · Listos · Entregados · Cancelados**, cada uno con su conteo.
+- **Lista**: **5 columnas** — Pedido · Estado · Fecha de entrega · Total · Saldo; filtros **Todos · Pendientes · En producción · Listos · Entregados · Cancelados**, cada uno con su conteo.
 - **Calendario**: por mes, con los pedidos en su fecha de entrega; botón "Hoy".
 
 Tras guardar un pedido nuevo se vuelve al Tablero.
@@ -175,7 +175,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 ## 6. Filamentos
 
-**Muestra:** lista ancha de filamentos (material + color) con lo que queda, rollos, costo por gramo, y estado (Sin rollos · Agotado · Se acaba · Poco · Nuevo · Normal, `04 §1`). Seleccionar uno abre el **cajón** con sus rollos y movimientos.
+**Muestra:** lista ancha de filamentos (material + color) con lo que queda, rollos, costo por gramo, y estado (Sin rollos · Agotado · Crítico · Stock bajo · Nuevo · Normal, `04 §1`). Seleccionar uno abre el **cajón** con sus rollos y movimientos.
 
 | Botón | Caso de uso |
 |---|---|
@@ -200,7 +200,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 ## 8. Impresoras
 
-**Muestra:** por impresora: estado (imprimiendo/libre), cola con progreso y tiempo restante, horas acumuladas, mantenimiento (Al corriente / Pronto / Toca ya) y **recuperación de la inversión**.
+**Muestra:** por impresora: estado (imprimiendo/disponible), cola con progreso y tiempo restante, horas acumuladas, mantenimiento (Al día / Próximo / Vencido) y **recuperación de la inversión**.
 | Botón | Caso de uso |
 |---|---|
 | Nueva / Editar impresora | `createPrinter` / `updatePrinter` (nueva trae las 3 tareas base) |
@@ -229,7 +229,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 ## 10. Existencias
 
-**Muestra:** piezas con existencias en **Lista** (por defecto) o **Fichas** (selector, se recuerda): Estado, Libres, Apartadas, Total y precio de lista, y sets armables; filtros por estado (Todas · Pocas · Todo apartado · Disponible · Agotadas) y buscador. Orden: menos libres primero. **Ronda 2:** una pieza con variantes es **una fila o ficha** con sus miembros desplegables y la suma de sus existencias; las fichas ya no dibujan un cuadrito por unidad (un número grande de libres y una barra de libres contra apartadas). El cajón con movimientos se abre desde la pieza o el miembro que tiene movimientos propios. Detalle en `mejoras/ronda-2.md §4`; maquetas `existencias-lista.html` y `existencias-fichas.html`. La vista se recuerda así: `?vista=fichas|lista` en la dirección y, sin ella, la última elegida en este navegador (`view.stock`); si no hay ninguna, Lista. En Lista, “Libres” en el encabezado alterna menos/más libres primero; la fila de una familia solo despliega sus variantes (la original primero, “Original”), y cada pieza simple o variante abre el cajón con “›” o tocando la fila. En Fichas, tocar la ficha abre la original (o la primera variante con existencias) y cada línea de variante abre la suya.
+**Muestra:** piezas con existencias en **Lista** (por defecto) o **Fichas** (selector, se recuerda): Estado, Disponibles, Apartadas, Total y precio de lista, y sets armables; filtros por estado (Todas · Stock bajo · Apartado · Disponible · Agotado) y buscador. Orden: menos disponibles primero. **Ronda 2:** una pieza con variantes es **una fila o ficha** con sus miembros desplegables y la suma de sus existencias; las fichas ya no dibujan un cuadrito por unidad (un número grande de disponibles y una barra de disponibles contra apartadas). El cajón con movimientos se abre desde la pieza o el miembro que tiene movimientos propios. Detalle en `mejoras/ronda-2.md §4`; maquetas `existencias-lista.html` y `existencias-fichas.html`. La vista se recuerda así: `?vista=fichas|lista` en la dirección y, sin ella, la última elegida en este navegador (`view.stock`); si no hay ninguna, Lista. En Lista, “Disponibles” en el encabezado alterna menos/más disponibles primero; la fila de una familia solo despliega sus variantes (la original primero, “Original”), y cada pieza simple o variante abre el cajón con “›” o tocando la fila. En Fichas, tocar la ficha abre la original (o la primera variante con existencias) y cada línea de variante abre la suya.
 | Botón | Caso de uso |
 |---|---|
 | Llevar existencias (en una pieza) | `enableStockTracking` (con conteo inicial) |
@@ -238,7 +238,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 | Fichas / Lista | Preferencia de vista de Existencias (`view.stock`) | — |
 | Seleccionar pieza (o un miembro de una familia) | Abre el cajón | — |
 | Flecha de una familia | Despliega o cierra sus variantes | — |
-| Vender (en la fila de una pieza simple o de una variante con libres; en Fichas, en la ficha de una pieza simple con libres) | Lleva a Armar venta con esa pieza, como “Vender” del cajón (ronda 2 · D4). Sin libres no aparece: el cajón ofrece “Hacer pedido”. La fila de una familia solo despliega | Armar venta |
+| Vender (en la fila de una pieza simple o de una variante con disponibles; en Fichas, en la ficha de una pieza simple con disponibles) | Lleva a Armar venta con esa pieza, como “Vender” del cajón (ronda 2 · D4). Sin disponibles no aparece: el cajón ofrece “Hacer pedido”. La fila de una familia solo despliega | Armar venta |
 
 ---
 
@@ -256,7 +256,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 ## 12. Clientes
 
-**Lista:** 4 columnas — Cliente · Contacto · Compras · Debe. Nuevo cliente abre su ficha.
+**Lista:** 4 columnas — Cliente · Contacto · Compras · Saldo. Nuevo cliente abre su ficha.
 **Ficha del cliente (página):** datos, logo, nota, totales (pedidos, ventas, ingreso, ganancia, por cobrar), historial combinado de pedidos y ventas.
 | Botón | Caso de uso |
 |---|---|

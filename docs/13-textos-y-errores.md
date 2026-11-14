@@ -14,7 +14,7 @@ Todo lo que la persona lee, en español, y cómo se organiza en `apps/web/src/i1
 
 ## 1. Cómo se escribe
 
-- **Vocabulario fijo:** Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Libres, Apartadas, Artículos. No se usan sinónimos (nada de "Importe", "Utilidad" ni "Stock" en la interfaz).
+- **Vocabulario fijo:** Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Disponibles, Apartadas, Artículos. No se usan sinónimos (nada de "Importe", "Utilidad" ni "Stock" en la interfaz; la única excepción es el estado **Stock bajo**, de la ronda 3, §9.3).
 - **Botones y títulos:** verbo en infinitivo o sustantivo, sin segunda persona: "Registrar venta", "Nuevo pedido".
 - **Mensajes que explican algo:** cortos, dicen **qué pasó** y **qué hacer**. Se conserva la voz del mockup ("Agrega al menos un artículo.", "Reduce la cantidad…", "Toca de nuevo para eliminar"); los nuevos usan infinitivo ("Revisar los campos marcados.") o frase impersonal ("Sin permiso para hacer esto."). **Nunca** "tu/tus", "tienes/puedes" ni pasados en segunda persona ("escribiste", "elegiste").
 - **Los errores no se disculpan, no dicen "error" ni muestran códigos**, salvo el `errorId` de una falla inesperada, para poder reportarla.
@@ -109,7 +109,7 @@ Un renglón por código de `12 §2`. Entre llaves, los parámetros de `details`.
 |---|---|
 | `LINE_ITEMS_REQUIRED` | Agrega al menos un artículo. |
 | `CUSTOMER_REQUIRED` | Falta elegir el cliente del pedido. |
-| `INSUFFICIENT_STOCK` | Existencias insuficientes. Reduce la cantidad o convierte la venta en pedido. *(debajo, por cada pieza de `items`:)* {name}: se piden {requested}, hay {free} libres. |
+| `INSUFFICIENT_STOCK` | Existencias insuficientes. Reduce la cantidad o convierte la venta en pedido. *(debajo, por cada pieza de `items`:)* {name}: se piden {requested}, hay {free} disponibles. |
 | `PAYMENT_EXCEEDS_BALANCE` | El monto no puede ser mayor al saldo ({balanceCents}). |
 | `REFUND_EXCEEDS_PAID` | El reembolso no puede ser mayor a lo pagado ({paidCents}). |
 | `SALE_ALREADY_RETURNED` | Esta venta ya se devolvió. |
@@ -131,7 +131,7 @@ Un renglón por código de `12 §2`. Entre llaves, los parámetros de `details`.
 | `COUNT_UNCHANGED` | El conteo coincide con el total actual. |
 | `PRINTER_HAS_QUEUE` | No se puede eliminar: {name} tiene {jobs} {jobs\|trabajo\|trabajos} en cola. Primero terminarlos o reasignarlos. |
 | `PRINT_RUN_LOCKED` · `order_history` | Este registro se creó solo al terminar un pedido. Se conserva como historial. |
-| `PRINT_RUN_LOCKED` · `pieces_unavailable` | Esta impresión sumó {pieces} {pieces\|pieza\|piezas} a Existencias y ya no hay {pieces\|esa pieza libre\|tantas libres}: se vendieron o están apartadas. Primero debe corregirse Existencias. |
+| `PRINT_RUN_LOCKED` · `pieces_unavailable` | Esta impresión sumó {pieces} {pieces\|pieza\|piezas} a Existencias y ya no hay {pieces\|esa pieza disponible\|tantas disponibles}: se vendieron o están apartadas. Primero debe corregirse Existencias. |
 
 ### Negocio y datos
 
@@ -210,7 +210,7 @@ Los que traen **Deshacer** (`undo: true`) llaman a `restore<Entidad>` (`12`). En
 | `order.updated` | Pedido #{folio} actualizado | |
 | `order.accepted` | Pedido #{folio} aceptado. | |
 | `order.readyFromStock` | Pedido #{folio} listo para entregar: todo salió de existencias. | |
-| `order.ready` | Pedido #{folio} listo para entregar. Impresoras libres. | |
+| `order.ready` | Pedido #{folio} listo para entregar. Impresoras disponibles. | |
 | `order.delivered` | Pedido #{folio} entregado. La venta se registró sola. | |
 | `order.cancelled` | Pedido #{folio} cancelado. |  |
 | `order.deleted` | Pedido #{folio} eliminado. | ✓ |
@@ -333,16 +333,16 @@ Después de eliminar, el aviso trae **Deshacer** (§5). Solo `importWorkspace` y
 | Columnas del Tablero | Pendientes (cotizados y aceptados) · En producción · Listos para entregar · Entregados |
 | Filtros de la Lista de pedidos | Todos · Pendientes · En producción · Listos · Entregados · Cancelados |
 | Motivo de un registro de producción | `stock` Para existencias · `test` Prueba de material · `order` Pedido |
-| Estado de filamento | `no_spools` Sin rollos · `out` Agotado · `ending` Se acaba · `low` Poco · `new` Nuevo · `ok` Normal |
+| Estado de filamento | `no_spools` Sin rollos · `out` Agotado · `ending` Crítico · `low` Stock bajo · `new` Nuevo · `ok` Normal |
 | Estado de rollo | `empty` Vacío · `new` Nuevo · `in_use` En uso |
-| Estado de insumo | `out` Agotado · `low` Poco · `ok` Suficiente |
-| Estado de una pieza en Existencias | `out` Agotada · `all_reserved` Todo apartado · `few` Pocas · `ok` Disponible |
-| Estado de mantenimiento | Al corriente · Pronto · Toca ya |
+| Estado de insumo | `out` Agotado · `low` Stock bajo · `ok` Normal |
+| Estado de una pieza en Existencias | `out` Agotado · `all_reserved` Apartado · `few` Stock bajo · `ok` Disponible |
+| Estado de mantenimiento | `ok` Al día · `soon` Próximo · `due` Vencido |
 | Etiquetas de precio de una pieza | Regalo · Coleccionable · Personalizado · Edición limitada · Negocio |
 | Tipos de cliente (iniciales) | Restaurante · Empresa · Persona · Otro |
 | Categorías de gasto (iniciales) | Renta o espacio · Servicios · Mantenimiento y refacciones · Herramientas · Publicidad · Envíos · Sueldo propio · Otros |
 
-Color de la etiqueta de estado (del mockup): rojo = Agotado, Agotada, Se acaba · ámbar = Poco, Pocas · azul = Nuevo, Todo apartado · verde = Normal, Suficiente, Disponible, En uso · gris = Vacío, Sin rollos.
+Color de la etiqueta de estado (ronda 3, `ronda-3.md §2`): rojo = Agotado, Crítico, Vencido, Fallida · ámbar = Stock bajo, Próximo · gris = Nuevo, Apartado, Vacío, Sin rollos · verde = Normal, Disponible, En uso, Al día, Correcta. Siempre con texto; el color solo refuerza.
 | Periodos de Reportes | 7 días · 30 días · 90 días · Todo |
 | Modo de precio | Precio libre · Costo + margen |
 | Vista de Productos | Fichas · Lista |
@@ -404,7 +404,7 @@ Los textos nuevos de variantes agrupadas, Existencias (lista y fichas), Inicio (
 | `screens.calculator.usedInPiece` | En esta pieza | Grupo de la lista de filamentos: los que ya usa la pieza |
 | `screens.calculator.otherFilaments` | Los demás | Grupo de la lista de filamentos: el resto |
 | `screens.stock.sellOne` | Vender {name} | Nombre accesible del botón “Vender” de cada fila o ficha de Existencias |
-| `screens.sales.owesPay` | {owes}: registrar abono | Nombre accesible del chip “Debe $X” de la lista de Ventas, que abre el abono |
+| `screens.sales.owesPay` | {owes}: registrar abono | Nombre accesible del chip “Saldo $X” de la lista de Ventas, que abre el abono |
 | `screens.builder.newCustomerLink`, `screens.sales.newCustomerLink` | Nuevo cliente | Enlace bajo el selector de cliente de Armar venta o pedido y de Editar datos de la venta |
 
 ---
@@ -416,3 +416,23 @@ Los textos nuevos de variantes agrupadas, Existencias (lista y fichas), Inicio (
 - `t.test.ts`: las tres formas (`{nombre}`, plural y elección), formato por sufijo y parámetros faltantes (no deben imprimir `{x}` en pantalla: se cae a un texto genérico y se registra).
 - Lint de textos literales en JSX (§2).
 - Revisión visual (modo autónomo, paso 4): cada pantalla se compara con `reference/mockup-textos.md`.
+
+## 9.3 Vocabulario de la ronda 3 (`mejoras/ronda-3.md §5`)
+
+Palabras de un sistema en lugar de frases coloquiales. Los valores internos (`free`, `reserved`, `few`, …) no cambian. `04` describe las reglas con los nombres anteriores (Poco, Se acaba, Pocas, Todo apartado, libres…): son los mismos estados con su valor interno; en la interfaz se leen como dice esta tabla.
+
+| Dónde (clave de `es.ts`) | Antes | Ahora |
+|---|---|---|
+| Inicio (`screens.home.attention.title`) | Atención | Alertas |
+| Existencias (`screens.stock.summary`, `.col.free`, `.card.*`, `.drawer free`, `.counts`, `.onlyFree`, `.sort*`; `screens.products.variants.free`; `screens.builder.free`, `.noFree`, `.sxFree`; `screens.reports.inventoryLine`; `screens.csv.head.pieces`; `screens.order.cancelFrees`, `.freedToast`; `INSUFFICIENT_STOCK.item`, `PRINT_RUN_LOCKED.pieces_unavailable`, `order.ready`) | libre(s) | disponible(s) |
+| Estado en Existencias (`status.stock`, `screens.stock.filter`, `screens.builder.soldOut`) | Agotada · Todo apartado · Pocas | Agotado · Apartado · Stock bajo |
+| Estado de filamento (`status.filament`) | Poco · Se acaba | Stock bajo · Crítico |
+| Estado de insumo (`status.supply`) | Poco · Suficiente | Stock bajo · Normal |
+| Mantenimiento (`status.maintenance`) | Al corriente · Pronto · Toca ya | Al día · Próximo · Vencido |
+| Impresoras (`screens.printers.idle`, `.free`; `screens.home.bayFree`; `screens.order.printerFree`, `.printerFreeIn`) | Libre | Disponible |
+| Clientes y ventas (`screens.sales.owes`, `screens.customers.colOwes`, `.phraseOwes`, `.hOwes`; `screens.order.tabPaymentsOwed`) | Debe {amount} · No debe nada. | Saldo {amount} · Sin saldo. |
+| Pedidos (`screens.orders.colDue`, `.due`; `screens.order.dueK`, `.due`; `screens.builder.dueOn`; `screens.documents.due`) | Entrega | Fecha de entrega |
+| Producción (`screens.production.ok`, `.fail`) | Salió bien · Falló | Correcta · Fallida |
+| Precios (`screens.calculator.floor`, `.belowFloor`; `screens.builder.refFloor`, `.belowFloor`) | Piso · piso de margen | Precio mínimo |
+| Ajustes (`screens.settings.minMargin`, D-5) | Piso de margen | Margen mínimo |
+| Inicio y Reportes (`screens.home.top`, `screens.reports.summary.top`) | Piezas con más ganancia | Productos con más ganancia |

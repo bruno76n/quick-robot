@@ -22,7 +22,7 @@ for (const width of [1440, 390]) {
       await page.goto(`${server.url}/existencias`);
       await expect(page.getByRole('button', { name: 'Lista', pressed: true })).toBeVisible();
       await expect(page.getByTestId('stock-list')).toBeVisible();
-      await expect(page.getByText(/Total: 22 unidades de 6 piezas · Libres: 13 · Apartadas: 9/)).toBeVisible();
+      await expect(page.getByText(/Total: 22 unidades de 6 piezas · Disponibles: 13 · Apartadas: 9/)).toBeVisible();
       await page.getByRole('button', { name: 'Fichas' }).click();
       await expect(page).toHaveURL(/vista=fichas/);
       await expect(page.getByTestId('stock-card')).toHaveCount(6);
@@ -38,15 +38,15 @@ for (const width of [1440, 390]) {
       await page.goto(`${server.url}/existencias`);
       await expect(filter(page, /^Todas 6$/)).toBeVisible();
       await expect(rows(page)).toHaveCount(6);
-      await filter(page, /^Pocas 4$/).click();
+      await filter(page, /^Stock bajo 4$/).click();
       await expect(rows(page)).toHaveCount(4);
       await expect(row(page, FAMILY)).toHaveCount(1);
       await filter(page, /^Disponible 1$/).click();
       await expect(rows(page)).toHaveCount(1);
       await expect(row(page, 'Llavero con nombre')).toBeVisible();
-      await filter(page, /^Todo apartado 1$/).click();
+      await filter(page, /^Apartado 1$/).click();
       await expect(row(page, 'Spider-Man · trepando')).toBeVisible();
-      await filter(page, /^Agotadas 0$/).click();
+      await filter(page, /^Agotado 0$/).click();
       await expect(rows(page)).toHaveCount(0);
       await expect(page.getByText('No hay piezas con ese filtro o búsqueda.')).toBeVisible();
     });
@@ -87,13 +87,13 @@ for (const width of [1440, 390]) {
       await expect(members).toHaveCount(0);
     });
 
-    test('search by a variant label opens its family; Libres toggles the order', async ({ page }) => {
+    test('search by a variant label opens its family; Disponibles toggles the order', async ({ page }) => {
       await page.goto(`${server.url}/existencias`);
       await expect(rows(page).first()).toContainText('Spider-Man · trepando');
       if (width > 760) {
-        await page.getByRole('button', { name: 'Libres: menos primero' }).click();
+        await page.getByRole('button', { name: 'Disponibles: menos primero' }).click();
         await expect(rows(page).first()).toContainText('Llavero con nombre');
-        await page.getByRole('button', { name: 'Libres: más primero' }).click();
+        await page.getByRole('button', { name: 'Disponibles: más primero' }).click();
         await expect(rows(page).first()).toContainText('Spider-Man · trepando');
       }
       await page.getByPlaceholder('Buscar pieza').fill('silk');
@@ -106,8 +106,8 @@ for (const width of [1440, 390]) {
       const card = page.getByTestId('stock-card').filter({ hasText: FAMILY });
       await expect(card.getByTestId('stock-free').first()).toHaveText('2');
       await expect(card).toContainText('de 4 en total');
-      await expect(card.getByRole('img', { name: '2 libres y 2 apartadas' })).toBeVisible();
-      await expect(card).toContainText('2 variantes · libres por variante');
+      await expect(card.getByRole('img', { name: '2 disponibles y 2 apartadas' })).toBeVisible();
+      await expect(card).toContainText('2 variantes · disponibles por variante');
       await card.getByTestId('stock-variant').nth(1).click();
       await expect(drawer(page)).toContainText('silk morado');
       await page.keyboard.press('Escape');

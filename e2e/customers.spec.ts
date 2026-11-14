@@ -61,18 +61,18 @@ test('customer page opens the builder with the customer chosen', async ({ page }
 test('sale: record a payment, remove it, delete the sale and undo', async ({ page }) => {
   await page.goto(`${server.url}/ventas`);
   const row = page.getByTestId('sale-row').filter({ hasText: 'Colección completa y dos llaveros' });
-  await expect(row).toContainText('Debe $500');
+  await expect(row).toContainText('Saldo $500');
   await row.click();
   const dlg = page.getByRole('dialog');
   await dlg.getByRole('button', { name: 'Registrar abono' }).click();
   await dlg.locator('input[name=monto]').fill('200');
   await dlg.getByRole('button', { name: 'Registrar abono' }).click();
   await expect(status(page)).toHaveText('Abono registrado. Faltan $300.');
-  await expect(row).toContainText('Debe $300');
+  await expect(row).toContainText('Saldo $300');
   await row.click();
   await dlg.getByRole('button', { name: 'Quitar el pago de $200' }).click();
   await expect(status(page)).toHaveText('Pago quitado de la venta.');
-  await expect(row).toContainText('Debe $500');
+  await expect(row).toContainText('Saldo $500');
   await dlg.getByRole('button', { name: 'Eliminar venta' }).click();
   await dlg.getByRole('button', { name: 'Toca de nuevo para eliminar' }).click();
   await expect(status(page)).toContainText('Venta eliminada.');

@@ -52,7 +52,7 @@ Estándar: **OWASP Top 10:2025**, aplicado a todo lo web (interfaz y API) desde 
 
 ## Vocabulario de la interfaz (fijo)
 
-Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Libres, Apartadas, Artículos. Botones y títulos sin segunda persona ("Registrar venta", no "Registra tu venta"); los mensajes que heredó del mockup conservan su imperativo ("Agrega al menos un artículo.") y los nuevos van en infinitivo o impersonales (`docs/13 §1`); los documentos para clientes sí pueden hablar directo. Color con significado: **gris oscuro = costo, verde = ganancia** (el morado ya no se usa).
+Total, Costo, Ganancia, Ventas, Saldo, Pagado, Por cobrar, Disponible, Disponibles, Apartadas, Artículos. Botones y títulos sin segunda persona ("Registrar venta", no "Registra tu venta"); los mensajes que heredó del mockup conservan su imperativo ("Agrega al menos un artículo.") y los nuevos van en infinitivo o impersonales (`docs/13 §1`); los documentos para clientes sí pueden hablar directo. Color con significado: **gris oscuro = costo, verde = ganancia** (el morado ya no se usa).
 
 ## Diseño
 

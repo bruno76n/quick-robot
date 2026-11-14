@@ -61,6 +61,6 @@
   .sx-q, .sx-p, .sx-l { text-align: left; }
   .sx-q::before { content: "Cant. "; color: var(--ink-3t); font-weight: 400; }
   .sx-p::before { content: "c/u "; color: var(--ink-3t); font-weight: 400; }
-  .sx-l::before { content: "Libres "; color: var(--ink-3t); font-weight: 400; }
+  .sx-l::before { content: "Disponibles "; color: var(--ink-3t); font-weight: 400; }
 }
 .pk:hover, .pk:focus-visible { background: var(--soft); border-color: var(--line-2); }
