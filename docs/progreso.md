@@ -73,6 +73,6 @@ Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 4` · `t
 | Parte | Fase | Estado | Notas |
 |---|---|---|---|
 | Reglas en `core`, `04 §1` y golden | A | terminada | [`mejoras/informe-ronda4-a.md`](mejoras/informe-ronda4-a.md): reglas de §2 en `core` con sus casos (1.1a–g, 1.4, 1.5a–c, 1.6 en `04 §1`); costo por gramo = últimas 3 compras con costo (decisión del dueño); golden: solo PLA Blanco 0.3784 → 0.38 y sus 5 piezas y 2 colecciones; servidor ya cuesta con la regla nueva. Plan de B y C en el informe |
-| Migración y operaciones | B | no iniciada | |
+| Migración y operaciones | B | terminada | [`mejoras/informe-ronda4-b.md`](mejoras/informe-ronda4-b.md): migración `0008` aditiva (número de rollo por negocio en orden de compra, sin costo, precio de referencia, tara por marca, compras para el promedio), probada con el respaldo v7; `addSpool` con cantidad, `updateSpool` + sin costo, `finishSpool`, `weighSpool`, elegir rollo en `logPrintRun` y `startProduction`, `GET /filaments` con rollos y origen del costo, Ajustes N; copias viejas numeradas como la migración. Lista de rutas y códigos para la fase C en el informe |
 | Pantallas | C | no iniciada | Excepciones E1–E3 de la ronda 3 siguen |
 | Revisión y flujo nuevo | D | no iniciada | |
