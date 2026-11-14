@@ -15,7 +15,7 @@ import { useCollections } from '../../lib/queries';
 import { useProductFamilies } from './api';
 import { Figures, FamilyTiles } from './FamilyTiles';
 import { FamilyTable } from './FamilyTable';
-import { MarginBar } from './Piece3d';
+import { MarginBar } from './MarginBar';
 import { PieceThumb } from '../../components/PieceThumb';
 import './products.css';
 

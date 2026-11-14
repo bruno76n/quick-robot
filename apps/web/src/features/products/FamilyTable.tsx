@@ -10,7 +10,7 @@ import { centsTotal, money, number1 } from '../../lib/format';
 import { go } from '../../lib/nav';
 import { newVariantPath, sellPath } from './api';
 import { Chevron, MemberStock, membersOf, openPiece, printerOf, ratio } from './FamilyTiles';
-import { MarginBar } from './Piece3d';
+import { MarginBar } from './MarginBar';
 
 const L = es.screens.products;
 

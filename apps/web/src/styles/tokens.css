@@ -23,8 +23,6 @@
   /* states */
   --amber: #b4740a; --amber-d: #8a5a06; --amber-l: #fdf3e1;
   --red: #c8302a; --red-l: #fbeaea;
-  /* layers of the cost breakdown (greys, darkest = material), failures reserve and business expenses (phase C replaces them) */
-  --c-m: #2d2d35; --c-l: var(--cost); --c-q: #8b8b97; --c-t: #b9b9c3; --c-e: #dcdce3; --c-f: #d6a2ab; --sand: #cdb083;
   /* printer timeline tags and pieces with no filament color */
   --tg-sale: #4b4b55; --tg-queue: #b9b9c3; --tg-todo: #f0b429; --tg-done: #cfcfd8; --no-color: #c9c9d1;
   /* shadows: only floating things (popover, drawer, dialog); panels have none */

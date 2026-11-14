@@ -65,10 +65,10 @@ describe('design tokens', () => {
     const tokens = new Set([...read(TOKENS).matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]!));
     const used = all.flatMap(([p, text]) => [...text.matchAll(/var\(\s*(--[\w-]+)/g)].map((m) => [p, m[1]!] as const));
     expect(used.filter(([, v]) => !declared.has(v)).map(([p, v]) => `${rel(p)}: ${v}`)).toEqual([]);
-    // A token named as a value from a component ([label, cents, '--c-m']) must be a real token.
+    // A token named as a value from a component ([label, cents, '--cost']) must be a real token.
     const named = all.filter(([p]) => p.endsWith('.tsx')).flatMap(([p, text]) => [...text.matchAll(/['"](--[\w-]+)['"](?!\s*(?:as string\]\s*)?:)/g)].map((m) => [p, m[1]!] as const));
     expect(named.filter(([, v]) => !tokens.has(v)).map(([p, v]) => `${rel(p)}: ${v}`)).toEqual([]);
-    const REMOVED = ['--r', '--sh-soft', '--panel', '--panel-2', '--green-soft', '--amber-ink', '--amber-soft', '--red-ink', '--red-soft', '--blue', '--cost-soft', '--sh', '--c-legend'];
+    const REMOVED = ['--r', '--sh-soft', '--panel', '--panel-2', '--green-soft', '--amber-ink', '--amber-soft', '--red-ink', '--red-soft', '--blue', '--cost-soft', '--sh', '--c-legend', '--c-m', '--c-l', '--c-q', '--c-t', '--c-e', '--c-f', '--sand'];
     const hits = all.flatMap(([p, text]) => REMOVED.filter((r) => new RegExp(`${r}(?![\\w-])`).test(text)).map((r) => `${rel(p)}: ${r}`));
     expect(hits).toEqual([]);
   });
