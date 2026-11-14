@@ -100,5 +100,5 @@ export async function filamentOut(ex: Executor, ctx: Ctx, filamentId: string) {
   const data = await loadFilamentData(ex, ctx);
   const f = data.filaments.find((x) => x.id === filamentId)!;
   const spools = data.spoolsOf(filamentId);
-  return { filament: filamentListView(f, spools, data.costs), spools, spool: (id: string) => spoolView(spools.find((s) => s.id === id)!) };
+  return { filament: filamentListView(f, spools, data.costs), cost: data.costs.get(filamentId) ?? NO_COST, spools, spool: (id: string) => spoolView(spools.find((s) => s.id === id)!) };
 }

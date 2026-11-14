@@ -2,6 +2,9 @@
 import { z } from 'zod';
 import { calendarDate, cents, grams, hex, id, LIMITS, name, note, short } from './common';
 
+/** Spools created at once by addSpool (the same range as core › SPOOL_QUANTITY; contract does not depend on core). */
+const SPOOL_QUANTITY = { min: 1, max: 20 } as const;
+
 export const filamentStatus = z.enum(['no_spools', 'out', 'ending', 'low', 'new', 'ok']);
 export const spoolStatus = z.enum(['empty', 'new', 'in_use']);
 export const spoolMovementKind = z.enum(['purchase', 'consumption', 'failure', 'waste', 'adjustment']);
@@ -78,9 +81,16 @@ export const addSpoolInput = z.object({
   purchasedOn: calendarDate,
   supplierId: id.optional(),
   note: note.optional(),
+  /** Equal spools bought together (ronda-4 §4): consecutive numbers; costCents is per spool, shippingCents for the whole order. */
+  quantity: z.number().int().min(SPOOL_QUANTITY.min).max(SPOOL_QUANTITY.max).optional(),
+  noCost: z.boolean().optional(),
+  referenceCentsPerKg: cents(LIMITS.unitPriceCents).refine((c) => c > 0, { message: 'too_small' }).optional(),
 }).refine((v) => Boolean(v.filamentId) !== Boolean(v.filament), { path: ['filament'], message: 'required' });
 
-export const addSpoolOutput = z.object({ spool, filament: filamentListItem });
+/** One spool and its filament after a write (updateSpool, restoreSpool, movements, finishSpool). */
+export const spoolOutput = z.object({ spool, filament: filamentListItem });
+/** addSpool: `spool` is the first one created, `spools` all of them by number. */
+export const addSpoolOutput = spoolOutput.extend({ spools: z.array(spool) });
 
 export type FilamentListItem = z.infer<typeof filamentListItem>;
 export type FilamentDetail = z.infer<typeof filamentDetail>;
@@ -89,6 +99,7 @@ export type CostSource = z.infer<typeof costSource>;
 export type SpoolMovement = z.infer<typeof spoolMovement>;
 export type AddSpoolInput = z.infer<typeof addSpoolInput>;
 export type AddSpoolOutput = z.infer<typeof addSpoolOutput>;
+export type SpoolOutput = z.infer<typeof spoolOutput>;
 
 /** updateSpool · PATCH /spools/:id: the same fields as addSpool (docs/12 §8). */
 export const updateSpoolInput = z.object({
