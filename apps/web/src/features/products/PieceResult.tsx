@@ -9,6 +9,7 @@ import { Meter } from '../../components/Meter';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { grams, hours as fmtHours, money, moneyTotal, number1, pct } from '../../lib/format';
+import { costSourceLong } from '../filament/spools';
 import { draftHours, isTechnical, marginOf, num, previewCost, priceOf, type Catalog, type Draft } from './costing';
 
 const L = es.screens.calculator;
@@ -38,6 +39,8 @@ export function PieceResult({ d, c, parent, channels, method, price, onPrice, on
   const pTot = parent ? previewCost(parent, c).total : 0;
   const pPrice = parent ? priceOf(parent, c, pTot) : 0;
   const dc = tot - pTot;
+  // Ronda 4: a filament without any way to cost it (no purchases, no material, no reference) counts at $0: say so.
+  const noReference = c.filaments.filter((f) => f.costSource === 'none' && d.filaments.some((x) => x.filamentId === f.id && num(x.grams) > 0));
   const ids = [...(d.printerId === '' ? [''] : []), ...c.printers.map((p) => p.id)];
   return (
     <>
@@ -61,6 +64,7 @@ export function PieceResult({ d, c, parent, channels, method, price, onPrice, on
         </div>
       </div>
       {parent && d.mode === 'value' ? <p className="note">{t('screens.calculator.vsParent', { name: parent.name })} {Math.abs(dc) < 0.005 ? L.costSame : t(dc > 0 ? 'screens.calculator.costUp' : 'screens.calculator.costDown', { amount: money(Math.abs(dc)) })} {pr === pPrice ? L.priceSame : t('screens.calculator.priceChanges', { price: moneyTotal(pr) })}</p> : null}
+      {noReference.map((f) => <p key={f.id} className="note warn" data-testid="no-reference">{costSourceLong(f)}</p>)}
       {isTechnical(d, c) && d.mode === 'value' ? <p className="note warn">{L.technical} <button type="button" className="link" onClick={onFormula}>{L.useFormula}</button></p> : null}
       {d.mode === 'value' ? (
         <div className="refs"><span className="k">{L.shortcuts}</span><div>{refs.map((r) => <button key={r[0]} type="button" className="ref" onClick={() => onPrice(r[1])}><b>{moneyTotal(r[1])}</b><small>{r[0]}{r[2] ? ` · ${r[2]}` : ''}</small></button>)}</div></div>

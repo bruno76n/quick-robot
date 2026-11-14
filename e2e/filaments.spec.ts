@@ -22,10 +22,11 @@ test('add spool → appears in the list → survives a restart', async ({ page }
     await expect(dialog.getByText('Filamento nuevo: PETG Verde. Se crea con este rollo.')).toBeVisible();
     await dialog.locator('input[name=costo]').fill('420');
     await dialog.locator('input[name=envio]').fill('30');
-    await expect(dialog.getByText('Costo por gramo: $0.45.')).toBeVisible();
+    await expect(dialog.getByTestId('cost-after')).toHaveText('$0.450/g');
+    await expect(dialog.getByRole('button', { name: 'Agregar rollo #9' })).toBeVisible();
     await dialog.getByRole('button', { name: 'Agregar rollo' }).click();
 
-    await expect(page.getByRole('status')).toHaveText('Rollo agregado a PETG Verde. Disponible: 1,000 g.');
+    await expect(page.getByRole('status')).toHaveText('Rollo #9 agregado a PETG Verde. Disponible: 1,000 g.');
     const drawer = page.getByRole('complementary', { name: 'Detalle' });
     await expect(drawer.getByRole('heading', { name: 'PETG Verde' })).toBeVisible();
     await expect(page.getByText('8 filamentos · 9 rollos', { exact: true })).toBeVisible();
@@ -36,10 +37,10 @@ test('add spool → appears in the list → survives a restart', async ({ page }
     await page.keyboard.press('Escape');
     await page.getByTestId('filament-row').filter({ hasText: 'PLA Blanco' }).click();
     await drawer.getByRole('button', { name: 'Agregar rollo de PLA Blanco' }).click();
-    await expect(dialog.getByText(/Se suma a PLA Blanco: hay 1,720 g en 2 rollos/)).toBeVisible();
+    await expect(dialog.getByText('PLA Blanco ya existe: el rollo se agrega como uno nuevo, no se suma a los que tienes.')).toBeVisible();
     await dialog.locator('input[name=costo]').fill('350');
     await dialog.getByRole('button', { name: 'Agregar rollo' }).click();
-    await expect(page.getByRole('status')).toHaveText('Rollo agregado a PLA Blanco. Disponible: 2,720 g.');
+    await expect(page.getByRole('status')).toHaveText('Rollo #10 agregado a PLA Blanco. Disponible: 2,720 g.');
     await expect(drawer.getByText('3 rollos registrados')).toBeVisible();
 
     await server.stop({ keepData: true });

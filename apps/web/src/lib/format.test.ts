@@ -1,6 +1,6 @@
 // The examples of docs/13 §2.1.
 import { describe, expect, it } from 'vitest';
-import { centsTotal, date, folio, grams, hours, money, moneyTotal, overdue, pct, queueDuration, relativeDay } from './format';
+import { centsTotal, date, folio, grams, hours, money, money3d, moneyTotal, overdue, pct, queueDuration, relativeDay } from './format';
 
 describe('formats (docs/13 §2.1)', () => {
   it('money', () => {
@@ -8,6 +8,8 @@ describe('formats (docs/13 §2.1)', () => {
     expect(centsTotal(125000)).toBe('$1,250');
     expect(money(35.95)).toBe('$35.95');
     expect(money(35)).toBe('$35');
+    expect(money3d(0.25)).toBe('$0.250');
+    expect(money3d(0.276667)).toBe('$0.277');
   });
   it('grams, hours, percent', () => {
     expect(grams(1234.5)).toBe('1,234.5 g');

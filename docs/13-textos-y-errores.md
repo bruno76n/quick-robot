@@ -56,6 +56,7 @@ export const es = {
 |---|---|---|
 | Dinero en totales y listas | Pesos sin centavos, miles con coma, `es-MX` | `$1,250` |
 | Dinero con centavos | Solo cuando hay centavos reales (precios, costos unitarios, abonos) | `$35.95` |
+| Costo por gramo de un filamento (Filamentos y sus diálogos, ronda 4) | Tres decimales + `/g` | `$0.250/g` |
 | Gramos | Un decimal máximo + ` g` | `1,234.5 g` |
 | Horas | `2 h`, `2 h 30 min` | `7 h 15 min` |
 | Porcentaje | Un decimal máximo | `14.6%` |
@@ -225,7 +226,8 @@ Los que traen **Deshacer** (`undo: true`) llaman a `restore<Entidad>` (`12`). En
 ### Filamentos, insumos, impresoras y producción
 | Clave | Texto | Deshacer |
 |---|---|---|
-| `spool.added` | Rollo agregado a {filament}. Disponible: {available}. | |
+| `spool.added` | Rollo {number} agregado a {filament}. Disponible: {available}. *(ronda 4: con su número, para rotular el contenedor)* | |
+| `spool.addedMany` | Rollos {numbers} agregados a {filament}. Disponible: {available}. | |
 | `spool.deleted` | Rollo eliminado *(si tenía movimientos:)* junto con sus {count} {count\|movimiento\|movimientos}. | ✓ |
 | `spool.movementRecorded` | Movimiento registrado | |
 | `supply.saved` | Insumo guardado | |
@@ -297,7 +299,10 @@ Salen de `VALIDATION_ERROR.details.fields[]` (`path` + `rule`). Aparecen **debaj
 | `salePayment.amount.required` | Falta el monto del abono. |
 | `orderPayment.amount.required` | Falta el monto del pago. |
 | `spool.filament.required` | Elige el material y el color del rollo. |
-| `spool.cost.required` | Falta el costo del rollo. |
+| `spool.cost.required` | Falta el costo del rollo. *(con «Sin costo» no se pide)* |
+| `spool.quantity.range` | La cantidad va de 1 a 20 rollos. |
+| `settings.costAvgPurchases.range` | Las compras para el promedio van de 1 a 10. |
+| `spool.reference.required` | Falta el precio de referencia por kilo. |
 | `spoolMovement.grams.required` | Falta la cantidad en gramos. |
 | `printRun.text.required` | Falta describir la prueba. |
 | `customer.name.required` | Falta el nombre del cliente. |

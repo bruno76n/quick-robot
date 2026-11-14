@@ -14,8 +14,9 @@ import { api } from '../../lib/api';
 import { errorText } from '../../lib/errors';
 import { grams as fmtGrams } from '../../lib/format';
 import { parseNumber, todayLocal } from '../../lib/input';
-import { keys, usePrinters, useProducts } from '../../lib/queries';
+import { keys, usePrinters, useProducts, useSettings } from '../../lib/queries';
 import { useFilaments } from '../filament/api';
+import { spoolPicks, SpoolUse, type SpoolChoice } from '../filament/SpoolUse';
 import { productionApi, type PrintRunInput } from './api';
 import { useWriteWithWarnings, warningTexts } from './write';
 
@@ -53,9 +54,15 @@ function PrintRunForm({ productId, onClose, onDone, filaments, products, printer
   const [uploading, setUploading] = useState(false);
   // What the person typed wins only for the piece and quantity it was typed for; otherwise the proposal of the
   // mockup applies: grams = piece × qty, time = hours × qty, the piece's printer.
+  const fil = (id: string) => filaments.find((x) => x.id === id);
   const [typed, setTyped] = useState<{ key: string; grams: Record<string, string>; hours?: string }>({ key: '', grams: {} });
   const [printerTyped, setPrinterTyped] = useState<{ pieceId: string; value: string } | null>(null);
   const [testHours, setTestHours] = useState('0');
+  // Ronda 4: the spool of each filament (nothing chosen = the automatic order, the suggested spool first).
+  const [choices, setChoices] = useState<Record<string, SpoolChoice>>({});
+  const purge = useSettings().data?.settings.purgePct ?? 0;
+  const choose = (fid: string) => (c: SpoolChoice) => setChoices({ ...choices, [fid]: c });
+  const withPicks = (fid: string, g: number) => { const sp = spoolPicks(fil(fid), choices[fid]); return { filamentId: fid, grams: g, ...(sp ? { spools: sp } : {}) }; };
 
   const piece = useQuery({ queryKey: [...keys.products, 'detail', pieceId], queryFn: async () => (await api.products.get(pieceId)).data, enabled: Boolean(pieceId) }).data;
   const ready = piece && piece.id === pieceId ? piece : undefined;
@@ -94,11 +101,11 @@ function PrintRunForm({ productId, onClose, onDone, filaments, products, printer
       const g = parseNumber(testGrams);
       if (!text.trim()) { toast(es.fields['printRun.text.required']); return; }
       if (!(g > 0)) { toast(es.fields['spoolMovement.grams.required']); return; }
-      save.mutate({ ...base, reason: 'test', text: text.trim(), qty: 1, filaments: [{ filamentId: testFil, grams: g }] });
+      save.mutate({ ...base, reason: 'test', text: text.trim(), qty: 1, filaments: [withPicks(testFil, g)] });
       return;
     }
     if (!ready) return;
-    const fils = ready.filaments.map((f) => ({ filamentId: f.filamentId, grams: parseNumber(gramsOf(f.filamentId)) })).filter((f) => f.grams > 0);
+    const fils = ready.filaments.map((f) => withPicks(f.filamentId, parseNumber(gramsOf(f.filamentId)))).filter((f) => f.grams > 0);
     save.mutate({ ...base, reason: 'stock', productId: ready.id, qty: n, filaments: fils });
   };
 
@@ -108,9 +115,8 @@ function PrintRunForm({ productId, onClose, onDone, filaments, products, printer
     try { const out = (await api.files.upload('print_photo', file)).data; setPhoto({ id: out.fileId, url: out.url }); } catch (e) { toast(errorText(e).text); } finally { setUploading(false); }
   };
 
-  const fil = (id: string) => filaments.find((x) => x.id === id);
   return (
-    <Dialog open title={L.register} submitLabel={L.register} onClose={onClose} onSubmit={submit} busy={save.isPending}>
+    <Dialog open wide className="sheet r4w" title={L.register} submitLabel={L.register} onClose={onClose} onSubmit={submit} busy={save.isPending}>
       <div className="fld">
         <span>{L.reason}</span>
         <div className="seg wide">
@@ -121,7 +127,6 @@ function PrintRunForm({ productId, onClose, onDone, filaments, products, printer
       </div>
       <div hidden={test}>
         {products?.length ? <Field label={L.piece}><select name="prod" value={pieceId} onChange={(e) => setPieceId(e.target.value)}>{products.map((p) => <option key={p.id} value={p.id}>{p.displayName}</option>)}</select></Field> : null}
-        <div className="grid2 mt"><Field label={L.qty} hint={L.qtyHint}><input name="cant" inputMode="numeric" value={qty} onChange={(e) => setQty(e.target.value)} data-autofocus={productId ? '' : undefined} /></Field></div>
       </div>
       <div hidden={!test}>
         <Field label={L.testText}><input name="texto" value={text} onChange={(e) => setText(e.target.value)} placeholder={L.testPlaceholder} /></Field>
@@ -129,8 +134,10 @@ function PrintRunForm({ productId, onClose, onDone, filaments, products, printer
           <Field label={L.filament}><select name="fil" value={testFil} onChange={(e) => setTestFil(e.target.value)}>{withSpools.map((f) => <option key={f.id} value={f.id}>{t('screens.production.filamentOption', { name: `${f.material} ${f.color}`, grams: fmtGrams(f.remainingGrams) })}</option>)}</select></Field>
           <Field label={L.gramsUsed}><UnitInput unit="g" name="gt" inputMode="decimal" value={testGrams} onChange={(e) => setTestGrams(e.target.value)} placeholder="0" /></Field>
         </div>
+        {test && fil(testFil) ? <div className="mt"><SpoolUse f={fil(testFil)!} grams={parseNumber(testGrams)} purgePct={purge} choice={choices[testFil]} onChange={choose(testFil)} /></div> : null}
       </div>
-      <div className="grid2">
+      <div className="grid3">
+        {test ? null : <Field label={L.qty} hint={L.qtyHint}><input name="cant" inputMode="numeric" value={qty} onChange={(e) => setQty(e.target.value)} data-autofocus={productId ? '' : undefined} /></Field>}
         {printers.length ? <Field label={L.printer} hint={L.printerHint}><select name="imp" value={printerId} onChange={(e) => setPrinterTyped({ pieceId, value: e.target.value })}>{printers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></Field> : null}
         <Field label={L.realTime}><UnitInput unit="h" name="horas" inputMode="decimal" value={hours} onChange={(e) => setHours(e.target.value)} /></Field>
       </div>
@@ -143,10 +150,12 @@ function PrintRunForm({ productId, onClose, onDone, filaments, products, printer
       </div>
       <div className="fld" hidden={test}>
         <span>{L.gramsUsed}</span>
-        <div id="imp-fil">
-          {ready ? (ready.filaments.length ? ready.filaments.map((f) => {
+        <div id="imp-fil" className="fsecs">
+          {ready && !test ? (ready.filaments.length ? ready.filaments.map((f) => {
             const x = fil(f.filamentId);
-            return <GramsRow key={f.filamentId} name={x ? `${x.material} ${x.color}` : ''} left={x?.remainingGrams ?? 0} hex={x?.hex ?? 'var(--no-color)'} value={gramsOf(f.filamentId)} onChange={(v) => setTyped({ ...own, grams: { ...own.grams, [f.filamentId]: v } })} />;
+            const name = x ? `${x.material} ${x.color}` : '';
+            const input = <UnitInput unit="g" className="g" inputMode="decimal" value={gramsOf(f.filamentId)} onChange={(e) => setTyped({ ...own, grams: { ...own.grams, [f.filamentId]: e.target.value } })} aria-label={t('screens.production.gramsOf', { name })} />;
+            return x ? <SpoolUse key={f.filamentId} f={x} grams={parseNumber(gramsOf(f.filamentId))} purgePct={purge} choice={choices[f.filamentId]} onChange={choose(f.filamentId)} gramsInput={input} /> : null;
           }) : <p className="muted">{L.noPieceFilaments}</p>) : null}
         </div>
         <small>{L.gramsHint}</small>
@@ -161,15 +170,5 @@ function PrintRunForm({ productId, onClose, onDone, filaments, products, printer
         <small>{photo ? L.photoSaved : L.noPhoto}</small>
       </div>
     </Dialog>
-  );
-}
-
-function GramsRow({ name, left, value, onChange, hex }: { name: string; left: number; value: string; onChange: (v: string) => void; hex: string }) {
-  return (
-    <div className="frow ro">
-      <span className="sw lg" style={{ ['--c' as string]: hex }} />
-      <span>{name}<small className="blk">{t('screens.production.available', { grams: fmtGrams(left) })}</small></span>
-      <UnitInput unit="g" inputMode="decimal" value={value} onChange={(e) => onChange(e.target.value)} aria-label={t('screens.production.gramsOf', { name })} />
-    </div>
   );
 }

@@ -10,7 +10,8 @@ const status = (page: Page) => page.getByRole('status');
 // Existencias opens in Lista (ronda-2 §4): one row per piece; a simple piece opens its drawer.
 const card = (page: Page, name: string) => page.getByTestId('stock-row').filter({ has: page.getByText(name, { exact: true }) });
 const totalOf = (page: Page, name: string) => card(page, name).getByTestId('stock-total').first();
-const gramsIn = (s: string) => Number((/disponible ([\d,.]+) g/.exec(s)?.[1] ?? '0').replace(/,/g, ''));
+// The filament before this run, from the line «PETG Negro: 800 g → 760 g. El costo …» of its spool section (ronda 4).
+const gramsIn = (s: string) => Number((/: ([\d,.]+) g →/.exec(s)?.[1] ?? '0').replace(/,/g, ''));
 
 /** Opens "Registrar impresión" from the drawer of a piece and returns the first filament row text. */
 async function openRegister(page: Page, piece: string) {
@@ -19,7 +20,7 @@ async function openRegister(page: Page, piece: string) {
   await drawer.getByRole('button', { name: 'Registrar impresión' }).click();
   const dlg = page.getByRole('dialog');
   await expect(dlg.locator('select[name=prod]')).toHaveValue(/.+/);
-  await expect(dlg.locator('.frow.ro').first()).toBeVisible();
+  await expect(dlg.getByTestId('spool-use').first()).toBeVisible();
   return dlg;
 }
 
@@ -29,9 +30,9 @@ test('print run for stock: +n in Existencias, filament goes down; undo puts both
   await expect(totalOf(page, piece)).toHaveText('2');
   let dlg = await openRegister(page, piece);
   await expect(dlg.locator('select[name=prod] option:checked')).toHaveText(piece);
-  const before = gramsIn(await dlg.locator('.frow.ro').first().innerText());
+  const before = gramsIn(await dlg.getByTestId('spool-use').first().innerText());
   await dlg.locator('input[name=cant]').fill('2');
-  const used = Number(await dlg.locator('.frow.ro input').first().inputValue());
+  const used = Number(await dlg.locator('[data-testid=spool-use] .fsec-h input').first().inputValue());
   expect(used).toBeGreaterThan(0);
   await dlg.getByRole('button', { name: 'Registrar impresión' }).click();
   await expect(status(page)).toContainText('Impresión registrada. Se descontaron');
@@ -40,7 +41,7 @@ test('print run for stock: +n in Existencias, filament goes down; undo puts both
 
   await page.keyboard.press('Escape');
   dlg = await openRegister(page, piece);
-  const after = gramsIn(await dlg.locator('.frow.ro').first().innerText());
+  const after = gramsIn(await dlg.getByTestId('spool-use').first().innerText());
   expect(after).toBeLessThan(before);
   await dlg.getByRole('button', { name: 'Cancelar' }).click();
 
@@ -56,7 +57,7 @@ test('print run for stock: +n in Existencias, filament goes down; undo puts both
   await page.goto(`${server.url}/existencias`);
   await expect(totalOf(page, piece)).toHaveText('2');
   dlg = await openRegister(page, piece);
-  expect(gramsIn(await dlg.locator('.frow.ro').first().innerText())).toBeCloseTo(before, 1);
+  expect(gramsIn(await dlg.getByTestId('spool-use').first().innerText())).toBeCloseTo(before, 1);
 });
 
 test('a run whose pieces were sold is locked; an order run is history', async ({ page }) => {

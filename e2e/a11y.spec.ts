@@ -1,5 +1,5 @@
-// Accessibility (ronda-3 §8): axe finds no serious or critical violation on the 16 screens, the filament drawer,
-// the order page and the most used dialogs, at desktop and phone width (WCAG 2.1 A and AA rules).
+// Accessibility (ronda-3 §8): axe finds no serious or critical violation on the 16 screens, the filament and spool drawers,
+// the order page and the most used dialogs (ronda 4: the spool menu, Terminar rollo, splitting a print, Poner en producción), at desktop and phone width (WCAG 2.1 A and AA rules).
 import AxeBuilder from '@axe-core/playwright';
 import type { Page } from '@playwright/test';
 import { expect, test } from './support/test';
@@ -42,9 +42,22 @@ for (const width of [1440, 390]) {
     }
     // Filament drawer (E2) and the dialogs used most.
     await open(page, '/filamentos');
-    await page.locator('tbody tr').first().click();
+    await page.getByTestId('filament-row').first().click();
     await expect(page.locator('.fdr')).toBeVisible();
     found.push(...await violations(page, 'filament drawer'));
+    // Ronda 4: the spool drawer (Pesar, Terminar rollo), the menu of a spool and Terminar rollo's confirmation.
+    await open(page, '/filamentos');
+    await page.getByTestId('spool-row').first().click();
+    await expect(page.locator('.sdr')).toBeVisible();
+    await page.locator('input[name=bascula]').fill('900');
+    found.push(...await violations(page, 'spool drawer'));
+    await open(page, '/filamentos');
+    await page.getByTestId('spool-menu').first().click();
+    await expect(page.getByRole('menu')).toBeVisible();
+    found.push(...await violations(page, 'spool menu'));
+    await page.getByRole('menuitem', { name: 'Terminar rollo' }).click();
+    await expect(page.locator('dialog[open]')).toBeVisible();
+    found.push(...await violations(page, 'Terminar rollo'));
     await open(page, '/filamentos');
     await page.getByRole('button', { name: 'Agregar rollo' }).first().click();
     await expect(page.locator('dialog[open]')).toBeVisible();
@@ -53,6 +66,13 @@ for (const width of [1440, 390]) {
     await page.getByRole('button', { name: 'Registrar impresión' }).first().click();
     await expect(page.locator('dialog[open]')).toBeVisible();
     found.push(...await violations(page, 'Registrar impresión'));
+    await page.getByRole('dialog').locator('select[name=prod]').selectOption({ label: 'Hulk · puño' }); // PLA Blanco: two spools
+    await page.getByRole('dialog').getByRole('button', { name: 'Repartir entre dos rollos' }).first().click();
+    found.push(...await violations(page, 'Registrar impresión · repartir'));
+    await open(page, '/pedidos');
+    await page.getByTestId('next-step').filter({ hasText: 'Poner en producción' }).first().click();
+    await expect(page.getByTestId('start-spool').first()).toBeVisible();
+    found.push(...await violations(page, 'Poner en producción'));
     if (width < 1100) {
       await open(page, '/inicio');
       await page.getByRole('button', { name: 'Menú' }).click();

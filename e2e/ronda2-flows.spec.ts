@@ -53,7 +53,7 @@ for (const { width, original, label } of CASES) {
     const dlg = page.getByRole('dialog');
     await dlg.locator('select[name=prod]').selectOption({ label: full });
     await dlg.locator('input[name=cant]').fill('2');
-    await expect(dlg.locator('.frow.ro').first()).toBeVisible();
+    await expect(dlg.getByTestId('spool-use').first()).toBeVisible();
     await dlg.getByRole('button', { name: 'Registrar impresión' }).click();
     await expect(page.getByRole('status')).toContainText('Se sumaron 2 piezas a Existencias.');
     const fam = stockRow(page, original);

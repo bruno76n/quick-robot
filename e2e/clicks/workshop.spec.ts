@@ -20,7 +20,7 @@ test('registrar impresión from Existencias (choose the piece, quantity 3)', asy
   const dlg = page.getByRole('dialog');
   await dlg.locator('select[name=prod]').selectOption({ label: 'Hulk · puño' });
   await c.fill(dlg.locator('input[name=cant]'), '3');
-  await expect(dlg.locator('.frow.ro').first()).toBeVisible();
+  await expect(dlg.getByTestId('spool-use').first()).toBeVisible();
   await dlg.getByRole('button', { name: 'Registrar impresión' }).click();
   await expect(status(page)).toContainText('Se sumaron 3 piezas a Existencias.');
   await c.expectBudget(BUDGET.printRun);
@@ -32,7 +32,7 @@ test('registrar impresión from the drawer of a piece (the piece comes chosen)',
   await stockRow(page, 'Soporte de celular PETG').click();
   await drawer(page).getByRole('button', { name: 'Registrar impresión' }).click();
   const dlg = page.getByRole('dialog');
-  await expect(dlg.locator('.frow.ro').first()).toBeVisible();
+  await expect(dlg.getByTestId('spool-use').first()).toBeVisible();
   await expect(dlg.locator('input[name=cant]')).toBeFocused(); // T1: the dialog focuses the marked field
   await c.fill(dlg.locator('input[name=cant]'), '2');
   await dlg.getByRole('button', { name: 'Registrar impresión' }).click();
@@ -77,7 +77,7 @@ test('agregar rollo of a filament that exists (from its row)', async ({ page }) 
   await expect(dlg.locator('input[name=costo]')).toBeFocused(); // T1: the dialog focuses the marked field
   await c.fill(dlg.locator('input[name=costo]'), '350');
   await dlg.getByRole('button', { name: 'Agregar rollo' }).click();
-  await expect(status(page)).toContainText('Rollo agregado a PLA Blanco.');
+  await expect(status(page)).toContainText(/Rollo #\d+ agregado a PLA Blanco\./);
   await c.expectBudget(BUDGET.addSpoolExisting);
 });
 
@@ -88,12 +88,11 @@ test('agregar rollo from the header (material and color to choose; the brand of 
   const dlg = page.getByRole('dialog');
   await dlg.locator('select[name=material]').selectOption('PLA');
   await dlg.locator('select[name=color]').selectOption('Negro');
-  // D3: PLA Negro exists; its last spool is eSUN, proposed and shown in the summary (still editable).
+  // D3: PLA Negro exists; its last spool is eSUN, proposed in Marca (still editable).
   await expect(dlg.locator('select[name=marca]')).toHaveValue('eSUN');
-  await expect(dlg.locator('summary .fb-t small')).toHaveText('eSUN');
   await c.fill(dlg.locator('input[name=costo]'), '380');
   await dlg.getByRole('button', { name: 'Agregar rollo' }).click();
-  await expect(status(page)).toContainText('Rollo agregado a PLA Negro.');
+  await expect(status(page)).toContainText(/Rollo #\d+ agregado a PLA Negro\./);
   await c.expectBudget(BUDGET.addSpoolHeader);
 });
 

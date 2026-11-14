@@ -95,6 +95,8 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 *Cálculo en vivo:* el navegador usa `core` para la vista previa. Al guardar, el servidor recalcula; nunca confía en el costo enviado.
 
+*Costo por gramo (ronda 4):* junto al «Disponible: … · $0.38 por gramo» de cada filamento hay una **i**; al tocarla dice de dónde sale (`04 §1`): «Promedio de las últimas compras con costo: #1 y #8. Los rollos sin costo no cuentan.», el promedio del material, el precio de referencia o «Sin costo de referencia para {filamento}.». Si un filamento de la pieza no tiene ninguna forma de costearse (cuenta a $0), el resultado lo avisa debajo del costo con ese mismo texto.
+
 ### 3.2 Colección
 Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), etiquetas, nota. Muestra costo, precio, ganancia, y cuántos **sets se pueden armar hoy** con los disponibles. Una colección nueva abre con el foco en su nombre. Acciones: Agregar pieza (crea la fila con la lista de piezas abierta y el foco dentro, con búsqueda; al elegir, el foco pasa a la cantidad), Guardar (`saveCollection`), Eliminar, Vender, Cancelar.
 
@@ -159,7 +161,7 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 | Botón | Caso de uso | Detalle |
 |---|---|---|
 | Siguiente paso (texto cambia) | `acceptOrder` / `startProduction` / `markOrderReady` / `deliverOrder` | Ver `04 §7`. Poner en producción abre diálogo de impresoras |
-| Poner en producción | `startProduction` | Diálogo: asignar impresora por artículo, ver plan y fecha de término, opción de descontar filamento, aviso de faltante |
+| Poner en producción | `startProduction` | Diálogo: asignar impresora por artículo, ver plan y fecha de término, opción de descontar filamento, aviso de faltante. Con «Descontar filamento», por artículo y filamento: lo que necesita con purga, **Empezar con el rollo** (viene el sugerido, `04 §1`) y, bajo el último artículo que usa ese filamento, **el reparto que resulta**: cada rollo con «antes → después», lo que se le toma y si «se termina» o «sigue con este», y «Al terminarse el #4 sigue el #13. PLA Negro: 1,410 g → 465 g.» (`reference/ronda-4/produccion-pedido.html`, caso 1.5c). Solo se mandan los rollos que la persona cambió (`startSpools`) |
 | Reasignar impresoras | `reassignPrinters` | Quita de las colas y vuelve a asignar |
 | Registrar pago | `recordOrderPayment` | Diálogo con monto máximo = saldo. Está en la pestaña Cobro y, mientras el pedido está activo y tiene saldo, también **bajo la cifra “Saldo”** del encabezado en las demás pestañas (no se repite en Cobro; ronda 2 · D7) |
 | Quitar pago | `deleteOrderPayment` | |
@@ -175,16 +177,22 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 ## 6. Filamentos
 
-**Muestra:** lista ancha de filamentos (material + color) con lo que queda, rollos, costo por gramo, y estado (Sin rollos · Agotado · Crítico · Stock bajo · Nuevo · Normal, `04 §1`). Seleccionar uno abre el **cajón** con sus rollos y movimientos.
+**Muestra** (ronda 4, `reference/ronda-4/filamentos.html`): franja de cuatro cifras — **Disponible** (kg), **Valor del inventario** («lo que costó cada rollo», `04 §1` caso 1.4), **Stock bajo o crítico** (filamentos en Stock bajo, Crítico o Agotado) y **Rollos sin costo** («no entran al promedio») — y cada filamento (material + color) como un bloque con su encabezado y **sus rollos abajo**:
+- *Encabezado:* color, nombre, «N rollos · marcas», gramos disponibles, **costo por gramo** con tres decimales (`$0.250/g`) y de dónde sale («promedio de #3, #5 y #9», «promedio de PLA», «precio de referencia» o «sin costo de referencia», `04 §1`), y el estado (Sin rollos · Agotado · Crítico · Stock bajo · Nuevo · Normal).
+- *Rollo:* número (`#7`, la etiqueta del contenedor), marca, fecha de compra, lo que costó o «Sin costo», barra, «x g de y g», estado del rollo (En uso · Nuevo · Vacío) y su menú **···** (Pesar, Terminar rollo, Editar, Movimientos). Los rollos vacíos se ocultan: «N rollo(s) vacío(s) oculto(s)» los muestra al tocarlo.
+- Tocar el **encabezado** abre el cajón del filamento (cifras, todos sus rollos con su número, todos sus movimientos, Registrar movimiento, Agregar rollo de …). Tocar un **rollo** abre el **cajón del rollo** (ronda 3 · excepción 2: no la columna fija de la maqueta): Quedan · Del rollo · Costo, la nota de qué costo usan las piezas («Para calcular piezas, PLA Gris usa $0.250/g (promedio de #3, #5 y #9)»; un rollo sin costo dice que no entra al promedio), **Pesar en báscula** (peso en la báscula y carrete vacío, propuesto con el último de esa marca; «Quedan» se calcula al escribir: «sin cambio», «ajuste de −18 g» o el rango válido), **Guardar peso**, **Terminar rollo** (con confirmación), **Editar** y sus movimientos con **Registrar movimiento**.
 
 | Botón | Caso de uso |
 |---|---|
-| Agregar rollo | `addSpool` (crea el filamento si no existe; movimiento `purchase`). Si el material y color ya existen (o el diálogo se abre desde el filamento), la **marca** propone la de su último rollo (el de fecha de compra más reciente) hasta que la persona elige otra; se ve en el resumen y sigue editable (ronda 2 · D3) |
+| Agregar rollo | `addSpool` (ver «Agregar rollo» abajo). Si el material y color ya existen (o el diálogo se abre desde el filamento), la **marca** propone la de su último rollo (el de fecha de compra más reciente) hasta que la persona elige otra; sigue editable (ronda 2 · D3) |
 | Editar rollo / Eliminar rollo | `updateSpool` / `deleteSpool` |
-| Movimiento (en el cajón) | `recordSpoolMovement` (consumo, fallo, merma, ajuste) con nota |
-| Ver filamento | Abre el cajón |
+| Pesar · Guardar peso | `weighSpool` (`WEIGHT_OUT_OF_RANGE` si el peso no cuadra; la vista previa ya lo avisa) |
+| Terminar rollo | `finishSpool` tras confirmar («Lo que queda (x g) se registra como merma y el rollo pasa a Vacío»); no se ofrece en un rollo vacío |
+| Movimientos (menú del rollo) | Abre el cajón del rollo en sus movimientos |
+| Registrar movimiento (en el cajón) | `recordSpoolMovement` (consumo, fallo, merma, ajuste) con nota |
+| Ver filamento / Ver rollo | Abre el cajón |
 
----
+**Agregar rollo** (`reference/ronda-4/rollo-nuevo.html`): un rollo = una compra; **nunca suma gramos a un rollo que existe**. Campos: Material, Color, Marca (de las listas, «Otro…» agrega uno); Gramos por rollo, **Cantidad** (1–20: crea esa cantidad de rollos iguales con números consecutivos), Fecha; Precio por rollo, **Envío del pedido** (se reparte entre los rollos), Proveedor (propone el del último rollo); el interruptor **Sin costo (regalo o incluido con la impresora)**. Si el filamento ya existe lo dice en verde («PLA Blanco ya existe: el rollo se agrega como uno nuevo, no se suma a los que tienes.»); si no, «Filamento nuevo: …». Abajo, **Resultado**: los números que se crean («#17 Rollo nuevo de PLA Blanco · Bambu Lab · 1,000 g · $250»), los rollos del filamento con lo que les queda (los sin costo lo dicen) y el **costo para piezas antes → después** con de qué compras sale y qué rollos sin costo no cuentan (vista previa con `core`; el servidor recalcula). Con Sin costo y sin forma de calcular el costo (`04 §1`: sin compras con costo del filamento ni de su material ni precio de referencia) aparece **Precio de referencia por kilo**; si el servidor responde `REFERENCE_COST_REQUIRED`, el campo aparece con el foco. El botón dice el número («Agregar rollo #17», «Agregar 2 rollos») y el aviso lo repite («Rollo #17 agregado a …»). **Editar rollo** usa el mismo diálogo sin Cantidad ni Precio de referencia (el número no cambia).
 
 ## 7. Insumos
 
@@ -217,11 +225,13 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 **Muestra:** bloque **Imprimiéndose ahora** (cola en vivo por impresora) y la lista de **registros**: todo lo que se imprimió (para existencias, pedidos y pruebas), con filtros **Todo · Existencias · Pedidos · Pruebas** (cada uno con su conteo) y totales de piezas, horas, filamento.
 | Botón | Caso de uso |
 |---|---|
-| Registrar impresión | `logPrintRun` (pieza, cantidad, impresora, resultado, horas, filamento por rollo, motivo, foto) |
+| Registrar impresión | `logPrintRun` (pieza, cantidad, impresora, resultado, horas, filamento y **rollo elegido** por filamento, motivo, foto) |
 | Abrir registro | Diálogo con detalle |
 | Eliminar registro | `deletePrintRun` (con las condiciones de `04 §8`) |
 | Abrir pedido | Pedido |
 | Filtros | Cambian la lista |
+
+*Registrar impresión* (`reference/ronda-4/impresion.html`): Motivo (los segmentados de siempre, excepción 1), Pieza, Cantidad · Impresora · Tiempo real, Resultado y, **por cada filamento de la pieza**, un bloque con sus gramos (editables) y lo que necesita con purga («+ 5% de purga = 52.5 g»), la lista de **rollos con material** con el **sugerido** marcado («Sugerido · abierto», `04 §1`) y «antes → después» de cada uno si se usara solo, la barra del elegido (lo que tenía en gris claro, lo que le queda en tinta) con «se gastan 50 g de la pieza y 2.5 g de purga», lo que falte y de qué rollo sale, y **Repartir entre dos rollos** (empezar con uno —con sus gramos o lo que tenga— y seguir con otro; se ve qué rollo se termina). Abajo: «PLA Gris: 1,740 g → 1,687.5 g. El costo de la pieza no cambia con el rollo: $0.250/g.». Sin tocar nada se manda sin rollos (orden automático = el sugerido primero); al elegir se manda `filaments[].spools`. La prueba de material tiene el mismo bloque para su filamento.
 
 *Nota:* las impresiones de pedidos **aparecen solas** al marcar listo un pedido cuyo filamento se descontó al iniciar.
 
@@ -291,7 +301,7 @@ Se arman en la interfaz con los datos del pedido o la venta y los **datos del ne
 
 | Sección | Qué contiene | Caso de uso |
 |---|---|---|
-| Costos del taller | kWh, fallos, purga, margen mínimo, margen de fórmula | `updateSettings` |
+| Costos del taller | kWh, fallos, purga, margen mínimo, margen de fórmula y **Compras para el promedio del filamento** (1–10, por omisión 3; ronda 4, `04 §1`: cambia el costo por gramo de los filamentos y el de las piezas al guardar) | `updateSettings` |
 | Canales de venta | Lista editable de canales con su comisión | `addChannel` / `removeChannel` |
 | Documentos | Datos del negocio que salen en cotizaciones y notas (nombre, giro, teléfono, correo, ciudad, vigencia, pie de página) | `updateSettings` |
 | Copia de seguridad | Estado ("Aún no hay una copia descargada" / "Última copia hace N días"), descargar copia (archivo), restaurar desde archivo, lista de **copias automáticas** (una por día, las últimas 7) con "Restaurar", y en escritorio "Mostrar archivo de registro". Aviso fijo: *"Esta copia contiene todos los datos del negocio. Guárdala en un lugar seguro."* (`11 › S3`) | `exportWorkspace` / `importWorkspace` / `createBackup` / `restoreBackup` |

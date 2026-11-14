@@ -12,6 +12,8 @@ export interface DialogProps {
   cancelLabel?: string;
   busy?: boolean;
   wide?: boolean;
+  /** Extra class of the <dialog>: `sheet` makes it a sheet from the bottom on a phone (ronda-4 §5, spools.css). */
+  className?: string;
   children: ReactNode;
 }
 
@@ -27,7 +29,7 @@ export function initialFocus(d: HTMLElement): HTMLElement | undefined {
     .find((el) => !el.disabled && !(el instanceof HTMLInputElement && SKIP.includes(el.type)) && !el.hidden && visible(el));
 }
 
-export function Dialog({ open, title, onClose, onSubmit, submitLabel, cancelLabel, busy, wide, children }: DialogProps) {
+export function Dialog({ open, title, onClose, onSubmit, submitLabel, cancelLabel, busy, wide, className, children }: DialogProps) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const d = ref.current;
@@ -41,7 +43,7 @@ export function Dialog({ open, title, onClose, onSubmit, submitLabel, cancelLabe
   const submit = (e: FormEvent) => { e.preventDefault(); onSubmit?.(); };
   if (!open) return <dialog ref={ref} />;
   return (
-    <dialog ref={ref} className={wide ? 'wide' : ''} onCancel={(e) => { e.preventDefault(); onClose(); }} aria-label={typeof title === 'string' ? title : undefined}>
+    <dialog ref={ref} className={[wide ? 'wide' : '', className ?? ''].filter(Boolean).join(' ')} onCancel={(e) => { e.preventDefault(); onClose(); }} aria-label={typeof title === 'string' ? title : undefined}>
       <form id="dlg-form" autoComplete="off" onSubmit={submit} noValidate>
         <h2 className="dlg-t">{title}</h2>
         <div className="dlg-b">{children}</div>
