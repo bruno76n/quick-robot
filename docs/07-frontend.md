@@ -66,7 +66,7 @@ features/orders/
 **Componentes que ya existen en el mockup y se reconstruyen como componentes reales:**
 `Button` (primary / default / sm / link), `Field` (etiqueta + ayuda), `UnitInput` ($, g, h, %), `Segmented`, `Tag`, `Pill`/`Chip` (con punto de color), `Table` ancha (`xlist`, con columnas y fila clicable), `Drawer` (cajón), `Dialog`, `Toast` (con acción), `Stepper` del pedido, `Tabs`, `Details` plegable, `StatBand` (cifras), `KV` (listas de datos), `Calendar` (mes), `CommandPalette`, `DocumentSheet` (cotización/nota con estilos de impresión).
 
-**Responsivo:** tres anchos probados en el mockup (escritorio, tableta, móvil). La barra lateral se oculta tras un botón en pantallas pequeñas. Sin desbordes horizontales.
+**Responsivo:** tres anchos probados en el mockup (escritorio, tableta, móvil). La barra lateral se oculta tras un botón en tableta y celular (≤ 1099 px, ronda 3): arriba queda una barra fija con el menú, el título de la pantalla y «+»; Esc o tocar fuera cierra el menú y devuelve el foco al botón. Sin desbordes horizontales.
 
 **Accesibilidad mínima:** foco visible (anillo de 2 px con `--accent`), diálogos y cajones con captura de foco y cierre con Esc, `prefers-reduced-motion` respetado, contraste suficiente en texto terciario.
 

@@ -7,14 +7,14 @@ export const es = {
     saving: 'Guardando…', retry: 'Reintentar', choose: 'Elige…', noBrand: 'Sin marca', change: 'Cambiar',
     genericText: 'Listo.', loading: 'Cargando…', backHome: 'Volver al Inicio', errorCode: 'Código: {errorId}',
     openMenu: 'Abrir el menú', closeDetail: 'Cerrar el detalle', search: 'Buscar', searchShortcut: '⌘K', searchAll: 'Buscar en todo',
-    mainMenu: 'Menú principal', screens: 'Pantallas', detail: 'Detalle',
+    mainMenu: 'Menú principal', screens: 'Pantallas', detail: 'Detalle', breadcrumb: 'Ruta',
     picker: { search: 'Buscar', placeholder: 'Escribir para buscar…', none: 'Sin resultados.' },
   },
   nav: {
     home: 'Inicio', products: 'Productos', sales: 'Ventas', orders: 'Pedidos', filaments: 'Filamentos', supplies: 'Insumos',
     printers: 'Impresoras', production: 'Producción', stock: 'Existencias', purchases: 'Compras', customers: 'Clientes',
     expenses: 'Gastos', reports: 'Reportes', settings: 'Ajustes', groupSell: 'Vender', groupWorkshop: 'Taller', groupBusiness: 'Negocio',
-    newPiece: 'Nueva pieza',
+    newPiece: 'Nueva pieza', ordersCount: '{count} en curso', purchasesCount: '{count} {count|artículo|artículos} por comprar',
   },
   sidebar: { businessPlaceholder: 'Mi negocio', industryPlaceholder: 'Giro del negocio' },
   status: {

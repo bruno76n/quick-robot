@@ -1,4 +1,4 @@
-import { PageHead } from '../components/AppShell';
+import { PageHead } from '../components/PageHead';
 import { es } from '../i18n/es';
 
 /** Screens of later phases: the menu shows them, the content arrives with their phase (docs/10). */

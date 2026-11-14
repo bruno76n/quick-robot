@@ -436,3 +436,5 @@ Palabras de un sistema en lugar de frases coloquiales. Los valores internos (`fr
 | Precios (`screens.calculator.floor`, `.belowFloor`; `screens.builder.refFloor`, `.belowFloor`) | Piso · piso de margen | Precio mínimo |
 | Ajustes (`screens.settings.minMargin`, D-5) | Piso de margen | Margen mínimo |
 | Inicio y Reportes (`screens.home.top`, `screens.reports.summary.top`) | Piezas con más ganancia | Productos con más ganancia |
+
+**Marco de la ronda 3 (C1).** Textos nuevos del marco (solo para lectores de pantalla): `common.breadcrumb` «Ruta» (nombre de la ruta de un detalle) y los contadores grises del menú (D-6), `nav.ordersCount` «{count} en curso» y `nav.purchasesCount` «{count} artículo(s) por comprar»; en pantalla solo se ve el número. La barra de tableta y celular muestra el título de la pantalla (el mismo de su encabezado) y «+» con el nombre accesible «Nueva pieza».
