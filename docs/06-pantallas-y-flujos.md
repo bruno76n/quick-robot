@@ -223,11 +223,13 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 **Muestra:** bloque **Imprimiéndose ahora** (cola en vivo por impresora) y la lista de **registros**: todo lo que se imprimió (para existencias, pedidos y pruebas), con filtros **Todo · Existencias · Pedidos · Pruebas** (cada uno con su conteo) y totales de piezas, horas, filamento.
 | Botón | Caso de uso |
 |---|---|
-| Registrar impresión | `logPrintRun` (pieza, cantidad, impresora, resultado, horas, filamento por rollo, motivo, foto) |
+| Registrar impresión | `logPrintRun` (pieza, cantidad, impresora, resultado, horas, filamento y **rollo elegido** por filamento, motivo, foto) |
 | Abrir registro | Diálogo con detalle |
 | Eliminar registro | `deletePrintRun` (con las condiciones de `04 §8`) |
 | Abrir pedido | Pedido |
 | Filtros | Cambian la lista |
+
+*Registrar impresión* (`reference/ronda-4/impresion.html`): Motivo (los segmentados de siempre, excepción 1), Pieza, Cantidad · Impresora · Tiempo real, Resultado y, **por cada filamento de la pieza**, un bloque con sus gramos (editables) y lo que necesita con purga («+ 5% de purga = 52.5 g»), la lista de **rollos con material** con el **sugerido** marcado («Sugerido · abierto», `04 §1`) y «antes → después» de cada uno si se usara solo, la barra del elegido (lo que tenía en gris claro, lo que le queda en tinta) con «se gastan 50 g de la pieza y 2.5 g de purga», lo que falte y de qué rollo sale, y **Repartir entre dos rollos** (empezar con uno —con sus gramos o lo que tenga— y seguir con otro; se ve qué rollo se termina). Abajo: «PLA Gris: 1,740 g → 1,687.5 g. El costo de la pieza no cambia con el rollo: $0.250/g.». Sin tocar nada se manda sin rollos (orden automático = el sugerido primero); al elegir se manda `filaments[].spools`. La prueba de material tiene el mismo bloque para su filamento.
 
 *Nota:* las impresiones de pedidos **aparecen solas** al marcar listo un pedido cuyo filamento se descontó al iniciar.
 

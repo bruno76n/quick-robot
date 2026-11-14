@@ -159,6 +159,17 @@ export const es = {
       },
       sourceAria: 'De dónde sale el costo por gramo',
     },
+    // Which spool a print uses (Registrar impresión, Poner en producción; reference/ronda-4/impresion.html, produccion-pedido.html).
+    spoolUse: {
+      spool: 'Rollo', spoolOf: 'Rollo de {name}', suggested: 'Sugerido', suggestedOpen: 'Sugerido · abierto', from: '{before} → ',
+      split: 'Repartir entre dos rollos', oneSpool: 'Usar un solo rollo', noSpools: 'Sin rollos con material: se avisa el faltante.',
+      need: '{pieceGrams} + {purgePct} de purga = {needGrams}', plusPurge: '+ {purgePct} de purga = {needGrams}',
+      spent: 'se gastan {consumptionGrams} de la pieza y {purgeGrams} de purga',
+      restFrom: 'Lo que falta ({takenGrams}) sale del {number}: {before} → {after}.', missing: 'Faltan {missingGrams}: se avisa como faltante.',
+      total: '{name}: {beforeGrams} → {afterGrams}. El costo de la pieza no cambia con el rollo: {perGram}.',
+      option: '{number} · {brand} · {leftGrams}', firstSpool: 'Empezar con', fromIt: 'Gramos de ese rollo', thenSpool: 'Sigue con', theRest: 'y lo que falte, de este.',
+      ends: 'se termina', continues: 'sigue con este', startsHere: 'empieza con este', take: '−{takenGrams}',
+    },
     filaments: {
       title: 'Filamentos',
       sub: '{filaments} {filaments|filamento|filamentos} · {spools} {spools|rollo|rollos}',
@@ -612,7 +623,7 @@ export const es = {
       piece: 'Pieza', qty: 'Cantidad impresa', qtyHint: 'Si salió bien, se suman a Existencias.', testText: 'Prueba realizada', testPlaceholder: 'Ej.: PLA Silk dorado a 215 °C',
       filamentOption: '{name} · disponible {grams}', gramsUsed: 'Gramos usados', gramsOf: 'Gramos usados de {name}', available: 'disponible {grams}',
       printerHint: 'Impresora utilizada', realTime: 'Tiempo real', result: 'Resultado', noPieceFilaments: 'Esta pieza no tiene filamentos.',
-      gramsHint: 'Se descuentan del inventario de filamento, empezando por el rollo abierto. Son editables si el consumo fue distinto.',
+      gramsHint: 'Se descuentan del rollo elegido; si no alcanza, sigue con los demás. Los gramos son editables si el consumo fue distinto.',
       photoOptional: 'Foto (opcional)', uploadPhoto: 'Subir foto', removePhoto: 'Quitar foto', photoSaved: 'Foto guardada.', noPhoto: 'Sin foto.',
       piecesAdded: 'Se {count|sumó|sumaron} {count} {count|pieza|piezas} a Existencias.', nowTracks: 'La pieza ahora lleva existencias.', failedNoAddShort: 'No suma piezas porque falló.',
     },

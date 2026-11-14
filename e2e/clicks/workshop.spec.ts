@@ -20,7 +20,7 @@ test('registrar impresión from Existencias (choose the piece, quantity 3)', asy
   const dlg = page.getByRole('dialog');
   await dlg.locator('select[name=prod]').selectOption({ label: 'Hulk · puño' });
   await c.fill(dlg.locator('input[name=cant]'), '3');
-  await expect(dlg.locator('.frow.ro').first()).toBeVisible();
+  await expect(dlg.getByTestId('spool-use').first()).toBeVisible();
   await dlg.getByRole('button', { name: 'Registrar impresión' }).click();
   await expect(status(page)).toContainText('Se sumaron 3 piezas a Existencias.');
   await c.expectBudget(BUDGET.printRun);
@@ -32,7 +32,7 @@ test('registrar impresión from the drawer of a piece (the piece comes chosen)',
   await stockRow(page, 'Soporte de celular PETG').click();
   await drawer(page).getByRole('button', { name: 'Registrar impresión' }).click();
   const dlg = page.getByRole('dialog');
-  await expect(dlg.locator('.frow.ro').first()).toBeVisible();
+  await expect(dlg.getByTestId('spool-use').first()).toBeVisible();
   await expect(dlg.locator('input[name=cant]')).toBeFocused(); // T1: the dialog focuses the marked field
   await c.fill(dlg.locator('input[name=cant]'), '2');
   await dlg.getByRole('button', { name: 'Registrar impresión' }).click();
