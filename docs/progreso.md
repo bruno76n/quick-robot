@@ -53,3 +53,14 @@ Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 2` · `t
 | Medición de clics | C | terminada | `docs/mejoras/informe-ronda2-c.md`: 35 flujos medidos en `e2e/clicks/` (presupuestos en `e2e/clicks/budget.ts`), 16 “hacer” ordenados (D1 = P1 en filas nuevas, primero); sigue la fase D |
 | Mejoras de clics | D | terminada | `docs/mejoras/informe-ronda2-d.md`: las 16 “hacer” de C hechas (D1–D9, T1), selector accesible `components/Picker.tsx`; 35 flujos: 131 → 117 clics y 25 → 16 campos (`e2e/clicks/budget.ts`). **Ronda 2 terminada** (resumen final en ese informe); lo siguiente es la fase 5 |
 
+
+## Ronda 3 (`mejoras/ronda-3.md`)
+
+Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 3` · `terminada`.
+
+| Parte | Fase | Estado | Notas |
+|---|---|---|---|
+| Inventario contra la maqueta | A | en curso | Excepciones de la persona: interruptores y cajón de filamento como hoy; la mascota se queda (`decisiones.md`, 2026-11-14) |
+| Tokens y componentes base | B | no iniciada | |
+| Pantallas (17 pasos de §6) | C | no iniciada | |
+| Revisión visual, accesibilidad y textos | D | no iniciada | |

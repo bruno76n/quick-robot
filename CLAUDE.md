@@ -2,7 +2,7 @@
 
 Sistema para negocios de impresión 3D: costeo, ventas, pedidos, producción, inventarios y reportes. Es **un solo producto**: aplicación web con cuentas y suscripción; la app de escritorio (Electron) es solo una cáscara para uso personal en Mac. Documentación completa en `docs/` (empieza por `docs/README.md`). Prompts por fase en `docs/prompts.md`.
 
-**Dónde está cada cosa:** reglas de negocio → `04` · datos → `05` · pantallas y flujos → `06` · contrato de la API (entrada, salida, errores) → `12` · textos y mensajes en español → `13` · convenciones y pruebas → `14` · rendimiento, límites y fallos → `15` · seguridad → `11` · plan por fase → `10` · **mejoras tras el uso real (ronda 2: variantes agrupadas, Existencias, Inicio, panel neutro, menos clics) → `docs/mejoras/ronda-2.md`**.
+**Dónde está cada cosa:** reglas de negocio → `04` · datos → `05` · pantallas y flujos → `06` · contrato de la API (entrada, salida, errores) → `12` · textos y mensajes en español → `13` · convenciones y pruebas → `14` · rendimiento, límites y fallos → `15` · seguridad → `11` · plan por fase → `10` · **mejoras tras el uso real (ronda 2: variantes agrupadas, Existencias, Inicio, panel neutro, menos clics) → `docs/mejoras/ronda-2.md`** · **ronda 3 (diseño visual del sistema) → `docs/mejoras/ronda-3.md` y `reference/ronda-3/`**.
 
 ## Lo que no se negocia
 
@@ -93,7 +93,7 @@ Anotar siempre la decisión en `docs/decisiones.md` (formato en ese archivo). Nu
 
 **Al cerrar cada fase:** escribir `docs/informe-fase-N.md` con lo hecho, qué pasó las pruebas, las decisiones tomadas, lo que quedó bloqueado o dudoso y qué conviene que revise la persona; actualizar `docs/progreso.md`; dejar la rama lista para fusionar. **Ninguna fase se fusiona con pruebas rojas.**
 
-**Excepción: la ronda 2** (`docs/mejoras/ronda-2.md §1`). Sus cuatro fases se fusionan a la rama principal **sin pedir permiso** al cerrar cada una en verde, con etiqueta `antes-ronda2-<letra>` como punto de regreso; si el entorno no deja publicar en la principal, se deja la rama lista y la fase siguiente se apila encima.
+**Excepción: las rondas 2 y 3** (`docs/mejoras/ronda-2.md §1`, `ronda-3.md §1`). Sus cuatro fases se fusionan a la rama principal **sin pedir permiso** al cerrar cada una en verde, con etiqueta `antes-ronda2-<letra>` / `antes-ronda3-<letra>` como punto de regreso; si el entorno no deja publicar en la principal, se deja la rama lista y la fase siguiente se apila encima.
 
 **Nunca:** agregar funciones fuera del alcance de `docs/01`; saltarse una prueba para "avanzar"; cambiar un número esperado de `docs/04` o de `golden/` para que la prueba pase; tocar archivos en `reference/`; escribir textos de interfaz fuera de `i18n/es.ts`; cambiar o reutilizar un código de error ya publicado en `docs/12`; mostrar al usuario el `message` técnico de un error; tocar datos reales del negocio (las pruebas usan `reference/mockup-backup-v7.json` o datos generados).
 
