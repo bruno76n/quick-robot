@@ -63,6 +63,13 @@ export async function addCatalogItems(ex: Executor, ctx: Ctx, rows: readonly Omi
   await ex.insert(catalogItem).values(rows.map((r) => ({ ...r, workspaceId: ctx.workspaceId }))).onConflictDoNothing();
 }
 
+/** Weight of the empty spool of a brand (ronda-4 §2.7): adds the brand to the pick list when it is not there. */
+export async function saveBrandTare(ex: Executor, ctx: Ctx, brand: { id: string; name: string; nameKey: string }, tareGrams: number) {
+  inWorkspace(catalogItem.workspaceId, ctx);
+  await ex.insert(catalogItem).values({ ...brand, kind: 'brand', workspaceId: ctx.workspaceId, spoolTareGrams: tareGrams })
+    .onConflictDoUpdate({ target: [catalogItem.workspaceId, catalogItem.kind, catalogItem.nameKey], set: { spoolTareGrams: tareGrams, updatedAt: new Date() } });
+}
+
 export async function insertFile(ex: Executor, ctx: Ctx, row: Omit<typeof file.$inferInsert, 'workspaceId'>): Promise<FileRow> {
   inWorkspace(file.workspaceId, ctx);
   const [r] = await ex.insert(file).values({ ...row, workspaceId: ctx.workspaceId }).returning();

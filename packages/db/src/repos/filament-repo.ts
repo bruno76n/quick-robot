@@ -21,6 +21,12 @@ export async function getFilament(ex: Executor, ctx: Ctx, id: string): Promise<F
   return row;
 }
 
+/** Only the reference price per kg can change on a filament (material and color are its identity). */
+export async function updateFilament(ex: Executor, ctx: Ctx, id: string, patch: Pick<Partial<FilamentRow>, 'referenceCentsPerKg'>): Promise<FilamentRow | undefined> {
+  const [row] = await ex.update(filament).set({ ...patch, updatedAt: new Date() }).where(and(inWorkspace(filament.workspaceId, ctx), eq(filament.id, id))).returning();
+  return row;
+}
+
 export async function insertFilament(ex: Executor, ctx: Ctx, row: Omit<typeof filament.$inferInsert, 'workspaceId'>): Promise<FilamentRow> {
   inWorkspace(filament.workspaceId, ctx);
   const [created] = await ex.insert(filament).values({ ...row, workspaceId: ctx.workspaceId }).returning();
@@ -45,7 +51,7 @@ export async function listSpools(ex: Executor, ctx: Ctx, filamentIds: readonly s
   const rows = await ex.select({ s: spool, remainingGrams: spoolLevels.remainingGrams }).from(spool)
     .innerJoin(spoolLevels, and(eq(spoolLevels.workspaceId, spool.workspaceId), eq(spoolLevels.spoolId, spool.id)))
     .where(and(inWorkspace(spool.workspaceId, ctx), inArray(spool.filamentId, [...filamentIds]), isNull(spool.deletedAt)))
-    .orderBy(asc(spool.purchasedOn), asc(spool.id));
+    .orderBy(asc(spool.purchasedOn), asc(spool.number));
   return rows.map((r) => ({ ...r.s, remainingGrams: Number(r.remainingGrams) }));
 }
 
