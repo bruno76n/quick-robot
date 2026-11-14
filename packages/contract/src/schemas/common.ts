@@ -12,6 +12,7 @@ export const LIMITS = {
   partsPerCollection: 50,
   suppliesPerProduct: 30,
   filamentsPerProduct: 12,
+  spoolsPerFilament: 10,
   unitPriceCents: 100_000_000,
   amountCents: 1_000_000_000,
   spoolGrams: 100_000,

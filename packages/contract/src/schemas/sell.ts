@@ -47,7 +47,11 @@ export const printRunQuery = pageQuery.extend({ reason: z.enum(['stock', 'order'
 export const printRunInput = z.object({
   on: calendarDate, productId: id.nullable().optional(), text: z.string().trim().max(LIMITS.name).optional(), qty, printerId: id.nullable().optional(),
   result: z.enum(['ok', 'fail']), hours: z.number().min(0).max(LIMITS.hours), reason: z.enum(['stock', 'order', 'test']),
-  filaments: z.array(z.object({ filamentId: id, grams: grams(LIMITS.movementGrams) })).max(LIMITS.filamentsPerProduct), photoFileId: id.nullable().optional(),
+  filaments: z.array(z.object({
+    filamentId: id, grams: grams(LIMITS.movementGrams),
+    /** Chosen spools (ronda-4 §2.5): grams with purge from each; without grams, all it has up to what is still needed. */
+    spools: z.array(z.object({ spoolId: id, grams: grams(LIMITS.movementGrams).refine((g) => g > 0, { message: 'too_small' }).optional() })).max(LIMITS.spoolsPerFilament).optional(),
+  })).max(LIMITS.filamentsPerProduct), photoFileId: id.nullable().optional(),
 }).refine((x) => x.reason === 'test' || !!x.productId, { path: ['productId'], message: 'required' });
 
 // ---------- Expenses and reports ----------

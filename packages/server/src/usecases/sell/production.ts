@@ -11,7 +11,7 @@ import { notFound } from '../../http';
 import { loadStock } from './common';
 import { markReadyIn } from './orders';
 import { dequeue } from './queue';
-import { deductFilament, shortfall, useSupplies } from './material';
+import { assertSpoolPicks, deductFilament, shortfall, useSupplies, type SpoolPicks } from './material';
 
 /** One page of print runs; totals over the whole filter come from SQL (docs/15 §3). */
 export async function printRunList(_deps: Deps, ex: Executor, ctx: Ctx, f: { reason?: string | undefined; page: number; pageSize: number; ids?: readonly string[] }) {
@@ -51,7 +51,7 @@ export async function printRunDetail(deps: Deps, ex: Executor, ctx: Ctx, id: str
   return { ...view, piecesAdded, returnGrams: Math.round(returnGrams * 10) / 10, lock };
 }
 
-/** A run deducts its filament (with purge), adds pieces when it is for stock, uses supplies unless it is a test. */
+/** A run deducts its filament (with purge; from the chosen spools first), adds pieces when it is for stock, uses supplies unless it is a test. */
 export async function logPrintRun(deps: Deps, ctx: Ctx, input: PrintRunInput) {
   return transaction(deps.db, async (tx) => {
     const p = input.productId ? await getProduct(tx, ctx, input.productId) : undefined;
@@ -61,7 +61,12 @@ export async function logPrintRun(deps: Deps, ctx: Ctx, input: PrintRunInput) {
     const fils = new Map((await listAllFilaments(tx, ctx)).map((x) => [x.id, x]));
     for (const f of input.filaments) if (!fils.has(f.filamentId)) throw notFound('filament');
     const grams: Record<string, number> = {};
-    for (const f of input.filaments) grams[f.filamentId] = (grams[f.filamentId] ?? 0) + f.grams;
+    const picks: Record<string, { spoolId: string; grams?: number | undefined }[]> = {};
+    for (const f of input.filaments) {
+      grams[f.filamentId] = (grams[f.filamentId] ?? 0) + f.grams;
+      if (f.spools?.length) picks[f.filamentId] = [...(picks[f.filamentId] ?? []), ...f.spools];
+    }
+    await assertSpoolPicks(tx, ctx, picks as SpoolPicks);
     const used = Object.keys(grams).filter((id) => grams[id]! > 0);
     const spools = await listSpools(tx, ctx, used);
     if (used.some((id) => !spools.some((s) => s.filamentId === id))) throw new BusinessError('NO_SPOOLS');
@@ -74,7 +79,7 @@ export async function logPrintRun(deps: Deps, ctx: Ctx, input: PrintRunInput) {
     });
     await insertPrintRunFilaments(tx, ctx, used.map((filamentId) => ({ id: deps.ids.next(), printRunId: id, filamentId, grams: Math.round(grams[filamentId]! * 10) / 10 })));
     const note = p ? `${input.qty} × ${p.name}` : input.text?.trim() || 'Prueba';
-    await deductFilament(tx, ctx, grams, { on: input.on, note, refId: id, nextId: () => deps.ids.next() });
+    await deductFilament(tx, ctx, grams, { on: input.on, note, refId: id, nextId: () => deps.ids.next(), picks });
     if (p) {
       // Mockup printDlg + docs/04 §8: good pieces printed for stock enter Existencias; a piece that did not track stock starts tracking it.
       const startsTracking = !p.tracksStock && input.result === 'ok' && reason === 'stock';
