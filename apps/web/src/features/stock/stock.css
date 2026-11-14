@@ -1,8 +1,4 @@
 /* Existencias: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
-/* fotos de piezas */
-.lay-img { display: inline-block; flex: none; width: 38px; height: 38px; margin-inline: 7px; border-radius: var(--r-in); overflow: hidden; background: var(--soft); box-shadow: inset 0 0 0 1px rgba(18, 18, 20, .14); }
-.lay-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
 /* Existencias (ronda-2 §4; reference/ronda-2/existencias-lista.html and existencias-fichas.html). Colors only from tokens. */
 .sk { --st: var(--ink-2); --st-bar: var(--line-2); }
 .sk.few { --st: var(--amber-d); --st-bar: var(--amber); }
@@ -38,63 +34,81 @@
 .sk-foot-r { display: inline-flex; align-items: center; gap: 10px; }
 .sk-orig { background: var(--soft-2); color: var(--ink-2); border-radius: 99px; padding: 1px 9px; font-size: 12px; font-weight: 500; white-space: nowrap; }
 
-/* Lista. */
-.sk-table { min-width: 0; }
-.sk-row, .sk-head { display: grid; grid-template-columns: minmax(180px, 3fr) 130px minmax(56px, .8fr) minmax(76px, .9fr) minmax(44px, .7fr) minmax(96px, 1fr) 118px; column-gap: 12px; align-items: center; }
-.sk-head { padding: 8px; font-size: 12.5px; color: var(--ink-2); font-weight: 600; border-bottom: 1px solid var(--line); }
+/* Lista (ronda-3 existencias.html): one white panel; Producto · Existencia · Apartadas · Disponibles · Precio de
+   lista · Estado · actions; variants under their piece on --soft rows; Sets at the foot of the same panel. */
+.sk-table { min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-panel); padding: 4px 18px; font-size: 13px; }
+.sk-row, .sk-head { display: grid; grid-template-columns: minmax(200px, 3fr) minmax(64px, .8fr) minmax(64px, .8fr) minmax(76px, .9fr) minmax(84px, .9fr) 120px 118px; column-gap: 12px; align-items: center; }
+.sk-head { padding: 12px 0 8px; font-size: 11.5px; color: var(--ink-2); font-weight: 500; border-bottom: 1px solid var(--line); }
 .sk-head .r, .sk-row .r { text-align: right; justify-self: end; }
-.sk-sort { border: 0; background: none; padding: 0; font: inherit; color: var(--ink); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
-.sk-item { border-bottom: 1px solid var(--line); }
-.sk-row { padding: 11px 8px; }
+.sk-row .sk-state { justify-self: end; }
+.sk-sort { border: 0; background: none; padding: 0; font: inherit; color: var(--ink); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.sk-item { border-bottom: 1px solid var(--line-soft); }
+.sk-item:last-of-type { border-bottom: 0; }
+.sk-row { padding: 9px 0; }
 .sk-row.click { cursor: pointer; }
 .sk-row.click:hover, .sk-row.sel { background: var(--soft); }
 .sk-cell-piece { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.sk-cell-piece .sk-name b { font-size: 13.5px; }
+.sk-cell-piece .sk-name small { font-size: 12px; }
 .sk-gap { flex: none; width: 28px; }
-.sk-row .sk-free { font-size: 20px; }
+.sk-row .sk-free { color: var(--ink); font-size: 13.5px; font-weight: 600; letter-spacing: 0; }
 .sk-row .res { color: var(--ink); }
-.sk-row .tot { color: var(--ink-2); }
-.sk-members { background: var(--soft); border-top: 1px solid var(--line); padding: 2px 8px 6px; }
-.sk-members .sk-row { padding: 9px 0; border-bottom: 1px dashed var(--line); }
+.sk-row .tot { color: var(--ink); }
+.sk-row .price { color: var(--ink-2); }
+.sk-members { background: var(--soft); margin: 0 -18px; padding: 0 18px; border-top: 1px solid var(--line-soft); }
+.sk-members .sk-row { padding: 8px 0; border-bottom: 1px solid var(--line); }
 .sk-members .sk-row:last-child { border-bottom: 0; }
 .sk-members .sk-row.click:hover, .sk-members .sk-row.sel { background: var(--soft-2); }
-.sk-members .sk-cell-piece { padding-left: 38px; position: relative; }
-.sk-members .sk-cell-piece::before { content: ""; position: absolute; left: 14px; top: -9px; bottom: 50%; width: 12px; border-left: 2px solid var(--line-2); border-bottom: 2px solid var(--line-2); border-bottom-left-radius: var(--r-pill); }
-.sk-members .sk-free { font-size: 17px; }
-.sk-members .sk-name b { display: inline; }
+.sk-members .sk-cell-piece { padding-left: 54px; }
+.sk-members .sk-name b { display: inline; font-weight: 500; }
 .sk-lbl { display: none; }
+.sk-thumb { width: 36px; height: 36px; }
+.sk-row .sk-thumb .thumb { width: 36px !important; height: 36px !important; }
+
+/* Sets at the foot (mockup .ui-panel "Sets"). */
+.sk-sets { border-top: 1px solid var(--line); margin-top: 0; padding: 12px 0 8px; }
+.sk-sets h2 { margin: 0 0 6px; font-family: var(--font-body); font-size: 12.5px; font-weight: 500; color: var(--ink-2); letter-spacing: 0; }
+.sk-set { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; border: 0; background: none; padding: 6px 0; text-align: left; cursor: pointer; color: var(--ink); font: inherit; }
+.sk-set:hover .sk-name b { text-decoration: underline; }
+.sk-set-n { white-space: nowrap; color: var(--ink-2); font-size: 12.5px; }
+.sk-set-n b { font-size: 20px; font-weight: 600; letter-spacing: -.02em; color: var(--ink); font-variant-numeric: tabular-nums; margin-right: 4px; }
+.sk-set-n b.none { color: var(--red); }
+.sk-sets-p { margin-top: 14px; padding-top: 4px; }
+.sk-sets-p .sk-sets { border-top: 0; }
 
 /* Tablet: "Vender" on the row (ronda 2 · D4) takes room from the name; the state and action columns get tighter. */
 @media (min-width: 761px) and (max-width: 1100px) {
-  .sk-row, .sk-head { grid-template-columns: minmax(150px, 3fr) 108px minmax(48px, .7fr) minmax(70px, .8fr) minmax(40px, .6fr) minmax(64px, .8fr) 104px; column-gap: 10px; }
+  .sk-row, .sk-head { grid-template-columns: minmax(150px, 3fr) minmax(52px, .7fr) minmax(60px, .7fr) minmax(70px, .8fr) minmax(56px, .7fr) 100px 104px; column-gap: 10px; }
   .sk-sell { padding-left: 10px; padding-right: 10px; }
 }
 @media (max-width: 760px) {
+  .sk-table { padding: 4px 14px; }
+  .sk-members { margin: 0 -14px; padding: 0 14px; }
   .sk-head { display: none; }
   .sk-row { grid-template-columns: repeat(4, minmax(0, 1fr)) 32px; row-gap: 8px; }
   .sk-row > .sk-cell-piece { grid-column: 1 / 4; }
   .sk-row > .sk-act { grid-column: 4 / 6; grid-row: 1; justify-self: end; }
-  .sk-row > .sk-state { grid-column: 1 / -1; }
+  .sk-row > .sk-state { grid-column: 1 / -1; justify-self: start; }
   .sk-row > .r { justify-self: start; text-align: left; }
   .sk-row > .r.price { grid-column: 4 / 6; }
-  .sk-lbl { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink-2); letter-spacing: 0; }
+  .sk-lbl { display: block; font-size: 11.5px; font-weight: 500; color: var(--ink-2); letter-spacing: 0; }
   .sk-gap { display: none; }
-  .sk-members .sk-cell-piece { padding-left: 30px; }
-  .sk-members .sk-cell-piece::before { left: 8px; }
+  .sk-members .sk-cell-piece { padding-left: 16px; }
 }
 
 /* Fichas. */
 .sk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
 .sk-card { border: 1px solid var(--line); border-radius: var(--r-panel); padding: 14px; display: flex; flex-direction: column; gap: 12px; background: var(--bg); cursor: pointer; min-width: 0; }
-.sk-card:hover { border-color: var(--line-2); box-shadow: none; }
-.sk-card.sel { box-shadow: 0 0 0 2px var(--accent); border-color: transparent; }
+.sk-card.sel { box-shadow: 0 0 0 1px var(--ink); border-color: var(--ink); }
+.sk-card:hover { border-color: var(--ink-3); }
 .sk-card-h { display: flex; align-items: flex-start; gap: 10px; }
 .sk-card-h .sk-name { flex: 1; }
 .sk-big { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .sk-big > span:first-child { display: flex; align-items: baseline; gap: 6px; color: var(--ink); font-weight: 500; }
-.sk-big .sk-free { font-size: 36px; line-height: 1; letter-spacing: -.04em; }
+.sk-big .sk-free { font-size: 32px; line-height: 1; letter-spacing: -.04em; color: var(--ink); }
 .sk-big small { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.sk-bar { display: flex; gap: 2px; height: 6px; border-radius: var(--r-xs); overflow: hidden; background: var(--soft-2); }
-.sk-bar span { border-radius: var(--r-xs); min-width: 4px; }
+.sk-bar { display: flex; gap: 2px; height: 6px; border-radius: 99px; overflow: hidden; background: var(--track); }
+.sk-bar span { border-radius: 99px; min-width: 4px; }
 .sk-bar .f { background: var(--st-bar); }
 .sk-bar .a { background: var(--line-2); }
 .sk-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--ink-2); }
