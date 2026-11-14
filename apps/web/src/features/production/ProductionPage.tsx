@@ -16,6 +16,7 @@ import { tbOnly } from './bold';
 import { PrintRunDetailDialog } from './PrintRunDetailDialog';
 import { PrintRunDialog } from './PrintRunDialog';
 import { orderHref, reasonLabel, REASON_TONE, ResultPill, runName } from './runs';
+import './production.css';
 
 const L = es.screens.production;
 type Filter = 'all' | PrintRunReason;

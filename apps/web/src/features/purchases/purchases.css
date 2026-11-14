@@ -1,0 +1,16 @@
+/* Compras: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
+/* compras */
+.pv-g { display: grid; gap: 14px; margin: 16px 0 22px; }
+.pvc { border: 1px solid var(--line-2); border-radius: var(--r-field); padding: 14px 16px; display: grid; gap: 10px; background: var(--bg); }
+.pvc > header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+.cmp { list-style: none; margin: 0; padding: 0; display: grid; }
+.cmp li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.cmp .dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(18,18,20,.18); }
+.cmp .dot.sq { border-radius: var(--r-xs); background: var(--c-q); }
+.cmp-q { text-align: right; }
+.cmp-q small { display: block; }
+@media (max-width: 640px) {
+  .cmp li { grid-template-columns: auto minmax(0, 1fr); }
+  .cmp-q { text-align: left; grid-column: 2; }
+  .cmp li .btn { grid-column: 2; justify-self: start; }
+}

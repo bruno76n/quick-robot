@@ -1,0 +1,26 @@
+/* Ajustes: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
+.crow { display: grid; grid-template-columns: 1fr 130px auto; gap: 8px; margin-bottom: 8px; max-width: 500px; align-items: center; }
+@media (max-width: 560px) {
+  .crow { grid-template-columns: minmax(0, 1fr) 96px auto; }
+}
+.dat { display: grid; gap: 10px; align-content: start; }
+.dat h3 { margin: 10px 0 0; }
+.dat .btnrow { margin: 0; }
+.dat-st { margin: 2px 0 4px; }
+.auto-l { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.auto-l li { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--soft); border-radius: var(--r-panel); padding: 8px 8px 8px 14px; }
+.auto-l small { margin-left: 8px; }
+.exp-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.exp { border: 0; background: var(--soft); border-radius: var(--r-panel); padding: 12px 14px; text-align: left; cursor: pointer; display: grid; gap: 2px; transition: box-shadow .18s, background .18s; }
+.exp:hover { background: var(--bg); box-shadow: 0 0 0 1px var(--line-2); }
+.exp small { color: var(--ink-2); font-weight: 600; }
+.fld.inline { display: inline-block; margin: 0; }
+.exp small { color: var(--ink-2); }
+/* Ajustes › Copia de seguridad (agent F): date of the last download next to the status, the "Importando…" screen lock and the summary. */
+.dat-st { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+dialog.bak-busy { width: min(360px, calc(100vw - 32px)); padding: 22px 24px; text-align: center; font-weight: 500; }
+dialog.bak-busy p { margin: 0; }
+.bak-sum { display: grid; gap: 10px; }
+.bak-sum p, .bak-sum h3 { margin: 0; }
+.bak-sum .effects { margin: 0; }
+.bak-sum .bak-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 28px; }

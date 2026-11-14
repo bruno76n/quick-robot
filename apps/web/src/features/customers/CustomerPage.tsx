@@ -17,6 +17,7 @@ import { rich } from '../sales/rich';
 import { customersApi, type CustomerDetail } from './api';
 import { CustomerDialog } from './CustomerDialog';
 import { Avatar } from './CustomersPage';
+import './customers.css';
 
 const L = es.screens.customers;
 export const ORDER_TONE: Record<OrderStatusValue, Tone> = { quoted: '', accepted: 'info', in_production: 'warn', ready: 'good', delivered: '', cancelled: 'bad' };

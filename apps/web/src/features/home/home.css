@@ -1,3 +1,15 @@
+/* Inicio: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
+.switch { display: flex; align-items: center; gap: 9px; font-weight: 600; cursor: pointer; }
+.switch input { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; }
+.switch.big { font-size: 16px; margin-bottom: 6px; }
+.allok { display: flex; gap: 16px; align-items: center; background: var(--green-l); border-radius: var(--r-panel); padding: 18px 20px; margin-top: 12px; }
+.allok b { display: block; font-size: 16px; color: var(--green-ink); }
+.allok p { color: var(--ink-2); margin-top: 2px; font-size: 14px; }
+.bays { display: grid; gap: 10px; margin-top: 12px; }
+@media (max-width: 700px) {
+  .allok { flex-direction: column; text-align: center; }
+}
+
 /* Inicio (ronda-2 §5; mockup reference/ronda-2/inicio.html). Colors only from tokens.css. */
 .home-cols { display: flex; flex-wrap: wrap; gap: 32px 40px; align-items: flex-start; margin-bottom: 32px; }
 .home-cols > .atn, .home-cols > .home-main { flex: 2 1 520px; min-width: 0; }

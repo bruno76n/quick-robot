@@ -18,6 +18,7 @@ import { parseNumber } from '../../lib/input';
 import { invalidate, usePrinters, useSettings } from '../../lib/queries';
 import { BackupSection, ClearSection } from './BackupSection';
 import { CsvExport } from './CsvExport';
+import './settings.css';
 
 const L = es.screens.settings;
 type CostKey = 'kwhPriceCents' | 'failurePct' | 'purgePct' | 'minMarginPct' | 'formulaMarginPct';

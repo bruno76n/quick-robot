@@ -13,6 +13,7 @@ import { centsTotal, date, money, number1, pct, queueDuration } from '../../lib/
 import { usePrinters, useSettings } from '../../lib/queries';
 import { DoneDialog, PrinterDialog, TaskDialog } from './PrinterDialogs';
 import { QueueFinishButton, QueueList, QueueOrderLink } from './PrinterQueue';
+import './printers.css';
 
 const L = es.screens.printers;
 const TONE = { ok: 'good', soon: 'warn', due: 'bad' } as const;

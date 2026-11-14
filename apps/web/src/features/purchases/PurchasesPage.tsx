@@ -13,6 +13,7 @@ import { useSuppliers, useSupplies } from '../../lib/queries';
 import { tbOnly } from '../production/bold';
 import { usePurchases, type PurchaseGroup, type PurchaseLine } from './api';
 import { SupplierDialog } from './SupplierDialog';
+import './purchases.css';
 
 const L = es.screens.purchases;
 

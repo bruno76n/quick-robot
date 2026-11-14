@@ -12,6 +12,7 @@ import { keys } from '../../lib/queries';
 import { rich } from '../sales/rich';
 import { customersApi, type CustomerView } from './api';
 import { CustomerDialog } from './CustomerDialog';
+import './customers.css';
 
 const L = es.screens.customers;
 

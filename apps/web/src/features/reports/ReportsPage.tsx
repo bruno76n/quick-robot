@@ -12,6 +12,7 @@ import { useSettings } from '../../lib/queries';
 import { useReport, type ApiPeriod, type Bucket, type Report } from './api';
 import { Brief, C100Bar } from './Brief';
 import { allBold, rt } from './text';
+import './reports.css';
 
 const L = es.screens.reports;
 export const PERIODS = ['7', '30', '90', 'todo'] as const;

@@ -14,6 +14,7 @@ import { centsTotal, grams, money2d, number1 } from '../../lib/format';
 import { useFilaments } from './api';
 import { FilamentDrawer } from './FilamentDrawer';
 import { SpoolDialog } from './SpoolDialog';
+import './filament.css';
 
 export const FILAMENT_TONE: Record<FilamentListItem['status'], Tone> = { no_spools: 'plain', out: 'bad', ending: 'bad', low: 'warn', new: 'info', ok: 'good' };
 const L = es.screens.filaments;
