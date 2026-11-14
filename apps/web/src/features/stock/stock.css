@@ -13,13 +13,12 @@
 .sk-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
 .sk-tools .tb-r { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .sk-filters { display: flex; flex-wrap: wrap; gap: 8px; }
-.sk-f { border: 0; border-radius: 99px; padding: 6px 14px; font-size: 14px; font-weight: 500; cursor: pointer; background: var(--soft-2); color: var(--ink-2); }
-.sk-f span { font-variant-numeric: tabular-nums; }
-.sk-f.few { background: var(--amber-l); color: var(--amber-d); }
-.sk-f.ok { background: var(--green-l); color: var(--green-ink); }
-.sk-f.out { background: var(--red-l); color: var(--red); }
-.sk-f.on { background: var(--ink); color: var(--bg); font-weight: 600; }
-.sk-f.on span { opacity: .8; font-weight: 500; }
+/* Filter chips in the look of .tag (ronda-3 B4, mockup .ui-chip): neutral, the chosen one in ink. */
+.sk-f { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r-field); font-size: 12.5px; font-weight: 500; white-space: nowrap; cursor: pointer; background: var(--bg); color: var(--ink); }
+.sk-f:hover { background: var(--soft); }
+.sk-f span { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.sk-f.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.sk-f.on span { color: inherit; opacity: .8; }
 
 /* Shared pieces. */
 .sk-thumb { flex: none; width: 44px; height: 44px; border-radius: var(--r-pill); background: var(--soft); display: flex; align-items: center; justify-content: center; overflow: hidden; }

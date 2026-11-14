@@ -1,6 +1,11 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, TdHTMLAttributes, ThHTMLAttributes } from 'react';
 
-/** Wide table with header; rows are passed as children (docs/07 Table). */
+/**
+ * Table (ronda-3 §3, mockup .ui-tbl): grey 11.5 px headers, light row separators, 13 px rows.
+ * - head: the header cells (use <Th>); children: the rows (<tr> with <Td>).
+ * - small: compact rows and no minimum width (inside drawers and dialogs).
+ * Rows with className="click" highlight on hover; "sel" marks the open one.
+ */
 export function Table({ head, children, className = '', small }: { head: ReactNode; children: ReactNode; className?: string; small?: boolean }) {
   return (
     <div className="tw">
@@ -10,4 +15,16 @@ export function Table({ head, children, className = '', small }: { head: ReactNo
       </table>
     </div>
   );
+}
+
+type CellOpts = { /** number column: right aligned */ r?: boolean; /** hidden on a phone (≤ 760 px) */ hideSm?: boolean };
+const cellClass = (r: boolean | undefined, hideSm: boolean | undefined, className: string | undefined) => [r && 'r', hideSm && 'hide-sm', className].filter(Boolean).join(' ') || undefined;
+
+/** Header cell: <Th r hideSm>Ganancia</Th>. */
+export function Th({ r, hideSm, className, ...rest }: CellOpts & ThHTMLAttributes<HTMLTableCellElement>) {
+  return <th className={cellClass(r, hideSm, className)} {...rest} />;
+}
+/** Body cell: <Td r hideSm className="num">$120</Td>. */
+export function Td({ r, hideSm, className, ...rest }: CellOpts & TdHTMLAttributes<HTMLTableCellElement>) {
+  return <td className={cellClass(r, hideSm, className)} {...rest} />;
 }

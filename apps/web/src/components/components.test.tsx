@@ -12,7 +12,7 @@ import { Icon } from './Icon';
 import { Mascot } from './Mascot';
 import { Pill, Swatch } from './Pill';
 import { Segmented } from './Segmented';
-import { Table } from './Table';
+import { Table, Td, Th } from './Table';
 import { toast, ToastViewport, useToast } from './Toast';
 import { UnitInput } from './UnitInput';
 
@@ -50,6 +50,32 @@ describe('components', () => {
     expect(document.querySelector('img.mascot')?.getAttribute('height')).toBe('53');
     expect(document.querySelector('table.tbl.sm')).toBeTruthy();
     expect(screen.getByRole('alert').textContent).toContain('x');
+  });
+
+  it('Pill keeps the text and maps the tone to its class; ok is the same green as good', () => {
+    render(<><Pill tone="ok">Disponible</Pill><Pill tone="warn">Stock bajo</Pill><Pill tone="bad">Crítico</Pill><Pill tone="info">Info</Pill><Pill>Sin tono</Pill></>);
+    expect(screen.getByText('Disponible').className).toBe('chip good');
+    expect(screen.getByText('Stock bajo').className).toBe('chip warn');
+    expect(screen.getByText('Crítico').className).toBe('chip bad');
+    expect(screen.getByText('Info').className).toBe('chip info');
+    expect(screen.getByText('Sin tono').className.trim()).toBe('chip');
+  });
+
+  it('Button sizes: md is the plain button, sm adds .sm; green and primary are both the main action', () => {
+    render(<><Button>Md</Button><Button size="sm">Sm</Button><Button variant="green">G</Button><Button variant="primary" block>P</Button></>);
+    expect(screen.getByRole('button', { name: 'Md' }).className).toBe('btn');
+    expect(screen.getByRole('button', { name: 'Sm' }).className).toBe('btn sm');
+    expect(screen.getByRole('button', { name: 'G' }).className).toBe('btn green');
+    expect(screen.getByRole('button', { name: 'P' }).className).toBe('btn primary block');
+  });
+
+  it('Table: Th and Td mark number columns (.r) and columns hidden on a phone (.hide-sm)', () => {
+    render(<Table head={<><Th>Producto</Th><Th r hideSm>Costo</Th><Th r>Ganancia</Th></>}><tr><Td>Llavero</Td><Td r hideSm className="num">$10</Td><Td r>$40</Td></tr></Table>);
+    const th = [...document.querySelectorAll('th')].map((x) => x.getAttribute('class'));
+    expect(th).toEqual([null, 'r hide-sm', 'r']);
+    expect(screen.getByText('$10').className).toBe('r hide-sm num');
+    expect(screen.getByText('Llavero').getAttribute('class')).toBeNull();
+    expect(document.querySelector('table')?.className.trim()).toBe('tbl');
   });
 
   it('Segmented marks the current option', () => {

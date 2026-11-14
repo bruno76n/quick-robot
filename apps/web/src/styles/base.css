@@ -50,31 +50,34 @@ button { font: inherit; color: inherit; }
 .crumbs { display: flex; gap: 8px; color: var(--ink-3t); font-size: 13.5px; margin-bottom: 14px; }
 .crumbs a { color: var(--ink-2); }
 /* ---------- botones y campos ---------- */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); padding: 8px 14px; border-radius: var(--r-pill); font-weight: 500; cursor: pointer; min-height: 38px; text-decoration: none; }
-.btn:hover { background: var(--soft); border-color: var(--ink-3t); }
-.btn.primary { background: var(--btn); color: var(--btn-ink); border-color: var(--btn); }
-.btn.primary:hover { filter: brightness(1.45); }
-.btn.green { background: var(--green); color: var(--on-green); border-color: var(--green); }
-.btn.green:hover { background: var(--green); border-color: var(--green); filter: brightness(1.08); }
+/* Buttons (ronda-3 §2): 30 px, radius 7, white with a line; the main one (primary, and "green", which is no longer
+   green: green means profit) in ink. Components: Button.tsx. */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 30px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r-btn); background: var(--bg); color: var(--ink); font-size: 12.5px; font-weight: 500; line-height: 1.2; cursor: pointer; text-decoration: none; }
+.btn .ic { width: 14px; height: 14px; }
+.btn:hover { background: var(--soft); }
+.btn.primary, .btn.green { background: var(--btn); color: var(--btn-ink); border-color: var(--btn); }
+.btn.primary:hover, .btn.green:hover { background: var(--btn); border-color: var(--btn); filter: brightness(1.45); }
 .btn.ghost { border-color: transparent; background: transparent; color: var(--ink-2); }
-.btn.ghost:hover { background: var(--soft-2); }
+.btn.ghost:hover { background: var(--soft); color: var(--ink); }
 .btn.danger { color: var(--red); }
-.btn.sm { min-height: 32px; padding: 4px 11px; font-size: 13.5px; }
+.btn.sm { min-height: 26px; padding: 0 9px; font-size: 12px; }
 .btn.block { width: 100%; }
-.btn.icon { padding: 0; width: 34px; min-height: 34px; }
+.btn.icon { padding: 0; width: 30px; min-height: 30px; }
+.btn.icon.sm { width: 26px; min-height: 26px; }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .link { background: none; border: 0; padding: 0; color: var(--accent); font-weight: 600; text-decoration: underline; cursor: pointer; }
-input, select, textarea { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--r-pill); padding: 8px 10px; min-height: 38px; width: 100%; min-width: 0; }
+/* Fields (ronda-3 §2): 34 px, radius 8. The border keeps --line-2 for contrast (WCAG 1.4.11; informe-ronda3-a R5). */
+input, select, textarea { font: inherit; font-size: 14px; color: var(--ink); background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--r-field); padding: 6px 10px; min-height: 34px; width: 100%; min-width: 0; }
 textarea { resize: vertical; line-height: 1.4; }
 input[type="color"] { padding: 3px; }
 input[type="checkbox"], input[type="radio"] { width: auto; min-height: 0; }
 .fld { display: grid; gap: 4px; min-width: 0; align-content: start; }
-.fld > span:first-child { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.fld > span:first-child { font-size: 12.5px; font-weight: 500; color: var(--ink-2); }
 .fld small { line-height: 1.3; }
-.unit { display: flex; align-items: center; border: 1px solid var(--line-2); border-radius: var(--r-pill); background: var(--bg); min-width: 0; }
+.unit { display: flex; align-items: center; border: 1px solid var(--line-2); border-radius: var(--r-field); background: var(--bg); min-width: 0; }
+.unit input { border: 0; outline: none; background: transparent; min-height: 32px; text-align: left; }
+.unit i { font-style: normal; color: var(--ink-3t); padding-right: 10px; font-size: 13px; white-space: nowrap; }
 .unit:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
-.unit input { border: 0; outline: none; background: transparent; min-height: 36px; text-align: left; }
-.unit i { font-style: normal; color: var(--ink-3t); padding-right: 10px; font-size: 13.5px; white-space: nowrap; }
 .unit i.pre { padding: 0 0 0 12px; font-size: 22px; font-family: var(--font-display); font-weight: 600; color: var(--ink-2); }
 .unit.big input { font-family: var(--font-display); font-size: 30px; font-weight: 600; letter-spacing: -.02em; min-height: 48px; }
 .grid2, .grid3 { display: grid; gap: 12px 14px; }
@@ -94,29 +97,37 @@ input[type="checkbox"], input[type="radio"] { width: auto; min-height: 0; }
 .rad input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 1px; }
 .toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .search { width: min(260px, 100%); }
+/* Filter chips (ronda-3 §3, mockup .ui-chip): 30 px, radius 8, white with a line; the chosen one in ink. Not the
+   segmented switches (.seg, .seg2), which stay as they are (exception 1). */
 .tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 14px; }
-.tag { border: 1px solid var(--line-2); background: var(--bg); border-radius: var(--r-xs); padding: 3px 11px; cursor: pointer; font-size: 13.5px; color: var(--ink-2); font-weight: 500; }
-.tag:hover { border-color: var(--ink-3t); color: var(--ink); }
-.tag.on { background: var(--ink); border-color: var(--ink); color: var(--bg); font-weight: 600; }
-.chip { --c: var(--ink-3t); display: inline-flex; align-items: center; font-size: 12.5px; font-weight: 600; border-radius: var(--r-xs); padding: 1px 8px 1px 7px; background: var(--soft); color: var(--ink); border-left: 3px solid var(--c); white-space: nowrap; }
-.chip.info { --c: var(--c-q); }
-.chip.good { --c: var(--green); }
-.chip.warn { --c: var(--amber); }
-.chip.bad { --c: var(--red); background: var(--red-l); color: var(--red); }
+.tag { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r-field); background: var(--bg); color: var(--ink); font-size: 12.5px; font-weight: 500; white-space: nowrap; cursor: pointer; }
+.tag:hover { background: var(--soft); }
+.tag.on { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+/* State pills (ronda-3 §3, mockup .ui-pill): 22 px, radius 6, a dot of the color; the text always says the state.
+   Components: Pill.tsx (.chip); .pill is the same look written by hand. */
+.chip, .pill { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border: 0; border-radius: var(--r-pill); font-size: 12px; font-weight: 500; line-height: 1; background: var(--line-soft); color: var(--cost); white-space: nowrap; }
+.chip::before, .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; margin-right: 6px; flex: none; }
+.chip.good, .pill.good, .chip.ok, .pill.ok { background: var(--green-l); color: var(--green-ink); }
+.chip.warn, .pill.warn { background: var(--amber-l); color: var(--amber-d); }
+.chip.bad, .pill.bad { background: var(--red-l); color: var(--red); }
+.chip.info, .pill.info { background: var(--soft-2); color: var(--ink); }
+
 /* ---------- tablas y listas ---------- */
+/* Tables (ronda-3 §3, mockup .ui-tbl): 13 px, grey 11.5 px headers, light row separators, numbers right (.r);
+   .hide-sm columns go away on a phone. Components: Table.tsx, Th, Td. */
 .tw { overflow-x: auto; position: relative; }
-.tbl { width: 100%; border-collapse: collapse; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
 .tbl:not(.sm) { min-width: 640px; }
-.tbl th { font-size: 12.5px; color: var(--ink-2); font-weight: 600; text-align: left; padding: 8px 10px; border-bottom: 2px solid var(--ink); white-space: nowrap; }
-.tbl td { padding: 10px; border-bottom: 1px dotted var(--line-2); vertical-align: middle; }
-.tbl.sm td { padding: 7px 10px; }
-.tbl.sm { font-size: 14px; }
+.tbl th { font-size: 11.5px; font-weight: 500; color: var(--ink-2); text-align: left; padding: 0 8px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; vertical-align: bottom; }
+.tbl td { padding: 10px 8px; border-bottom: 1px solid var(--line-soft); vertical-align: middle; }
+.tbl tbody tr:last-child td, .tbl tbody:last-of-type tr:last-child td { border-bottom: 0; }
+.tbl.sm td { padding: 7px 8px; }
 .tbl .r { text-align: right; }
-.tbl td.nw, .tbl td.r small.blk { white-space: nowrap; }
 .tbl tr.click { cursor: pointer; }
-.tbl tr.click:hover td, .tbl tr.sel td { background: var(--soft); }
-.tbl tr.click:hover td:first-child, .tbl tr.sel td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
-.tbl tr.tot td { font-weight: 600; border-top: 3px double var(--ink); border-bottom: 0; }
+.tbl tr.click:hover td, .tbl tr.sel td, .tbl tr.click:focus-visible td { background: var(--soft); }
+.tbl tr.tot td, .tbl tfoot td { font-weight: 600; border-top: 1px solid var(--line); border-bottom: 0; }
+@media (max-width: 760px) { .hide-sm { display: none !important; } }
+.tbl td.nw, .tbl td.r small.blk { white-space: nowrap; }
 .empty-td { text-align: center; padding: 36px 12px !important; color: var(--ink-2); }
 .empty-td p { margin: 8px 0 14px; }
 .pn { display: flex; align-items: center; gap: 10px; }
@@ -213,13 +224,13 @@ fieldset.blk > * { clear: both; }
 .set section { display: grid; gap: 12px; align-content: start; }
 .btnrow { display: flex; flex-wrap: wrap; gap: 8px; }
 /* ---------- diálogo, globo, aviso ---------- */
-dialog { border: 1px solid var(--line-2); border-radius: var(--r-field); padding: 0; background: var(--bg); color: var(--ink); width: min(540px, calc(100vw - 32px)); max-height: calc(100% - 32px); box-shadow: var(--sh-up); }
+dialog { border: 1px solid var(--line); border-radius: var(--r-panel); padding: 0; background: var(--bg); color: var(--ink); width: min(540px, calc(100vw - 32px)); max-height: calc(100% - 32px); box-shadow: var(--sh-up); }
 dialog.wide { width: min(800px, calc(100vw - 32px)); }
 dialog::backdrop { background: rgba(18, 18, 20, .5); }
 #dlg-form { display: grid; }
-.dlg-t { padding: 20px 22px 0; font-size: 20px; }
-.dlg-b { padding: 16px 22px; display: grid; gap: 14px; }
-.dlg-f { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 22px 18px; border-top: 1px solid var(--line); position: sticky; bottom: 0; background: var(--bg); border-radius: 0 0 var(--r-field) var(--r-field); }
+.dlg-t { padding: 18px 20px 0; font-size: 17px; letter-spacing: -.02em; }
+.dlg-b { padding: 14px 20px; display: grid; gap: 14px; }
+.dlg-f { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px 16px; border-top: 1px solid var(--line); position: sticky; bottom: 0; background: var(--bg); border-radius: 0 0 var(--r-panel) var(--r-panel); }
 dialog fieldset.blk { padding-top: 12px; }
 dialog .refs { margin-top: 6px; }
 /* ---------- cantidad y precio en venta y pedido ---------- */
@@ -319,7 +330,6 @@ dialog .refs { margin-top: 6px; }
 .tree { display: inline-block; width: 9px; height: 9px; margin: 0 9px 3px 4px; border-left: 1px solid var(--ink-3t); border-bottom: 1px solid var(--ink-3t); vertical-align: middle; }
 .kcard .capas { margin-top: -2px; }
 .strip .d.up { color: var(--green-ink); }
-.tbl tr.click:focus-visible td { background: var(--soft); }
 .tbl td.nota { overflow-wrap: anywhere; min-width: 90px; }
 /* ---------- pantallas medianas y celular ---------- */
 @media (max-width: 1260px) {
@@ -361,26 +371,13 @@ dialog .refs { margin-top: 6px; }
   .ed-res { padding: 14px; }
 }
 /* ============ suave: objetos en vez de filas ============ */
-.btn { border-radius: var(--r-in); }
-input, select, textarea, .unit { border-radius: var(--r-in); }
-dialog { border-radius: var(--r-panel); }
 .seg, .seg2 { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 4px; background: var(--soft); border: 0; border-radius: 99px; }
 .seg button, .seg2 button { border: 0; margin: 0; border-radius: 99px; padding: 6px 16px; font-weight: 600; color: var(--ink-2); background: transparent; cursor: pointer; }
 .seg button:hover, .seg2 button:hover { color: var(--ink); }
 .seg button.on, .seg2 button.on { background: var(--bg); color: var(--ink); box-shadow: 0 1px 3px rgba(18, 18, 20, .14); border: 0; }
 .seg2 button { padding: 5px 14px; font-size: 13.5px; }
-.tag { border: 0; background: var(--soft); border-radius: 99px; padding: 5px 14px; }
-.tag:hover { background: var(--soft-2); color: var(--ink); }
-.tag.on { background: var(--ink); color: var(--bg); }
-.chip { border-left: 0; border-radius: 99px; padding: 2px 10px 2px 8px; }
-.chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--c); margin-right: 6px; flex: none; }
 .detail { border: 0; border-radius: var(--r-panel); background: var(--bg); box-shadow: 0 0 0 1px var(--line); padding: 20px; }
 .toolbar .tb-r { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-.pill { display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 3px 11px; font-size: 12.5px; font-weight: 600; background: var(--soft-2); color: var(--ink-2); white-space: nowrap; }
-.pill.good { background: var(--green-l); color: var(--green-ink); }
-.pill.warn { background: var(--amber-l); color: var(--amber-d); }
-.pill.info { background: var(--soft-2); color: var(--ink-2); }
-.pill.bad { background: var(--red-l); color: var(--red); }
 .empty-card { grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: var(--soft); border-radius: var(--r-panel); color: var(--ink-2); display: grid; justify-items: center; gap: 10px; }
 .empty-card p { max-width: 46ch; }
 /* pieza impresa en capas: el color es el del filamento */
@@ -485,20 +482,6 @@ dialog { border-radius: var(--r-panel); }
 .brf.sm .c100.sm { margin-top: 14px; }
 .brf.sm .c100-l { grid-template-columns: repeat(2, minmax(0, 240px)); }
 .brf.sm .hint { margin: 8px 0 0; }
-.tbl th { font-weight: 500; border-bottom: 1px solid var(--line-2); }
-.tbl td { border-bottom: 1px solid var(--line); }
-.tbl tbody tr:last-child td, .tbl tbody:last-of-type tr:last-child td { border-bottom: 0; }
-.tbl tr.tot td { border-top: 1px solid var(--line-2); }
-.tbl tr.click:hover td:first-child, .tbl tr.sel td:first-child { box-shadow: none; }
-.tbl tr.click:hover td:first-child, .tbl tr.sel td:first-child { border-radius: var(--r-panel) 0 0 var(--r-panel); }
-.tbl tr.click:hover td:last-child, .tbl tr.sel td:last-child { border-radius: 0 var(--r-panel) var(--r-panel) 0; }
-.tbl tr.sel td { background: var(--soft); }
-.tbl td { padding-top: 12px; padding-bottom: 12px; }
-.chip { border: 0; border-radius: 99px; padding: 2px 10px; background: var(--soft-2); color: var(--ink-2); }
-.chip.info { background: var(--soft-2); color: var(--ink-2); }
-.chip.good { background: var(--green-l); color: var(--green-ink); }
-.chip.warn { background: var(--amber-l); color: var(--amber-d); }
-.chip.bad { background: var(--red-l); color: var(--red); }
 .tg { border-radius: 99px; padding: 1px 10px 1px 4px; background: var(--soft); }
 .tg:not(:has(b))::before { width: 8px; height: 8px; border-radius: 50%; align-self: center; margin: 0 6px 0 6px; }
 .tg b { border-radius: 99px; margin-right: 6px; }
@@ -518,30 +501,18 @@ dialog { border-radius: var(--r-panel); }
    El color de dato (cada filamento) es el único que no sale de los tokens. */
 .nav a[aria-current="page"] { background: var(--soft-2); color: var(--ink); }
 .nav a[aria-current="page"] svg { color: var(--ink); }
-.btn.green { background: var(--btn); color: var(--btn-ink); border-color: var(--btn); }
-.btn.green:hover { background: var(--btn); border-color: var(--btn); filter: brightness(1.45); }
 .av { background: var(--soft-2); color: var(--ink-2); }
 .banner { background: var(--soft-2); color: var(--ink); }
-.pill.info, .chip.info, .tg-set { background: var(--soft-2); color: var(--ink-2); }
+.tg-set { background: var(--soft-2); color: var(--ink-2); }
 .status.info { --c: var(--ink-3t); }
 .prog i, .prog.soft i { background-color: var(--c-l); }
 .lay.printing { background: linear-gradient(to top, var(--c-l) var(--p), transparent var(--p)); }
 .calc { border-left-color: var(--line-2); }
-.tbl tr.sel td { background: var(--soft); }
-.tbl tr.click:hover td:first-child, .tbl tr.sel td:first-child { box-shadow: none; }
 .ref:hover { background: var(--soft); border-color: var(--line-2); }
 :is(.tg, .capas i, .lg i).print { --c: var(--c-l); --cx: var(--on-dark); }
 /* etiquetas de estado: grises, con un punto de color; solo lo que pide atención se pinta entero */
-.chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--c); margin-right: 6px; flex: none; }
-.chip.info, .chip.good { background: var(--soft-2); color: var(--ink-2); }
-.chip.warn { background: var(--amber-l); color: var(--amber-d); }
-.chip.bad { background: var(--red-l); color: var(--red); }
-.chip.info { --c: var(--c-q); }
-.pill.warn { background: var(--amber-l); color: var(--amber-d); }
-.tag.on { background: var(--ink); color: var(--bg); }
 .seg button.on, .seg2 button.on { color: var(--ink); }
 .sidebar .brand small, .brand small { color: var(--ink-3t); }
-.pill.good { background: var(--soft-2); color: var(--ink-2); }
 .note.warn { background: var(--soft); border-left: 0; color: var(--ink); }
 .tg b { background: var(--c-l); color: var(--on-dark); }
 a, .link { color: var(--ink); text-decoration-color: var(--ink-3t); }

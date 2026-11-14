@@ -1,6 +1,7 @@
 // Neutral panel (ronda-2 §2, D36–D37): every interface color lives in tokens.css; no purple, no tinted shadows.
 // Data colors (the real color of a filament) come from the data and are not checked here.
 import { describe, expect, it } from 'vitest';
+import segmented from './segmented.snapshot.json';
 
 // Sources read as text by Vite (the web package does not import node:fs; docs/03).
 const raw = (m: Record<string, unknown>) => Object.entries(m as Record<string, string>).filter(([p]) => !/\.test\.tsx?$/.test(p));
@@ -96,6 +97,14 @@ describe('design tokens', () => {
       .filter((m) => !m[1]!.split(/,(?![^(]*\))/).every(layer)).map((m) => `${rel(p)} ${sel}: ${m[1]!.trim()}`));
     expect(bad).toEqual([]);
     expect(read(TOKENS)).toMatch(/--sh-up:/);
+  });
+
+  it('the segmented switches (.seg, .seg2, .seg4, .rad) keep their rules byte for byte (exception 1 of the person, 2026-11-14)', () => {
+    // Snapshot taken at the start of ronda 3 · B4. A rule may move between files, never change.
+    const now = css.flatMap((p) => [...read(p).replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+      .filter((m) => /\.(seg|seg2|seg4|rad)\b/.test(m[1]!)).map((m) => `${m[1]!.trim()} {${m[2]!}}`)).sort();
+    expect(now).toEqual(segmented);
+    expect(read('/src/components/Segmented.tsx')).toContain('className="seg"');
   });
 
   it('the focus ring and the accent of checkboxes and radios use --accent, in the app and on the fatal page', () => {

@@ -18,11 +18,12 @@
 
 .atn-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .atn-f { display: flex; flex-wrap: wrap; gap: 8px; }
-.atn-chip { --tb: var(--soft-2); --ti: var(--ink); border: 0; border-radius: 99px; padding: 6px 14px; font: inherit; font-size: 14px; font-weight: 500; background: var(--tb); color: var(--ti); cursor: pointer; }
-.atn-chip .num { font-weight: 500; opacity: .85; }
-.atn-chip.s-urgent { --tb: var(--red-l); --ti: var(--red); }
-.atn-chip.s-soon { --tb: var(--amber-l); --ti: var(--amber-d); }
-.atn-chip[aria-pressed="true"] { --tb: var(--accent); --ti: var(--accent-ink); font-weight: 600; }
+/* Filter chips in the look of .tag (ronda-3 B4, mockup .ui-chip): neutral, the chosen one in ink. */
+.atn-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r-field); font: inherit; font-size: 12.5px; font-weight: 500; background: var(--bg); color: var(--ink); white-space: nowrap; cursor: pointer; }
+.atn-chip:hover { background: var(--soft); }
+.atn-chip .num { font-weight: 500; color: var(--ink-2); }
+.atn-chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.atn-chip[aria-pressed="true"] .num { color: inherit; opacity: .8; }
 
 .atn-g { --dot: var(--ink-2); --ib: var(--soft-2); --ii: var(--ink-2); }
 .atn-g.s-urgent { --dot: var(--red); --ib: var(--red-l); --ii: var(--red); }
