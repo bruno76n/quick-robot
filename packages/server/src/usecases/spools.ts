@@ -17,7 +17,7 @@ async function out(tx: Executor, ctx: Ctx, spoolId: string, filamentId: string):
 
 /**
  * Edit a spool. The ledger is never rewritten: if the grams of the purchase change, an "adjustment" movement
- * records the difference (decision 2.3). Changing material or color moves the spool to that filament.
+ * records the difference (decision 2.3). Changing material or color moves the spool to that filament. Its number never changes.
  */
 export async function updateSpool(deps: Deps, ctx: Ctx, id: string, input: UpdateSpoolInput) {
   return transaction(deps.db, async (tx) => {
@@ -34,6 +34,8 @@ export async function updateSpool(deps: Deps, ctx: Ctx, id: string, input: Updat
       ...(input.grams !== undefined ? { grams: input.grams } : {}),
       ...(input.purchasedOn !== undefined ? { purchasedOn: input.purchasedOn } : {}),
       ...(input.supplierId !== undefined ? { supplierId: input.supplierId } : {}),
+      // A spool that ends up costing nothing is a no-cost spool (as in addSpool and migration 0008).
+      noCost: (input.noCost ?? s.noCost) || (input.costCents ?? s.costCents) + (input.shippingCents ?? s.shippingCents) === 0,
     });
     if (input.grams !== undefined && input.grams !== s.grams) {
       await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: id, on: deps.clock.today(), kind: 'adjustment', grams: round1(input.grams - s.grams), note: '' }]);
