@@ -99,6 +99,50 @@ describe('old backups with variants (informe-ronda2-a §4.3): normalized like mi
   });
 });
 
+describe('old backups without the columns of ronda 4 (docs/05, migration 0008)', () => {
+  const spoolNumbers = async (token?: string) => Object.fromEntries(((await get('/filaments?pageSize=200', token)).data.items as J[])
+    .map((f) => [`${f.material} ${f.color}`, (f.spools as J[]).map((x) => `${x.purchasedOn}#${x.number}${x.noCost ? ' sin costo' : ''}`).sort()]));
+
+  it('spools get numbers in purchase order and $0 spools become no-cost; grams and costs are the same', async () => {
+    const old = JSON.parse(JSON.stringify(await exportData(h.deps, h.A))) as J;
+    const spools = old.tables.spool as J[];
+    for (const r of spools) { delete r.number; delete r.noCost; }
+    const gift = spools.find((r) => r.purchasedOn === '2026-10-20')!;
+    Object.assign(gift, { costCents: 0, shippingCents: 0 });
+    for (const t of ['workspace_settings', 'filament', 'catalog_item'] as const) for (const r of old.tables[t] as J[]) { delete r.costAvgPurchases; delete r.referenceCentsPerKg; delete r.spoolTareGrams; }
+    const r = await upload(JSON.stringify(old));
+    expect(r.status).toBe(200);
+    const b = await spoolNumbers(B_TOKEN);
+    // Mockup order: r1 and r2 the 22nd of September, r4, r5, r6, r7, r3 (20 Oct), r8.
+    expect(b['PLA Blanco']).toEqual(['2026-09-22#1', '2026-10-26#8']);
+    expect(b['PLA Negro']).toEqual(['2026-09-22#2']);
+    expect(b['PLA Gris claro']).toEqual(['2026-10-20#7 sin costo']);
+    expect((await get('/settings', B_TOKEN)).data.settings.costAvgPurchases).toBe(3);
+    expect((await summary(B_TOKEN)).grams).toEqual((await summary()).grams);
+  });
+
+  it('the seed and the mockup import number spools the same way as the migration', async () => {
+    const a = await spoolNumbers();
+    expect(Object.values(a).flat().map((x) => x.split('#')[1]).sort((x, y) => Number(x) - Number(y))).toEqual(['1', '2', '3', '4', '5', '6', '7', '8']);
+    expect(a['PLA Blanco']).toEqual(['2026-09-22#1', '2026-10-26#8']);
+    expect(a['PLA Gris claro']).toEqual(['2026-10-20#7']);
+  });
+
+  it('a repeated or invalid number, N out of 1–10, a reference of 0 or a negative tare → IMPORT_INVALID_FILE, nothing changes', async () => {
+    const before = await summary(B_TOKEN);
+    const good = JSON.parse(JSON.stringify(await exportData(h.deps, h.A))) as J;
+    const variant = (table: string, i: number, over: J) => ({ ...good, tables: { ...good.tables, [table]: (good.tables[table] as J[]).map((r, k) => (k === i ? { ...r, ...over } : r)) } });
+    const reason = async (body: J) => { const r = await upload(JSON.stringify(body)); expect(r.json.code).toBe('IMPORT_INVALID_FILE'); return r.json.details.reason as string; };
+    expect(await reason(variant('spool', 1, { number: good.tables.spool[0].number }))).toBe('spool-number#1');
+    expect(await reason(variant('spool', 0, { number: 0 }))).toBe('spool-number#0');
+    expect(await reason(variant('spool', 0, { number: 1.5 }))).toBe('spool-number#0');
+    expect(await reason(variant('workspace_settings', 0, { costAvgPurchases: 11 }))).toBe('value:workspace_settings.costAvgPurchases#0');
+    expect(await reason(variant('filament', 0, { referenceCentsPerKg: 0 }))).toBe('value:filament.referenceCentsPerKg#0');
+    expect(await reason(variant('catalog_item', 0, { spoolTareGrams: -1 }))).toBe('value:catalog_item.spoolTareGrams#0');
+    expect(await summary(B_TOKEN)).toEqual(before);
+  });
+});
+
 describe('import of the mockup v7 backup', () => {
   it('no differences in spools, stock, sales and owed; same numbers as the seed', async () => {
     const r = await upload(MOCKUP);

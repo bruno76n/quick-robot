@@ -58,8 +58,9 @@ export async function addSpool(deps: Deps, ctx: Ctx, input: AddSpoolInput): Prom
     }
     await insertSpoolMovements(tx, ctx, ids.map((spoolId) => ({ id: deps.ids.next(), spoolId, on: input.purchasedOn, kind: 'purchase' as const, grams: input.grams, note: input.note ?? '' })));
     const o = await filamentOut(tx, ctx, filament.id);
-    // A no-cost spool needs some way to cost pieces (docs/04 §1): purchases of the filament or its material, or a reference price.
-    if (noCost && o.cost.source === 'none') throw new BusinessError('REFERENCE_COST_REQUIRED');
+    // A spool marked «Sin costo» needs some way to cost pieces (docs/04 §1): purchases of the filament or its material, or a
+    // reference price. A $0 spool sent without the mark (older clients, the mockup importer) is kept as before, without asking.
+    if (input.noCost && o.cost.source === 'none') throw new BusinessError('REFERENCE_COST_REQUIRED');
     const spools = ids.map(o.spool);
     return { spool: spools[0]!, spools, filament: o.filament };
   });

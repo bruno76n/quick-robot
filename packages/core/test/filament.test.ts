@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { costProduct } from '../src/costs';
 import {
   COST_AVG_PURCHASES, filamentCost, filamentCostPerGram, filamentCosts, filamentKey, filamentRemaining, filamentStatus,
-  inventoryValue, nextSpoolNumbers, splitCents, spoolCostPerGram, spoolRemaining, spoolStatus, type SpoolInput,
+  inventoryValue, nextSpoolNumbers, numberSpools, splitCents, spoolCostPerGram, spoolRemaining, spoolStatus, type SpoolInput,
 } from '../src/filament';
 import { aSpool } from './builders';
 
@@ -198,5 +198,17 @@ describe('status', () => {
   it('same filament regardless of spacing and case', () => {
     expect(filamentKey('PLA  ', 'negro')).toBe(filamentKey('pla', ' Negro'));
     expect(filamentKey('PLA', 'Negro mate')).not.toBe(filamentKey('PLA', 'Negro'));
+  });
+});
+
+describe('numbers for spools without one (migration 0008 and old backups)', () => {
+  it('in purchase order, ties by id; after the highest number in use; numbered spools keep theirs', () => {
+    const n = numberSpools([
+      { id: 'b', purchasedOn: '2026-09-22' }, { id: 'a', purchasedOn: '2026-09-22' }, { id: 'c', purchasedOn: '2026-09-01' },
+    ]);
+    expect([...n.entries()].sort()).toEqual([['a', 2], ['b', 3], ['c', 1]]);
+    const m = numberSpools([{ id: 'x', purchasedOn: '2026-01-01' }, { id: 'y', purchasedOn: '2026-12-01', number: 7 }, { id: 'z', purchasedOn: '2026-02-01', number: null }]);
+    expect([m.get('y'), m.get('x'), m.get('z')]).toEqual([7, 8, 9]);
+    expect(numberSpools([])).toEqual(new Map());
   });
 });

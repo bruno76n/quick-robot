@@ -49,7 +49,9 @@ export async function applyMockupBackup(deps: Deps, ctx: Ctx, b: MockupBackup, h
 
   const spoolIds = new Map<string, string>();
   const filamentIds = new Map<string, string>();
-  for (const r of b.rollos) {
+  // In purchase order, so the spool numbers are the ones migration 0008 gives (ties keep the order of the backup).
+  const byDate = b.rollos.map((r, i) => ({ r, i })).sort((x, y) => x.r.fecha.localeCompare(y.r.fecha) || x.i - y.i).map((x) => x.r);
+  for (const r of byDate) {
     const f = b.filamentos.find((x) => x.id === r.fil)!;
     const out = await addSpool(deps, ctx, {
       filament: { material: f.material, color: f.color, hex: f.hex }, brand: r.marca, costCents: toCents(r.costo), shippingCents: toCents(r.envio), grams: r.gramos, purchasedOn: r.fecha,

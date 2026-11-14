@@ -124,6 +124,11 @@ describe('addSpool of ronda 4: quantity, numbers, shipping, no-cost spools and t
     expect((await add({ filamentId: r.filament.id, filament: undefined, costCents: 0, noCost: true })).filament.costSource).toBe('reference');
   });
 
+  it('a $0 spool sent without the «Sin costo» mark (older clients, the importer) is kept without asking for a reference', async () => {
+    const r = await add({ filament: { material: 'Nylon', color: 'Viejo' }, costCents: 0 });
+    expect([r.spool.noCost, r.filament.costSource, r.filament.costPerGram]).toEqual([true, 'none', 0]);
+  });
+
   it('a no-cost spool of a filament whose material has purchases takes the material (case 1.1d)', async () => {
     const r = await add({ filament: { material: 'PLA', color: 'Blanco regalo' }, costCents: 0, noCost: true });
     expect(r.filament).toMatchObject({ costSource: 'material', costPerGram: 0.2 });

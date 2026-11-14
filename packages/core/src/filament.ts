@@ -156,6 +156,20 @@ export function nextSpoolNumbers(existing: readonly number[], quantity: number):
   return Array.from({ length: Math.max(0, Math.floor(quantity)) }, (_, i) => start + i);
 }
 
+/**
+ * Numbers for spools that have none (data from before ronda 4: migration 0008, old backups): after the highest number in use,
+ * in purchase order, ties by id; deleted spools too. Spools that already have a number keep it.
+ */
+export function numberSpools(spools: readonly { id: string; purchasedOn: string; number?: number | null | undefined }[]): Map<string, number> {
+  const out = new Map<string, number>();
+  let next = spools.reduce((a, s) => Math.max(a, s.number ?? 0), 0) + 1;
+  for (const s of spools) if (s.number !== null && s.number !== undefined) out.set(s.id, s.number);
+  const missing = spools.filter((s) => s.number === null || s.number === undefined)
+    .sort((a, b) => a.purchasedOn.localeCompare(b.purchasedOn) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  for (const s of missing) out.set(s.id, next++);
+  return out;
+}
+
 /** Integer cents split in `parts` equal shares; the cents left over go to the first (shipping of N spools, ronda-4 §4). */
 export function splitCents(totalCents: number, parts: number): number[] {
   const n = Math.max(0, Math.floor(parts));
