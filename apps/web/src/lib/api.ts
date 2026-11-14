@@ -2,7 +2,7 @@
 // launch secret is added by Electron or the Vite proxy, never by this code.
 import type {
   AddChannelInput, AddSpoolInput, AddSpoolOutput, SpoolOutput, ChannelView, CollectionDetail, CollectionListItem, CompleteMaintenanceInput, CreateSupplyInput, ErrorCode,
-  FilamentDetail, FilamentListItem, MaintenanceTaskInput, MaintenanceView, Page, PrinterInput, PrintersOutput, PrinterView, ProductDetail, ProductFamilyFilter, ProductFamilyPage, ProductOptions,
+  FilamentDetail, FilamentListItem, FilamentPage, MaintenanceTaskInput, MaintenanceView, Page, PrinterInput, PrintersOutput, PrinterView, ProductDetail, ProductFamilyFilter, ProductFamilyPage, ProductOptions,
   SaveCollectionInput, SaveProductAsVariantInput, SaveProductInput, SettingsOutput, SettingsView, Spool, SpoolMovementInput, SupplierInput, SupplierView, SupplyDetail, SupplyListItem,
   SupplyMovementInput, SupplyPurchaseInput, UpdateChannelInput, UpdateSettingsInput, UpdateSpoolInput, UpdateSupplyInput, Warning, WeighSpoolInput, WeighSpoolOutput, FinishSpoolInput,
 } from '@app/contract';
@@ -54,7 +54,7 @@ export const api = {
   me: () => request<{ user: { id: string }; workspace: { id: string; name: string }; role: string }>('GET', '/me'),
   health: () => request<{ ok: boolean; version: string; schemaVersion: number }>('GET', '/health'),
   filaments: {
-    list: (p: { q?: string; page?: number; pageSize?: number } = {}, signal?: AbortSignal) => request<Page<FilamentListItem>>('GET', `/filaments${qs(p)}`, undefined, signal),
+    list: (p: { q?: string; page?: number; pageSize?: number } = {}, signal?: AbortSignal) => request<FilamentPage>('GET', `/filaments${qs(p)}`, undefined, signal),
     get: (id: string) => request<FilamentDetail>('GET', `/filaments/${encodeURIComponent(id)}`),
   },
   spools: {

@@ -2,7 +2,7 @@ import { schemaVersion } from '@app/db';
 // Integration: "add spool → it appears in the list" through HTTP, with contract validation of the responses.
 import { addSpoolOutput, filamentDetail, filamentListItem, page } from '@app/contract';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { makeHarness, validSpool, type Harness } from '../harness';
+import { B_TOKEN, makeHarness, validSpool, type Harness } from '../harness';
 
 let h: Harness;
 beforeAll(async () => { h = await makeHarness(); });
@@ -61,5 +61,18 @@ describe('filament routes', () => {
     expect((await h.call('GET', '/api/v1/me')).json.data).toMatchObject({ workspace: { name: 'Negocio A' }, role: 'owner' });
     const health = await h.call('GET', '/api/v1/health', { token: null });
     expect(health.json.data).toMatchObject({ ok: true, version: 'test', schemaVersion: schemaVersion() });
+  });
+
+  it('GET /filaments says the next spool number; a deleted last spool keeps its number (preview of Agregar rollo, ronda 4 · D)', async () => {
+    const next = async (token?: string) => ((await h.call('GET', '/api/v1/filaments', token ? { token } : {})).json.data as { nextSpoolNumber: number }).nextSpoolNumber;
+    const before = await next();
+    const added = addSpoolOutput.parse((await h.call('POST', '/api/v1/spools', { body: validSpool({ filament: { material: 'PLA', color: 'Siguiente' }, quantity: 2 }) })).json.data);
+    expect(added.spools.map((s) => s.number)).toEqual([before, before + 1]);
+    expect(await next()).toBe(before + 2);
+    expect((await h.call('DELETE', `/api/v1/spools/${added.spools[1]!.id}`)).status).toBe(200);
+    expect(await next()).toBe(before + 2);
+    const again = addSpoolOutput.parse((await h.call('POST', '/api/v1/spools', { body: validSpool({ filament: { material: 'PLA', color: 'Siguiente' } }) })).json.data);
+    expect(again.spool.number).toBe(before + 2);
+    expect(await next(B_TOKEN)).toBe(1);
   });
 });
