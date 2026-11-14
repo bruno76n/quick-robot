@@ -361,10 +361,8 @@ export const es = {
     },
     printers: {
       title: 'Impresoras', add: 'Agregar impresora',
-      summaryOne: 'La impresora costó {equipment} y ya recuperó {recovered} con la ganancia acumulada de {net} (ventas menos gastos). Llevan {hours} h impresas.',
-      summaryMany: 'Las {count} impresoras costaron {equipment} y ya recuperaron {recovered} con la ganancia acumulada de {net} (ventas menos gastos). Llevan {hours} h impresas.',
-      pending: 'Hay {count} {count|tarea de mantenimiento por hacer|tareas de mantenimiento por hacer}.', upToDate: 'El mantenimiento está al día.',
-      recoveredAria: '{pct} de la inversión recuperada', recovered: 'Inversión recuperada: {pct}',
+      sub: '{count} {count|impresora|impresoras} · {printing} imprimiendo', nowLabel: 'Imprimiendo ahora', queue: 'En cola', queueEmpty: 'Cola vacía.', ofCost: 'de {cost}',
+      recoveredAria: '{pct} de la inversión recuperada',
       empty: 'Agrega tus impresoras para calcular el costo por hora, ponerles trabajo y llevar su mantenimiento. Se necesita al menos una.',
       bought: 'comprada el {date}', printing: 'Imprimiendo', idle: 'Disponible', left: 'Quedan {time}', free: 'Disponible', freeHint: 'Aquí aparece el trabajo que se le asigna al poner un pedido en producción.',
       investment: 'Inversión recuperada', investmentLine: '{recovered} de {cost}. Es un estimado: la ganancia después de gastos se reparte según las horas que trabajó cada impresora.',

@@ -1,17 +1,41 @@
-/* Impresoras: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
-.job { margin-top: 12px; display: grid; gap: 6px; }
-.pc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
-.pc2 { background: var(--bg); border-radius: var(--r-panel); box-shadow: 0 0 0 1px var(--line); padding: 20px; display: grid; gap: 16px; align-content: start; min-width: 0; }
-.pc2 header { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
-.pc2 footer { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 4px; }
-.pc2 .dl { margin: 0; }
-.pc-sec { display: grid; gap: 8px; background: var(--soft); border-radius: var(--r-panel); padding: 14px 16px; }
-.pc-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-.pc-sec .rk-b { background: var(--bg); }
-.mt-l { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.mt-l li { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-.mt-m { flex: 1 1 180px; min-width: 0; display: grid; gap: 4px; }
-.mt-r { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-@media (max-width: 1000px) {
-  .pc-grid { grid-template-columns: minmax(0, 1fr); }
+/* Impresoras (ronda 3, mockup impresoras.html: .pgrid, .pcard, .pc-job, .pc-sec, .pc-m). Colors only from tokens.css. */
+.pc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; align-items: start; }
+.pc2 { min-width: 0; }
+.pc2 .lbl { display: block; font-size: 12.5px; font-weight: 500; color: var(--ink-2); margin-bottom: 8px; }
+.pc2 .meta { display: block; font-size: 12.5px; line-height: 1.4; color: var(--ink-2); margin: 0; }
+.pr-h { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.pr-h > div { min-width: 0; flex: 1 1 auto; }
+.pr-h h2 { font-size: 15px; font-weight: 600; letter-spacing: -.01em; margin: 0; }
+.pr-ic { width: 30px; height: 30px; border-radius: var(--r-field); background: var(--soft); display: flex; align-items: center; justify-content: center; color: var(--ink-2); flex: none; }
+.pc-job { background: var(--soft); border-radius: var(--r-in); padding: 12px; display: grid; gap: 5px; }
+.pc-job .lbl { margin-bottom: 0; }
+.pc-job.idle b { font-size: 13px; }
+.pr-job { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+.pr-job .num { font-weight: 600; }
+.pc-job .meta .link { font-size: 12.5px; }
+.pc-job .pc-fin { justify-self: start; margin-top: 4px; }
+.pc-sec { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 12px; display: grid; gap: 4px; }
+.pc-sec > .lbl { margin-bottom: 4px; }
+.pc-sec .cola { margin: 0; gap: 0; }
+.pc-sec .cola li { background: none; padding: 4px 0; border-radius: 0; font-size: 13px; }
+.pc-sec .cola li b { font-weight: 500; }
+.pc-sec .cola .link { font-size: 13px; }
+.mt-l { list-style: none; margin: 0; padding: 0; }
+.mt-l li { display: grid; grid-template-columns: minmax(0, 1fr) 70px auto; column-gap: 10px; align-items: center; padding: 6px 0; }
+.mt-l li + li { border-top: 1px solid var(--line-soft); }
+.mt-m { min-width: 0; }
+.mt-m b { display: block; font-size: 13px; font-weight: 600; }
+.mt-r { display: flex; align-items: center; gap: 2px; margin-top: 5px; }
+.mt-m .meta.sm { font-size: 11.5px; }
+.pc-invr { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.pc-invr b { font-size: 22px; font-weight: 600; letter-spacing: -.03em; }
+.pc-invr .meta { display: inline; }
+.pc-sec > .meter + .meta { margin-top: 6px; font-size: 12px; }
+.pc-kv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 8px; }
+.pc-kv dt { font-size: 12px; color: var(--ink-2); }
+.pc-kv dd { margin: 2px 0 0; font-size: 15px; font-weight: 600; }
+.pc-kv small { font-size: 11.5px; color: var(--ink-2); }
+@media (max-width: 480px) {
+  .mt-l li { grid-template-columns: minmax(0, 1fr) auto; }
+  .mt-l .meter { grid-column: 1 / -1; grid-row: 2; margin-top: 4px; }
 }
