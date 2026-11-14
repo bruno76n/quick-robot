@@ -331,10 +331,10 @@ dialog .refs { margin-top: 6px; }
 .lg b { color: var(--ink); }
 .dsg-sum .capas { flex: 1 1 220px; max-width: 460px; }
 .surt .capas { max-width: none; }
-.tbl.dsg { min-width: 780px; }
+.tbl.dsg { min-width: 640px; }
 .dsg th, .dsg td { white-space: nowrap; }
-.dsg td.pz-n { white-space: normal; min-width: 170px; }
-.dsg td.c-ori, .dsg th.c-ori { white-space: normal; min-width: 200px; }
+.dsg td.pz-n { white-space: normal; min-width: 140px; }
+.dsg td.c-ori, .dsg th.c-ori { white-space: normal; min-width: 140px; }
 .dsg td small.blk { white-space: normal; }
 .dsg .dn { display: flex; align-items: center; flex-wrap: wrap; gap: 3px 8px; padding: 2px 0; }
 .dsg .dn small { color: var(--ink-3t); font-size: 12.5px; }
