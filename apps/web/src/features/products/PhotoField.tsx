@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Button } from '../../components/Button';
 import { Icon } from '../../components/Icon';
-import { Piece3d } from './Piece3d';
+import { PieceThumb } from '../../components/PieceThumb';
 import { toast } from '../../components/Toast';
 import { es } from '../../i18n/es';
 import { api } from '../../lib/api';
@@ -20,12 +20,12 @@ async function shrink(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('encode'))), 'image/jpeg', 0.85));
 }
 
-export function PhotoField({ fileId, url, hexes, seed, onChange }: { fileId: string | null; url: string | null; hexes: string[]; seed: string; onChange: (fileId: string | null, url: string | null) => void }) {
+export function PhotoField({ fileId, url, hexes, onChange }: { fileId: string | null; url: string | null; hexes: string[]; onChange: (fileId: string | null, url: string | null) => void }) {
   const [busy, setBusy] = useState(false);
   const L = es.screens.calculator;
   return (
     <div className="foto-row">
-      <div className="foto-prev">{url ? <img src={url} alt="" /> : <Piece3d hexes={hexes} id={seed} />}</div>
+      <PieceThumb photoUrl={url} hexes={hexes} size={64} />
       <div className="foto-ctl">
         <div className="btnrow">
           <label className="btn sm" htmlFor="pf-file"><Icon name="plus" size={14} />{busy ? es.common.saving : L.uploadPhoto}</label>

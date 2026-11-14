@@ -3,8 +3,10 @@ import type { CollectionDetail, ProductListItem } from '@app/contract';
 import { floorPrice, partQty, PRICE_TAGS } from '@app/core';
 import { useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '../../components/Button';
+import { Meter } from '../../components/Meter';
+import { PageHead } from '../../components/PageHead';
 import { ConfirmButton } from '../../components/ConfirmButton';
 import { Field } from '../../components/Field';
 import { Icon } from '../../components/Icon';
@@ -63,7 +65,6 @@ function CollectionForm({ id, initial, products, minMarginPct }: { id: string | 
   const price = num(d.price) > 0 ? num(d.price) : loose;
   const gain = price - total;
   const floor = floorPrice(total, minMarginPct);
-  const scale = Math.max(price, total, 1);
   const loss = price < total && total > 0;
   const status: ['info' | 'bad' | 'warn' | 'good', string] = !rows.length ? ['info', L.needPieces] : price <= 0 ? ['info', L.needPrice]
     : loss ? ['bad', t('screens.collection.loss', { amount: money(total - price) })] : price < floor ? ['warn', t('screens.calculator.belowFloor', { floor: moneyTotal(floor) })]
@@ -76,12 +77,20 @@ function CollectionForm({ id, initial, products, minMarginPct }: { id: string | 
     if (!rows.length) { toast(es.errors.COLLECTION_EMPTY); return false; }
     return true;
   };
+  const heading = d.name.trim() || (search.id ? L.edit : L.new);
+  const costRows: [string, string, number][] = [...rows.map((r, i): [string, string, number] => [String(i), `${r.qty > 1 ? `${r.qty} × ` : ''}${r.x.displayName}`, (r.qty * r.x.costCents) / 100]), ...(extras > 0 ? [['box', L.box, extras] as [string, string, number]] : [])];
   return (
     <>
-      <nav className="crumbs"><a href="/productos" onClick={(e) => { e.preventDefault(); go('/productos'); }}>{es.screens.products.title}</a><span>/</span><a href="/productos?tab=colecciones" onClick={(e) => { e.preventDefault(); go('/productos?tab=colecciones'); }}>{es.screens.products.collections}</a><span>/</span><span>{search.id ? L.edit : L.new}</span></nav>
-      <div className="ed">
+      <PageHead crumbs={[{ label: es.screens.products.title, to: '/productos' }, { label: es.screens.products.collections, to: '/productos?tab=colecciones' }]} title={heading} short={heading} sub={es.screens.products.colCollection}
+        actions={<>
+          {search.id ? <Button disabled>{L.sellSet}</Button> : null}
+          <Button variant="primary" busy={save.isPending} busyLabel={es.common.saving} onClick={() => { if (valid()) save.mutate(undefined); }}>{search.id ? es.screens.calculator.saveChanges : L.saveNew}</Button>
+        </>} />
+      <div className="ed pz">
         <div className="ed-form">
-          <label className="fld title-f"><span className="sr">{L.name}</span><input ref={nameRef} value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>
+          <fieldset className="blk"><legend>{es.screens.calculator.data}</legend>
+            <label className="fld"><span>{L.name}</span><input ref={nameRef} value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>
+          </fieldset>
           <fieldset className="blk"><legend>{L.pieces}</legend>
             <div>{d.parts.map((p, i) => {
               const x = byId.get(p.productId);
@@ -108,30 +117,27 @@ function CollectionForm({ id, initial, products, minMarginPct }: { id: string | 
         </div>
         <aside className="ed-res" aria-label={es.screens.calculator.result}>
           <div className="res-top">
-            <div><span className="k">{L.setCost}</span><b className="big num">{money(total)}</b></div>
-            <label className="price"><span className="k">{L.setPrice}</span><span className="unit big"><i className="pre">$</i><input inputMode="decimal" value={d.price} onChange={(e) => set({ price: e.target.value })} placeholder={String(Math.round(loose))} /></span></label>
+            <section className="pz-bd" aria-label={es.screens.calculator.breakdown}>
+              <span className="k">{es.screens.calculator.breakdown}</span>
+              <ul className="pz-rows">
+                {costRows.map(([key, label, v]) => <li key={key}><b>{label}</b><Meter value={total > 0 ? (v / total) * 100 : 0} /><span className="num mut">{total > 0 ? pct((v / total) * 100) : '—'}</span><span className="num">{money(v)}</span></li>)}
+              </ul>
+              <div className="pz-cost"><span>{L.setCost}</span><b className="big num">{money(total)}</b></div>
+            </section>
+            <div className="pz-price">
+              <label className="price"><span className="k">{L.setPrice}</span><span className="unit big"><i className="pre">$</i><input inputMode="decimal" value={d.price} onChange={(e) => set({ price: e.target.value })} placeholder={String(Math.round(loose))} /></span></label>
+              <dl className="pz-k">
+                <div className="g"><dt>{es.screens.calculator.gain}</dt><dd className={`num ${gain >= 0 ? 'pos' : 'neg'}`}>{price > 0 ? money(gain) : '—'}</dd></div>
+                <div><dt>{es.screens.calculator.margin}</dt><dd className="num">{price > 0 ? pct((gain / price) * 100) : '—'}</dd></div>
+                <div><dt>{L.piecesKpi}</dt><dd className="num">{rows.reduce((a, r) => a + r.qty, 0)}</dd></div>
+              </dl>
+              <p className={`pz-st ${status[0]}`}><Icon name={status[0] === 'good' ? 'check' : 'warn'} size={14} /><span>{status[1]}</span></p>
+            </div>
           </div>
-          <div id="r-dyn">
-          <div className={`sbar${loss ? ' loss' : ''}`} role="img" aria-label={L.priceSplit}>
-            {pieces > 0 ? <i style={{ width: `${(pieces / scale) * 100}%`, '--s': 'var(--c-m)' } as CSSProperties} title={`${L.setPieces}: ${money(pieces)}`} /> : null}
-            {extras > 0 ? <i style={{ width: `${(extras / scale) * 100}%`, '--s': 'var(--c-t)' } as CSSProperties} title={`${L.box}: ${money(extras)}`} /> : null}
-            {gain > 0 ? <i className="gain" style={{ width: `${(gain / scale) * 100}%` }} /> : null}
-          </div>
-          <div className="kpis"><div><span className="k">{es.screens.calculator.gain}</span><b className={`num ${gain >= 0 ? 'pos' : 'neg'}`}>{price > 0 ? moneyTotal(gain) : '—'}</b></div><div><span className="k">{es.screens.calculator.margin}</span><b className="num">{price > 0 ? pct((gain / price) * 100) : '—'}</b></div><div><span className="k">{L.piecesKpi}</span><b className="num">{rows.reduce((a, r) => a + r.qty, 0)}</b></div></div>
-          <p className={`status ${status[0]}`}><Icon name={status[0] === 'good' ? 'check' : 'warn'} size={16} /><span>{status[1]}</span></p>
           {rows.length ? <p className="note">{t('screens.collection.looseSum', { amount: moneyTotal(loose) })} {auto ? L.autoPrice : dif > 0.5 ? t('screens.collection.discount', { amount: moneyTotal(dif), pct: pct((dif / loose) * 100) }) : dif < -0.5 ? t('screens.collection.surcharge', { amount: moneyTotal(-dif) }) : L.sameButSet}</p> : null}
-          <table className="tbl sm legend"><tbody>
-            {rows.map((r, i) => <tr key={i}><td><span className="lk" style={{ '--s': 'var(--c-m)' } as CSSProperties} />{r.qty > 1 ? `${r.qty} × ` : ''}{r.x.displayName}</td><td className="r num">{money((r.qty * r.x.costCents) / 100)}</td><td className="r num mut">{price > 0 ? pct((((r.qty * r.x.costCents) / 100) / price) * 100) : ''}</td></tr>)}
-            {extras > 0 ? <tr><td><span className="lk" style={{ '--s': 'var(--c-t)' } as CSSProperties} />{L.box}</td><td className="r num">{money(extras)}</td><td className="r num mut">{price > 0 ? pct((extras / price) * 100) : ''}</td></tr> : null}
-            <tr className="tot"><td>{L.setCost}</td><td className="r num">{money(total)}</td><td /></tr>
-            {price > 0 && rows.length ? <tr className="gan"><td><span className="lk gain" />{es.screens.calculator.gain}</td><td className="r num">{money(gain)}</td><td className="r num mut">{pct((gain / price) * 100)}</td></tr> : null}
-          </tbody></table>
           <div className="refs"><span className="k">{es.screens.calculator.shortcuts}</span><div>{refs.map((r) => <button key={r[0]} type="button" className="ref" onClick={() => set({ price: r[1] ? String(r[1]) : '' })}><b>{r[2]}</b><small>{r[0]}</small></button>)}</div></div>
           <p className="hint">{L.emptyHint}</p>
-          </div>
           <div className="res-act">
-            <Button variant="primary" block busy={save.isPending} busyLabel={es.common.saving} onClick={() => { if (valid()) save.mutate(undefined); }}>{search.id ? es.screens.calculator.saveChanges : L.saveNew}</Button>
-            {search.id ? <Button block disabled>{L.sellSet}</Button> : null}
             {search.id ? <ConfirmButton variant="ghost" danger block confirmText={es.confirm.tapAgainDelete} onConfirm={() => del.mutate(undefined)}>{L.delete}</ConfirmButton> : <Button variant="ghost" block onClick={() => go('/productos?tab=colecciones')}>{es.screens.calculator.discard}</Button>}
           </div>
         </aside>
