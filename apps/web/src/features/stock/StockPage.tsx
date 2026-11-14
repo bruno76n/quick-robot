@@ -11,7 +11,7 @@ import { fill, formatParam, t, type Params } from '../../i18n/t';
 import { centsTotal } from '../../lib/format';
 import { go } from '../../lib/nav';
 import { PrintRunDialog } from '../production/PrintRunDialog';
-import { Piece3d } from '../products/Piece3d';
+import { PieceThumb } from '../../components/PieceThumb';
 import { useStock, type StockFilter, type StockMember, type StockRow, type StockSort, type StockStatus } from './api';
 import { AdjustDialog, EnableDialog } from './StockDialogs';
 import { StockDrawer, type Dlg } from './StockDrawer';
@@ -51,7 +51,7 @@ const Chevron = ({ dir = 'right' }: { dir?: 'right' | 'up' | 'down' }) => (
   </svg>
 );
 const Thumb = ({ p }: { p: { photoUrl: string | null; hexes: string[]; productId: string } }) => (
-  <span className="sk-thumb">{p.photoUrl ? <img src={p.photoUrl} alt="" /> : <Piece3d hexes={p.hexes} id={p.productId} cls="sm" />}</span>
+  <span className="sk-thumb"><PieceThumb photoUrl={p.photoUrl} hexes={p.hexes} size={44} /></span>
 );
 const Dot = ({ hex }: { hex: string | undefined }) => <span className="sk-dot" style={hex ? ({ '--c': hex } as CSSProperties) : undefined} />;
 const StatePill = ({ status }: { status: StockStatus }) => <span className={`pill ${STATE_PILL[status]}`}>{es.status.stock[status]}</span>;

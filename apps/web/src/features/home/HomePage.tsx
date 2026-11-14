@@ -9,7 +9,8 @@ import { t } from '../../i18n/t';
 import { centsTotal, number1, queueDuration } from '../../lib/format';
 import { go } from '../../lib/nav';
 import { usePrinters } from '../../lib/queries';
-import { Piece3d, shapeOf } from '../products/Piece3d';
+import { PieceThumb } from '../../components/PieceThumb';
+import { shapeOf } from '../products/Piece3d';
 import { useHome, useReport } from '../reports/api';
 import { Brief } from '../reports/Brief';
 import { Attentions } from './Attentions';
@@ -43,7 +44,7 @@ export function HomePage() {
             {rank.length ? (
               <ul className="rk">{rank.map((r) => (
                 <li key={r.productId}>
-                  <Piece3d hexes={r.hexes} id={r.productId} cls="sm" />
+                  <PieceThumb hexes={r.hexes} size={40} />
                   <div className="rk-m">
                     <div className="rk-t"><b>{r.name}</b><span className="num">{centsTotal(r.profitCents)}</span></div>
                     <div className="rk-b"><i style={{ width: `${Math.max(3, (r.profitCents / max) * 100)}%` }} title={t('screens.home.topTip', { name: r.name, profit: centsTotal(r.profitCents), count: r.qty })} tabIndex={0} /></div>

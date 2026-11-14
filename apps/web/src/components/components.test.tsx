@@ -76,6 +76,9 @@ describe('components', () => {
     expect(screen.getByText('$10').className).toBe('r hide-sm num');
     expect(screen.getByText('Llavero').getAttribute('class')).toBeNull();
     expect(document.querySelector('table')?.className.trim()).toBe('tbl');
+    cleanup();
+    render(<Table fit head={<Th>A</Th>}><tr><Td>1</Td></tr></Table>);
+    expect(document.querySelector('table')?.className.trim()).toBe('tbl fit');
   });
 
   it('Segmented marks the current option', () => {
