@@ -1,23 +1,48 @@
 /* Ajustes: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
-.crow { display: grid; grid-template-columns: 1fr 130px auto; gap: 8px; margin-bottom: 8px; max-width: 500px; align-items: center; }
-@media (max-width: 560px) {
-  .crow { grid-template-columns: minmax(0, 1fr) 96px auto; }
-}
+/* ronda-3 C17 (reference/ronda-3/ajustes.html): index on the left, one panel per section */
+.set-grid { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 24px; align-items: start; }
+.set-nav { display: grid; position: sticky; top: 20px; }
+.set-nav button { border: 0; background: none; text-align: left; font: inherit; font-size: 13.5px; color: var(--ink-2); padding: 8px 10px; border-radius: var(--r-btn); cursor: pointer; }
+.set-nav button:hover { color: var(--ink); }
+.set-nav button.on { background: var(--bg); color: var(--ink); font-weight: 600; box-shadow: 0 0 0 1px var(--line); }
+.set-main, .set-form { display: grid; gap: 14px; min-width: 0; }
+.set-main .panel { scroll-margin-top: 20px; }
+.set-main .panel-h > h2 { font-size: 14px; }
+.set-lead { margin: -6px 0 10px; }
+.set-note { margin: 12px 0 0; }
+.set-main .grid3, .set-main .grid2 { margin: 0; }
+.chan-t td { padding-top: 8px; padding-bottom: 8px; }
+.chan-t td:first-child, .chan-t th:first-child { padding-left: 0; }
+.chan-t td:last-child, .chan-t th:last-child { padding-right: 0; }
+.chan-t td:first-child input { font-weight: 600; max-width: 380px; }
+.chan-t .chan-pct { width: 132px; }
+.set-save { position: sticky; bottom: 0; z-index: 2; display: flex; justify-content: flex-end; align-items: center; gap: 12px; padding: 12px 0 4px; background: var(--soft); }
 .dat { display: grid; gap: 10px; align-content: start; }
-.dat h3 { margin: 10px 0 0; }
+.dat > .panel-h { margin-bottom: 2px; }
+.dat h3.lbl { font-family: inherit; font-size: 12.5px; font-weight: 500; color: var(--ink-2); letter-spacing: 0; margin: 4px 0 0; }
+.dat h3.lbl small { font-weight: 400; color: var(--ink-3t); margin-left: 4px; }
 .dat .btnrow { margin: 0; }
-.dat-st { margin: 2px 0 4px; }
-.auto-l { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.auto-l li { display: flex; justify-content: space-between; align-items: center; gap: 10px; background: var(--soft); border-radius: var(--r-panel); padding: 8px 8px 8px 14px; }
-.auto-l small { margin-left: 8px; }
-.exp-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-.exp { border: 0; background: var(--soft); border-radius: var(--r-panel); padding: 12px 14px; text-align: left; cursor: pointer; display: grid; gap: 2px; transition: box-shadow .18s, background .18s; }
-.exp:hover { background: var(--bg); box-shadow: 0 0 0 1px var(--line-2); }
-.exp small { color: var(--ink-2); font-weight: 600; }
-.fld.inline { display: inline-block; margin: 0; }
-.exp small { color: var(--ink-2); }
-/* Ajustes › Copia de seguridad (agent F): date of the last download next to the status, the "Importando…" screen lock and the summary. */
+.dat .note, .dat .meta { margin: 0; }
 .dat-st { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.auto-l { list-style: none; margin: 0; padding: 0; }
+.auto-l li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; column-gap: 12px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line-soft); font-size: 13px; }
+.auto-l li:first-child { border-top: 0; }
+.auto-l b { font-weight: 500; }
+.exp-g { display: flex; flex-wrap: wrap; gap: 6px; }
+.exp { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r-btn); background: var(--bg); color: var(--ink); font: inherit; font-size: 13px; cursor: pointer; }
+.exp b { font-weight: 500; }
+.exp:hover { background: var(--soft); }
+@media (max-width: 1099px) {
+  .set-grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .set-nav { position: static; display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .set-nav button { white-space: nowrap; }
+  .set-main .panel { scroll-margin-top: 70px; }
+}
+@media (max-width: 560px) {
+  .chan-t .chan-pct { width: 104px; }
+}
+.fld.inline { display: inline-block; margin: 0; }
+/* Ajustes › Copia de seguridad (agent F): the "Importando…" screen lock and the summary. */
 dialog.bak-busy { width: min(360px, calc(100vw - 32px)); padding: 22px 24px; text-align: center; font-weight: 500; }
 dialog.bak-busy p { margin: 0; }
 .bak-sum { display: grid; gap: 10px; }

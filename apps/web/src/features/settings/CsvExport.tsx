@@ -68,11 +68,11 @@ export function CsvExport() {
     } catch (e) { toast(errorText(e).text); } finally { setBusy(null); }
   };
   return (
-    <section className="dat" data-testid="csv-export">
-      <h2>{L.exportTitle}</h2>
-      <p className="muted">{L.exportHint}</p>
+    <section className="panel dat" id="set-export" data-testid="csv-export">
+      <header className="panel-h"><h2>{L.exportTitle}</h2></header>
+      <p className="meta">{L.exportHint}</p>
       <div className="exp-g">
-        {CSV_TABLES.map((k) => <button key={k} type="button" className="exp" disabled={busy === k} onClick={() => void run(k, false)}><b>{C[k]}</b><small>{L.exportDownload}</small></button>)}
+        {CSV_TABLES.map((k) => <button key={k} type="button" className="exp" disabled={busy === k} onClick={() => void run(k, false)}><b>{C[k]}</b><span className="sr">{L.exportDownload}</span></button>)}
       </div>
       <div className="btnrow">
         <label className="fld inline"><span className="sr">{L.exportWhich}</span><select value={which} onChange={(e) => setWhich(e.target.value as CsvTable)}>{CSV_TABLES.map((k) => <option key={k} value={k}>{C[k]}</option>)}</select></label>

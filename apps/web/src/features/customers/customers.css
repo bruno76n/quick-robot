@@ -1,4 +1,4 @@
-/* Clientes: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
+/* Clientes and Cliente. Colors only from tokens.css. */
 .logo-row { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
 .lg-prev { width: 88px; height: 88px; border: 1px dashed var(--line-2); border-radius: var(--r-panel); display: grid; place-items: center; background: var(--soft); overflow: hidden; font-size: 13px; text-align: center; flex: none; }
 .lg-prev img { width: 100%; height: 100%; object-fit: contain; background: var(--bg); display: block; }
@@ -6,12 +6,17 @@
 .lg-ctl .hint { margin: 0; }
 .hist td:first-child { white-space: nowrap; }
 .hist td small.blk { white-space: normal; max-width: 30ch; }
-@media (max-width: 560px) {
-  .split .tbl.cli-t:not(.sm), .tbl.cli-t:not(.sm) { min-width: 0; }
-  .cli-t th:nth-child(2), .cli-t td:nth-child(2), .cli-t th:nth-child(5), .cli-t td:nth-child(5) { display: none; }
-  .cli-t td, .cli-t th { padding-left: 8px; padding-right: 8px; }
+/* list (ronda-3 C14, reference/ronda-3/clientes.html) */
+.cli-k { margin-bottom: 18px; }
+.cli-p .tbl td { padding-top: 12px; padding-bottom: 12px; }
+.cli-t .pn b { display: block; font-size: 13.5px; }
+.cli-t .av { width: 32px; height: 32px; border-radius: var(--r-field); background: var(--soft-2); color: var(--ink); font-size: 12px; }
+.cli-t td.owe { color: var(--red); font-weight: 600; }
+@media (max-width: 760px) {
+  .cli-t td, .cli-t th { padding-left: 6px; padding-right: 6px; }
+  .cli-t td:first-child, .cli-t th:first-child { padding-left: 0; }
+  .cli-t td:last-child, .cli-t th:last-child { padding-right: 0; }
 }
-.tw > .tbl.cli-t { min-width: 520px; }
 .cli-id { display: flex; gap: 14px; align-items: center; min-width: 0; }
 .cli-id .av { width: 52px; height: 52px; border-radius: var(--r-panel); font-size: 18px; flex: none; }
 .cli-g { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 36px; align-items: start; margin-top: 8px; }

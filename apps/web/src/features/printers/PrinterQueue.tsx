@@ -23,14 +23,13 @@ export function QueueOrderLink({ orderId, folio }: { orderId: string; folio: num
 
 export function QueueList({ printer }: { printer: PrinterView }) {
   const q = printer.queue;
-  if (q.length < 2) return null;
-  const first = q[0]!.remainingMinutes;
+  const first = q[0]?.remainingMinutes ?? 0;
   return (
-    <div><span className="k">{t('screens.printers.inQueue', { count: q.length - 1 })}</span>
-      <ul className="cola">{q.slice(1).map((e, k) => {
+    <div className="pc-sec"><span className="lbl">{q.length > 1 ? t('screens.printers.inQueue', { count: q.length - 1 }) : L.queue}</span>
+      {q.length > 1 ? <ul className="cola">{q.slice(1).map((e, k) => {
         const wait = first + q.slice(1, k + 1).reduce((a, x) => a + x.minutes, 0);
-        return <li key={e.id}><div><b>{e.text}</b><small className="blk"><QueueOrderLink orderId={e.orderId} folio={e.orderNumber} /></small></div><span className="mut">{t('screens.printers.startsIn', { time: queueDuration(wait) })}</span></li>;
-      })}</ul>
+        return <li key={e.id}><div><b>{e.text}</b> · <QueueOrderLink orderId={e.orderId} folio={e.orderNumber} /></div><span className="meta num">{t('screens.printers.startsIn', { time: queueDuration(wait) })}</span></li>;
+      })}</ul> : <p className="meta">{L.queueEmpty}</p>}
     </div>
   );
 }
@@ -46,5 +45,5 @@ export function QueueFinishButton({ printer }: { printer: PrinterView }) {
       next ? t('screens.printers.nowPrinting', { text: next.text }) : '',
     ].filter(Boolean).join(' '),
   });
-  return <Button size="sm" variant="primary" busy={finish.isPending} onClick={() => finish.mutate(undefined)} data-testid="queue-finish">{L.finish}</Button>;
+  return <Button size="sm" className="pc-fin" busy={finish.isPending} onClick={() => finish.mutate(undefined)} data-testid="queue-finish">{L.finish}</Button>;
 }

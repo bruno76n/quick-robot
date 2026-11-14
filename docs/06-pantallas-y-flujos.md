@@ -32,7 +32,7 @@ Para cada pantalla: qué muestra, qué botones tiene, qué hace cada uno (caso d
 
 ## 2. Inicio
 
-**Muestra:** resumen compacto del taller (el "brief"): cifras clave del periodo, qué se está imprimiendo ahora, y las **atenciones** agrupadas por prioridad, cada una con un botón que lleva al elemento. **Ronda 2:** “Atención” (“Alertas” desde la ronda 3) es la columna principal, las atenciones se agrupan en **Urgente · Esta semana · Para revisar** con chips de filtro, y **se quitó la cuadrícula de rollos de filamento** (`mejoras/ronda-2.md §5`, maqueta `reference/ronda-2/inicio.html`). Las atenciones se generan con estas reglas:
+**Muestra:** resumen compacto del taller (el "brief"): cifras clave del periodo, qué se está imprimiendo ahora, y las **atenciones** agrupadas por prioridad, cada una con un botón que lleva al elemento. **Ronda 2:** “Atención” (“Alertas” desde la ronda 3) es la columna principal, las atenciones se agrupan en **Urgente · Esta semana · Para revisar** con chips de filtro, y **se quitó la cuadrícula de rollos de filamento** (`mejoras/ronda-2.md §5`, maqueta `reference/ronda-2/inicio.html`). **Ronda 3** (`mejoras/ronda-3.md §6`, maqueta `reference/ronda-3/inicio.html`): arriba, las ventas de los últimos 30 días en cifra grande (con el cambio contra el periodo anterior y el número de ventas), la franja Ganancia bruta · Gastos · Ganancia neta · Por cobrar y las ventas por semana (gris las ventas, verde la ganancia bruta); abajo, las Alertas y a su lado **En impresión** (avance y tiempo restante por impresora) y **Próximas entregas** (fecha, cliente, pedido y estado; abren el pedido). La frase del resumen, "De cada $100" y "Productos con más ganancia" quedan solo en Reportes. Las atenciones se generan con estas reglas:
 
 - Pedido **aceptado** sin descontar filamento y con faltante → "falta tanto de tal filamento".
 - Filamento con rollos y **150 g o menos** disponibles.
@@ -102,7 +102,7 @@ Nombre, piezas con cantidad, extras, precio del set (vacío = suma de sueltas), 
 
 ## 4. Ventas
 
-**Muestra:** lista de **4 columnas**: Fecha · Artículos (con cliente, pedido, canal y nota) · Total (con chips Saldo / Devuelta) · Ganancia. Filtro por canal.
+**Muestra:** franja de cifras de los últimos 60 días (Ventas con su número, Ganancia bruta, Comisiones y Saldo por cobrar con el número de ventas que deben; ronda 3) y lista de **5 columnas**: Fecha · Artículos (con cliente, pedido y nota) · Canal (en celular va debajo de los artículos) · Total (con chips Saldo / Devuelta) · Ganancia. Filtro por canal (las cifras siguen el filtro).
 
 | Botón | Caso de uso | Lleva a |
 |---|---|---|
@@ -271,9 +271,9 @@ Tras guardar un pedido nuevo se vuelve al Tablero.
 
 ## 13. Gastos y Reportes
 
-**Gastos:** lista con filtro de periodo, categorías, **fijos al mes** y total del periodo. Acciones: Nuevo / Editar / Eliminar gasto (`createExpense`, `updateExpense`, `deleteExpense`). Recurrente = se prorratea.
+**Gastos:** franja de cifras (gastos de los últimos 30 días, **fijos al mes**, ganancia neta de 30 días; ronda 3), tabla con filtro de periodo (Fecha · Concepto con su categoría · Tipo: Fijo mensual o Variable · Monto) y total del periodo; a su lado, **por categoría** del periodo (barras de un color) y el punto de equilibrio. Acciones: Nuevo / Editar / Eliminar gasto (`createExpense`, `updateExpense`, `deleteExpense`). Recurrente = se prorratea.
 
-**Reportes:** periodo (7 días, 30 días, 90 días, Todo); totales (Ventas, Costo, Ganancia, margen, piezas), por canal, ranking de piezas, gastos y **ganancia neta**, inversión recuperada. Acciones: cambiar periodo, **Copiar** (resumen como texto), Registrar venta.
+**Reportes:** periodo (7 días, 30 días, 90 días, Todo); cinco cifras (Ventas, Ganancia bruta, Gastos, **Ganancia neta** y Margen neto, con el cambio contra el periodo anterior), ventas por semana (o día o mes; gris las ventas, verde la ganancia bruta, con “Ver como tabla”), distribución de cada $100 vendidos, productos con más ganancia, por canal (tabla con total), clientes, colecciones, impresoras, filamento, estado actual e inversión recuperada (ronda 3). Acciones: cambiar periodo, **Copiar** (resumen como texto), Registrar venta.
 
 ---
 

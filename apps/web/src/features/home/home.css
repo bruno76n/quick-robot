@@ -1,45 +1,71 @@
-/* Inicio: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
+/* Inicio (ronda-3 §6, reference/ronda-3/inicio.html .ui-sum, .ui-row2, .pp, .du). Colors only from tokens.css. */
 .switch { display: flex; align-items: center; gap: 9px; font-weight: 600; cursor: pointer; }
 .switch input { accent-color: var(--accent); width: 18px; height: 18px; margin: 0; }
 .switch.big { font-size: 16px; margin-bottom: 6px; }
-.allok { display: flex; gap: 16px; align-items: center; background: var(--green-l); border-radius: var(--r-panel); padding: 18px 20px; margin-top: 12px; }
-.allok b { display: block; font-size: 16px; color: var(--green-ink); }
-.allok p { color: var(--ink-2); margin-top: 2px; font-size: 14px; }
-.bays { display: grid; gap: 10px; margin-top: 12px; }
-@media (max-width: 700px) {
-  .allok { flex-direction: column; text-align: center; }
-}
 
-/* Inicio (ronda-2 §5; mockup reference/ronda-2/inicio.html). Colors only from tokens.css. */
-.home-cols { display: flex; flex-wrap: wrap; gap: 32px 40px; align-items: flex-start; margin-bottom: 32px; }
-.home-cols > .atn, .home-cols > .home-main { flex: 2 1 520px; min-width: 0; }
-.home-side { flex: 1 1 320px; max-width: 440px; min-width: 0; display: grid; gap: 28px; align-content: start; }
-@media (max-width: 1000px) { .home-side { max-width: none; } }
+/* sales of the last 30 days: big figure, strip and sales by week */
+.home-sum { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 28px; padding: 20px 22px; margin-bottom: 16px; }
+.home-sum .lbl { display: block; font-size: 12.5px; font-weight: 500; color: var(--ink-2); margin-bottom: 8px; }
+.sum-a, .sum-b { min-width: 0; }
+.sum-big { display: block; font-size: 40px; font-weight: 600; letter-spacing: -.045em; line-height: 1.05; margin: 0 0 6px; }
+.home-sum .meta .up, .home-sum .kp dd small .up { color: var(--green-d); font-weight: 600; }
+.home-sum .meta .down, .home-sum .kp dd small .down { color: var(--red); font-weight: 600; }
+.home-sum .kp:first-child dt { color: var(--ink); font-weight: 500; }
 
-.atn-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-.atn-f { display: flex; flex-wrap: wrap; gap: 8px; }
+/* alerts beside printing and deliveries */
+.home-row2 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px; align-items: start; margin-bottom: 28px; }
+.home-stack { display: grid; gap: 16px; min-width: 0; }
+.allok { display: flex; gap: 16px; align-items: center; background: var(--green-l); border-radius: var(--r-panel); padding: 16px 18px; }
+.allok b { display: block; font-size: 15px; color: var(--green-ink); }
+.allok p { color: var(--ink-2); margin-top: 2px; font-size: 13.5px; }
+
+.atn-f { display: flex; flex-wrap: wrap; gap: 6px; margin: -2px 0 12px; }
 /* Filter chips in the look of .tag (ronda-3 B4, mockup .ui-chip): neutral, the chosen one in ink. */
-.atn-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r-field); font: inherit; font-size: 12.5px; font-weight: 500; background: var(--bg); color: var(--ink); white-space: nowrap; cursor: pointer; }
+.atn-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--r-field); font: inherit; font-size: 12.5px; font-weight: 500; background: var(--bg); color: var(--ink); white-space: nowrap; cursor: pointer; }
 .atn-chip:hover { background: var(--soft); }
 .atn-chip .num { font-weight: 500; color: var(--ink-2); }
 .atn-chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
 .atn-chip[aria-pressed="true"] .num { color: inherit; opacity: .8; }
 
-.atn-g { --dot: var(--ink-2); --ib: var(--soft-2); --ii: var(--ink-2); }
-.atn-g.s-urgent { --dot: var(--red); --ib: var(--red-l); --ii: var(--red); }
-.atn-g.s-soon { --dot: var(--amber); --ib: var(--amber-l); --ii: var(--amber-d); }
-.atn-g + .atn-g .atn-gh { padding-top: 22px; }
-.atn-gh { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; padding: 4px 4px 8px; }
-.atn-gh .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); align-self: center; }
-.atn-gh > span:last-child { font-size: 13px; color: var(--ink-2); }
-.atn-g ul { list-style: none; margin: 0; padding: 0; }
-.atn-g li { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 4px; border-bottom: 1px solid var(--line); font-size: 14.5px; }
-.atn-g .ai { flex: none; width: 36px; height: 36px; border-radius: var(--r-in); display: grid; place-items: center; background: var(--ib); color: var(--ii); }
-.atn-g .at { flex: 1 1 260px; min-width: 0; line-height: 1.35; }
+.atn-g { --dot: var(--ink-3); }
+.atn-g.s-urgent { --dot: var(--red); }
+.atn-g.s-soon { --dot: var(--amber); }
+.atn-g + .atn-g { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.atn-gh { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; padding: 0 0 10px; font-size: 13px; }
+.atn-gh .dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--dot); align-self: center; }
+.atn-gh b { font-weight: 600; }
+.atn-gh > span:last-child { font-size: 12.5px; color: var(--ink-2); }
+.atn-g .al-list li { font-size: 13.5px; }
+.atn-g .at { min-width: 0; line-height: 1.35; }
 .atn-g .at b { font-weight: 600; }
-.atn-g a.btn { flex: none; white-space: nowrap; text-decoration: none; }
-.atn-more { display: inline-block; margin: 10px 4px 0; background: none; border: 0; padding: 4px 0; font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
-@media (max-width: 700px) {
-  .atn-g li { display: grid; grid-template-columns: auto minmax(0, 1fr); }
-  .atn-g a.btn { grid-column: 2; justify-self: start; }
+.atn-g .al-list a.btn { white-space: nowrap; text-decoration: none; }
+.atn-more { display: inline-block; margin: 8px 0 0; background: none; border: 0; padding: 4px 0; font: inherit; font-size: 13px; font-weight: 600; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+/* printing now */
+.pp, .du { list-style: none; margin: 0; padding: 0; }
+.pp li { display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; padding: 10px 0; border-top: 1px solid var(--line-soft); }
+.pp li:first-child { border-top: 0; padding-top: 0; }
+.pp-h { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; }
+.pp-h b { font-weight: 600; }
+.pp-h .num { font-weight: 600; }
+.pp-t { display: inline-flex; align-items: center; gap: 6px; }
+
+/* next deliveries */
+.du li { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; align-items: center; column-gap: 10px; padding: 9px 0; border-top: 1px solid var(--line-soft); }
+.du li:first-child { border-top: 0; padding-top: 0; }
+.du li.click { cursor: pointer; }
+.du li.click:hover .du-c b, .du li.click:focus-visible .du-c b { text-decoration: underline; text-underline-offset: 3px; }
+.du-d { font-size: 12.5px; font-weight: 600; }
+.du-c { min-width: 0; }
+.du-c b { display: block; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+@media (max-width: 760px) {
+  .home-sum { grid-template-columns: minmax(0, 1fr); gap: 18px; padding: 16px; margin-bottom: 12px; }
+  .sum-big { font-size: 34px; }
+  .home-row2 { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .home-stack { gap: 12px; }
+  .allok { flex-direction: column; text-align: center; }
+  /* The mockup hides the alert button on a phone; here it stays under the text, since it is the way to the element. */
+  .atn-g .al-list li { grid-template-columns: auto minmax(0, 1fr); row-gap: 8px; }
+  .atn-g .al-list li > .btn { display: inline-flex; grid-column: 2; justify-self: start; }
 }

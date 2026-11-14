@@ -14,9 +14,11 @@ test.beforeAll(async () => { server = await startServer(); });
 test.afterAll(async () => { await server?.stop(); });
 
 const dialog = (page: Page) => page.locator('dialog[open]').filter({ has: page.locator('.dlg-t') });
-const expectIncome = async (page: Page, text: string) => {
+// Ronda 3 (§6): the brief sentence became the strip of figures (Ventas and the number of sales under it).
+const expectIncome = async (page: Page, income: string, count: string) => {
   await page.goto(`${server.url}/reportes?periodo=todo`);
-  await expect(page.getByTestId('brief')).toContainText(text);
+  await expect(page.getByTestId('brief')).toContainText(income);
+  await expect(page.getByTestId('brief')).toContainText(count);
 };
 const chooseFile = async (page: Page, file: string | { name: string; mimeType: string; buffer: Buffer }) => {
   await page.goto(`${server.url}/ajustes`);
@@ -66,7 +68,7 @@ test('Restaurar desde archivo brings the downloaded copy back', async ({ page })
   await expect(summary).toContainText('Sin diferencias');
   await expect(summary).toContainText('Antes se guardó una copia de lo que había');
   await dialog(page).getByRole('button', { name: 'Cerrar' }).click();
-  await expectIncome(page, 'Se vendieron $13,170 en 25 ventas.');
+  await expectIncome(page, '$13,170', '25 ventas');
 });
 
 test('The mockup v7 backup imports with no differences', async ({ page }) => {
@@ -75,7 +77,7 @@ test('The mockup v7 backup imports with no differences', async ({ page }) => {
   const summary = await confirmRestore(page);
   await expect(summary).toContainText('Sin diferencias: los totales coinciden con la copia.');
   await expect(summary).toContainText('Clientes: 4');
-  await expectIncome(page, 'Se vendieron $13,170 en 25 ventas.');
+  await expectIncome(page, '$13,170', '25 ventas');
 });
 
 test('An invalid file or another version changes nothing', async ({ page }) => {
@@ -88,7 +90,7 @@ test('An invalid file or another version changes nothing', async ({ page }) => {
   await dialog(page).getByRole('button', { name: 'Restaurar' }).click();
   await expect(dialog(page).getByRole('alert')).toContainText('Esta copia es de una versión que esta aplicación no entiende (v3). Actualizar la aplicación e intentar de nuevo. No se cambió ningún dato.');
   await dialog(page).getByRole('button', { name: 'Cancelar' }).click();
-  await expectIncome(page, 'Se vendieron $13,170 en 25 ventas.');
+  await expectIncome(page, '$13,170', '25 ventas');
 });
 
 test('Copias automáticas: list, Hacer copia ahora and Restaurar', async ({ page }) => {
@@ -102,5 +104,5 @@ test('Copias automáticas: list, Hacer copia ahora and Restaurar', async ({ page
   await expect(dialog(page)).toContainText('Copia del');
   const summary = await confirmRestore(page);
   await expect(summary).toContainText('Ventas: 25');
-  await expectIncome(page, 'Se vendieron $13,170 en 25 ventas.');
+  await expectIncome(page, '$13,170', '25 ventas');
 });

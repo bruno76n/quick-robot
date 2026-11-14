@@ -10,7 +10,7 @@ test.afterAll(async () => { await server.stop(); });
 test('F: list, copy per supplier, buy the supply → it leaves the list', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: server.url });
   await page.goto(`${server.url}/compras`);
-  await expect(page.getByText('Hay 4 cosas por comprar, con un costo aproximado de $1,292.')).toBeVisible();
+  await expect(page.getByText('4 artículos · costo estimado $1,292', { exact: true })).toBeVisible();
   const group = page.getByTestId('purchase-group').filter({ hasText: 'Empaques Guadalajara' });
   await expect(group).toContainText('Caja de regalo');
   await expect(group).toContainText('Quedan 3 pza. Aviso en 5.');
@@ -40,7 +40,7 @@ test('F: list, copy per supplier, buy the supply → it leaves the list', async 
   await expect(drawer.getByRole('heading', { name: 'Caja de regalo' })).toBeVisible();
 
   await page.goto(`${server.url}/compras`);
-  await expect(page.getByText('Hay 3 cosas por comprar')).toBeVisible();
+  await expect(page.getByText('3 artículos · costo estimado', { exact: false })).toBeVisible();
   await expect(page.getByTestId('purchase-line').filter({ hasText: 'Caja de regalo' })).toHaveCount(0);
   await expect(page.getByTestId('purchase-group').filter({ hasText: 'Empaques Guadalajara' })).toHaveCount(0);
 });

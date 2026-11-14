@@ -14,7 +14,7 @@ test.afterAll(async () => { await server.stop(); });
 test.describe.configure({ mode: 'serial' });
 
 const status = (page: Page) => page.locator('.toast[role=status]');
-const card = (page: Page, folio: number) => page.getByTestId('order-card').filter({ hasText: `#${folio} ·` });
+const card = (page: Page, folio: number) => page.getByTestId('order-card').filter({ hasText: new RegExp(`Pedido #${folio}(?!\\d)`) });
 let folio = 0;
 let paid = 0;
 

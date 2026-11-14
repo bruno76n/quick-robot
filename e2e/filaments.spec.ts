@@ -7,7 +7,9 @@ test('add spool → appears in the list → survives a restart', async ({ page }
   try {
     await page.goto(`${server.url}/filamentos`);
     await expect(page.getByRole('heading', { name: 'Filamentos' })).toBeVisible();
-    await expect(page.getByText('7 filamentos · 8 rollos · 4.9 kg disponibles · valor $2,044.')).toBeVisible();
+    await expect(page.getByText('7 filamentos · 8 rollos', { exact: true })).toBeVisible();
+    await expect(page.locator('dl.fil-k')).toContainText('Disponible4.9 kg');
+    await expect(page.locator('dl.fil-k')).toContainText('Valor del inventario$2,044');
 
     await page.getByRole('button', { name: 'Agregar rollo' }).first().click();
     const dialog = page.getByRole('dialog');
@@ -26,7 +28,9 @@ test('add spool → appears in the list → survives a restart', async ({ page }
     await expect(page.getByRole('status')).toHaveText('Rollo agregado a PETG Verde. Disponible: 1,000 g.');
     const drawer = page.getByRole('complementary', { name: 'Detalle' });
     await expect(drawer.getByRole('heading', { name: 'PETG Verde' })).toBeVisible();
-    await expect(page.getByText('8 filamentos · 9 rollos · 5.9 kg disponibles · valor $2,494.')).toBeVisible();
+    await expect(page.getByText('8 filamentos · 9 rollos', { exact: true })).toBeVisible();
+    await expect(page.locator('dl.fil-k')).toContainText('Disponible5.9 kg');
+    await expect(page.locator('dl.fil-k')).toContainText('Valor del inventario$2,494');
 
     // A second spool of PLA Blanco from its drawer joins the same filament.
     await page.keyboard.press('Escape');
@@ -41,7 +45,8 @@ test('add spool → appears in the list → survives a restart', async ({ page }
     await server.stop();
     server = await startServer({ dataDir: server.dataDir });
     await page.goto(`${server.url}/filamentos`);
-    await expect(page.getByText('8 filamentos · 10 rollos · 6.9 kg disponibles')).toBeVisible();
+    await expect(page.getByText('8 filamentos · 10 rollos', { exact: true })).toBeVisible();
+    await expect(page.locator('dl.fil-k')).toContainText('Disponible6.9 kg');
     await expect(page.getByTestId('filament-row').filter({ hasText: 'PETG Verde' })).toContainText('1 rollo · Polymaker');
   } finally {
     await server.stop();

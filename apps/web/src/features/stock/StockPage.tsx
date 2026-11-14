@@ -1,8 +1,9 @@
 // Existencias (docs/06 §10, mejoras/ronda-2.md §4): finished pieces by family, as Lista (default) or Fichas, with
 // filters by state, search, fewest-free-first order and a drawer per piece with movements (StockDrawer).
+import type { CollectionListItem } from '@app/contract';
 import { useSearch } from '@tanstack/react-router';
 import { Fragment, useDeferredValue, useState, type CSSProperties, type ReactNode } from 'react';
-import { PageHead } from '../../components/AppShell';
+import { PageHead } from '../../components/PageHead';
 import { Button } from '../../components/Button';
 import { Mascot } from '../../components/Mascot';
 import { toast } from '../../components/Toast';
@@ -10,6 +11,7 @@ import { es } from '../../i18n/es';
 import { fill, formatParam, t, type Params } from '../../i18n/t';
 import { centsTotal } from '../../lib/format';
 import { go } from '../../lib/nav';
+import { useCollections } from '../../lib/queries';
 import { PrintRunDialog } from '../production/PrintRunDialog';
 import { PieceThumb } from '../../components/PieceThumb';
 import { useStock, type StockFilter, type StockMember, type StockRow, type StockSort, type StockStatus } from './api';
@@ -85,6 +87,9 @@ export function StockPage() {
   const enable = () => { if (first && !first.untracked.length) toast(es.toast['stock.allTracked']); else setDlg({ kind: 'enable' }); };
   const T = first?.totals;
   const anyStock = Boolean(first && (first.counts.all > 0 || needle));
+  // Sets that can be put together from what is in stock (mockup "Sets"): only on the whole list, not while filtering.
+  const collections = useCollections().data?.items ?? [];
+  const sets = status === 'all' && !needle && collections.length ? <SetsBlock items={collections} /> : null;
   const hexesOf = (id: string | null) => {
     for (const r of rows) { if (r.productId === id) return r.hexes; const m = r.members.find((x) => x.productId === id); if (m) return m.hexes; }
     return [];
@@ -95,7 +100,7 @@ export function StockPage() {
       <PageHead
         title={L.title}
         sub={T && T.pieces ? boldSome('screens.stock.summary', L.summary, { units: T.units, pieces: T.pieces, free: T.free, reserved: T.reserved }, ['units', 'free', 'reserved']) : L.subEmpty}
-        actions={<><Button variant="primary" icon="plus" onClick={() => setDlg({ kind: 'print' })}>{L.register}</Button><Button onClick={enable}>{L.enableOther}</Button></>}
+        actions={<><Button onClick={enable}>{L.enableOther}</Button><Button variant="primary" icon="plus" onClick={() => setDlg({ kind: 'print' })}>{L.register}</Button></>}
       />
       {first && !anyStock ? (
         <div className="empty-card"><Mascot size={64} /><p>{L.empty}</p><Button variant="primary" icon="plus" onClick={() => setDlg({ kind: 'print' })}>{L.register}</Button> <Button onClick={enable}>{L.enableOne}</Button></div>
@@ -117,8 +122,8 @@ export function StockPage() {
             </div>
           </div>
           {view === 'lista'
-            ? <StockList rows={rows} selected={search.p ?? null} needle={needle} sort={sort} onSort={() => setSort(sort === 'free_asc' ? 'free_desc' : 'free_asc')} onOpen={select} />
-            : <StockCards rows={rows} selected={search.p ?? null} onOpen={select} />}
+            ? <StockList rows={rows} selected={search.p ?? null} needle={needle} sort={sort} onSort={() => setSort(sort === 'free_asc' ? 'free_desc' : 'free_asc')} onOpen={select} foot={sets} />
+            : <><StockCards rows={rows} selected={search.p ?? null} onOpen={select} />{sets ? <div className="panel sk-sets-p">{sets}</div> : null}</>}
           {query.data && !rows.length ? <p className="muted">{L.noMatch}</p> : null}
           {query.hasNextPage ? <div className="sk-more"><Button onClick={() => void query.fetchNextPage()} disabled={query.isFetchingNextPage}>{L.more}</Button></div> : null}
         </>
@@ -131,9 +136,9 @@ export function StockPage() {
   );
 }
 
-/** Lista: Pieza · Estado · Libres · Apartadas · Total · Precio de lista; a family row unfolds its members. */
-function StockList({ rows, selected, needle, sort, onSort, onOpen }: {
-  rows: StockRow[]; selected: string | null; needle: string; sort: StockSort; onSort: () => void; onOpen: (id: string) => void;
+/** Lista (ronda-3 existencias.html): Producto · Existencia · Apartadas · Disponibles · Precio de lista · Estado; a family row unfolds its members; Sets at the foot. */
+function StockList({ rows, selected, needle, sort, onSort, onOpen, foot }: {
+  rows: StockRow[]; selected: string | null; needle: string; sort: StockSort; onSort: () => void; onOpen: (id: string) => void; foot: ReactNode;
 }) {
   const [toggled, setToggled] = useState<ReadonlySet<string>>(new Set());
   const flip = (id: string) => setToggled((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
@@ -141,9 +146,9 @@ function StockList({ rows, selected, needle, sort, onSort, onOpen }: {
   return (
     <div className="sk-table" data-testid="stock-list">
       <div className="sk-head" role="presentation">
-        <span>{L.col.piece}</span><span>{L.col.state}</span>
+        <span>{L.col.piece}</span><span className="r">{L.col.total}</span><span className="r">{L.col.reserved}</span>
         <span className="r"><button type="button" className="sk-sort" onClick={onSort} aria-label={sort === 'free_asc' ? L.sortFewFirst : L.sortMostFirst}>{L.col.free} <Chevron dir={sort === 'free_asc' ? 'up' : 'down'} /></button></span>
-        <span className="r">{L.col.reserved}</span><span className="r">{L.col.total}</span><span className="r">{L.col.listPrice}</span><span />
+        <span className="r">{L.col.listPrice}</span><span className="r">{L.col.state}</span><span />
       </div>
       {rows.map((r) => {
         const family = r.members.length > 0;
@@ -181,6 +186,7 @@ function StockList({ rows, selected, needle, sort, onSort, onOpen }: {
           </div>
         );
       })}
+      {foot}
     </div>
   );
 }
@@ -188,11 +194,11 @@ function StockList({ rows, selected, needle, sort, onSort, onOpen }: {
 function Cells({ x }: { x: StockRow | StockMember }) {
   return (
     <>
-      <span className="sk-state"><StatePill status={x.status} /></span>
-      <span className="r"><span className="sk-lbl">{L.col.free}</span><span className="sk-free" data-testid="stock-free">{x.free}</span></span>
-      <span className="r sk-num res"><span className="sk-lbl">{L.col.reserved}</span>{x.reserved}</span>
       <span className="r sk-num tot"><span className="sk-lbl">{L.col.total}</span><span data-testid="stock-total">{x.physical}</span></span>
+      <span className="r sk-num res"><span className="sk-lbl">{L.col.reserved}</span>{x.reserved}</span>
+      <span className="r"><span className="sk-lbl">{L.col.free}</span><span className="sk-free" data-testid="stock-free">{x.free}</span></span>
       <span className="r sk-num price"><span className="sk-lbl">{L.col.listPrice}</span>{centsTotal(x.listCents)}</span>
+      <span className="sk-state"><StatePill status={x.status} /></span>
     </>
   );
 }
@@ -245,5 +251,20 @@ function StockCards({ rows, selected, onOpen }: { rows: StockRow[]; selected: st
         );
       })}
     </div>
+  );
+}
+
+/** Sets (collections) and how many can be put together with the pieces in stock (buildableSets). */
+function SetsBlock({ items }: { items: CollectionListItem[] }) {
+  return (
+    <section className="sk-sets" aria-label={L.sets}>
+      <h2>{L.sets}</h2>
+      {items.map((c) => (
+        <button key={c.id} type="button" className="sk-set" onClick={() => go(`/productos/coleccion?id=${c.id}`)}>
+          <span className="sk-name"><b>{c.name}</b><small>{t('screens.stock.pieces', { count: c.pieces })}</small></span>
+          <span className="sk-set-n"><b className={c.buildableSets > 0 ? '' : 'none'}>{c.buildableSets}</b> {t('screens.stock.buildable', { count: c.buildableSets })}</span>
+        </button>
+      ))}
+    </section>
   );
 }

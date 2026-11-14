@@ -12,7 +12,12 @@ const status = (page: Page) => page.getByRole('status');
 test('Inicio shows the brief and the attentions; each button goes to its element', async ({ page }) => {
   await page.goto(`${server.url}/inicio`);
   await expect(page.getByRole('heading', { name: 'Inicio' })).toBeVisible();
-  await expect(page.getByTestId('brief')).toContainText('Se vendieron $6,270 en 13 ventas en los últimos 30 días.');
+  // Ronda 3 (§6): the sentence became the big figure with its strip.
+  const sum = page.getByTestId('brief');
+  await expect(sum).toContainText('Ventas · últimos 30 días');
+  await expect(sum).toContainText('$6,270');
+  await expect(sum).toContainText('13 ventas');
+  await expect(sum).toContainText('▲ 14.6%');
   const att = page.getByTestId('attentions');
   // Ronda 2: every attention is shown, grouped by priority (the "Y 3 avisos más." line is gone).
   await expect(att.locator('li')).toHaveCount(9);
@@ -39,7 +44,9 @@ test('Inicio shows the brief and the attentions; each button goes to its element
 test('Reportes: "Todo" shows the mockup totals and the period can change', async ({ page }) => {
   await page.goto(`${server.url}/reportes?periodo=todo`);
   const brief = page.getByTestId('brief');
-  await expect(brief).toContainText('Se vendieron $13,170 en 25 ventas.');
+  // Ronda 3 (§6): five figures instead of the sentence.
+  await expect(brief).toContainText('$13,170');
+  await expect(brief).toContainText('25 ventas');
   await page.getByText('Ver como tabla').click();
   await expect(page.locator('tr.tot')).toContainText('$13,170');
   await expect(page.locator('tr.tot')).toContainText('$10,575');
@@ -47,8 +54,8 @@ test('Reportes: "Todo" shows the mockup totals and the period can change', async
 
   await page.getByRole('button', { name: '30 días' }).click();
   await expect(page).toHaveURL(/periodo=(%22)?30/);
-  await expect(brief).toContainText('Se vendieron $6,270 en 13 ventas.');
-  await expect(brief).toContainText('Ventas ▲ 14.6%');
+  await expect(brief).toContainText('$6,270');
+  await expect(brief).toContainText('▲ 14.6%');
   await expect(page.getByRole('heading', { name: 'Ventas por semana' })).toBeVisible();
 
   await page.getByRole('button', { name: '7 días' }).click();
@@ -58,9 +65,11 @@ test('Reportes: "Todo" shows the mockup totals and the period can change', async
 
 test('Gastos: create, edit, validation of the end date, delete and Deshacer', async ({ page }) => {
   await page.goto(`${server.url}/gastos`);
-  await expect(page.getByTestId('expenses-summary')).toContainText('En los últimos 30 días hubo $2,707 en gastos.');
+  // Ronda 3 (§6): the summary sentence became a strip of figures and the list a table.
+  await expect(page.getByTestId('expenses-summary')).toContainText('Gastos · últimos 30 días');
+  await expect(page.getByTestId('expenses-summary')).toContainText('$2,707');
   const list = page.getByTestId('expense-list');
-  await expect(list.locator('li')).toHaveCount(5);
+  await expect(list.locator('tbody tr')).toHaveCount(5);
 
   await page.getByRole('button', { name: 'Registrar gasto' }).click();
   const dialog = page.getByRole('dialog');
@@ -77,8 +86,8 @@ test('Gastos: create, edit, validation of the end date, delete and Deshacer', as
   await dialog.locator('input[name=fin]').fill('');
   await dialog.getByRole('button', { name: 'Guardar' }).click();
   await expect(status(page)).toHaveText('Gasto guardado');
-  await expect(list.locator('li')).toHaveCount(6);
-  const row = list.locator('li', { hasText: 'Software de diseño' });
+  await expect(list.locator('tbody tr')).toHaveCount(6);
+  const row = list.locator('tbody tr', { hasText: 'Software de diseño' });
   await expect(row).toContainText('Cada mes desde 10 oct');
   await expect(row).toContainText('al mes');
 
@@ -87,16 +96,16 @@ test('Gastos: create, edit, validation of the end date, delete and Deshacer', as
   await dialog.locator('input[name=concepto]').fill('Software CAD');
   await dialog.getByRole('button', { name: 'Guardar' }).click();
   await expect(status(page)).toHaveText('Gasto guardado');
-  await expect(list.locator('li', { hasText: 'Software CAD' })).toContainText('$300');
+  await expect(list.locator('tbody tr', { hasText: 'Software CAD' })).toContainText('$300');
 
-  await list.locator('li', { hasText: 'Software CAD' }).click();
+  await list.locator('tbody tr', { hasText: 'Software CAD' }).click();
   await dialog.getByRole('button', { name: 'Eliminar gasto' }).click();
   await dialog.getByRole('button', { name: '¿Eliminar?' }).click();
   await expect(status(page)).toContainText('Gasto eliminado');
-  await expect(list.locator('li')).toHaveCount(5);
+  await expect(list.locator('tbody tr')).toHaveCount(5);
   await status(page).getByRole('button', { name: 'Deshacer' }).click();
-  await expect(list.locator('li', { hasText: 'Software CAD' })).toBeVisible();
-  await expect(list.locator('li')).toHaveCount(6);
+  await expect(list.locator('tbody tr', { hasText: 'Software CAD' })).toBeVisible();
+  await expect(list.locator('tbody tr')).toHaveCount(6);
 
   await page.getByRole('button', { name: '7 días' }).click();
   await expect(page.getByTestId('expenses-period')).toContainText('Total del periodo');

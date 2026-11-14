@@ -1,11 +1,18 @@
-// Gastos (docs/06 §13; mockup vGastos): last 30 days against the profit of sales, by category, break-even and the list.
+// Gastos (docs/06 §13; ronda-3 §6, reference/ronda-3/gastos.html): strip of the last 30 days, the list of the chosen
+// period as a table (period as a segmented switch, exception 1), and beside it by category and the break-even.
 import { useEffect, useState } from 'react';
 import { PageHead } from '../../components/AppShell';
 import { Button } from '../../components/Button';
 import { ConfirmButton } from '../../components/ConfirmButton';
 import { Dialog } from '../../components/Dialog';
 import { Field } from '../../components/Field';
+import { HBarList } from '../../components/charts';
+import { Kpis } from '../../components/Kpis';
 import { Mascot } from '../../components/Mascot';
+import { Meter } from '../../components/Meter';
+import { Panel } from '../../components/Panel';
+import { Pill } from '../../components/Pill';
+import { Table, Td, Th } from '../../components/Table';
 import { toast } from '../../components/Toast';
 import { UnitInput } from '../../components/UnitInput';
 import { es } from '../../i18n/es';
@@ -15,7 +22,6 @@ import { parseNumber, todayLocal } from '../../lib/input';
 import { useWrite } from '../../lib/mutate';
 import { useSettings } from '../../lib/queries';
 import { useReport } from '../reports/api';
-import { C100Bar } from '../reports/Brief';
 import { PERIODS, type Period } from '../reports/ReportsPage';
 import { rt } from '../reports/text';
 import { onNewExpenseRequest, takeNewExpenseRequest } from '../../components/CommandPalette';
@@ -59,41 +65,18 @@ export function ExpensesPage() {
   const mg = income > 0 ? profit / income : 0;
   const goal = mg > 0 ? g30 / mg : 0;
   const reached = goal > 0 ? Math.min(100, (income / goal) * 100) : 100;
-  const cats = last30?.byCategory ?? [];
-  const maxC = Math.max(1, ...cats.map((c) => c.cents));
+  const cats = list?.byCategory ?? [];
   const items = [...(list?.items ?? [])].sort((x, y) => y.on.localeCompare(x.on));
   return (
     <>
       <PageHead title={L.title} sub={L.sub} actions={actions} />
       {last30 && T ? (
-        <section className="brf one sm" data-testid="expenses-summary"><div>
-          <p className="brf-l">{rt('screens.expenses.summary', { expenses: centsTotal(g30), profit: centsTotal(profit), real: centsTotal(real), fixed: centsTotal(fixed), count: nFixed, goal: goal ? t('screens.expenses.summaryGoal', { goal: centsTotal(goal) }) : '' }, { expenses: '', profit: '', real: real >= 0 ? 'g' : 'r', fixed: '' })}</p>
-          {real >= 0 && profit > 0 ? <C100Bar segs={[[L.segExpenses, g30, '--sand', 'dk'], [L.segReal, real, '--green', 'gan dk']]} base={0} label={L.barLabel} cls="sm" /> : null}
-        </div></section>
+        <div className="exp-kps" data-testid="expenses-summary"><Kpis label={L.figures} items={[
+          { label: L.k30, value: centsTotal(g30) },
+          { label: L.kFixed, value: centsTotal(fixed), sub: t('screens.expenses.kFixedSub', { count: nFixed }) },
+          { label: L.kReal, value: centsTotal(real), tone: real < 0 ? 'bad' : 'net', sub: t('screens.expenses.kRealSub', { profit: centsTotal(profit) }) },
+        ]} /></div>
       ) : <div className="skel" />}
-      <div className="cols2 soft">
-        <section>
-          <h2>{L.byCategory}</h2>
-          {cats.length ? (
-            <ul className="rk cat">{cats.map((c) => (
-              <li key={c.category}><div className="rk-m"><div className="rk-t"><b>{c.category}</b><span className="num">{centsTotal(c.cents)}</span></div><div className="rk-b"><i className="pu" style={{ width: `${Math.max(3, (c.cents / maxC) * 100)}%` }} /></div></div></li>
-            ))}</ul>
-          ) : <p className="muted">{L.noneInPeriod}</p>}
-        </section>
-        <section>
-          <h2>{L.breakEven}</h2>
-          {goal ? (
-            <>
-              <p className="muted">{rt('screens.expenses.breakEvenText', { expenses: centsTotal(g30), margin: pct(mg * 100), goal: centsTotal(goal) }, { expenses: '', margin: '', goal: '' })}</p>
-              <div className="eq">
-                <div className="rk-b big"><i style={{ width: `${reached}%` }} /></div>
-                <div className="eq-t"><span>{rt('screens.expenses.sold', { value: centsTotal(income) }, { value: '' })}</span><span>{rt('screens.expenses.goal', { value: centsTotal(goal) }, { value: '' })}</span></div>
-                {reached >= 100 ? <span className="pill good">{L.reached}</span> : <span className="pill warn">{t('screens.expenses.missing', { value: centsTotal(goal - income) })}</span>}
-              </div>
-            </>
-          ) : <p className="muted">{L.noMargin}</p>}
-        </section>
-      </div>
       <div className="exp-h">
         <h2 className="gap">{L.all}</h2>
         <div className="seg" role="group" aria-label={L.periodLabel}>
@@ -101,14 +84,41 @@ export function ExpensesPage() {
         </div>
       </div>
       {list ? <p className="hint" data-testid="expenses-period">{rt('screens.expenses.periodTotal', { total: centsTotal(list.periodTotalCents), fixed: centsTotal(list.fixedPerMonthCents) }, { total: '', fixed: '' })}</p> : null}
-      {list && !items.length ? <p className="muted">{L.noneInPeriod}</p> : null}
-      <ul className="gl" data-testid="expense-list">{items.map((g) => (
-        <li key={g.id} className="gi" tabIndex={0} onClick={() => setDlg(g)} onKeyDown={(e) => { if (e.key === 'Enter') setDlg(g); }}>
-          <span className="pill">{g.category}</span>
-          <div className="gi-m"><b>{g.concept}</b><small>{when(g)}</small></div>
-          <span className="gi-v"><b className="num">{centsTotal(g.amountCents)}</b>{g.recurring ? <small>{L.perMonth}</small> : null}</span>
-        </li>
-      ))}</ul>
+      <div className="exp-grid">
+        <div data-testid="expense-list">
+          <Panel flush className="exp-p">
+            {list && !items.length ? <p className="muted exp-none">{L.noneInPeriod}</p> : (
+              <Table fit className="big" head={<><Th>{L.colDate}</Th><Th>{L.colConcept}</Th><Th hideSm>{L.colType}</Th><Th r>{L.colAmount}</Th></>}>
+                {items.map((g) => (
+                  <tr key={g.id} className="click" tabIndex={0} onClick={() => setDlg(g)} onKeyDown={(e) => { if (e.key === 'Enter') setDlg(g); }}>
+                    <Td className="nw num">{date(g.on)}</Td>
+                    <Td><b className="exp-c">{g.concept}</b><span className="meta">{g.recurring ? `${g.category} · ${when(g)}` : g.category}</span></Td>
+                    <Td hideSm>{g.recurring ? <Pill tone="info">{L.fixedType}</Pill> : <Pill>{L.variableType}</Pill>}</Td>
+                    <Td r className="num">{centsTotal(g.amountCents)}{g.recurring ? <span className="meta">{L.perMonth}</span> : null}</Td>
+                  </tr>
+                ))}
+              </Table>
+            )}
+          </Panel>
+        </div>
+        <div className="exp-side">
+          <Panel title={L.byCategory}>
+            {cats.length ? <HBarList label={L.byCategory} items={cats.map((c) => ({ key: c.category, label: c.category, value: c.cents, display: centsTotal(c.cents) }))} /> : <p className="meta">{L.noneInPeriod}</p>}
+          </Panel>
+          <Panel title={L.breakEven}>
+            {goal ? (
+              <>
+                <p className="meta">{rt('screens.expenses.breakEvenText', { expenses: centsTotal(g30), margin: pct(mg * 100), goal: centsTotal(goal) }, { expenses: '', margin: '', goal: '' })}</p>
+                <div className="eq">
+                  <Meter value={reached} tone={reached >= 100 ? 'ok' : ''} label={L.breakEven} />
+                  <div className="eq-t"><span>{rt('screens.expenses.sold', { value: centsTotal(income) }, { value: '' })}</span><span>{rt('screens.expenses.goal', { value: centsTotal(goal) }, { value: '' })}</span></div>
+                  {reached >= 100 ? <Pill tone="ok">{L.reached}</Pill> : <Pill tone="warn">{t('screens.expenses.missing', { value: centsTotal(goal - income) })}</Pill>}
+                </div>
+              </>
+            ) : <p className="meta">{L.noMargin}</p>}
+          </Panel>
+        </div>
+      </div>
       {dialog}
     </>
   );

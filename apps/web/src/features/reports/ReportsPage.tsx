@@ -1,16 +1,23 @@
-// Reportes (docs/06 §13; mockup vReportes): period, brief with comparison, chart by buckets, rankings, workshop and current state.
+// Reportes (docs/06 §13; ronda-3 §6, reference/ronda-3/reportes.html): period (segmented switch as before, exception 1),
+// 5 figures, sales by bucket, of every $100, products with the most profit, by channel; then customers, collections,
+// printers, filament and the current state (D-11).
 import { useSearch } from '@tanstack/react-router';
 import type { CSSProperties, ReactNode } from 'react';
-import { PageHead } from '../../components/AppShell';
+import { PageHead } from '../../components/PageHead';
 import { Button } from '../../components/Button';
+import { HBarList, Per100Bar, WeekColumns } from '../../components/charts';
+import { Kpis } from '../../components/Kpis';
+import { Panel } from '../../components/Panel';
 import { toast } from '../../components/Toast';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
-import { centsTotal, date, grams, money, number1, pct } from '../../lib/format';
+import { centsTotal, grams, money, money2d, number1, pct } from '../../lib/format';
 import { go } from '../../lib/nav';
 import { useSettings } from '../../lib/queries';
-import { useReport, type ApiPeriod, type Bucket, type Report } from './api';
-import { Brief, C100Bar } from './Brief';
+import { Delta } from './Delta';
+import { useReport, type ApiPeriod, type Report } from './api';
+import { C100Bar } from './Brief';
+import { at, bucketColumns, bucketLabel, deltaPct, rangeText } from './buckets';
 import { allBold, rt } from './text';
 import './reports.css';
 
@@ -18,35 +25,14 @@ const L = es.screens.reports;
 export const PERIODS = ['7', '30', '90', 'todo'] as const;
 export type Period = (typeof PERIODS)[number];
 export const apiPeriod = (p: Period): ApiPeriod => (p === 'todo' ? 'all' : p);
-
-const weekday = new Intl.DateTimeFormat('es-MX', { weekday: 'short', timeZone: 'UTC' });
-const monthShort = new Intl.DateTimeFormat('es-MX', { month: 'short', timeZone: 'UTC' });
-const monthLong = new Intl.DateTimeFormat('es-MX', { month: 'long', timeZone: 'UTC' });
-const at = (iso: string) => new Date(`${iso}T12:00:00Z`);
-const clean = (s: string) => s.replace('.', '');
-export const rangeText = (from: string, to: string) => t('screens.reports.range', { from: date(from), to: date(to) });
-
-/** Column label and tooltip title of a bucket (mockup repBuckets). */
-function bucketLabel(b: Bucket, unit: Report['range']['unit']): [string, string] {
-  if (unit === 'day') { const w = clean(weekday.format(at(b.from))); return [`${w} ${at(b.from).getUTCDate()}`, `${w} ${date(b.from)}`]; }
-  if (unit === 'week') return [date(b.from), t('screens.reports.weekOf', { range: rangeText(b.from, b.to) })];
-  const m = monthLong.format(at(b.from));
-  return [clean(monthShort.format(at(b.from))), `${m[0]!.toUpperCase()}${m.slice(1)} ${at(b.from).getUTCFullYear()}`];
-}
-
-export function niceScale(max: number) {
-  const m = Math.max(max, 1);
-  const e0 = Math.floor(Math.log10(m));
-  for (let e = e0 - 2; e <= e0 + 1; e++) for (const f of [1, 2, 2.5, 5]) { const st = f * 10 ** e; if (m / st <= 5 + 1e-9) return { step: st, top: Math.ceil(m / st - 1e-9) * st }; }
-  return { step: m / 4, top: m };
-}
+export { rangeText };
 
 const pctOf = (x: number, total: number) => pct(total ? (x / total) * 100 : 0);
 
 function RkxRow({ name, sub, w, value, cls = '', vc = '', onOpen }: { name: string; sub: ReactNode; w: number; value: string; cls?: string; vc?: string; onOpen?: (() => void) | undefined }) {
   return (
     <li className={onOpen ? 'click' : undefined} onClick={onOpen} onKeyDown={onOpen ? (e) => { if (e.key === 'Enter') onOpen(); } : undefined} tabIndex={onOpen ? 0 : undefined}>
-      <span className="n"><b>{name}</b><small>{sub}</small></span><span className="rk-b"><i className={cls} style={{ width: `${Math.max(2, w).toFixed(1)}%` }} /></span><b className={`v num ${vc}`}>{value}</b>
+      <span className="n"><b>{name}</b><small>{sub}</small></span><span className="hb-track"><i className={cls} style={{ width: `${Math.max(2, w).toFixed(1)}%` }} /></span><b className={`v num ${vc}`}>{value}</b>
     </li>
   );
 }
@@ -79,14 +65,14 @@ export function ReportsPage() {
     if (!R) return;
     void navigator.clipboard?.writeText(summaryText(R, business)).then(() => toast(t('toast.copy.done', { what: L.copied })), () => toast(es.toast['copy.failed']));
   };
+  const cap = R ? <><b>{rangeText(R.range.from, R.range.to)}</b>{R.range.period === 'all' ? t('screens.reports.capAll', { range: '' }) : t('screens.reports.capDays', { range: '', days: R.range.days })}{R.previous ? t('screens.reports.capPrev', { range: rangeText(prevRange(R).from, prevRange(R).to) }) : ''}</> : L.sub;
   return (
     <>
-      <PageHead title={L.title} sub={L.sub} actions={<Button icon="copy" onClick={copy} disabled={!R}>{L.copy}</Button>} />
+      <PageHead title={L.title} sub={<span className="cap">{cap}</span>} actions={<Button icon="copy" onClick={copy} disabled={!R}>{L.copy}</Button>} />
       <div className="rep-bar">
         <div className="seg" role="group" aria-label={L.periodLabel}>
           {PERIODS.map((p) => <button key={p} type="button" className={p === period ? 'on' : undefined} aria-pressed={p === period} onClick={() => go(`/reportes?periodo=${p}`, true)}>{L.periods[p]}</button>)}
         </div>
-        {R ? <p className="cap"><b>{rangeText(R.range.from, R.range.to)}</b>{R.range.period === 'all' ? t('screens.reports.capAll', { range: '' }) : t('screens.reports.capDays', { range: '', days: R.range.days })}{R.previous ? t('screens.reports.capPrev', { range: rangeText(prevRange(R).from, prevRange(R).to) }) : ''}</p> : null}
       </div>
       {R ? <ReportBody R={R} /> : <div className="skel" />}
     </>
@@ -98,47 +84,64 @@ function prevRange(R: Report) {
   return { from: shift(R.range.from, -R.range.days), to: shift(R.range.from, -1) };
 }
 
+/** Ventas · Ganancia bruta · Gastos · Ganancia neta · Margen neto (D-10: net profit ÷ sales). */
+function Figures({ R }: { R: Report }) {
+  const T = R.totals;
+  const A = R.previous?.count ? R.previous : null;
+  return (
+    <div className="rep-k" data-testid="brief"><Kpis label={L.briefLabel} items={[
+      { label: L.kSales, value: centsTotal(T.incomeCents), sub: A ? <Delta value={deltaPct(T.incomeCents, A.incomeCents)} /> : t('screens.reports.kCount', { count: T.count }) },
+      { label: L.kGross, value: centsTotal(T.profitCents), ...(A ? { sub: <Delta value={deltaPct(T.profitCents, A.profitCents)} /> } : {}) },
+      { label: L.kExpenses, value: centsTotal(R.expensesCents), ...(R.hasExpenses && A && R.previousExpensesCents ? { sub: <Delta value={deltaPct(R.expensesCents, R.previousExpensesCents)} good={false} /> } : {}) },
+      { label: L.kNet, value: centsTotal(R.netProfitCents), tone: R.netProfitCents < 0 ? 'bad' : 'net' },
+      { label: L.kMargin, value: T.incomeCents > 0 ? pct((R.netProfitCents / T.incomeCents) * 100) : '—' },
+    ]} /></div>
+  );
+}
+
+/** Of every $100 sold: costs and expenses against net profit, and each concept per $100 (largest first). */
+function Per100({ R }: { R: Report }) {
+  const T = R.totals;
+  const K = R.costConcepts;
+  const per = (c: number) => (c / T.incomeCents) * 100;
+  const net = Math.max(0, per(R.netProfitCents));
+  const parts: [string, string, number][] = [
+    ['g', L.seg.expenses, R.expensesCents], ['m', L.seg.material, K.materialCents], ['q', L.seg.machine, K.machineCents], ['e', L.seg.extras, K.extrasCents],
+    ['c', L.seg.commissions, T.commissionCents], ['f', L.seg.failures, K.failureReserveCents], ['l', L.seg.power, K.powerCents],
+  ];
+  return (
+    <>
+      <Per100Bar label={R.hasExpenses ? L.per100LabelExpenses : L.per100Label}
+        cost={{ label: L.costsAndExpenses, value: 100 - net, display: money2d(100 - net) }} net={{ label: L.kNet, value: net, display: money2d(net) }}
+        items={parts.filter((x) => x[2] > 0).map(([key, label, c]) => ({ key, label, value: per(c), display: money2d(per(c)) }))} />
+      {R.netProfitCents < 0 ? <p className="note warn mt">{t('screens.reports.expensesOver', { amount: centsTotal(-R.netProfitCents) })}</p> : null}
+      <p className="meta mt">{L.conceptsHint}</p>
+    </>
+  );
+}
+
+function ChannelTable({ R }: { R: Report }) {
+  const T = R.totals;
+  return (
+    <div className="tw"><table className="tbl fit rp-ch">
+      <thead><tr><th>{L.colChannel}</th><th className="r hide-sm">{L.sales}</th><th className="r">{L.colAmount}</th><th className="r hide-sm">{L.commission}</th><th className="r">{L.profit}</th></tr></thead>
+      <tbody>{R.byChannel.map((c) => (
+        <tr key={c.channelId}><td>{c.name}</td><td className="r num hide-sm">{c.count}</td><td className="r num">{centsTotal(c.incomeCents)}</td><td className="r num hide-sm">{centsTotal(c.commissionCents)}</td><td className={`r num ${c.profitCents < 0 ? 'neg' : 'pos'}`}>{centsTotal(c.profitCents)}</td></tr>
+      ))}</tbody>
+      <tfoot><tr><td>{L.total}</td><td className="r num hide-sm">{T.count}</td><td className="r num">{centsTotal(T.incomeCents)}</td><td className="r num hide-sm">{centsTotal(T.commissionCents)}</td><td className={`r num ${T.profitCents < 0 ? 'neg' : 'pos'}`}>{centsTotal(T.profitCents)}</td></tr></tfoot>
+    </table></div>
+  );
+}
+
 function ReportBody({ R }: { R: Report }) {
   const T = R.totals;
-  const empty = <p className="muted mt">{L.noSales}</p>;
-  const gA = R.hasExpenses ? R.expensesCents : null;
-  const gP = R.hasExpenses && R.previous ? R.previousExpensesCents : null;
+  const empty = <p className="meta">{L.noSales}</p>;
   const unit = L.unit[R.range.unit];
-  // Chart
-  const tops = Math.max(1, ...R.buckets.map((x) => x.costCents + x.commissionCents + Math.max(0, x.profitCents)));
-  const sc = niceScale(tops / 100);
-  const yMax = sc.top * 100;
-  const many = R.buckets.length > 8;
-  const marks: number[] = [];
-  for (let v = 0; v <= sc.top + 1e-9; v += sc.step) marks.push(v * 100);
   const chart = !T.count ? (
-    <p className="note mt">{L.noSalesChart} <button type="button" className="link" onClick={() => go('/armar?modo=venta')}>{L.newSale}</button></p>
+    <p className="note">{L.noSalesChart} <button type="button" className="link" onClick={() => go('/armar?modo=venta')}>{L.newSale}</button></p>
   ) : (
     <>
-      <ul className="lg mt" aria-label={L.legend}>
-        <li><i style={{ '--c': 'var(--cost)' } as CSSProperties} />{L.cost}</li><li><i style={{ '--c': 'var(--c-t)' } as CSSProperties} />{L.commission}</li><li><i style={{ '--c': 'var(--green)' } as CSSProperties} />{L.profit}</li>
-      </ul>
-      <div className={`rk-chart${many ? ' many' : ''}`} role="img" aria-label={t('screens.reports.chartLabel', { unit })}>
-        <div className="rk-y">{marks.map((v) => <span key={v} style={{ bottom: `${(v / yMax) * 100}%` }}>{centsTotal(v)}</span>)}</div>
-        <div className="rk-plot">
-          {marks.filter((v) => v > 0).map((v) => <i key={v} className="gl" style={{ bottom: `${(v / yMax) * 100}%` }} />)}
-          <div className="rk-cols" data-testid="chart-cols">
-            {R.buckets.map((x) => {
-              const tot = x.costCents + x.commissionCents + Math.max(0, x.profitCents);
-              const part = (v: number, c: string) => (v > 0 ? <i className={c} style={{ height: `${((v / tot) * 100).toFixed(2)}%` }} /> : null);
-              const [label, title] = bucketLabel(x, R.range.unit);
-              const tip = t('screens.reports.colTip', { label: title, partial: x.partial ? L.inProgressTip : '', count: x.count, income: centsTotal(x.incomeCents), cost: centsTotal(x.costCents), commission: centsTotal(x.commissionCents), profit: centsTotal(x.profitCents) });
-              return (
-                <div className="tcol" key={x.from} title={tip} tabIndex={0}>
-                  {!many && x.incomeCents > 0 ? <span className="cv num">{centsTotal(x.incomeCents)}</span> : null}
-                  <div className="stk3" style={{ height: `${((tot / yMax) * 100).toFixed(2)}%` }}>{part(x.costCents, 's-co')}{part(x.commissionCents, 's-cm')}{part(Math.max(0, x.profitCents), 's-ga')}</div>
-                  <span className="cl">{label}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      <WeekColumns columns={bucketColumns(R)} legend={{ sales: L.sales, profit: L.kGross }} label={t('screens.reports.chartLabel', { unit })} testId="chart-cols" />
       <details className="tabview">
         <summary>{L.asTable}</summary>
         <div className="tw"><table className="tbl sm">
@@ -153,36 +156,48 @@ function ReportBody({ R }: { R: Report }) {
       </details>
     </>
   );
-  // Pieces, channels, customers, collections
-  const rank = R.topProducts.slice(0, 10);
-  const rmax = Math.max(1, ...rank.map((r) => r.profitCents));
   const totalParams = { count: R.topProducts.length, pieces: T.pieces, income: centsTotal(T.incomeCents), cost: centsTotal(T.costCents), profit: centsTotal(T.profitCents), margin: pct(T.marginPct) };
-  const pieces = !rank.length ? empty : (
+  const top = R.topProducts.slice(0, 10);
+  const pieces = !top.length ? empty : (
     <>
-      <ul className="rkx" data-testid="rank">{rank.map((r) => <RkxRow key={r.productId} name={r.name} sub={t('screens.reports.pieceLine', { count: r.qty, income: centsTotal(r.incomeCents), cost: centsTotal(r.costCents), margin: pctOf(r.profitCents, r.incomeCents) })} w={(r.profitCents / rmax) * 100} value={centsTotal(r.profitCents)} vc={r.profitCents < 0 ? 'neg' : 'pos'} />)}</ul>
-      <p className="rkx-t">{rt(R.topProducts.length > rank.length ? 'screens.reports.pieceTotalOf' : 'screens.reports.pieceTotal', totalParams, { profit: T.profitCents < 0 ? 'neg' : 'pos' })}</p>
+      <div data-testid="rank"><HBarList tone="green" label={L.byPiece} items={top.map((r) => ({ key: r.productId, label: r.name, meta: t('screens.reports.pieceLine', { count: r.qty, income: centsTotal(r.incomeCents), cost: centsTotal(r.costCents), margin: pctOf(r.profitCents, r.incomeCents) }), value: Math.max(0, r.profitCents), display: centsTotal(r.profitCents) }))} /></div>
+      <p className="rkx-t">{rt(R.topProducts.length > top.length ? 'screens.reports.pieceTotalOf' : 'screens.reports.pieceTotal', totalParams, { profit: T.profitCents < 0 ? 'neg' : 'pos' })}</p>
     </>
   );
-  const cmax = Math.max(1, ...R.byChannel.map((c) => c.profitCents));
-  const channels = !T.count ? empty : <ul className="rkx">{R.byChannel.map((c) => <RkxRow key={c.channelId} name={c.name} sub={t('screens.reports.channelLine', { count: c.count, income: centsTotal(c.incomeCents), commission: centsTotal(c.commissionCents) })} w={(c.profitCents / cmax) * 100} value={centsTotal(c.profitCents)} vc={c.profitCents < 0 ? 'neg' : 'pos'} />)}</ul>;
+  return (
+    <>
+      <Figures R={R} />
+      <div className="rp-grid">
+        <Panel title={t('screens.reports.salesBy', { unit })}>{chart}</Panel>
+        <Panel title={L.per100}>{T.count && T.incomeCents > 0 ? <Per100 R={R} /> : empty}</Panel>
+        <Panel title={L.byPiece}>{pieces}</Panel>
+        <Panel title={L.channels}>{T.count ? <ChannelTable R={R} /> : empty}</Panel>
+      </div>
+      <More R={R} />
+    </>
+  );
+}
+
+/** What the app has and the mockup does not draw (D-11): customers, collections, printers, filament and the current state. */
+function More({ R }: { R: Report }) {
+  const empty = <p className="meta">{L.noSales}</p>;
   const clm = Math.max(1, ...R.byCustomer.map((c) => c.incomeCents));
   const customers = !R.byCustomer.length ? empty : (
     <ul className="rkx">{R.byCustomer.map((c) => (
-      <RkxRow key={c.id ?? 'none'} name={c.id ? c.name : L.noCustomer} cls="pu" w={(c.incomeCents / clm) * 100} value={centsTotal(c.incomeCents)} onOpen={c.id ? () => go(`/clientes/cliente?id=${c.id}`) : undefined}
+      <RkxRow key={c.id ?? 'none'} name={c.id ? c.name : L.noCustomer} w={(c.incomeCents / clm) * 100} value={centsTotal(c.incomeCents)} onOpen={c.id ? () => go(`/clientes/cliente?id=${c.id}`) : undefined}
         sub={<>{t('screens.reports.customerLine', { count: c.count, profit: centsTotal(c.profitCents) })}{c.owedCents > 0 ? <span className="neg">{t('screens.reports.customerOwed', { owed: centsTotal(c.owedCents) })}</span> : null}</>} />
     ))}</ul>
   );
   const cgm = Math.max(1, ...R.byCollection.map((c) => c.profitCents));
-  const collections = !R.byCollection.length ? <p className="muted mt">{L.noCollections}</p> : <ul className="rkx">{R.byCollection.map((c) => <RkxRow key={c.id} name={c.name} sub={t('screens.reports.collectionLine', { count: c.qty, income: centsTotal(c.incomeCents), margin: pctOf(c.profitCents, c.incomeCents) })} w={(c.profitCents / cgm) * 100} value={centsTotal(c.profitCents)} vc={c.profitCents < 0 ? 'neg' : 'pos'} />)}</ul>;
-  // Workshop
+  const collections = !R.byCollection.length ? <p className="meta">{L.noCollections}</p> : <ul className="rkx">{R.byCollection.map((c) => <RkxRow key={c.id} name={c.name} cls="g" sub={t('screens.reports.collectionLine', { count: c.qty, income: centsTotal(c.incomeCents), margin: pctOf(c.profitCents, c.incomeCents) })} w={(c.profitCents / cgm) * 100} value={centsTotal(c.profitCents)} vc={c.profitCents < 0 ? 'neg' : 'pos'} />)}</ul>;
   const W = R.workshop;
   const umax = Math.max(1, ...W.filaments.map((x) => x.grams));
   const real = W.usedGrams ? (W.lostGrams / W.usedGrams) * 100 : 0;
   const high = W.usedGrams > 0 && real > W.failurePct;
-  const filament = !W.filaments.length ? <p className="muted mt">{L.noFilament}</p> : (
+  const filament = !W.filaments.length ? <p className="meta">{L.noFilament}</p> : (
     <>
       <ul className="hb">{W.filaments.map((x) => (
-        <li key={x.filamentId}><span className="hb-l"><span className="sw" style={{ '--c': x.hex || 'var(--no-color)' } as CSSProperties} />{x.name}</span><span className="hb-t"><i className="pu" style={{ width: `${Math.max(2, (x.grams / umax) * 100)}%`, '--fc': x.hex || 'var(--no-color)' } as CSSProperties} title={`${x.name}: ${grams(x.grams)}`} tabIndex={0} /></span><span className="hb-v">{grams(x.grams)}</span></li>
+        <li key={x.filamentId}><span className="hb-l"><span className="sw" style={{ '--c': x.hex || 'var(--no-color)' } as CSSProperties} />{x.name}</span><span className="hb-t"><i style={{ width: `${Math.max(2, (x.grams / umax) * 100)}%` }} title={`${x.name}: ${grams(x.grams)}`} tabIndex={0} /></span><span className="hb-v">{grams(x.grams)}</span></li>
       ))}</ul>
       <p className={`note mt ${high ? 'warn' : ''}`}>
         {rt('screens.reports.failNote', { real: pct(real) }, { real: '' })}{W.runs ? t('screens.reports.failNoteRuns', { fails: W.failures, runs: W.runs }) : ''}{t('screens.reports.failNoteReserve', { reserve: pct(W.failurePct) })}
@@ -191,57 +206,49 @@ function ReportBody({ R }: { R: Report }) {
     </>
   );
   const hmax = Math.max(1, ...W.printers.map((m) => m.hours));
-  const printers = !W.printers.length ? <p className="muted mt">{L.noPrinters}</p> : (
+  const printers = !W.printers.length ? <p className="meta">{L.noPrinters}</p> : (
     <ul className="rkx">{W.printers.map((m) => (
-      <RkxRow key={m.id} name={m.name} cls="pu" w={(m.hours / hmax) * 100} value={`${number1(m.hours)} h`}
+      <RkxRow key={m.id} name={m.name} w={(m.hours / hmax) * 100} value={`${number1(m.hours)} h`}
         sub={<>{t('screens.reports.printerRuns', { count: m.runs })}{m.failures ? <span className="neg">{t('screens.reports.printerFails', { count: m.failures })}{m.runs ? t('screens.reports.printerFailsPct', { pct: pct((m.failures / m.runs) * 100) }) : ''}</span> : null}{t('screens.reports.printerPerHour', { cost: money(m.costPerHourCents / 100) })}</>} />
     ))}</ul>
   );
-  // Current state
   const O = R.ordersNow;
   const orders = O.active ? (
     <>
       <p className="lead">{rt('screens.reports.ordersLine', { count: O.active, production: O.inProduction, ready: O.ready, total: centsTotal(O.totalCents), paid: centsTotal(O.paidCents), owed: centsTotal(O.owedCents), profit: centsTotal(O.profitCents) }, { count: '', total: '', paid: 'pos', owed: O.owedCents > 0 ? 'neg' : '' })}</p>
-      <div className="rk-b big mt"><i style={{ width: `${O.totalCents ? (O.paidCents / O.totalCents) * 100 : 0}%` }} /></div>
-      <p className="hint">{t('screens.reports.ordersPaid', { pct: pctOf(O.paidCents, O.totalCents) })}</p>
+      <span className="meter mt"><i style={{ width: `${O.totalCents ? (O.paidCents / O.totalCents) * 100 : 0}%` }} /></span>
+      <p className="meta mt">{t('screens.reports.ordersPaid', { pct: pctOf(O.paidCents, O.totalCents) })}</p>
     </>
   ) : <p className="lead mut">{L.ordersEmpty}</p>;
   const I = R.inventory;
   const inventory = (
     <>
       <p className="lead">{rt('screens.reports.inventoryLine', { pieces: I.pieces, count: I.pieces, free: I.free, reservedPart: I.reserved ? t('screens.reports.inventoryReserved', { count: I.reserved }) : '', atCost: centsTotal(I.atCostCents), atList: centsTotal(I.atListCents), kg: `${number1(I.grams / 1000)} kg`, spools: I.spools, value: centsTotal(I.valueCents) }, allBold('pieces', 'atCost', 'atList', 'kg'))}</p>
-      {I.atCostCents + I.valueCents > 0 ? <C100Bar segs={[[L.inventoryPieces, I.atCostCents, '--c-l'], [L.inventoryFilament, I.valueCents, '--c-q']]} base={0} label={L.inventoryLabel} cls="sm" /> : null}
-      <p className="hint">{t('screens.reports.inventoryTotal', { total: centsTotal(I.atCostCents + I.valueCents) })}{O.quotes ? t('screens.reports.inventoryQuotes', { count: O.quotes, total: centsTotal(O.quotesCents) }) : ''}</p>
+      {I.atCostCents + I.valueCents > 0 ? <C100Bar segs={[[L.inventoryPieces, I.atCostCents, '--cost'], [L.inventoryFilament, I.valueCents, '--soft-3']]} base={0} label={L.inventoryLabel} cls="sm" /> : null}
+      <p className="meta mt">{t('screens.reports.inventoryTotal', { total: centsTotal(I.atCostCents + I.valueCents) })}{O.quotes ? t('screens.reports.inventoryQuotes', { count: O.quotes, total: centsTotal(O.quotesCents) }) : ''}</p>
     </>
   );
   const inv = R.investmentRecovered;
   const nPrinters = W.printers.length;
   return (
     <>
-      <Brief T={T} K={R.costConcepts} gA={gA} A={R.previous} gP={gP} />
-      <section className="rp"><h2>{t('screens.reports.salesBy', { unit })}</h2>{chart}</section>
-      <section className="rp"><h2>{L.byPiece}</h2>{pieces}</section>
-      <div className="rp-g">
-        <section className="rp"><h2>{L.channels}</h2>{channels}</section>
-        <section className="rp"><h2>{L.customers}</h2>{customers}</section>
+      <div className="rp-grid">
+        <Panel title={L.customers}>{customers}</Panel>
+        <Panel title={L.collections}>{collections}</Panel>
+        <Panel title={L.printers}>{printers}</Panel>
+        <Panel title={L.filament}>{filament}</Panel>
       </div>
-      <div className="rp-g">
-        <section className="rp"><h2>{L.collections}</h2>{collections}</section>
-        <section className="rp"><h2>{L.printers}</h2>{printers}</section>
-      </div>
-      <section className="rp"><h2>{L.filament}</h2>{filament}</section>
       <h2 className="rp-h">{L.now} <small>{L.nowSub}</small></h2>
-      <div className="rp-g">
-        <section className="rp"><h3>{L.orders}</h3>{orders}</section>
-        <section className="rp"><h3>{L.inventory}</h3>{inventory}</section>
+      <div className="rp-grid">
+        <Panel title={L.orders}>{orders}</Panel>
+        <Panel title={L.inventory}>{inventory}</Panel>
       </div>
       {nPrinters ? (
-        <section className="rp" data-testid="investment">
-          <h3>{L.investment}</h3>
+        <div data-testid="investment" className="rp-inv"><Panel title={L.investment}>
           <p className="lead">{rt(nPrinters === 1 ? 'screens.reports.investmentLineOne' : 'screens.reports.investmentLineMany', { count: nPrinters, equipment: centsTotal(inv.equipmentCents), pct: pct(inv.recoveredPct), net: centsTotal(inv.netCents) }, { equipment: '', pct: inv.recoveredPct >= 100 ? 'g' : '', net: '' })}</p>
-          <div className="rk-b big mt" role="img" aria-label={t('screens.reports.investmentBar', { pct: pct(inv.recoveredPct) })}><i style={{ width: `${Math.min(100, Math.max(1.5, inv.recoveredPct))}%` }} /></div>
-          <p className="hint">{t('screens.reports.investmentHint', { pct: pct(inv.recoveredPct) })}</p>
-        </section>
+          <span className="meter mt" role="img" aria-label={t('screens.reports.investmentBar', { pct: pct(inv.recoveredPct) })}><i style={{ width: `${Math.min(100, Math.max(1.5, inv.recoveredPct))}%` }} /></span>
+          <p className="meta mt">{t('screens.reports.investmentHint', { pct: pct(inv.recoveredPct) })}</p>
+        </Panel></div>
       ) : null}
     </>
   );

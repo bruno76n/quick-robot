@@ -149,29 +149,32 @@ export function BackupSection() {
   const close = () => { if (busy !== 'import') { setPending(null); setFailure(null); } };
   const list = backups.data ?? [];
   return (
-    <section className="dat" data-testid="backup">
-      <h2>{L.title}</h2>
-      <p className="muted">{L.hint}</p>
-      <div className="dat-st"><span className={`pill ${status[1]}`}>{status[0]}</span>{last ? <small className="muted bak-last">{t('screens.backup.lastOn', { date: date(last) })}</small> : null}</div>
-      <p className="note">{L.warning}</p>
-      <div className="btnrow">
-        <Button variant="primary" onClick={() => void download()} busy={busy === 'download'}>{L.download}</Button>
-        <label className="btn" htmlFor="rb-file" onClick={onPick}>{L.restoreFile}</label>
-        <input type="file" id="rb-file" accept=".json,application/json" className="sr" onChange={onInput} data-testid="restore-file" />
-        {logs ? <Button size="sm" variant="ghost" onClick={() => void logs()}>{L.showLogs}</Button> : null}
-      </div>
-      <h3>{L.autoTitle} <small>{L.autoSub}</small></h3>
+    <section className="panel dat" id="set-backup" data-testid="backup">
+      <header className="panel-h">
+        <h2>{L.title}</h2>
+        <div className="panel-a dat-st">{last ? <span className="meta bak-last">{t('screens.backup.lastOn', { date: date(last) })}</span> : null}<span className={`pill ${status[1]}`}>{status[0]}</span></div>
+      </header>
+      <h3 className="lbl">{L.autoTitle} <small>{L.autoSub}</small></h3>
       {list.length ? (
-        <ul className="auto-l">
+        <ul className="auto-l" aria-label={L.autoTitle}>
           {list.map((c) => (
             <li key={c.id}>
-              <div><b>{date(c.on)}</b><small>{t('screens.backup.sizeKb', { size: c.sizeKb })}</small></div>
+              <b className="num">{date(c.on)}</b>
+              <span className="meta">{t('screens.backup.sizeKb', { size: c.sizeKb })}</span>
               <Button size="sm" onClick={() => { setFailure(null); setPending({ source: { kind: 'auto', id: c.id }, origin: t('screens.backup.autoOrigin', { date: date(c.on) }), preview: null, invalid: false }); }}>{L.restore}</Button>
             </li>
           ))}
         </ul>
-      ) : <p className="muted">{L.autoEmpty}</p>}
-      <div className="btnrow"><Button size="sm" variant="ghost" onClick={() => void makeNow()} busy={busy === 'auto'}>{L.backupNow}</Button></div>
+      ) : <p className="meta">{L.autoEmpty}</p>}
+      <div className="btnrow">
+        <Button variant="primary" onClick={() => void download()} busy={busy === 'download'}>{L.download}</Button>
+        <label className="btn" htmlFor="rb-file" onClick={onPick}>{L.restoreFile}</label>
+        <input type="file" id="rb-file" accept=".json,application/json" className="sr" onChange={onInput} data-testid="restore-file" />
+        <Button variant="ghost" onClick={() => void makeNow()} busy={busy === 'auto'}>{L.backupNow}</Button>
+        {logs ? <Button variant="ghost" onClick={() => void logs()}>{L.showLogs}</Button> : null}
+      </div>
+      <p className="meta dat-h">{L.hint}</p>
+      <p className="note">{L.warning}</p>
 
       <Dialog open={pending !== null} title={L.confirmTitle} onClose={close} submitLabel={L.restore} busy={busy === 'import'}
         {...(pending && !pending.invalid && !failure ? { onSubmit: () => void apply() } : {})}>
@@ -216,9 +219,9 @@ export function ClearSection() {
     try { await backupApi.clear(); await qc.invalidateQueries(); toast(es.toast['data.cleared']); } catch (e) { toast(errorText(e).text); } finally { setBusy(false); }
   };
   return (
-    <section className="dat" data-testid="clear">
-      <h2>{L.clearTitle}</h2>
-      <p className="muted">{L.clearHint}</p>
+    <section className="panel dat" id="set-clear" data-testid="clear">
+      <header className="panel-h"><h2>{L.clearTitle}</h2></header>
+      <p className="meta">{L.clearHint}</p>
       <div className="btnrow"><ConfirmButton confirmText={es.confirm.tapAgainClear} onConfirm={() => void clear()} busy={busy}>{L.clear}</ConfirmButton></div>
     </section>
   );

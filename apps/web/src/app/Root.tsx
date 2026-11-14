@@ -13,12 +13,18 @@ import { es } from '../i18n/es';
 import { api, ApiError } from '../lib/api';
 import { isDesktop } from '../lib/platform';
 import { useSettings } from '../lib/queries';
+import { isActive, useOrderList } from '../features/orders/api';
+import { usePurchases } from '../features/purchases/api';
 import { go } from '../lib/nav';
 
 export function Root() {
   const me = useQuery({ queryKey: ['me'], queryFn: async () => (await api.me()).data, staleTime: Infinity });
   const settings = useSettings();
   const business = settings.data?.settings.business;
+  // Menu counters (D-6): orders in progress (the board query of Pedidos) and suggested purchases (Compras).
+  const board = useOrderList('board');
+  const purchases = usePurchases();
+  const counts = { '/pedidos': board.data?.items.filter((o) => isActive(o.status)).length ?? 0, '/compras': purchases.data?.count ?? 0 };
   const path = useRouterState({ select: (s) => s.location.pathname });
   const qc = useQueryClient();
   const fetching = useIsFetching();
@@ -42,7 +48,7 @@ export function Root() {
   ) : null;
   return (
     <>
-      <AppShell businessName={business?.name || me.data?.workspace.name || ''} trade={business?.trade ?? ''} banner={banner} onNewPiece={() => void go('/productos/pieza')} onSearch={openPalette}>
+      <AppShell businessName={business?.name || me.data?.workspace.name || ''} trade={business?.trade ?? ''} banner={banner} counts={counts} onNewPiece={() => void go('/productos/pieza')} onSearch={openPalette}>
         <ErrorBoundary resetKey={path} onHome={() => void go('/inicio')}>
           <LoadingSkeleton />
           <Outlet />

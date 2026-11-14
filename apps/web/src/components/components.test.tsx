@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { createMemoryHistory, createRootRoute, createRouter, RouterProvider } from '@tanstack/react-router';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -10,6 +11,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import { Field } from './Field';
 import { Icon } from './Icon';
 import { Mascot } from './Mascot';
+import { PageHead } from './PageHead';
 import { Pill, Swatch } from './Pill';
 import { Segmented } from './Segmented';
 import { Table, Td, Th } from './Table';
@@ -162,13 +164,81 @@ describe('neutral sidebar (ronda-2 §2)', () => {
     expect(brand.querySelector('b')?.textContent).toBe('Taller de Ana');
     expect(brand.querySelector('b')?.className ?? '').not.toContain('ph-txt');
     expect(brand.querySelector('small')?.textContent).toBe('Impresión 3D');
-    expect(document.querySelector('.topbar img.mascot')).toBeTruthy();
+    // Ronda 3 (C1): the top bar of tablet and phone names the screen, not the business; the mascot stays in the sidebar.
+    expect(document.querySelector('.topbar .t-title')?.textContent).toBe('Inicio');
   });
 
   it('without a name or trade shows "Mi negocio" and "Giro del negocio" in grey', async () => {
     const brand = await shell('  ', '');
     expect(brand.querySelector('b.ph-txt')?.textContent).toBe('Mi negocio');
     expect(brand.querySelector('small.ph-txt')?.textContent).toBe('Giro del negocio');
-    expect(document.querySelector('.topbar .ph-txt')?.textContent).toBe('Mi negocio');
+  });
+});
+
+describe('app frame (ronda-3 C1)', () => {
+  const frame = async (view: ReactNode, at = '/pedidos', counts?: Record<string, number>) => {
+    const onNew = vi.fn();
+    const root = createRootRoute({ component: () => <AppShell businessName="Taller" trade="Impresión 3D" counts={counts} onNewPiece={onNew}>{view}</AppShell> });
+    render(<RouterProvider router={createRouter({ routeTree: root, history: createMemoryHistory({ initialEntries: [at] }) })} />);
+    await waitFor(() => expect(document.querySelector('#view')?.textContent).not.toBe(''));
+    return { onNew, menu: screen.getByRole('button', { name: 'Abrir el menú' }) };
+  };
+
+  it('the menu opens with the focus on the current screen; Esc closes it and the focus returns to the button', async () => {
+    const { menu } = await frame(<p>vista</p>);
+    expect(menu.getAttribute('aria-expanded')).toBe('false');
+    expect(menu.getAttribute('aria-controls')).toBe('side');
+    fireEvent.click(menu);
+    expect(menu.getAttribute('aria-expanded')).toBe('true');
+    expect(document.body.classList.contains('nav-open')).toBe(true);
+    expect(document.activeElement?.textContent).toContain('Pedidos');
+    expect(document.activeElement?.getAttribute('aria-current')).toBe('page');
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(menu.getAttribute('aria-expanded')).toBe('false');
+    expect(document.body.classList.contains('nav-open')).toBe(false);
+    expect(document.activeElement).toBe(menu);
+  });
+
+  it('a tap outside the menu closes it and returns the focus; Esc does nothing while it is closed', async () => {
+    const { menu } = await frame(<p>vista</p>);
+    fireEvent.click(menu);
+    fireEvent.click(document.querySelector('.scrim')!);
+    expect(document.body.classList.contains('nav-open')).toBe(false);
+    expect(document.activeElement).toBe(menu);
+    const other = screen.getByRole('button', { name: 'Buscar en todo' });
+    other.focus();
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(document.activeElement).toBe(other);
+  });
+
+  it('the top bar shows the screen title and «+» makes a new piece', async () => {
+    const { onNew } = await frame(<PageHead title="Clientes" />, '/clientes');
+    expect(document.querySelector('.topbar .t-title')?.textContent).toBe('Clientes');
+    fireEvent.click(screen.getAllByRole('button', { name: 'Nueva pieza' })[0]!);
+    expect(onNew).toHaveBeenCalledOnce();
+  });
+
+  it('a detail screen names itself in the top bar with `short` and shows its breadcrumb', async () => {
+    await frame(<PageHead crumbs={[{ label: 'Pedidos', to: '/pedidos' }]} title={<span>Pedido #3</span>} short="Pedido #3" sub="Taquería" actions={<Button variant="primary">Marcar listo</Button>} />, '/pedidos/pedido');
+    expect(document.querySelector('.topbar .t-title')?.textContent).toBe('Pedido #3');
+    const crumbs = screen.getByRole('navigation', { name: 'Ruta' });
+    expect(crumbs.querySelector('a')?.getAttribute('href')).toBe('/pedidos');
+    expect(crumbs.textContent).toBe('Pedidos/');
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Pedido #3');
+    expect(document.querySelector('.ph .sub')?.textContent).toBe('Taquería');
+    expect(document.querySelector('.ph-a .btn.primary')?.textContent).toBe('Marcar listo');
+  });
+
+  it('a node title without `short` falls back to the menu name of the section', async () => {
+    await frame(<PageHead title={<span>Tacos</span>} />, '/pedidos/pedido');
+    expect(document.querySelector('.topbar .t-title')?.textContent).toBe('Pedidos');
+  });
+
+  it('menu counters (D-6): grey number with a spoken label, only when there is something', async () => {
+    await frame(<p>vista</p>, '/inicio', { '/pedidos': 6, '/compras': 0 });
+    const orders = screen.getByRole('link', { name: /Pedidos/ });
+    expect(orders.querySelector('.cnt')?.textContent).toBe('66 en curso');
+    expect(orders.querySelector('.cnt [aria-hidden]')?.textContent).toBe('6');
+    expect(screen.getByRole('link', { name: /Compras/ }).querySelector('.cnt')).toBeNull();
   });
 });

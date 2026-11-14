@@ -4,7 +4,7 @@
 /* Component styles taken from the mockup (reference/). Every color comes from tokens.css (the mockup is the reference: CLAUDE.md › Diseño). */
 * { box-sizing: border-box; }
 html, body { height: 100%; overscroll-behavior: none; }
-body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
 [hidden] { display: none !important; }
 h1, h2, h3 { font-family: var(--font-display); margin: 0; letter-spacing: -.03em; text-wrap: balance; }
 h1 { font-size: 28px; line-height: 1.1; font-weight: 600; letter-spacing: -.04em; }
@@ -24,31 +24,50 @@ button { font: inherit; color: inherit; }
 .mut { color: var(--ink-3t); }
 .muted { color: var(--ink-2); margin-top: 4px; max-width: 62ch; }
 .ic { flex: none; }
-/* ---------- estructura ---------- */
-.app { display: grid; grid-template-columns: 248px minmax(0, 1fr); height: 100%; }
-.side { background: var(--soft); border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 14px; padding: 16px 12px 14px; padding-left: max(12px, env(safe-area-inset-left, 0px)); overflow-y: auto; min-height: 0; }
-.brand { display: flex; align-items: center; gap: 10px; padding: 2px 6px; }
-.brand b { font-family: var(--font-display); font-size: 21px; font-weight: 600; letter-spacing: -.03em; line-height: 1; }
-.brand small { display: block; margin-top: 3px; }
-.nav { display: flex; flex-direction: column; gap: 14px; flex: 1; }
-.ng { display: flex; flex-direction: column; gap: 2px; }
-.ngl { font-size: 12.5px; color: var(--ink-3t); font-weight: 600; padding: 0 10px 3px; }
-.nav a { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--r-in); color: var(--ink-2); text-decoration: none; font-weight: 500; }
-.nav a:hover { background: var(--soft-2); color: var(--ink); }
-.nav a[aria-current="page"] { background: var(--soft-2); color: var(--ink); font-weight: 600; }
-.side-foot { display: grid; gap: 6px; padding: 12px 8px 0; border-top: 1px solid var(--line); }
-.side-foot .loc { line-height: 1.35; }
-.main { overflow-y: auto; overscroll-behavior: contain; min-width: 0; min-height: 0; }
-.page { max-width: 1160px; margin: 0 auto; padding-block: 28px 72px; padding-left: max(28px, env(safe-area-inset-left, 0px)); padding-right: max(28px, env(safe-area-inset-right, 0px)); outline: none; }
+/* ---------- marco (ronda-3 C1, reference/ronda-3 app.css and ui.css .ui-side/.ui-mtop/.ui-top) ----------
+   White sidebar of 232 px with a line; grey work area. At ≤ 1099 px the sidebar is a drawer under a fixed top bar. */
+.app { display: grid; grid-template-columns: 232px minmax(0, 1fr); height: 100%; background: var(--soft); }
+.side { background: var(--bg); border-right: 1px solid var(--line); display: flex; flex-direction: column; padding: 16px 12px 20px; padding-left: max(12px, env(safe-area-inset-left, 0px)); overflow-y: auto; min-height: 0; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 2px 6px 14px; min-width: 0; }
+.brand .mk { flex: none; display: flex; }
+.brand > div { min-width: 0; }
+.brand b { display: block; font-size: 14px; font-weight: 600; line-height: 1.2; letter-spacing: -.01em; overflow-wrap: anywhere; }
+.brand small { display: block; font-size: 12px; color: var(--ink-2); }
+.srch { display: flex; align-items: center; gap: 8px; width: 100%; height: 34px; margin: 0 0 8px; padding: 0 10px; border: 1px solid var(--line); background: var(--bg); border-radius: var(--r-field); color: var(--ink-2); font-size: 13px; cursor: pointer; }
+.srch:hover { border-color: var(--line-2); color: var(--ink); }
+.srch span { flex: 1; text-align: left; }
+.srch kbd { font-size: 11px; font-weight: 400; line-height: 18px; min-width: 0; padding: 0 5px; margin: 0; border: 1px solid var(--line); border-bottom-width: 1px; border-radius: var(--r-pill); background: var(--bg); color: var(--ink-2); }
+.side .new-b { margin: 0 0 4px; }
+.nav { display: flex; flex-direction: column; flex: 1; }
+.ng { display: flex; flex-direction: column; }
+.ngl { font-size: 11.5px; color: var(--ink-3t); font-weight: 500; padding: 12px 8px 4px; }
+.nav a { display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 8px; border-radius: var(--r-btn); color: var(--cost); font-size: 13.5px; font-weight: 400; text-decoration: none; }
+.nav a .ic { color: var(--ink-2); }
+.nav a > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav a:hover { background: var(--soft); color: var(--ink); }
+.nav a[aria-current="page"] { background: var(--soft); color: var(--ink); font-weight: 600; }
+.nav a[aria-current="page"] .ic { color: var(--ink); }
+.nav .cnt { margin-left: auto; font-style: normal; font-size: 11.5px; font-weight: 500; line-height: 18px; color: var(--ink-2); background: var(--soft); border-radius: var(--r-pill); padding: 0 6px; }
+.nav a[aria-current="page"] .cnt, .nav a:hover .cnt { background: var(--bg); }
+.side-foot { padding: 14px 8px 0; margin-top: 12px; border-top: 1px solid var(--line); }
+.side-foot .loc { display: block; line-height: 1.35; font-size: 12px; }
+.main { overflow-y: auto; overscroll-behavior: contain; min-width: 0; min-height: 0; background: var(--soft); }
+.page { max-width: 1320px; padding-block: 28px 56px; padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); outline: none; }
 .topbar { display: none; }
 .scrim { display: none; }
-.ph { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px 24px; flex-wrap: wrap; margin-bottom: 22px; }
-.ph > div:first-child { flex: 1 1 320px; min-width: 0; }
-.ph h1 { display: flex; align-items: center; gap: 12px; }
-.ph .sub { max-width: 58ch; color: var(--ink-2); margin-top: 8px; }
-.ph-a { display: flex; gap: 8px; flex-wrap: wrap; }
-.crumbs { display: flex; gap: 8px; color: var(--ink-3t); font-size: 13.5px; margin-bottom: 14px; }
-.crumbs a { color: var(--ink-2); }
+.menu-b { border: 0; background: none; width: 40px; height: 40px; margin-left: -8px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-field); color: var(--ink); cursor: pointer; flex: none; }
+.menu-b:hover { background: var(--soft); }
+/* Head of a screen (components/PageHead.tsx): breadcrumb, title 26/24/22, short data line, actions on the right */
+.ph { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 16px; margin-bottom: 18px; }
+.ph-t { flex: 1 1 320px; min-width: 0; margin-bottom: 4px; }
+.ph h1 { display: flex; align-items: center; gap: 10px; font-size: 26px; font-weight: 600; letter-spacing: -.03em; line-height: 1.2; }
+.ph .sub { max-width: 72ch; font-size: 13px; line-height: 1.4; color: var(--ink-2); margin-top: 3px; }
+.ph-a { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.crumbs { display: flex; flex-wrap: wrap; gap: 0 6px; width: 100%; font-size: 13px; color: var(--ink-2); margin-bottom: 6px; }
+.ph .crumbs { margin-bottom: -4px; }
+.crumbs a { color: var(--ink-2); text-decoration: none; }
+.crumbs a:hover { color: var(--ink); }
+.crumbs .sep { margin-left: 6px; color: var(--ink-3t); }
 /* ---------- botones y campos ---------- */
 /* Buttons (ronda-3 §2): 30 px, radius 7, white with a line; the main one (primary, and "green", which is no longer
    green: green means profit) in ink. Components: Button.tsx. */
@@ -341,14 +360,24 @@ dialog .refs { margin-top: 6px; }
   .cols2, .split { grid-template-columns: minmax(0, 1fr); }
   .cols2 { gap: 28px; }
 }
-@media (max-width: 899px) {
+/* tablet and phone: the sidebar is a drawer under a fixed top bar with the menu, the screen title and «+» */
+@media (max-width: 1099px) {
   .app { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
-  .topbar { display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); border-bottom: 1px solid var(--line); background: var(--soft); }
-  .topbar .t-name { font-family: var(--font-display); font-weight: 600; font-size: 18px; letter-spacing: -.02em; margin-right: auto; display: flex; align-items: center; gap: 8px; }
-  .side { position: fixed; z-index: 30; inset: 0 auto 0 0; width: min(300px, 86vw); transform: translateX(-105%); visibility: hidden; transition: transform .22s, visibility .22s; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 54px; padding: 0 max(24px, env(safe-area-inset-right, 0px)) 0 max(24px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--line); background: var(--bg); position: relative; z-index: 20; }
+  .topbar .t-title { font-size: 15px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .side { position: fixed; z-index: 50; inset: 0 auto 0 0; width: min(272px, 86vw); transform: translateX(-102%); visibility: hidden; box-shadow: var(--sh-up); transition: transform .2s ease, visibility .2s; }
   .nav-open .side { transform: none; visibility: visible; }
-  .nav-open .scrim { display: block; position: fixed; inset: 0; z-index: 25; background: rgba(18, 18, 20, .5); }
-  .page { padding-block: 20px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .nav-open .scrim { display: block; position: fixed; inset: 0; z-index: 40; background: rgba(18, 18, 20, .35); }
+  .page { padding-block: 18px 48px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+  .ph h1 { font-size: 24px; }
+}
+@media (max-width: 760px) {
+  .topbar { padding: 0 max(14px, env(safe-area-inset-right, 0px)) 0 max(14px, env(safe-area-inset-left, 0px)); }
+  .page { padding-block: 14px 40px; padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px)); }
+  .ph { display: block; margin-bottom: 14px; }
+  .ph h1 { font-size: 22px; }
+  .ph .crumbs { margin-bottom: 6px; }
+  .ph-a { margin-top: 10px; }
 }
 @media (max-width: 700px) {
   .tbl.dsg { min-width: 0; }
@@ -372,11 +401,13 @@ dialog .refs { margin-top: 6px; }
   .ed-res { padding: 14px; }
 }
 /* ============ suave: objetos en vez de filas ============ */
-.seg, .seg2 { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 4px; background: var(--soft); border: 0; border-radius: 99px; }
+.seg, .seg2 { display: inline-flex; flex-wrap: wrap; gap: 2px; padding: 4px; background: var(--track); border: 0; border-radius: 99px; }
 .seg button, .seg2 button { border: 0; margin: 0; border-radius: 99px; padding: 6px 16px; font-weight: 600; color: var(--ink-2); background: transparent; cursor: pointer; }
 .seg button:hover, .seg2 button:hover { color: var(--ink); }
 .seg button.on, .seg2 button.on { background: var(--bg); color: var(--ink); box-shadow: 0 1px 3px rgba(18, 18, 20, .14); border: 0; }
 .seg2 button { padding: 5px 14px; font-size: 13.5px; }
+/* The body went to 14 px (ronda-3 §2, C1); the segmented switches keep the 15 px they had (exception 1) */
+.seg button, .rad span { font-size: 15px; }
 .detail { border: 0; border-radius: var(--r-panel); background: var(--bg); box-shadow: 0 0 0 1px var(--line); padding: 20px; }
 .toolbar .tb-r { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .empty-card { grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: var(--soft); border-radius: var(--r-panel); color: var(--ink-2); display: grid; justify-items: center; gap: 10px; }
@@ -500,8 +531,6 @@ dialog .refs { margin-top: 6px; }
 /* ---------- interfaz neutra: el color solo significa algo ----------
    Gris oscuro = costo y estructura · verde = ganancia y lo positivo · rojo = deuda, fallos · ámbar = aviso.
    El color de dato (cada filamento) es el único que no sale de los tokens. */
-.nav a[aria-current="page"] { background: var(--soft-2); color: var(--ink); }
-.nav a[aria-current="page"] svg { color: var(--ink); }
 .av { background: var(--soft-2); color: var(--ink-2); }
 .banner { background: var(--soft-2); color: var(--ink); }
 .tg-set { background: var(--soft-2); color: var(--ink-2); }
@@ -513,12 +542,10 @@ dialog .refs { margin-top: 6px; }
 :is(.tg, .capas i, .lg i).print { --c: var(--c-l); --cx: var(--on-dark); }
 /* etiquetas de estado: grises, con un punto de color; solo lo que pide atención se pinta entero */
 .seg button.on, .seg2 button.on { color: var(--ink); }
-.sidebar .brand small, .brand small { color: var(--ink-3t); }
 .note.warn { background: var(--soft); border-left: 0; color: var(--ink); }
 .tg b { background: var(--c-l); color: var(--on-dark); }
 a, .link { color: var(--ink); text-decoration-color: var(--ink-3t); }
 a:hover, .link:hover { text-decoration-color: var(--ink); }
-.nav a { text-decoration: none; }
 /* ---------- sin líneas: rellenos lisos ---------- */
 .prog i, .stk i { background-image: none; }
 .col i { background-image: none; }
@@ -557,10 +584,6 @@ a:hover, .link:hover { text-decoration-color: var(--ink); }
 .toast-b:hover { background: rgba(255,255,255,.14); }
 .effects { margin: 10px 0 0; padding-left: 18px; color: var(--ink-2); font-size: 14px; display: grid; gap: 4px; }
 kbd { font: inherit; font-size: 12px; font-weight: 600; background: var(--soft); border: 1px solid var(--line-2); border-bottom-width: 2px; border-radius: var(--r-pill); padding: 0 6px; min-width: 22px; display: inline-block; text-align: center; color: var(--ink-2); margin: 0 1px; }
-.srch { display: flex; align-items: center; gap: 8px; width: 100%; margin: 0 0 6px; padding: 8px 10px; border: 1px solid var(--line-2); background: var(--bg); border-radius: var(--r-field); color: var(--ink-2); cursor: pointer; }
-.srch:hover { border-color: var(--ink-3t); color: var(--ink); }
-.srch span { flex: 1; text-align: left; }
-.srch kbd { font-size: 11px; }
 /* documento (cotización / nota de venta) */
 .doc { border: 1px solid var(--line-2); border-radius: var(--r-field); background: var(--bg); color: var(--ink); padding: 26px 28px; display: grid; gap: 18px; font-size: 14px; }
 .doc small { display: block; color: var(--ink-2); font-size: 12.5px; }

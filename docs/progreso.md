@@ -62,5 +62,6 @@ Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 3` · `t
 |---|---|---|---|
 | Inventario contra la maqueta | A | terminada | [`mejoras/informe-ronda3-a.md`](mejoras/informe-ronda3-a.md). Excepciones de la persona: interruptores y cajón de filamento como hoy; la mascota se queda (`decisiones.md`, 2026-11-14) |
 | Tokens y componentes base | B | terminada | [`mejoras/informe-ronda3-b.md`](mejoras/informe-ronda3-b.md): tokens, CSS partido por pantalla (sin cambio visual), componentes base y compartidos, vocabulario §5, arreglo del doble % |
-| Pantallas (17 pasos de §6) | C | no iniciada | |
+| Pantallas (17 pasos de §6) | C | terminada | [`mejoras/informe-ronda3-c.md`](mejoras/informe-ronda3-c.md): marco y 16 pantallas con el diseño nuevo; segmentados, cajón de filamento y mascota como antes (E1–E3); lo que la maqueta muestra y el sistema no tiene, en ese informe |
+| Marco (barra lateral, menú ≤ 1099, encabezado) | C1 | igual a la maqueta de la ronda 3 | Mascota en lugar de «EZ» (E3) y «Nueva pieza» (D-11); comparado a 1440, 820 y 390 |
 | Revisión visual, accesibilidad y textos | D | no iniciada | |

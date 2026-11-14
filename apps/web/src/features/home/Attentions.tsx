@@ -1,8 +1,9 @@
-// Inicio › Atención (docs/06 §2, ronda-2 §5; mockup reference/ronda-2/inicio.html): attentions grouped by
-// priority (`severity` from core › classifyAttention), filter chips with counters (not saved), 5 per group and
-// "Ver las N restantes" that adds batches of 50 in place, never painting more than 200 rows at once (D-2).
+// Inicio › Alertas (docs/06 §2, ronda-2 §5; ronda-3 §3 .al-list): attentions grouped by priority (`severity` from
+// core › classifyAttention), filter chips with counters (not saved), 5 per group and "Ver las N restantes" that adds
+// batches of 50 in place, never painting more than 200 rows at once (D-2). Drawn as a ronda-3 panel with the alert list.
 import { useMemo, useState } from 'react';
 import { Icon } from '../../components/Icon';
+import { Count, Panel } from '../../components/Panel';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { go } from '../../lib/nav';
@@ -11,6 +12,8 @@ import { attentionView } from './attentionView';
 
 const L = es.screens.home.attention;
 const GROUPS: readonly AttentionSeverity[] = ['urgent', 'soon', 'review'];
+/** Icon square in the color of its group (ronda-3 .al-ic): red, amber, grey. */
+const TONE: Record<AttentionSeverity, string> = { urgent: ' bad', soon: ' warn', review: '' };
 type Filter = 'all' | AttentionSeverity;
 
 export const FIRST = 5;
@@ -48,16 +51,13 @@ export function Attentions({ items }: { items: readonly Attention[] }) {
     ...GROUPS.map((s): [Filter, string, number] => [s, L.group[s], byGroup[s].length]),
   ];
   return (
-    <section className="atn" aria-labelledby="atn-title">
-      <div className="atn-h">
-        <h2 id="atn-title">{L.title}</h2>
-        <div className="atn-f" role="group" aria-label={L.title}>
-          {chips.map(([k, label, n]) => (
-            <button key={k} type="button" className={`atn-chip${k === 'all' ? '' : ` s-${k}`}`} aria-pressed={filter === k} onClick={() => setFilter(k)}>
-              {label} <span className="num">{n}</span>
-            </button>
-          ))}
-        </div>
+    <Panel className="atn" title={L.title} aside={<Count n={items.length} />}>
+      <div className="atn-f" role="group" aria-label={L.title}>
+        {chips.map(([k, label, n]) => (
+          <button key={k} type="button" className="atn-chip" aria-pressed={filter === k} onClick={() => setFilter(k)}>
+            {label} <span className="num">{n}</span>
+          </button>
+        ))}
       </div>
       <div className="atn-list" data-testid="attentions">
         {groups.map((s) => {
@@ -68,13 +68,13 @@ export function Attentions({ items }: { items: readonly Attention[] }) {
           return (
             <div key={s} className={`atn-g s-${s}`} data-severity={s}>
               {filter === 'all' ? <div className="atn-gh"><span className="dot" aria-hidden="true" /><b>{L.group[s]}</b><span>{L.groupNote[s]}</span></div> : null}
-              <ul>{list.slice(from, to).map((a, i) => {
+              <ul className="al-list">{list.slice(from, to).map((a, i) => {
                 const v = attentionView(a);
                 return (
-                  <li key={from + i}>
-                    <span className="ai"><Icon name={ICON[a.kind] ?? 'warn'} size={19} /></span>
+                  <li key={from + i} className="al">
+                    <span className={`al-ic${TONE[s]}`}><Icon name={ICON[a.kind] ?? 'warn'} size={16} /></span>
                     <span className="at">{v.text}</span>
-                    <a className="btn sm" href={v.href} onClick={(e) => { e.preventDefault(); go(v.href); }}>{v.button}</a>
+                    <a className="btn" href={v.href} onClick={(e) => { e.preventDefault(); go(v.href); }}>{v.button}</a>
                   </li>
                 );
               })}</ul>
@@ -83,6 +83,6 @@ export function Attentions({ items }: { items: readonly Attention[] }) {
           );
         })}
       </div>
-    </section>
+    </Panel>
   );
 }

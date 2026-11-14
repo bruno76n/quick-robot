@@ -1,10 +1,12 @@
 // Calculadora (docs/06 §3.1): the piece form and its live breakdown. Save sends the inputs; the server costs it.
-import type { ProductDetail, SaveProductInput } from '@app/contract';
+import type { ChannelView, ProductDetail, SaveProductInput } from '@app/contract';
 import { PRICE_TAGS } from '@app/core';
 import { useQuery } from '@tanstack/react-query';
 import { useSearch } from '@tanstack/react-router';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '../../components/Button';
+import { PageHead } from '../../components/PageHead';
+import { PieceThumb } from '../../components/PieceThumb';
 import { ConfirmButton } from '../../components/ConfirmButton';
 import { Field } from '../../components/Field';
 import { Icon } from '../../components/Icon';
@@ -14,13 +16,13 @@ import { UnitInput } from '../../components/UnitInput';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { api } from '../../lib/api';
-import { grams as fmtGrams, money } from '../../lib/format';
+import { grams as fmtGrams, hours as fmtHours, money } from '../../lib/format';
 import { useWrite } from '../../lib/mutate';
 import { go } from '../../lib/nav';
 import { keys, usePrinters, useSettings, useSupplies } from '../../lib/queries';
 import { useFilaments } from '../filament/api';
 import { SpoolDialog } from '../filament/SpoolDialog';
-import { num, previewCost, priceOf, type Catalog, type Draft } from './costing';
+import { draftHours, num, previewCost, priceOf, type Catalog, type Draft } from './costing';
 import { PieceResult } from './PieceResult';
 import { PhotoField } from './PhotoField';
 import { QuoteDialog } from './QuoteDialog';
@@ -58,6 +60,15 @@ function toInput(d: Draft, c: Catalog): SaveProductInput {
 
 interface Root { id: string; name: string }
 
+/** "PLA Negro · 45 g · 2 h 30 min · Bambu Lab P1S" under the name in the result panel (mockup .pz-h). */
+function resultMeta(d: Draft, c: Catalog): string {
+  const fils = d.filaments.map((f) => c.filaments.find((x) => x.id === f.filamentId)).filter((x) => x !== undefined);
+  const g = d.filaments.reduce((a, f) => a + num(f.grams), 0);
+  const h = draftHours(d);
+  const printer = c.printers.find((p) => p.id === d.printerId)?.name;
+  return [fils.map((x) => `${x.material} ${x.color}`).join(' + '), g > 0 ? fmtGrams(g) : '', h > 0 ? (h < 1 ? `${Math.max(1, Math.round(h * 60))} min` : fmtHours(h)) : '', printer ?? ''].filter(Boolean).join(' · ');
+}
+
 export function ProductEditor() {
   // ?id= edits a piece; ?variante= opens a copy of that piece as a new variant of its original (mejoras/ronda-2.md §3.4).
   const search = useSearch({ strict: false }) as { id?: string; variante?: string };
@@ -83,10 +94,10 @@ export function ProductEditor() {
     if (original) { root = { id: original.id, name: original.name }; parent = fromDetail(original); }
     initial = fromId ? { ...base, name: root!.name, variantLabel: '', parentId: root!.id, photoFileId: null, photoUrl: null } : base;
   }
-  return <PieceForm key={`${loadId ?? 'new'}-${fromId ?? ''}`} initial={initial} parent={parent} root={root} c={c} editId={editId} fromId={fromId} />;
+  return <PieceForm key={`${loadId ?? 'new'}-${fromId ?? ''}`} initial={initial} parent={parent} root={root} c={c} channels={settings!.channels} editId={editId} fromId={fromId} />;
 }
 
-function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draft; parent: Draft | null; root: Root | null; c: Catalog; editId: string | undefined; fromId: string | undefined }) {
+function PieceForm({ initial, parent, root, c, channels, editId, fromId }: { initial: Draft; parent: Draft | null; root: Root | null; c: Catalog; channels: ChannelView[]; editId: string | undefined; fromId: string | undefined }) {
   const [d, setD] = useState<Draft>(initial);
   const [spoolFor, setSpoolFor] = useState<number | null>(null);
   const [quote, setQuote] = useState(false);
@@ -129,22 +140,34 @@ function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draf
     : sortedFil.map((y) => filOption(y));
   const supOptions: PickerOption[] = c.supplies.map((o) => ({ value: o.id, label: o.name }));
   const rowInput = (row: string) => (el: HTMLElement) => el.closest(row)?.querySelector<HTMLInputElement>('.unit input');
+  const heading = newOf ? t('screens.products.variants.editorTitle', { name: newOf.name }) : isVariant && root ? `${root.name} · ${d.variantLabel.trim() || '…'}` : d.name.trim() || (editId ? L.edit : L.new);
+  const hexes = d.filaments.map((f) => c.filaments.find((x) => x.id === f.filamentId)?.hex ?? '').filter(Boolean);
   return (
     <>
-      <nav className="crumbs"><a href="/productos" onClick={(e) => { e.preventDefault(); go('/productos'); }}>{es.screens.products.title}</a><span>/</span><span>{newOf ? t('screens.products.variants.editorTitle', { name: newOf.name }) : editId ? L.edit : L.new}</span></nav>
-      {newOf ? <h1 className="var-title">{t('screens.products.variants.editorTitle', { name: newOf.name })}</h1> : null}
-      {editId && root && !newOf ? <p className="banner" data-testid="variant-of">{t('screens.products.variantOf', { name: root.name })}</p> : null}
-      <div className="ed">
+      <PageHead crumbs={[{ label: es.screens.products.title, to: '/productos' }]} title={heading} short={heading}
+        sub={editId && root && !newOf ? <span data-testid="variant-of">{t('screens.products.variantOf', { name: root.name })}</span> : isVariant ? L.variantSub : L.pieceSub}
+        actions={<>
+          <Button onClick={() => setQuote(true)}>{L.quote}</Button>
+          {editId ? <Button disabled>{L.sell}</Button> : null}
+          <Button variant="primary" busy={save.isPending} busyLabel={es.common.saving} onClick={() => { if (valid()) save.mutate(toInput(d, c)); }}>{editId && !newOf ? L.saveChanges : L.saveNew}</Button>
+        </>} />
+      <div className="ed pz">
         <div className="ed-form">
-          {isVariant
-            ? <label className="fld title-f var-label"><span>{es.screens.products.variants.labelField}</span><input ref={labelRef} value={d.variantLabel} required maxLength={60} onChange={(e) => set({ variantLabel: e.target.value })} /></label>
-            : <label className="fld title-f"><span className="sr">{L.name}</span><input ref={nameRef} value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>}
-          <PhotoField fileId={d.photoFileId} url={d.photoUrl} hexes={d.filaments.map((f) => c.filaments.find((x) => x.id === f.filamentId)?.hex ?? '').filter(Boolean)} seed={editId ?? 'new'} onChange={(photoFileId, photoUrl) => set({ photoFileId, photoUrl })} />
+          <fieldset className="blk"><legend>{L.data}</legend>
+            {isVariant
+              ? <label className="fld"><span>{es.screens.products.variants.labelField}</span><input ref={labelRef} value={d.variantLabel} required maxLength={60} onChange={(e) => set({ variantLabel: e.target.value })} /></label>
+              : <label className="fld"><span>{L.name}</span><input ref={nameRef} value={d.name} onChange={(e) => set({ name: e.target.value })} placeholder={L.namePlaceholder} /></label>}
+            <div className="fld"><span>{L.priceTags}</span><div className="tags" role="group" aria-label={L.priceTags}>{PRICE_TAGS.map((tag) => <button key={tag} type="button" className={`tag${d.tags.includes(tag) ? ' on' : ''}`} aria-pressed={d.tags.includes(tag)} onClick={() => set({ tags: d.tags.includes(tag) ? d.tags.filter((x) => x !== tag) : [...d.tags, tag] })}>{tag}</button>)}</div></div>
+            <PhotoField fileId={d.photoFileId} url={d.photoUrl} hexes={hexes} onChange={(photoFileId, photoUrl) => set({ photoFileId, photoUrl })} />
+            <Field label={L.notes}><textarea rows={2} value={d.note} onChange={(e) => set({ note: e.target.value })} placeholder={L.notesPlaceholder} /></Field>
+          </fieldset>
           <fieldset className="blk"><legend>{L.printing}</legend>
-            <div className="grid2">
-              <Field label={L.printer} hint={L.printerHint}><select value={d.printerId} onChange={(e) => set({ printerId: e.target.value })}>{c.printers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}{c.printers.length > 1 || !c.printers.length ? <option value="">{L.anyPrinter}</option> : null}</select></Field>
-              <div className="fld"><span>{L.time}</span><div className="hm"><UnitInput unit="h" inputMode="numeric" value={d.hours} onChange={(e) => set({ hours: e.target.value })} placeholder="0" aria-label={L.hoursLabel} /><UnitInput unit="min" inputMode="numeric" value={d.minutes} onChange={(e) => set({ minutes: e.target.value })} placeholder="0" aria-label={L.minutesLabel} /></div></div>
+            <Field label={L.printer}><select value={d.printerId} onChange={(e) => set({ printerId: e.target.value })}>{c.printers.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}{c.printers.length > 1 || !c.printers.length ? <option value="">{L.anyPrinter}</option> : null}</select></Field>
+            <div className="grid3 pz-time">
+              <div className="fld pz-hm"><span>{L.time}</span><div className="hm"><UnitInput unit="h" inputMode="numeric" value={d.hours} onChange={(e) => set({ hours: e.target.value })} placeholder="0" aria-label={L.hoursLabel} /><UnitInput unit="min" inputMode="numeric" value={d.minutes} onChange={(e) => set({ minutes: e.target.value })} placeholder="0" aria-label={L.minutesLabel} /></div></div>
+              <Field label={L.perPlate}><input inputMode="numeric" value={d.batch} onChange={(e) => set({ batch: e.target.value })} /></Field>
             </div>
+            <p className="hint">{L.printerHint} {L.perPlateHint}.</p>
           </fieldset>
           <fieldset className="blk"><legend>{L.filaments}</legend>
             <div>{d.filaments.map((f, i) => {
@@ -176,21 +199,12 @@ function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draf
             ) : <p className="hint">{L.noSuppliesYet}</p>}
             <p className="hint">{L.suppliesHint}</p>
           </fieldset>
-          <fieldset className="blk"><legend>{L.plate}</legend>
+          <fieldset className="blk"><legend>{L.extrasStock}</legend>
             <div className="grid2">
-              <Field label={L.perPlate} hint={L.perPlateHint}><input inputMode="numeric" value={d.batch} onChange={(e) => set({ batch: e.target.value })} /></Field>
               <Field label={L.otherExtras} hint={L.otherExtrasHint}><UnitInput unit="$" inputMode="decimal" value={d.extras} onChange={(e) => set({ extras: e.target.value })} placeholder="0" /></Field>
+              <div className="fld"><span>{L.stock}</span><label className="chk"><input type="checkbox" checked={d.tracksStock} onChange={(e) => set({ tracksStock: e.target.checked })} /><span>{L.tracksStock}</span></label></div>
             </div>
-          </fieldset>
-          <fieldset className="blk"><legend>{L.listPrice}</legend>
-            <div className="seg wide" role="group" aria-label={L.priceMethod}>
-              <button type="button" className={d.mode === 'value' ? 'on' : ''} onClick={() => set({ mode: 'value' })}>{es.status.priceMode.value}</button>
-              <button type="button" className={d.mode === 'formula' ? 'on' : ''} onClick={() => set({ mode: 'formula' })}>{es.status.priceMode.formula}</button>
-            </div>
-            {d.mode === 'formula' ? <div className="grid3"><Field label={L.margin} hint={L.marginHint}><UnitInput unit="%" inputMode="decimal" value={d.margin === '' ? String(c.settings.formulaMarginPct) : d.margin} onChange={(e) => set({ margin: e.target.value })} /></Field></div> : null}
-            <p className="hint">{d.mode === 'value' ? L.valueHint : L.formulaHint} {L.listHint}</p>
-            <div className="tags" role="group" aria-label={L.priceTags}>{PRICE_TAGS.map((tag) => <button key={tag} type="button" className={`tag${d.tags.includes(tag) ? ' on' : ''}`} aria-pressed={d.tags.includes(tag)} onClick={() => set({ tags: d.tags.includes(tag) ? d.tags.filter((x) => x !== tag) : [...d.tags, tag] })}>{tag}</button>)}</div>
-            <Field label={L.notes}><textarea rows={2} value={d.note} onChange={(e) => set({ note: e.target.value })} placeholder={L.notesPlaceholder} /></Field>
+            <p className="hint">{L.tracksStockHint}</p>
           </fieldset>
           <fieldset className="blk"><legend>{L.spec}</legend>
             <p className="hint">{L.specHint}</p>
@@ -206,20 +220,23 @@ function PieceForm({ initial, parent, root, c, editId, fromId }: { initial: Draf
               void navigator.clipboard?.writeText(text).then(() => toast(t('toast.copy.done', { what: L.specCopied })), () => toast(es.toast['copy.failed']));
             }}>{L.copySpec}</Button></div>
           </fieldset>
-          <fieldset className="blk"><legend>{L.stock}</legend>
-            <label className="chk"><input type="checkbox" checked={d.tracksStock} onChange={(e) => set({ tracksStock: e.target.checked })} /><span>{L.tracksStock}</span><small>{L.tracksStockHint}</small></label>
-          </fieldset>
         </div>
         <aside className="ed-res" aria-label={L.result}>
-          <div className="res-top">
-            <div><span className="k">{L.cost}</span><b className="big num">{money(total)}</b></div>
-            <label className="price"><span className="k">{L.listPrice}</span><span className="unit big"><i className="pre">$</i><input inputMode="decimal" value={d.mode === 'formula' ? (price ? String(price) : '') : d.price} onChange={(e) => set({ price: e.target.value })} placeholder="0" disabled={d.mode === 'formula'} /></span></label>
+          <div className="pz-h">
+            <PieceThumb photoUrl={d.photoUrl} hexes={hexes} size={44} />
+            <div><b>{heading}</b><small>{resultMeta(d, c)}</small></div>
           </div>
-          <div id="r-dyn"><PieceResult d={d} c={c} parent={parent} onPrice={(v) => set({ price: String(v) })} onFormula={() => set({ mode: 'formula' })} /></div>
+          <PieceResult d={d} c={c} parent={parent} channels={channels} onPrice={(v) => set({ price: String(v) })} onFormula={() => set({ mode: 'formula' })}
+            method={<div className="seg wide" role="group" aria-label={L.priceMethod}>
+              <button type="button" className={d.mode === 'value' ? 'on' : ''} onClick={() => set({ mode: 'value' })}>{es.status.priceMode.value}</button>
+              <button type="button" className={d.mode === 'formula' ? 'on' : ''} onClick={() => set({ mode: 'formula' })}>{es.status.priceMode.formula}</button>
+            </div>}
+            price={<>
+              <label className="price"><span className="k">{L.listPrice}</span><span className="unit big"><i className="pre">$</i><input inputMode="decimal" value={d.mode === 'formula' ? (price ? String(price) : '') : d.price} onChange={(e) => set({ price: e.target.value })} placeholder="0" disabled={d.mode === 'formula'} /></span></label>
+              {d.mode === 'formula' ? <Field label={L.margin} hint={L.marginHint}><UnitInput unit="%" inputMode="decimal" value={d.margin === '' ? String(c.settings.formulaMarginPct) : d.margin} onChange={(e) => set({ margin: e.target.value })} /></Field> : null}
+            </>} />
           <div className="res-act">
-            <Button variant="primary" block busy={save.isPending} busyLabel={es.common.saving} onClick={() => { if (valid()) save.mutate(toInput(d, c)); }}>{editId && !newOf ? L.saveChanges : L.saveNew}</Button>
             {editId && !newOf ? <Button block onClick={() => { setNewOf(root ?? { id: editId, name: d.name }); setD({ ...d, variantLabel: '', photoFileId: null, photoUrl: null }); }}>{L.saveVariant}</Button> : null}
-            <div className="row2"><Button block onClick={() => setQuote(true)}>{L.quote}</Button>{editId ? <Button block disabled>{L.sell}</Button> : null}</div>
             {editId && !newOf ? <ConfirmButton variant="ghost" danger block confirmText={es.confirm.tapAgainDelete} onConfirm={() => del.mutate(undefined)}>{L.deletePiece}</ConfirmButton> : <Button variant="ghost" block onClick={() => go('/productos')}>{L.discard}</Button>}
           </div>
         </aside>

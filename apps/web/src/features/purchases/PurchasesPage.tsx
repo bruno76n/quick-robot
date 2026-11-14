@@ -1,16 +1,18 @@
 // Compras (docs/06 §11, docs/04 §9): calculated list grouped by supplier, "Copiar lista" per supplier, suppliers and latest purchases.
 import type { SupplierView } from '@app/contract';
 import { useState } from 'react';
-import { PageHead } from '../../components/AppShell';
+import { PageHead } from '../../components/PageHead';
 import { Button } from '../../components/Button';
 import { Dialog } from '../../components/Dialog';
+import { Panel } from '../../components/Panel';
+import { Pill } from '../../components/Pill';
+import { Table, Td, Th } from '../../components/Table';
 import { toast } from '../../components/Toast';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { centsTotal, date, number1 } from '../../lib/format';
 import { go } from '../../lib/nav';
 import { useSuppliers, useSupplies } from '../../lib/queries';
-import { tbOnly } from '../production/bold';
 import { usePurchases, type PurchaseGroup, type PurchaseLine } from './api';
 import { SupplierDialog } from './SupplierDialog';
 import './purchases.css';
@@ -37,7 +39,6 @@ export function PurchasesPage() {
   const { data } = usePurchases();
   // In the order they were added (ids are time-ordered), like the mockup.
   const suppliers = [...(useSuppliers().data ?? [])].sort((a, b) => a.id.localeCompare(b.id));
-  const supplies = useSupplies().data?.items ?? [];
   const [dlg, setDlg] = useState<{ supplier: SupplierView | null } | null>(null);
   const [shown, setShown] = useState<string | null>(null);
   const copy = async (g: PurchaseGroup) => {
@@ -52,68 +53,36 @@ export function PurchasesPage() {
     const full = suppliers.find((s) => s.id === g.supplier!.id);
     return [g.supplier.phone, full?.note ?? g.supplier.note].filter(Boolean).join(' · ') || ' ';
   };
+  const meta = data?.count ? t('screens.purchases.suggestedMeta', { count: data.count, amount: centsTotal(data.estimatedCents) }) : '';
   return (
     <>
-      <PageHead title={L.title} actions={<Button icon="plus" onClick={() => setDlg({ supplier: null })}>{L.newSupplier}</Button>} />
-      {data ? (
-        <section className="brf one sm"><div><p className="brf-l">
-          {data.count ? (
-            <>
-              {tbOnly('screens.purchases.summary', { count: data.count, amount: centsTotal(data.estimatedCents) }, { count: '', amount: '' })}{' '}
-              {data.urgent ? tbOnly('screens.purchases.urgent', { count: data.urgent }, { count: 'r' }) : L.noneUrgent}
-            </>
-          ) : L.allStocked}
-        </p></div></section>
-      ) : null}
-      <div className="pv-g">
-        {data?.groups.map((g) => (
-          <section className="pvc" key={g.supplierId ?? 'none'} data-testid="purchase-group">
-            <header>
-              <div><h2>{g.supplier?.name ?? L.noSupplier}</h2><small>{supplierSub(g)}</small></div>
-              <div className="btnrow">
-                <Button size="sm" icon="copy" onClick={() => void copy(g)}>{L.copyList}</Button>
-                {g.supplier ? <Button size="sm" variant="ghost" onClick={() => edit(g.supplier!.id)}>{es.common.edit}</Button> : null}
-              </div>
-            </header>
-            <ul className="cmp">
-              {g.lines.map((x) => (
-                <li key={`${x.kind}-${x.id}`} data-testid="purchase-line">
-                  {x.kind === 'filament' ? <span className="dot" style={{ background: x.hex ?? 'var(--no-color)' }} /> : <span className="dot sq" />}
-                  <div><b>{x.name}</b>{x.brand ? <> <small>{x.brand}</small></> : null}<small className="blk">{reasonText(x)}</small></div>
-                  <div className="cmp-q"><b className="num">{qtyText(x)}</b><small>{x.estimatedCents > 0 ? t('screens.purchases.estimate', { amount: centsTotal(x.estimatedCents) }) : ''}</small></div>
-                  <Button size="sm" onClick={() => goBuy(x)}>{L.registerPurchase}</Button>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
-      </div>
-      <div className="cols2 soft">
-        <section>
-          <h2>{L.suppliers}</h2>
-          {suppliers.length ? (
-            <ul className="pvl">
-              {suppliers.map((p) => {
-                const ni = supplies.filter((s) => s.supplier?.id === p.id).length;
-                const sub = [p.phone, p.brands ? t('screens.purchases.brands', { brands: p.brands }) : '', ni ? t('screens.purchases.supplies', { count: ni }) : ''].filter(Boolean).join(' · ') || L.noData;
-                return <li key={p.id}><div><b>{p.name}</b><small className="blk">{sub}</small></div><Button size="sm" variant="ghost" onClick={() => setDlg({ supplier: p })}>{es.common.edit}</Button></li>;
-              })}
-            </ul>
-          ) : <p className="muted">{L.noSuppliers}</p>}
-        </section>
-        <section>
-          <h2>{L.recent}</h2>
-          {data?.recent.length ? (
-            <ul className="pvl">
-              {data.recent.map((u, i) => (
-                <li key={`${u.kind}-${u.id}-${u.on}-${i}`}>
-                  <div><b>{u.kind === 'filament' ? t('screens.purchases.recentFilament', { name: u.name, brand: u.brand || L.noBrand }) : t('screens.purchases.recentSupply', { name: u.name, qty: number1(u.qty) })}</b><small className="blk">{date(u.on)}</small></div>
-                  <b className="num">{centsTotal(u.amountCents)}</b>
-                </li>
-              ))}
-            </ul>
-          ) : <p className="muted">{L.noRecent}</p>}
-        </section>
+      <PageHead title={L.title} sub={data?.count ? t('screens.purchases.sub', { count: data.count }) : null} actions={<Button icon="plus" onClick={() => setDlg({ supplier: null })}>{L.newSupplier}</Button>} />
+      <div className="cp-grid">
+        <Panel title={L.suggested} className="cp-s">
+          {data ? <p className="meta cp-m">{data.count ? meta : L.allStocked}</p> : null}
+          {data?.groups.map((g) => (
+            <section className="cp-g" key={g.supplierId ?? 'none'} data-testid="purchase-group">
+              <header className="cp-gh">
+                <div><h3>{g.supplier?.name ?? L.noSupplier}</h3><span className="meta">{supplierSub(g)}</span></div>
+                <div className="btnrow">
+                  <Button size="sm" icon="copy" onClick={() => void copy(g)}>{L.copyList}</Button>
+                  {g.supplier ? <Button size="sm" variant="ghost" onClick={() => edit(g.supplier!.id)}>{es.common.edit}</Button> : null}
+                </div>
+              </header>
+              <ul>
+                {g.lines.map((x) => (
+                  <li key={`${x.kind}-${x.id}`} data-testid="purchase-line">
+                    {x.kind === 'filament' ? <span className="dot" style={{ background: x.hex ?? 'var(--no-color)' }} /> : <span className="dot sq" />}
+                    <div className="cp-n"><b>{x.name}</b>{x.brand ? <small> {x.brand}</small> : null}{x.urgent ? <Pill tone="bad">{L.urgentTag}</Pill> : null}<span className="meta">{reasonText(x)}</span></div>
+                    <div className="cp-q"><b className="num">{qtyText(x)}</b><span className="meta num">{x.estimatedCents > 0 ? t('screens.purchases.estimate', { amount: centsTotal(x.estimatedCents) }) : ''}</span></div>
+                    <Button size="sm" onClick={() => goBuy(x)}>{L.registerPurchase}</Button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </Panel>
+        <Side suppliers={suppliers} onEdit={(p) => setDlg({ supplier: p })} />
       </div>
       {dlg ? <SupplierDialog supplier={dlg.supplier} onClose={() => setDlg(null)} /> : null}
       {shown !== null ? (
@@ -126,3 +95,42 @@ export function PurchasesPage() {
   );
 }
 
+/** Right column: suppliers and the latest purchases. */
+function Side({ suppliers, onEdit }: { suppliers: SupplierView[]; onEdit: (p: SupplierView) => void }) {
+  const { data } = usePurchases();
+  const supplies = useSupplies().data?.items ?? [];
+  return (
+    <div className="cp-side">
+      <Panel title={L.suppliers} className="cp-sup">
+        {suppliers.length ? (
+          <Table fit head={<><Th>{L.name}</Th><Th hideSm>{L.contact}</Th><Th /></>}>
+            {suppliers.map((p) => {
+              const ni = supplies.filter((s) => s.supplier?.id === p.id).length;
+              const sub = [p.brands ? t('screens.purchases.brands', { brands: p.brands }) : '', ni ? t('screens.purchases.supplies', { count: ni }) : ''].filter(Boolean).join(' · ');
+              return (
+                <tr key={p.id}>
+                  <Td><b>{p.name}</b><span className="meta">{sub || p.phone || L.noData}</span></Td>
+                  <Td hideSm>{p.phone}</Td>
+                  <Td r><Button size="sm" onClick={() => onEdit(p)}>{es.common.edit}</Button></Td>
+                </tr>
+              );
+            })}
+          </Table>
+        ) : <p className="meta">{L.noSuppliers}</p>}
+      </Panel>
+      <Panel title={L.recent}>
+        {data?.recent.length ? (
+          <ul className="lastb">
+            {data.recent.map((u, i) => (
+              <li key={`${u.kind}-${u.id}-${u.on}-${i}`}>
+                <span className="num">{date(u.on)}</span>
+                <b>{u.kind === 'filament' ? t('screens.purchases.recentFilament', { name: u.name, brand: u.brand || L.noBrand }) : t('screens.purchases.recentSupply', { name: u.name, qty: number1(u.qty) })}</b>
+                <span className="num">{centsTotal(u.amountCents)}</span>
+              </li>
+            ))}
+          </ul>
+        ) : <p className="meta">{L.noRecent}</p>}
+      </Panel>
+    </div>
+  );
+}

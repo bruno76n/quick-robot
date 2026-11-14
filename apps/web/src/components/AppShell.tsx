@@ -1,11 +1,17 @@
-// Sidebar, top bar on small screens and the work area (docs/06 §1). Business name and trade come from
-// the workspace (Ajustes), never from code (D30); with none, grey placeholders.
-// The mascot is the owner's brand mark and stays next to the name (person's decision, docs/decisiones.md 2026-11-13).
+// Frame of every screen (docs/06 §1, ronda-3 §3, reference/ronda-3 .ui-side/.ui-mtop): white sidebar with the mascot,
+// the business name and trade (from Ajustes, never from code: D30; grey placeholders when empty), Buscar ⌘K, the
+// groups of screens with grey counters (D-6) and the current one in grey and semibold. At ≤ 1099 px the sidebar is a
+// drawer opened from a fixed top bar (menu, screen title, «+»); Esc or a tap outside closes it and the focus goes back
+// to the menu button. The mascot is the owner's brand mark (person's decision, docs/decisiones.md 2026-11-13 and E3).
 import { Link, useRouterState } from '@tanstack/react-router';
-import { useEffect, useState, type ReactNode } from 'react';
+import { forwardRef, useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { es } from '../i18n/es';
+import { t } from '../i18n/t';
 import { Icon } from './Icon';
 import { Mascot } from './Mascot';
+import { ScreenTitle } from './PageHead';
+
+export { PageHead } from './PageHead';
 
 export interface NavItem { to: string; label: string; icon: string }
 export const NAV: readonly (readonly [string | null, readonly NavItem[]])[] = [
@@ -17,14 +23,88 @@ export const NAV: readonly (readonly [string | null, readonly NavItem[]])[] = [
   [es.nav.groupBusiness, [{ to: '/clientes', label: es.nav.customers, icon: 'users' }, { to: '/gastos', label: es.nav.expenses, icon: 'wallet' }, { to: '/reportes', label: es.nav.reports, icon: 'chart' }, { to: '/ajustes', label: es.nav.settings, icon: 'gear' }]],
 ];
 
-export function AppShell({ businessName, trade, banner, onNewPiece, onSearch, children }: { businessName: string; trade: string; banner?: ReactNode; onNewPiece?: () => void; onSearch?: () => void; children: ReactNode }) {
+/** Grey counters of the menu by path (D-6): orders in progress and suggested purchases. */
+export type NavCounts = Partial<Record<string, number>>;
+const COUNT_TEXT: Record<string, string> = { '/pedidos': 'nav.ordersCount', '/compras': 'nav.purchasesCount' };
+
+export function AppShell({ businessName, trade, banner, counts, onNewPiece, onSearch, children }: { businessName: string; trade: string; banner?: ReactNode; counts?: NavCounts | undefined; onNewPiece?: () => void; onSearch?: () => void; children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   // The menu closes by itself when the route changes: it is open only for the path where it was opened.
   const [openAt, setOpenAt] = useState<string | null>(null);
   const navOpen = openAt === path;
-  const setNavOpen = (v: boolean) => setOpenAt(v ? path : null);
+  const menuBtn = useRef<HTMLButtonElement>(null);
+  const side = useRef<HTMLElement>(null);
+  const open = () => setOpenAt(path);
+  const close = useCallback((back = true) => { setOpenAt(null); if (back) menuBtn.current?.focus(); }, []);
   useEffect(() => { document.body.classList.toggle('nav-open', navOpen); }, [navOpen]);
-  // Split screens scroll each side on its own (mockup: .pn-s, .pn-e, .pn-p on #main).
+  useEffect(() => {
+    if (!navOpen) return;
+    // Focus goes into the menu (the current screen, else the first link); Esc closes it.
+    (side.current?.querySelector<HTMLElement>('.nav a[aria-current="page"]') ?? side.current?.querySelector<HTMLElement>('.nav a'))?.focus({ preventScroll: true });
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.preventDefault(); close(); } };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [navOpen, close]);
+  useSplitPanes();
+  const [screenTitle, setScreenTitle] = useState<string | null>(null);
+  const section = `/${path.split('/')[1] ?? ''}`;
+  const sectionLabel = NAV.flatMap(([, items]) => items).find((it) => it.to === section)?.label ?? '';
+  return (
+    <ScreenTitle.Provider value={setScreenTitle}>
+      <div className="app" id="app">
+        <header className="topbar">
+          <button ref={menuBtn} type="button" className="menu-b" onClick={() => (navOpen ? close() : open())} aria-label={es.common.openMenu} aria-expanded={navOpen} aria-controls="side"><Icon name="menu" size={20} /></button>
+          <b className="t-title">{screenTitle ?? sectionLabel}</b>
+          <button type="button" className="btn primary icon" onClick={onNewPiece} disabled={!onNewPiece} aria-label={es.nav.newPiece} title={es.nav.newPiece}><Icon name="plus" size={16} /></button>
+        </header>
+        <Sidebar ref={side} businessName={businessName} trade={trade} section={section} counts={counts} onNewPiece={onNewPiece} onSearch={onSearch} />
+        <div className="scrim" onClick={() => close()} />
+        <main className="main" id="main">
+          {banner}
+          <div className="page" id="view" tabIndex={-1}>{children}</div>
+        </main>
+      </div>
+    </ScreenTitle.Provider>
+  );
+}
+
+/** The sidebar (≥ 1100 px fixed, below that the drawer): mascot, name and trade, search, «Nueva pieza» and the screens. */
+const Sidebar = forwardRef<HTMLElement, { businessName: string; trade: string; section: string; counts?: NavCounts | undefined; onNewPiece?: (() => void) | undefined; onSearch?: (() => void) | undefined }>(
+  function Sidebar({ businessName, trade, section, counts, onNewPiece, onSearch }, ref) {
+    const name = businessName.trim();
+    return (
+      <aside ref={ref} className="side" id="side" aria-label={es.common.mainMenu}>
+        <div className="brand">
+          <span className="mk"><Mascot size={36} /></span>
+          <div><b className={name ? undefined : 'ph-txt'}>{name || es.sidebar.businessPlaceholder}</b>{trade.trim() ? <small>{trade}</small> : <small className="ph-txt">{es.sidebar.industryPlaceholder}</small>}</div>
+        </div>
+        <button type="button" className="srch" onClick={onSearch} aria-label={es.common.searchAll}><Icon name="search" size={15} /><span>{es.common.search}</span><kbd>{es.common.searchShortcut}</kbd></button>
+        <button type="button" className="btn primary block new-b" onClick={onNewPiece} disabled={!onNewPiece}><Icon name="plus" size={14} />{es.nav.newPiece}</button>
+        <nav className="nav" aria-label={es.common.screens}>
+          {NAV.map(([group, items]) => (
+            <div className="ng" key={group ?? 'top'}>
+              {group ? <span className="ngl">{group}</span> : null}
+              {items.map((it) => {
+                const n = counts?.[it.to];
+                const nText = COUNT_TEXT[it.to];
+                return (
+                  <Link key={it.to} to={it.to} aria-current={section === it.to ? 'page' : undefined}>
+                    <Icon name={it.icon} size={16} /><span>{it.label}</span>
+                    {n && nText ? <em className="cnt num"><span aria-hidden="true">{n}</span><span className="sr">{t(nText, { count: n })}</span></em> : null}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
+        <div className="side-foot"><small className="loc">{es.screens.shell.localNote}</small></div>
+      </aside>
+    );
+  },
+);
+
+/** Split screens scroll each side on its own (mockup: .pn-s, .pn-e, .pn-p on #main). */
+function useSplitPanes() {
   useEffect(() => {
     const view = document.getElementById('view');
     const main = document.getElementById('main');
@@ -39,47 +119,4 @@ export function AppShell({ businessName, trade, banner, onNewPiece, onSearch, ch
     obs.observe(view, { childList: true });
     return () => obs.disconnect();
   }, []);
-  const section = `/${path.split('/')[1] ?? ''}`;
-  const name = businessName.trim();
-  const shownName = name || es.sidebar.businessPlaceholder;
-  const nameEl = <b className={name ? undefined : 'ph-txt'}>{shownName}</b>;
-  return (
-    <div className="app" id="app">
-      <header className="topbar">
-        <button type="button" className="btn ghost icon" onClick={() => setNavOpen(true)} aria-label={es.common.openMenu}><Icon name="menu" size={20} /></button>
-        <span className="t-name"><span className="mk"><Mascot size={28} /></span><span className={name ? undefined : 'ph-txt'}>{shownName}</span></span>
-        <button type="button" className="btn green sm" onClick={onNewPiece} disabled={!onNewPiece}>{es.nav.newPiece}</button>
-      </header>
-      <aside className="side" id="side" aria-label={es.common.mainMenu}>
-        <div className="brand"><span className="mk"><Mascot size={40} /></span><div>{nameEl}{trade.trim() ? <small>{trade}</small> : <small className="ph-txt">{es.sidebar.industryPlaceholder}</small>}</div></div>
-        <button type="button" className="btn green block" onClick={onNewPiece} disabled={!onNewPiece}><Icon name="plus" size={16} />{es.nav.newPiece}</button>
-        <button type="button" className="srch" onClick={onSearch} aria-label={es.common.searchAll}><Icon name="search" size={16} /><span>{es.common.search}</span><kbd>{es.common.searchShortcut}</kbd></button>
-        <nav className="nav" aria-label={es.common.screens}>
-          {NAV.map(([group, items]) => (
-            <div className="ng" key={group ?? 'top'}>
-              {group ? <span className="ngl">{group}</span> : null}
-              {items.map((it) => (
-                <Link key={it.to} to={it.to} aria-current={section === it.to ? 'page' : undefined}><Icon name={it.icon} size={18} /><span>{it.label}</span></Link>
-              ))}
-            </div>
-          ))}
-        </nav>
-        <div className="side-foot"><small className="loc">{es.screens.shell.localNote}</small></div>
-      </aside>
-      <div className="scrim" onClick={() => setNavOpen(false)} />
-      <main className="main" id="main">
-        {banner}
-        <div className="page" id="view" tabIndex={-1}>{children}</div>
-      </main>
-    </div>
-  );
-}
-
-export function PageHead({ title, sub, actions }: { title: ReactNode; sub?: ReactNode; actions?: ReactNode }) {
-  return (
-    <header className="ph">
-      <div><h1>{title}</h1>{sub ? <p className="sub">{sub}</p> : null}</div>
-      <div className="ph-a">{actions}</div>
-    </header>
-  );
 }
