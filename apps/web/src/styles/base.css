@@ -409,6 +409,8 @@ dialog .refs { margin-top: 6px; }
 .seg2 button { padding: 5px 14px; font-size: 13.5px; }
 /* The body went to 14 px (ronda-3 §2, C1); the segmented switches keep the 15 px they had (exception 1) */
 .seg button, .rad span { font-size: 15px; }
+/* On a phone a two-option radio switch keeps each option on one line inside its track (person's request, 2026-11-14) */
+@media (max-width: 480px) { .seg.wide:not(.seg4) .rad span { padding-left: 6px; padding-right: 6px; white-space: nowrap; } }
 .detail { border: 0; border-radius: var(--r-panel); background: var(--bg); box-shadow: 0 0 0 1px var(--line); padding: 20px; }
 .toolbar .tb-r { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .empty-card { grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: var(--soft); border-radius: var(--r-panel); color: var(--ink-2); display: grid; justify-items: center; gap: 10px; }
