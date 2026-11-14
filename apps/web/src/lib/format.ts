@@ -1,6 +1,7 @@
 // Formats of docs/13 §2.1 (es-MX, MXN). Same output as the mockup helpers.
 const money0 = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0, maximumFractionDigits: 0 });
 const money2 = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money3 = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 3, maximumFractionDigits: 3 });
 const num1 = new Intl.NumberFormat('es-MX', { maximumFractionDigits: 1 });
 const shortDate = new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 const list = new Intl.ListFormat('es-MX', { style: 'long', type: 'conjunction' });
@@ -11,6 +12,8 @@ export const moneyTotal = (pesos: number) => money0.format(Math.round(pesos || 0
 export const money = (pesos: number) => (Math.abs((pesos || 0) - Math.round(pesos || 0)) < 0.005 ? money0.format(Math.round(pesos || 0)) : money2.format(pesos || 0));
 /** Always two decimals (cost per gram). */
 export const money2d = (pesos: number) => money2.format(pesos || 0);
+/** Three decimals: the cost per gram of a filament in Filamentos and its dialogs (ronda-4 mockups, "$0.250/g"). */
+export const money3d = (pesos: number) => money3.format(pesos || 0);
 export const cents = (c: number) => money(c / 100);
 export const centsTotal = (c: number) => moneyTotal(c / 100);
 export const grams = (g: number) => `${num1.format(g || 0)} g`;

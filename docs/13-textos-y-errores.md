@@ -56,6 +56,7 @@ export const es = {
 |---|---|---|
 | Dinero en totales y listas | Pesos sin centavos, miles con coma, `es-MX` | `$1,250` |
 | Dinero con centavos | Solo cuando hay centavos reales (precios, costos unitarios, abonos) | `$35.95` |
+| Costo por gramo de un filamento (Filamentos y sus diálogos, ronda 4) | Tres decimales + `/g` | `$0.250/g` |
 | Gramos | Un decimal máximo + ` g` | `1,234.5 g` |
 | Horas | `2 h`, `2 h 30 min` | `7 h 15 min` |
 | Porcentaje | Un decimal máximo | `14.6%` |

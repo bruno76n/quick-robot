@@ -147,6 +147,18 @@ export const es = {
       bannerDown: 'La aplicación no responde. Cerrarla y volver a abrirla.',
       bannerOffline: 'Sin conexión. Lo escrito sigue aquí; se puede guardar cuando vuelva.',
     },
+    // Spools of ronda 4 (docs/mejoras/ronda-4.md §5): shared by Filamentos, Agregar rollo, Registrar impresión and Poner en producción.
+    spools: {
+      number: '#{number}', perGram: '{amount}/g', noCost: 'Sin costo', beforeAfter: '{before} → {after}',
+      source: { purchases: 'promedio de {numbers}', material: 'promedio de {material}', reference: 'precio de referencia', none: 'sin costo de referencia' },
+      sourceLong: {
+        purchases: 'Promedio de {count|la última compra con costo|las últimas compras con costo}: {numbers}. Los rollos sin costo no cuentan.',
+        material: 'Sin compras con costo de este color: promedio de las compras de {material} ({numbers}).',
+        reference: 'Sin compras con costo: precio de referencia de {price} por kilo.',
+        none: 'Sin costo de referencia para {filament}.',
+      },
+      sourceAria: 'De dónde sale el costo por gramo',
+    },
     filaments: {
       title: 'Filamentos',
       sub: '{filaments} {filaments|filamento|filamentos} · {spools} {spools|rollo|rollos}',
