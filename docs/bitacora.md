@@ -79,6 +79,17 @@ Pedido: adoptar el diseño de `reference/ronda-3/` (`docs/mejoras/ronda-3.md`), 
 - `pnpm test` 630, `pnpm e2e` 122 (5 de escritorio aparte, que pasan con `pnpm e2e:desktop`), lint 0 errores, typecheck y `pnpm security` en verde, `pnpm size` 214.7 KB de 350.
 - Todo en `main`. Las etiquetas `antes-ronda2-*` y `antes-ronda3-*` existen solo en la sesión de la nube (el remoto no acepta etiquetas).
 
+## 2026-11-14 · Ronda 4 · Rollos (sesión en la nube, modo autónomo)
+Pedido: llevar el filamento **por rollo** (`docs/mejoras/ronda-4.md`, maquetas en `reference/ronda-4/`) y el cambio de regla del dueño: el costo por gramo es el promedio de las **últimas 3 compras con costo**; los rollos sin costo no abaratan las piezas.
+- **A · Reglas** (`mejoras/informe-ronda4-a.md`): reglas en `core` con los casos de `04 §1` (1.1a–g, 1.4, 1.5a–c, 1.6); golden: solo PLA Blanco 0.3784 → 0.38 y sus 5 piezas y 2 colecciones.
+- **B · Datos** (`informe-ronda4-b.md`): migración `0008` aditiva (número de rollo, sin costo, precio de referencia, tara por marca, compras para el promedio) y las operaciones nuevas (agregar varios, terminar, pesar, elegir rollo al imprimir y al producir).
+- **C · Pantallas** (`informe-ronda4-c.md`): Filamentos con rollos numerados y su cajón, Agregar rollo, Registrar impresión y Poner en producción eligiendo rollo, la «i» del costo y Ajustes.
+- **D · Revisión** (`informe-ronda4-d.md`; **resumen final de la ronda ahí**): una carga fallida ya no se ve como lista vacía, aviso «Se descontaron» exacto, número real en la vista previa, flujo G, seguridad y textos.
+- **Pendiente fuera del sistema:** el texto de la web de venta sobre el costo por gramo (`ronda-4.md §9`).
+
+### Estado al cerrar
+- `pnpm test` 764, `pnpm e2e` 130 (5 de escritorio aparte), lint 0 errores, typecheck y `pnpm security` en verde, `pnpm size` 224.5 KB de 350.
+
 ---
 
 ## Cómo seguir en la Mac
