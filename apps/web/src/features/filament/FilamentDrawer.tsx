@@ -1,18 +1,20 @@
 // Drawer of a filament (docs/06 §6): spools in the order they are used, then the empty ones, and the ledger.
-import type { SpoolMovement } from '@app/contract';
+// Ronda 3: it stays an overlay drawer (exception 2); its content follows the mockup's aside (filamentos.html).
+import type { FilamentDetail, SpoolMovement } from '@app/contract';
 import { Button } from '../../components/Button';
 import { Drawer } from '../../components/Drawer';
-import { Pill, Swatch, type Tone } from '../../components/Pill';
-import { Table } from '../../components/Table';
+import { Meter } from '../../components/Meter';
+import { Pill, Swatch } from '../../components/Pill';
 import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
-import { centsTotal, date, grams, money2d, number1 } from '../../lib/format';
+import { centsTotal, date, grams, money2d } from '../../lib/format';
 import { useState } from 'react';
 import { useFilament } from './api';
+import { FILAMENT_TONE } from './tone';
 import { MovementDialog } from './MovementDialog';
 
+type Spool = FilamentDetail['spools'][number];
 const L = es.screens.filaments;
-const MOVE_TONE: Record<SpoolMovement['kind'], Tone> = { purchase: 'info', consumption: '', failure: 'bad', waste: 'warn', adjustment: '' };
 
 export function FilamentDrawer({ id, onClose, onAddSpool, onEditSpool }: { id: string | null; onClose: () => void; onAddSpool: (filamentId: string) => void; onEditSpool: (spoolId: string) => void }) {
   const [move, setMove] = useState<{ spoolId?: string } | null>(null);
@@ -22,51 +24,68 @@ export function FilamentDrawer({ id, onClose, onAddSpool, onEditSpool }: { id: s
   const first = withMaterial.length > 1 ? withMaterial[0]?.id : null;
   const many = (f?.spools.length ?? 0) > 1;
   const brandOf = (spoolId: string) => f?.spools.find((s) => s.id === spoolId)?.brand || es.common.noBrand;
+  const noteOf = (m: SpoolMovement) => [many ? brandOf(m.spoolId) : '', m.note || (m.kind === 'purchase' ? L.purchaseNote : '')].filter(Boolean).join(' · ');
   return (
     <Drawer open={Boolean(id)} kind={L.drawerKind} onClose={onClose}>
       {f ? (
-        <>
-          <div className="det-h"><Swatch hex={f.hex} /><div><h2>{name}</h2><small>{f.spoolCount ? t('screens.filaments.registered', { count: f.spoolCount }) : L.noSpools}</small></div></div>
-          <dl className="dl">
+        <div className="fdr">
+          <div className="fdr-h">
+            <Swatch hex={f.hex} />
+            <div><h2>{name}</h2><small className="meta">{f.spoolCount ? t('screens.filaments.registered', { count: f.spoolCount }) : L.noSpools}</small></div>
+            <Pill tone={FILAMENT_TONE[f.status]}>{es.status.filament[f.status]}</Pill>
+          </div>
+          <dl className="mini-kv">
             <div><dt>{L.available}</dt><dd className="num">{grams(f.remainingGrams)}</dd></div>
             <div><dt>{L.value}</dt><dd className="num">{centsTotal(f.valueCents)}</dd></div>
             <div><dt>{L.costPerGram}</dt><dd className="num">{money2d(f.costPerGram)}{many ? <small>{L.averageOfSpools}</small> : null}</dd></div>
             <div><dt>{L.spoolsWithMaterial}</dt><dd className="num">{withMaterial.length}</dd></div>
           </dl>
-          <div className="det-a btnrow"><Button size="sm" variant="primary" onClick={() => onAddSpool(f.id)}>{t('screens.filaments.addSpoolOf', { name })}</Button>{f.spools.length ? <Button size="sm" onClick={() => setMove({})}>{L.recordMovement}</Button> : null}</div>
-          {withMaterial.length > 1 ? <p className="note ok mt">{t('screens.filaments.asOne', { count: withMaterial.length, grams: grams(f.remainingGrams), name })}</p> : null}
-          <h3>{L.spools}</h3>
+          {withMaterial.length > 1 ? <p className="note ok">{t('screens.filaments.asOne', { count: withMaterial.length, grams: grams(f.remainingGrams), name })}</p> : null}
+          <h3 className="lbl">{L.spools}</h3>
           {f.spools.length ? (
             <ul className="rolls">
               {f.spools.map((s) => (
-                <li className="roll" key={s.id}>
-                  <div className="roll-h"><b>{s.brand || es.common.noBrand}</b>{s.id === first ? <Pill tone="info">{L.usedFirst}</Pill> : s.status === 'empty' ? <Pill tone="plain">{es.status.spool.empty}</Pill> : null}<span className="rowa"><Button size="sm" variant="ghost" onClick={() => setMove({ spoolId: s.id })}>{L.movement}</Button><Button size="sm" variant="ghost" onClick={() => onEditSpool(s.id)}>{es.common.edit}</Button></span></div>
-                  <div className="roll-s"><span className={`stk${s.remainingGrams <= 150 ? ' low' : ''}`}><i style={{ width: `${Math.min(100, (s.remainingGrams / s.grams) * 100)}%` }} /></span><span className="num">{grams(s.remainingGrams)} <small>{t('screens.filaments.spoolOfTotal', { total: grams(s.grams) })}</small></span></div>
-                  <small>{t('screens.filaments.spoolLine', { date: date(s.purchasedOn), cost: centsTotal(s.costCents + s.shippingCents), perGram: money2d(s.costPerGram) })}</small>
-                </li>
+                <SpoolCard key={s.id} s={s} first={s.id === first} onMove={() => setMove({ spoolId: s.id })} onEdit={() => onEditSpool(s.id)} />
               ))}
             </ul>
-          ) : <p className="muted">{L.noSpoolsHint}</p>}
+          ) : <p className="meta">{L.noSpoolsHint}</p>}
           {f.movements.length ? (
             <>
-              <h3>{L.movements}</h3>
-              <p className="hint">{L.movementsHint}</p>
-              <Table small head={<><th>{L.colDate}</th>{many ? <th>{L.colSpool}</th> : null}<th>{L.colMovement}</th><th className="r">{L.colGrams}</th><th>{L.colNote}</th></>}>
+              <h3 className="lbl">{L.movements}</h3>
+              <ul className="mv" aria-label={L.movements}>
                 {f.movements.slice(0, 14).map((m) => (
-                  <tr key={m.id}>
-                    <td>{date(m.on)}</td>
-                    {many ? <td>{brandOf(m.spoolId)}</td> : null}
-                    <td><Pill tone={MOVE_TONE[m.kind]}>{es.status.spoolMovement[m.kind]}</Pill></td>
-                    <td className={`r num${m.grams >= 0 ? ' pos' : ''}`}>{m.grams > 0 ? '+' : ''}{number1(m.grams)}</td>
-                    <td className="nota">{m.note || (m.kind === 'purchase' ? L.purchaseNote : '')}</td>
-                  </tr>
+                  <li key={m.id} className={m.kind}>
+                    <span className="num">{date(m.on)}</span>
+                    <span><b>{es.status.spoolMovement[m.kind]}</b>{noteOf(m) ? <span className="meta">{noteOf(m)}</span> : null}</span>
+                    <b className={`num${m.grams >= 0 ? ' pos' : ''}`}>{m.grams > 0 ? '+' : ''}{grams(m.grams)}</b>
+                  </li>
                 ))}
-              </Table>
+              </ul>
+              <p className="hint">{L.movementsHint}</p>
             </>
           ) : null}
-        </>
+          <div className="fdr-a btnrow">
+            {f.spools.length ? <Button onClick={() => setMove({})}>{L.recordMovement}</Button> : null}
+            <Button variant="primary" icon="plus" onClick={() => onAddSpool(f.id)}>{t('screens.filaments.addSpoolOf', { name })}</Button>
+          </div>
+        </div>
       ) : <div className="skel" />}
       {move && f ? <MovementDialog f={f} spoolId={move.spoolId} onClose={() => setMove(null)} /> : null}
     </Drawer>
+  );
+}
+
+function SpoolCard({ s, first, onMove, onEdit }: { s: Spool; first: boolean; onMove: () => void; onEdit: () => void }) {
+  return (
+    <li className="roll">
+      <div className="roll-h">
+        <b>{s.brand || es.common.noBrand} · {grams(s.grams)}</b>
+        {first ? <Pill tone="info">{L.usedFirst}</Pill> : s.status === 'empty' ? <Pill tone="plain">{es.status.spool.empty}</Pill> : null}
+        <span className="rowa"><Button size="sm" variant="ghost" onClick={onMove}>{L.movement}</Button><Button size="sm" variant="ghost" onClick={onEdit}>{es.common.edit}</Button></span>
+      </div>
+      <small className="meta">{t('screens.filaments.spoolLine', { date: date(s.purchasedOn), cost: centsTotal(s.costCents + s.shippingCents), perGram: money2d(s.costPerGram) })}</small>
+      <Meter value={s.remainingGrams} max={s.grams} tone={s.remainingGrams <= 150 ? 'bad' : ''} />
+      <small className="meta num">{grams(s.remainingGrams)} {t('screens.filaments.spoolOfTotal', { total: grams(s.grams) })}</small>
+    </li>
   );
 }

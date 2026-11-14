@@ -1,6 +1,57 @@
-/* Filamentos: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
-.stk-td { white-space: nowrap; }
-.stk-td .stk { margin-right: 10px; }
+/* Filamentos (ronda-3 C8, reference/ronda-3/filamentos.html). Colors only from tokens.css. */
+.fil-k { margin-bottom: 18px; }
+.fil-k.has-low .kp:nth-child(3) dd { color: var(--amber-d); }
+.fil-p .tbl td { padding-top: 12px; padding-bottom: 12px; }
+.fil-t .pn { gap: 10px; }
+.fil-t .pn b { display: block; font-size: 13.5px; }
+.fil-t .pn .meta { font-size: 12.5px; }
+.fil-q { width: 34%; min-width: 120px; }
+.fil-q .meter { max-width: 204px; margin-bottom: 4px; }
+.fil-q .meta { font-size: 12.5px; }
+.fil-t .chip { margin-left: 8px; }
+@media (max-width: 760px) {
+  .fil-q { width: 38%; min-width: 0; }
+  .fil-t td, .fil-t th { padding-left: 6px; padding-right: 6px; }
+  .fil-t td:first-child, .fil-t th:first-child { padding-left: 0; }
+  .fil-t td:last-child, .fil-t th:last-child { padding-right: 0; }
+}
+@media (max-width: 480px) {
+  .fil-q { width: auto; }
+  .fil-q .meter { width: 72px; }
+  .fil-t td.r .chip { margin-left: 0; padding: 0 6px; }
+}
+
+/* drawer of a filament (exception 2: overlay drawer; content like the mockup's aside) */
+.fdr-h { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.fdr-h > div { flex: 1; min-width: 0; }
+.fdr-h h2 { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.fdr-h .sw { width: 16px; height: 16px; }
+.fdr .mini-kv { margin: 0 0 14px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--soft); border-radius: var(--r-in); }
+.fdr .mini-kv div { padding: 9px 12px; min-width: 0; }
+.fdr .mini-kv dt { font-size: 11.5px; color: var(--ink-2); }
+.fdr .mini-kv dd { margin: 2px 0 0; font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+.fdr .mini-kv dd small { display: block; font-size: 11px; font-weight: 400; color: var(--ink-2); letter-spacing: 0; }
+.fdr .note { margin: 0 0 14px; font-size: 13px; }
+.fdr h3.lbl { font-family: inherit; font-size: 12.5px; font-weight: 500; color: var(--ink-2); letter-spacing: 0; margin: 0 0 8px; }
+.fdr .rolls { margin: 0 0 14px; }
+.fdr .roll { display: grid; gap: 5px; background: var(--soft); border: 0; border-radius: var(--r-in); padding: 10px 12px; }
+.fdr .roll-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-height: 26px; }
+.fdr .roll-h b { font-size: 13px; }
+.fdr .roll-h .rowa { margin-left: auto; display: flex; gap: 2px; }
+.fdr .roll .meter { margin: 3px 0 1px; }
+.fdr .mv { list-style: none; margin: 0; padding: 0; }
+.fdr .mv li { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; column-gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line-soft); font-size: 13px; }
+.fdr .mv li:first-child { border-top: 0; }
+.fdr .mv li > .num:first-child { font-size: 12px; color: var(--ink-2); }
+.fdr .mv li > b { white-space: nowrap; }
+.fdr .mv .pos { color: var(--green-d); }
+.fdr .hint { margin: 6px 0 0; font-size: 12.5px; }
+.fdr-a { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+@media (max-width: 480px) {
+  .fdr .mini-kv { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* SpoolDialog (.fbar, .newc, .mt-l: do not rename .mt-l, workshop.spec selects on it) */
 .fbar { border: 1px solid var(--line-2); border-radius: var(--r-panel); background: var(--bg); }
 .fbar > summary { list-style: none; display: flex; align-items: center; gap: 12px; padding: 10px 12px; cursor: pointer; border-radius: var(--r-panel); }
 .fbar > summary::-webkit-details-marker { display: none; }
@@ -14,18 +65,3 @@
 .fb-b .hint { margin: 0; }
 .newc { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
 .newc input[type="color"] { width: 46px; }
-.roll { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-in); padding: 10px 12px; display: grid; gap: 6px; }
-.roll-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.roll-h .rowa { margin-left: auto; }
-.roll-s { display: flex; align-items: center; gap: 10px; }
-.roll-s .stk { flex: 1; width: auto; min-width: 60px; }
-@media (max-width: 560px) {
-  .split .tbl.fil-t:not(.sm), .tbl.fil-t:not(.sm) { min-width: 0; }
-  .fil-t th:nth-child(4), .fil-t td:nth-child(4) { display: none; }
-  .fil-t th:nth-child(2), .fil-t td:nth-child(2) { display: none; }
-  .fil-t .stk { width: 44px; margin-right: 6px; }
-  .fil-t td, .fil-t th { padding-left: 8px; padding-right: 8px; }
-}
-.roll { border-radius: var(--r-panel); }
-.fb-c { color: var(--ink-2); }
-.tw > .tbl.fil-t { min-width: 520px; }

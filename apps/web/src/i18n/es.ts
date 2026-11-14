@@ -155,9 +155,10 @@ export const es = {
     },
     filaments: {
       title: 'Filamentos',
-      summary: '{filaments} {filaments|filamento|filamentos} · {spools} {spools|rollo|rollos} · {kg} kg disponibles · valor {value}.',
+      sub: '{filaments} {filaments|filamento|filamentos} · {spools} {spools|rollo|rollos}',
+      kpisAria: 'Resumen de filamentos', kg: '{kg} kg', inventoryValue: 'Valor del inventario',
       addSpool: 'Agregar rollo',
-      colFilament: 'Filamento', colPerGram: 'Por gramo', colAvailable: 'Disponible',
+      colFilament: 'Filamento', colPerGram: 'Por gramo', colAvailable: 'Disponible', colStatus: 'Estado',
       rowSpools: '{count} {count|rollo|rollos} · {brands}',
       noMaterial: 'Sin material',
       empty: 'Sin rollos registrados. Agrega el primero con su material, color y marca.',
