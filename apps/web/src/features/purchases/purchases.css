@@ -1,16 +1,38 @@
-/* Compras: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
-/* compras */
-.pv-g { display: grid; gap: 14px; margin: 16px 0 22px; }
-.pvc { border: 1px solid var(--line-2); border-radius: var(--r-field); padding: 14px 16px; display: grid; gap: 10px; background: var(--bg); }
-.pvc > header { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
-.cmp { list-style: none; margin: 0; padding: 0; display: grid; }
-.cmp li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
-.cmp .dot { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(18,18,20,.18); }
-.cmp .dot.sq { border-radius: var(--r-xs); background: var(--c-q); }
-.cmp-q { text-align: right; }
-.cmp-q small { display: block; }
+/* Compras (ronda-3 C13, reference/ronda-3/compras.html). Colors only from tokens.css. */
+.cp-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+.cp-side { display: grid; gap: 14px; min-width: 0; }
+.cp-s > .panel-h { margin-bottom: 2px; }
+.cp-s > .panel-h > h2 { font-size: 17px; letter-spacing: -.02em; }
+.cp-m { margin: 0 0 12px; }
+.cp-g { border: 1px solid var(--line); border-radius: var(--r-in); margin-top: 12px; overflow: hidden; }
+.cp-gh { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; background: var(--soft); flex-wrap: wrap; }
+.cp-gh > div:first-child { min-width: 0; }
+.cp-gh h3 { font-family: inherit; font-size: 13.5px; font-weight: 600; letter-spacing: 0; margin: 0; }
+.cp-g ul { list-style: none; margin: 0; padding: 0 12px; }
+.cp-g li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; column-gap: 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line-soft); }
+.cp-g li:first-child { border-top: 0; }
+.cp-g .dot { width: 12px; height: 12px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(18, 18, 20, .2); }
+.cp-g .dot.sq { border-radius: var(--r-xs); background: var(--soft-3); }
+.cp-n { min-width: 0; }
+.cp-n b { font-size: 13.5px; }
+.cp-n small { color: var(--ink-2); font-size: 12.5px; }
+.cp-n .chip { height: 20px; font-size: 11.5px; margin-left: 6px; vertical-align: 1px; }
+.cp-q { text-align: right; }
+.cp-q b { display: block; font-size: 13.5px; white-space: nowrap; }
+.cp-sup thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.cp-sup .tbl td { padding-top: 11px; padding-bottom: 11px; }
+.cp-sup .tbl td:first-child { padding-left: 0; }
+.cp-sup .tbl td:last-child { padding-right: 0; }
+.cp-sup .tbl tbody tr:first-child td { padding-top: 2px; }
+.cp-sup b { font-size: 13.5px; }
+.lastb { list-style: none; margin: 0; padding: 0; }
+.lastb li { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; column-gap: 10px; padding: 8px 0; border-top: 1px solid var(--line-soft); font-size: 13px; }
+.lastb li:first-child { border-top: 0; }
+.lastb li > .num:first-child { color: var(--ink-2); font-size: 12px; }
+@media (max-width: 1099px) {
+  .cp-grid { grid-template-columns: minmax(0, 1fr); }
+}
 @media (max-width: 640px) {
-  .cmp li { grid-template-columns: auto minmax(0, 1fr); }
-  .cmp-q { text-align: left; grid-column: 2; }
-  .cmp li .btn { grid-column: 2; justify-self: start; }
+  .cp-g li { grid-template-columns: auto minmax(0, 1fr) auto; row-gap: 6px; }
+  .cp-g li .btn { grid-column: 2 / -1; justify-self: start; }
 }

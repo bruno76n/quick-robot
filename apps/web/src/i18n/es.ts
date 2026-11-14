@@ -625,9 +625,8 @@ export const es = {
       enabledTotal: ': total {count}.', enabledNone: '. Sin piezas por ahora: registrar una impresión para existencias.',
     },
     purchases: {
-      title: 'Compras', newSupplier: 'Nuevo proveedor',
-      summary: 'Hay {count} {count|cosa por comprar|cosas por comprar}, con un costo aproximado de {amount}.',
-      urgent: '{count} {count|es urgente|son urgentes} (pedido en espera o agotado).', noneUrgent: 'Ninguna es urgente.',
+      title: 'Compras', newSupplier: 'Nuevo proveedor', sub: '{count} {count|artículo sugerido|artículos sugeridos}',
+      suggested: 'Compras sugeridas', suggestedMeta: '{count} {count|artículo|artículos} · costo estimado {amount}', urgentTag: 'Urgente',
       allStocked: 'Todo está surtido. Cuando un filamento o un insumo baje de su aviso, o un pedido aceptado necesite más material, aparece aquí lo que hay que comprar.',
       noSupplier: 'Sin proveedor', noSupplierHint: 'Asignar un proveedor al insumo o registrar la marca en un proveedor.', copyList: 'Copiar lista',
       orderNeed: 'Pedido {orders} necesita {missingGrams} más. Disponible: {remainingGrams}.', left: 'Quedan {remainingGrams}.', supplyOut: 'Agotado.',
