@@ -156,7 +156,8 @@ function PaymentDialog({ s, onBack, onDone }: { s: SaleDetail; onBack: () => voi
 }
 
 function ReturnDialog({ s, onBack, onDone }: { s: SaleDetail; onBack: () => void; onDone: () => void }) {
-  const products = useProducts().data?.items ?? [];
+  const productsQ = useProducts();
+  const products = productsQ.data?.items ?? [];
   const tracks = new Map(products.map((p) => [p.id, p.tracksStock]));
   const pieces = s.items.reduce((a, it) => a + Object.entries(itemNeed(toLineItem(it))).reduce((x, [pid, n]) => x + (tracks.get(pid) ? n : 0), 0), 0);
   const [on, setOn] = useState(todayLocal());
@@ -169,7 +170,7 @@ function ReturnDialog({ s, onBack, onDone }: { s: SaleDetail; onBack: () => void
     onDone,
   });
   return (
-    <Dialog open title={L.returnTitle} onClose={onBack} submitLabel={L.giveBack} busy={giveBack.isPending} onSubmit={() => giveBack.mutate(undefined)}>
+    <Dialog open title={L.returnTitle} onClose={onBack} submitLabel={L.giveBack} busy={giveBack.isPending || productsQ.isPending} onSubmit={() => giveBack.mutate(undefined)}>
       <p>{rich(L.returnIntro, { customer: s.customer ? ` · ${s.customer}` : '' }, { date: <b>{date(s.on)}</b>, total: <b>{centsTotal(s.totals.grossCents)}</b> })}</p>
       <div className="grid2 mt">
         <Field label={L.fDate}><input name="fecha" type="date" value={on} max={todayLocal()} onChange={(e) => setOn(e.target.value)} /></Field>
