@@ -21,6 +21,7 @@ const SAMPLES: Record<string, { path: () => string; body?: () => unknown }> = {
   'DELETE /api/v1/spools/:id': { path: () => `/api/v1/spools/${s.b.spool}` },
   'POST /api/v1/spools/:id/restore': { path: () => `/api/v1/spools/${s.b.spool}/restore` },
   'POST /api/v1/spools/:id/movements': { path: () => `/api/v1/spools/${s.b.spool}/movements`, body: () => ({ kind: 'consumption', grams: -1, on: '2026-11-01' }) },
+  'POST /api/v1/spools/:id/finish': { path: () => `/api/v1/spools/${s.b.spool}/finish`, body: () => ({}) },
   'PATCH /api/v1/channels/:id': { path: () => `/api/v1/channels/${first(s.b.channel)}`, body: () => ({ name: 'x' }) },
   'DELETE /api/v1/channels/:id': { path: () => `/api/v1/channels/${first(s.b.channel)}` },
   'GET /api/v1/supplies/:id': { path: () => `/api/v1/supplies/${first(s.b.supply)}` },

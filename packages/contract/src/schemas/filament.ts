@@ -124,3 +124,18 @@ export const spoolMovementInput = z.object({
 
 export type UpdateSpoolInput = z.infer<typeof updateSpoolInput>;
 export type SpoolMovementInput = z.infer<typeof spoolMovementInput>;
+
+/** finishSpool · POST /spools/:id/finish (ronda-4 §2.6): a waste movement for all that is left; `on` is today when left out. */
+export const finishSpoolInput = z.object({ on: calendarDate.optional() }).strict();
+
+/** weighSpool · POST /spools/:id/weigh (ronda-4 §2.7): scale − empty spool = what is left; the tare is kept for the brand. */
+export const weighSpoolInput = z.object({
+  scaleGrams: grams(LIMITS.spoolGrams),
+  tareGrams: z.number().int().min(0).max(LIMITS.spoolTareGrams),
+  on: calendarDate.optional(),
+}).strict();
+export const weighSpoolOutput = spoolOutput.extend({ leftGrams: z.number(), adjustmentGrams: z.number().nullable() });
+
+export type FinishSpoolInput = z.infer<typeof finishSpoolInput>;
+export type WeighSpoolInput = z.infer<typeof weighSpoolInput>;
+export type WeighSpoolOutput = z.infer<typeof weighSpoolOutput>;

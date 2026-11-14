@@ -3,7 +3,7 @@
 import { listSpoolMovements } from '@app/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { addSpool } from '../../src/usecases/add-spool';
-import { updateSpool } from '../../src/usecases/spools';
+import { finishSpool, recordSpoolMovement, updateSpool } from '../../src/usecases/spools';
 import { B_TOKEN, failOnWrite, makeHarness, validSpool, type Harness } from '../harness';
 
 let h: Harness;
@@ -43,5 +43,50 @@ describe('updateSpool + noCost', () => {
     const spool = (again.json.data as { spools: { id: string; noCost: boolean; grams: number }[] }).spools.find((x) => x.id === s.spool.id)!;
     expect([spool.noCost, spool.grams]).toEqual([false, 1000]);
     expect((await listSpoolMovements(h.db, h.A, s.filament.id)).filter((m) => m.spoolId === s.spool.id)).toHaveLength(1);
+  });
+});
+
+describe('finishSpool (docs/04 §1, terminar rollo)', () => {
+  it('records a waste movement for all that is left, noted «Rollo terminado»; the spool is empty and the filament drops', async () => {
+    const s = await gray({ filament: { material: 'PETG', color: 'Fin' }, costCents: 30000, purchasedOn: '2026-10-01' });
+    await recordSpoolMovement(h.deps, h.A, s.spool.id, { kind: 'consumption', grams: -900, on: '2026-10-02' });
+    const r = await finishSpool(h.deps, h.A, s.spool.id, { on: '2026-11-03' });
+    expect(r.spool).toMatchObject({ remainingGrams: 0, status: 'empty', number: s.spool.number });
+    expect(r.filament.remainingGrams).toBe(0);
+    const [m] = await listSpoolMovements(h.db, h.A, s.filament.id);
+    expect(m).toMatchObject({ kind: 'waste', grams: -100, note: 'Rollo terminado', on: '2026-11-03', spoolId: s.spool.id });
+    // The cost is the price of the purchase: an empty spool still counts in the average (case 1.1a).
+    expect(r.filament.costPerGram).toBe(0.3);
+  });
+
+  it('without a date it is today; through the route the body may be left out', async () => {
+    const s = await gray({ filament: { material: 'PETG', color: 'Hoy' }, costCents: 30000 });
+    const res = await h.call('POST', `/api/v1/spools/${s.spool.id}/finish`);
+    expect(res.status).toBe(200);
+    expect((await listSpoolMovements(h.db, h.A, s.filament.id))[0]).toMatchObject({ kind: 'waste', grams: -1000, on: h.deps.clock.today() });
+  });
+
+  it('an empty spool (0.5 g or less) → SPOOL_ALREADY_EMPTY 409, nothing written', async () => {
+    const s = await gray({ filament: { material: 'PETG', color: 'Vacío' }, costCents: 30000 });
+    await recordSpoolMovement(h.deps, h.A, s.spool.id, { kind: 'consumption', grams: -999.5, on: '2026-11-02' });
+    const res = await h.call('POST', `/api/v1/spools/${s.spool.id}/finish`, { body: {} });
+    expect([res.status, res.json.code]).toEqual([409, 'SPOOL_ALREADY_EMPTY']);
+    expect(await listSpoolMovements(h.db, h.A, s.filament.id)).toHaveLength(2);
+  });
+
+  it('a spool of another workspace or a deleted one → 404; a bad body → 422', async () => {
+    const s = await gray({ filament: { material: 'PETG', color: 'Ajeno' }, costCents: 30000 });
+    expect((await h.call('POST', `/api/v1/spools/${s.spool.id}/finish`, { token: B_TOKEN })).status).toBe(404);
+    await expect(finishSpool(h.deps, h.B, s.spool.id, {})).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    expect((await h.call('POST', `/api/v1/spools/${s.spool.id}/finish`, { body: { on: 'ayer' } })).status).toBe(422);
+    expect((await h.call('POST', `/api/v1/spools/${s.spool.id}/finish`, { body: '{' })).status).toBe(422);
+    await h.call('DELETE', `/api/v1/spools/${s.spool.id}`);
+    expect((await h.call('POST', `/api/v1/spools/${s.spool.id}/finish`)).status).toBe(404);
+  });
+
+  it('failing on the write leaves the spool as it was', async () => {
+    const s = await gray({ filament: { material: 'PETG', color: 'Mitad' }, costCents: 30000 });
+    await expect(finishSpool({ ...h.deps, db: failOnWrite(h.db, 1) }, h.A, s.spool.id, {})).rejects.toThrow(/injected/);
+    expect(await listSpoolMovements(h.db, h.A, s.filament.id)).toHaveLength(1);
   });
 });

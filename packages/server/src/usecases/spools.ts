@@ -1,6 +1,6 @@
-// updateSpool, deleteSpool, restoreSpool, recordSpoolMovement (docs/04 §1, docs/06 §6, docs/12 §8).
-import { BusinessError, type FilamentListItem, type Spool, type SpoolMovementInput, type UpdateSpoolInput } from '@app/contract';
-import { round1, tidyName } from '@app/core';
+// updateSpool, deleteSpool, restoreSpool, recordSpoolMovement, finishSpool, weighSpool (docs/04 §1, docs/06 §6, docs/12 §8).
+import { BusinessError, type FilamentListItem, type FinishSpoolInput, type Spool, type SpoolMovementInput, type UpdateSpoolInput } from '@app/contract';
+import { finishSpool as finishRule, round1, tidyName } from '@app/core';
 import {
   countSpoolMovements, getSpool, getSpoolAny, getSupplier, insertSpoolMovements, setSpoolDeleted, spoolRemainingGrams,
   transaction, updateSpool as updateRow, type Ctx, type Executor,
@@ -73,6 +73,18 @@ export async function recordSpoolMovement(deps: Deps, ctx: Ctx, id: string, inpu
     const available = Math.max(0, await spoolRemainingGrams(tx, ctx, id));
     if (grams < 0 && -grams > available + 0.05) throw new BusinessError('SPOOL_INSUFFICIENT', { availableGrams: available });
     await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: id, on: input.on, kind: input.kind, grams, note: input.note?.trim() ?? '' }]);
+    return out(tx, ctx, id, s.filamentId);
+  });
+}
+
+/** "Terminar rollo" (docs/04 §1): a waste movement for all that is left, noted «Rollo terminado»; an empty spool → SPOOL_ALREADY_EMPTY. */
+export async function finishSpool(deps: Deps, ctx: Ctx, id: string, input: FinishSpoolInput) {
+  return transaction(deps.db, async (tx) => {
+    const s = await getSpool(tx, ctx, id, { forUpdate: true });
+    if (!s) throw notFound('spool');
+    const r = finishRule({ remaining: await spoolRemainingGrams(tx, ctx, id) });
+    if (!r.ok) throw new BusinessError(r.code);
+    await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: id, on: input.on ?? deps.clock.today(), kind: 'waste', grams: r.grams, note: 'Rollo terminado' }]);
     return out(tx, ctx, id, s.filamentId);
   });
 }

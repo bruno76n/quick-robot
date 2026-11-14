@@ -15,6 +15,7 @@ export const LIMITS = {
   unitPriceCents: 100_000_000,
   amountCents: 1_000_000_000,
   spoolGrams: 100_000,
+  spoolTareGrams: 10_000,
   movementGrams: 100_000,
   hours: 1000,
   pctMax: 99,

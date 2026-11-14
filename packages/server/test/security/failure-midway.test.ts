@@ -10,7 +10,7 @@ import { addSpool } from '../../src/usecases/add-spool';
 import { completeMaintenance, createMaintenanceTask, createPrinter, deleteMaintenanceTask, deletePrinter, restorePrinter, updateMaintenanceTask, updatePrinter } from '../../src/usecases/printers';
 import { deleteCollection, deleteProduct, restoreCollection, restoreProduct, saveCollection, saveProduct, saveProductAsVariant } from '../../src/usecases/products';
 import { addChannel, removeChannel, updateChannel, updateSettings } from '../../src/usecases/settings';
-import { deleteSpool, recordSpoolMovement, restoreSpool, updateSpool } from '../../src/usecases/spools';
+import { deleteSpool, finishSpool, recordSpoolMovement, restoreSpool, updateSpool } from '../../src/usecases/spools';
 import { createSupplier, deleteSupplier, restoreSupplier, updateSupplier } from '../../src/usecases/suppliers';
 import { createSupply, deleteSupply, recordSupplyMovement, recordSupplyPurchase, restoreSupply, updateSupply } from '../../src/usecases/supplies';
 import { uploadFile } from '../../src/usecases/files';
@@ -82,6 +82,7 @@ const WRITE_ROUTES: Record<string, Case> = {
   'DELETE /api/v1/spools/:id': { setup: newSpool, run: (d, c, t) => deleteSpool(d, c, t) },
   'POST /api/v1/spools/:id/restore': { setup: deleted(newSpool, deleteSpool), run: (d, c, t) => restoreSpool(d, c, t) },
   'POST /api/v1/spools/:id/movements': { setup: newSpool, run: (d, c, t) => recordSpoolMovement(d, c, t, { kind: 'consumption', grams: -1, on: '2026-11-01' }) },
+  'POST /api/v1/spools/:id/finish': { setup: newSpool, run: (d, c, t) => finishSpool(d, c, t, { on: '2026-11-01' }) },
   'PATCH /api/v1/settings': { run: (d, c) => updateSettings(d, c, { kwhPriceCents: 999, business: { name: 'Otro' } }) },
   'POST /api/v1/channels': { run: (d, c) => addChannel(d, c, { name: uniq('Canal'), commissionPct: 1 }) },
   'PATCH /api/v1/channels/:id': { setup: newChannel, run: (d, c, t) => updateChannel(d, c, t, { name: uniq('Renombrado') }) },

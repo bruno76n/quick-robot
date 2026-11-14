@@ -31,6 +31,15 @@ export async function body<S extends z.ZodType>(c: Context<AppEnv>, schema: S): 
   return parse(schema, raw);
 }
 
+/** A body that may be left out (an empty request is `{}`); when present it must be valid JSON. */
+export async function optionalBody<S extends z.ZodType>(c: Context<AppEnv>, schema: S): Promise<z.infer<S>> {
+  const text = await c.req.text();
+  if (!text.trim()) return parse(schema, {});
+  let raw: unknown;
+  try { raw = JSON.parse(text); } catch { throw new BusinessError('VALIDATION_ERROR', { fields: [{ path: '', rule: 'invalid_format' }] }, 'Body is not valid JSON'); }
+  return parse(schema, raw);
+}
+
 export function query<S extends z.ZodType>(c: Context<AppEnv>, schema: S): z.infer<S> {
   return parse(schema, c.req.query());
 }
