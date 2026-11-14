@@ -177,6 +177,12 @@ WRITE_ROUTES['POST /api/v1/orders/:id/start-production (start spools)'] = {
   },
 };
 WRITE_ROUTES['PATCH /api/v1/settings (purchases for the average)'] = { run: (d, c) => updateSettings(d, c, { costAvgPurchases: 5, kwhPriceCents: 998 }) };
+// The cases that replace or clear the whole business run last (the ones above use its seeded data).
+for (const key of ['POST /api/v1/workspace/import', 'POST /api/v1/workspace/clear', 'POST /api/v1/backups', 'POST /api/v1/backups/:id/restore']) {
+  const kase = WRITE_ROUTES[key]!;
+  delete WRITE_ROUTES[key];
+  WRITE_ROUTES[key] = kase;
+}
 WRITE_ROUTES['POST /api/v1/workspace/import (mockup v7)'] = { run: (d, c) => importWorkspace(d, c, MOCKUP, { confirm: true, backupFirst: false }), maxN: 12 };
 
 /** Every row of workspace A in every table (the whole state of the business). */
