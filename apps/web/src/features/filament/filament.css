@@ -30,17 +30,6 @@
   .fdr .mini-kv { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* SpoolDialog (.fbar, .newc, .mt-l: do not rename .mt-l, workshop.spec selects on it) */
-.fbar { border: 1px solid var(--line-2); border-radius: var(--r-panel); background: var(--bg); }
-.fbar > summary { list-style: none; display: flex; align-items: center; gap: 12px; padding: 10px 12px; cursor: pointer; border-radius: var(--r-panel); }
-.fbar > summary::-webkit-details-marker { display: none; }
-.fbar > summary:hover { background: var(--soft); }
-.fbar[open] > summary { border-bottom: 1px solid var(--line); border-radius: var(--r-panel) var(--r-panel) 0 0; }
-.fb-t { display: grid; min-width: 0; flex: 1; line-height: 1.25; }
-.fb-t b { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fb-c { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); font-weight: 600; font-size: 13.5px; flex: none; }
-.fbar:not([open]) .fb-cc, .fbar[open] .fb-co { display: none; }
-.fb-b { padding: 12px 12px 14px; display: grid; gap: 10px; }
-.fb-b .hint { margin: 0; }
+/* SpoolDialog: the color picker of a new color */
 .newc { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
 .newc input[type="color"] { width: 46px; }

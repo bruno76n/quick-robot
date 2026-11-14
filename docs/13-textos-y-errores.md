@@ -226,7 +226,8 @@ Los que traen **Deshacer** (`undo: true`) llaman a `restore<Entidad>` (`12`). En
 ### Filamentos, insumos, impresoras y producción
 | Clave | Texto | Deshacer |
 |---|---|---|
-| `spool.added` | Rollo agregado a {filament}. Disponible: {available}. | |
+| `spool.added` | Rollo {number} agregado a {filament}. Disponible: {available}. *(ronda 4: con su número, para rotular el contenedor)* | |
+| `spool.addedMany` | Rollos {numbers} agregados a {filament}. Disponible: {available}. | |
 | `spool.deleted` | Rollo eliminado *(si tenía movimientos:)* junto con sus {count} {count\|movimiento\|movimientos}. | ✓ |
 | `spool.movementRecorded` | Movimiento registrado | |
 | `supply.saved` | Insumo guardado | |
@@ -298,7 +299,9 @@ Salen de `VALIDATION_ERROR.details.fields[]` (`path` + `rule`). Aparecen **debaj
 | `salePayment.amount.required` | Falta el monto del abono. |
 | `orderPayment.amount.required` | Falta el monto del pago. |
 | `spool.filament.required` | Elige el material y el color del rollo. |
-| `spool.cost.required` | Falta el costo del rollo. |
+| `spool.cost.required` | Falta el costo del rollo. *(con «Sin costo» no se pide)* |
+| `spool.quantity.range` | La cantidad va de 1 a 20 rollos. |
+| `spool.reference.required` | Falta el precio de referencia por kilo. |
 | `spoolMovement.grams.required` | Falta la cantidad en gramos. |
 | `printRun.text.required` | Falta describir la prueba. |
 | `customer.name.required` | Falta el nombre del cliente. |

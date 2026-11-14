@@ -79,6 +79,10 @@
 .fdr .roll-h .rnum { margin-right: 2px; }
 
 /* ---------- dialogs ---------- */
+dialog.r4w { width: min(640px, calc(100vw - 32px)); }
+.selsw { position: relative; display: block; }
+.selsw > .sw { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.selsw > select { padding-left: 32px; }
 .exists { display: flex; align-items: center; gap: 8px; margin: 0; padding: 8px 10px; border-radius: var(--r-field); background: var(--green-l); color: var(--green-d); font-size: 12.5px; font-weight: 500; }
 .tgl { display: inline-flex; align-items: center; gap: 10px; font-size: 13.5px; cursor: pointer; }
 .tgl input { appearance: none; -webkit-appearance: none; width: 36px; height: 20px; margin: 0; border-radius: 99px; background: var(--soft-3); position: relative; cursor: pointer; flex: none; transition: background .15s; }
