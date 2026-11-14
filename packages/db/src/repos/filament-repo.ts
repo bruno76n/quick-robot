@@ -1,8 +1,8 @@
 // Filaments, spools and the spool ledger. Every function takes ctx and filters by workspace.
-import { and, asc, count, desc, eq, ilike, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm';
-import type { Ctx } from '../ctx';
+import { and, asc, count, desc, eq, ilike, inArray, isNotNull, isNull, max, or, sql } from 'drizzle-orm';
+import { assertCtx, type Ctx } from '../ctx';
 import type { Executor } from '../db';
-import { filament, spool, spoolLevels, spoolMovement } from '../schema';
+import { filament, spool, spoolLevels, spoolMovement, workspace } from '../schema';
 import { inWorkspace, likePattern } from './scope';
 
 export type FilamentRow = typeof filament.$inferSelect;
@@ -59,6 +59,17 @@ export async function getSpool(ex: Executor, ctx: Ctx, id: string, opts: { forUp
 export async function lockSpoolsOfFilament(ex: Executor, ctx: Ctx, filamentId: string) {
   await ex.select({ id: spool.id }).from(spool)
     .where(and(inWorkspace(spool.workspaceId, ctx), eq(spool.filamentId, filamentId), isNull(spool.deletedAt))).for('update');
+}
+
+/**
+ * Highest spool number ever used in the workspace (deleted spools included; 0 if none), with the workspace row locked
+ * until the transaction ends so two purchases cannot take the same numbers (ronda-4 §2.4; the unique index is the backstop).
+ */
+export async function maxSpoolNumber(ex: Executor, ctx: Ctx): Promise<number> {
+  assertCtx(ctx);
+  await ex.select({ id: workspace.id }).from(workspace).where(eq(workspace.id, ctx.workspaceId)).for('update');
+  const [r] = await ex.select({ n: max(spool.number) }).from(spool).where(inWorkspace(spool.workspaceId, ctx));
+  return r?.n ?? 0;
 }
 
 export async function insertSpool(ex: Executor, ctx: Ctx, row: NewSpool) {

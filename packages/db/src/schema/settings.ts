@@ -15,8 +15,10 @@ export const workspaceSettings = pgTable('workspace_settings', {
   formulaMarginPct: pctCol('formula_margin_pct').notNull(),
   business: jsonb('business').$type<BusinessData>().notNull(),
   lastBackupOn: date('last_backup_on', { mode: 'string' }),
+  /** Purchases with cost that form the cost per gram of a filament (docs/04 §1). */
+  costAvgPurchases: integer('cost_avg_purchases').notNull().default(3),
   ...timestamps,
-});
+}, (t) => [check('workspace_settings_cost_avg', sql`${t.costAvgPurchases} between 1 and 10`)]);
 
 export const salesChannel = pgTable('sales_channel', {
   id: idCol(),
@@ -36,8 +38,11 @@ export const catalogItem = pgTable('catalog_item', {
   name: text('name').notNull(),
   nameKey: text('name_key').notNull(),
   hex: text('hex'),
+  /** Brands only: weight of the empty spool, saved by weighSpool (ronda-4 §2.7). */
+  spoolTareGrams: integer('spool_tare_grams'),
   ...timestamps,
 }, (t) => [
+  check('catalog_item_tare', sql`${t.spoolTareGrams} is null or ${t.spoolTareGrams} >= 0`),
   unique('catalog_item_ws_kind_key').on(t.workspaceId, t.kind, t.nameKey),
   check('catalog_item_kind', sql`${t.kind} in ('material', 'color', 'brand', 'customer_type', 'expense_category')`),
 ]);

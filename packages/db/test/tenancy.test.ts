@@ -119,7 +119,7 @@ describe('workshop and catalog: reads with ctx A never return B', () => {
 
 describe('writes with ctx A never touch B', () => {
   it('cannot attach a spool to a filament of B (composite foreign key)', async () => {
-    await expect(insertSpool(conn.db, A.ctx, { id: uid(0xa), filamentId: B.filamentId, brand: '', costCents: 1, shippingCents: 0, grams: 1, purchasedOn: '2026-11-01' })).rejects.toThrow();
+    await expect(insertSpool(conn.db, A.ctx, { id: uid(0xa), number: 2, filamentId: B.filamentId, brand: '', costCents: 1, shippingCents: 0, grams: 1, purchasedOn: '2026-11-01' })).rejects.toThrow();
   });
   it('cannot add a movement to a spool of B', async () => {
     await expect(insertSpoolMovements(conn.db, A.ctx, [{ id: uid(0xa), spoolId: B.spoolId, on: '2026-11-01', kind: 'consumption', grams: -10, note: '' }])).rejects.toThrow();

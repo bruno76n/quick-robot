@@ -1,9 +1,9 @@
 // addSpool — register a spool purchase; creates the filament if it does not exist (docs/04 §1, docs/06 §6, docs/12 §8).
 // Material, color and brand join the workspace pick lists when they are new (docs/06 §15).
 import type { AddSpoolInput, AddSpoolOutput } from '@app/contract';
-import { canonicalEntry, filamentKey, normalizeName, tidyName } from '@app/core';
+import { canonicalEntry, filamentKey, nextSpoolNumbers, normalizeName, tidyName } from '@app/core';
 import {
-  addCatalogItems, findFilamentByKey, getFilament, getSupplier, insertFilament, insertSpool, insertSpoolMovements, listSpools, transaction,
+  addCatalogItems, findFilamentByKey, getFilament, getSupplier, insertFilament, insertSpool, insertSpoolMovements, listSpools, maxSpoolNumber, transaction,
   type Ctx, type Executor, type FilamentRow,
 } from '@app/db';
 import type { Deps } from '../deps';
@@ -42,8 +42,9 @@ export async function addSpool(deps: Deps, ctx: Ctx, input: AddSpoolInput): Prom
     const filament = await resolveFilament(deps, tx, ctx, input);
     if (input.supplierId && !(await getSupplier(tx, ctx, input.supplierId))) throw notFound('supplier');
     const brand = input.brand ? await catalogBrand(deps, tx, ctx, input.brand) : '';
+    const [number] = nextSpoolNumbers([await maxSpoolNumber(tx, ctx)], 1);
     const spool = await insertSpool(tx, ctx, {
-      id: deps.ids.next(), filamentId: filament.id, brand, costCents: input.costCents,
+      id: deps.ids.next(), number: number!, noCost: input.costCents + input.shippingCents === 0, filamentId: filament.id, brand, costCents: input.costCents,
       shippingCents: input.shippingCents, grams: input.grams, purchasedOn: input.purchasedOn, supplierId: input.supplierId ?? null,
     });
     await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: spool.id, on: input.purchasedOn, kind: 'purchase', grams: input.grams, note: input.note ?? '' }]);

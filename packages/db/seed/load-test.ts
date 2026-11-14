@@ -5,7 +5,7 @@ import { eq } from 'drizzle-orm';
 import type { Ctx } from '../src/ctx';
 import type { Db, Executor } from '../src/db';
 import { transaction } from '../src/db';
-import { insertFilament, insertSpool, insertSpoolMovements } from '../src/repos/filament-repo';
+import { insertFilament, insertSpool, insertSpoolMovements, maxSpoolNumber } from '../src/repos/filament-repo';
 import { insertPrinter } from '../src/repos/printer-repo';
 import { insertProduct, replaceProductParts } from '../src/repos/product-repo';
 import { listChannels } from '../src/repos/settings-repo';
@@ -38,7 +38,8 @@ export async function generateLoad(db: Db, ctx: Ctx, opts: { today: string; next
     const filaments: string[] = [];
     for (let i = 0; i < n(LOAD.filaments); i++) filaments.push((await insertFilament(tx, ctx, { id: id(), material: 'PLA', color: `Carga ${i}`, hex: '#808080', nameKey: `pla|carga ${i}` })).id);
     const spools: string[] = [];
-    for (let i = 0; i < n(LOAD.spools); i++) spools.push((await insertSpool(tx, ctx, { id: id(), filamentId: filaments[i % filaments.length]!, brand: 'Carga', costCents: 40000, shippingCents: 0, grams: 1000, purchasedOn: dayOf(opts.today, 1800 - i) })).id);
+    const firstNumber = (await maxSpoolNumber(tx, ctx)) + 1;
+    for (let i = 0; i < n(LOAD.spools); i++) spools.push((await insertSpool(tx, ctx, { id: id(), number: firstNumber + i, filamentId: filaments[i % filaments.length]!, brand: 'Carga', costCents: 40000, shippingCents: 0, grams: 1000, purchasedOn: dayOf(opts.today, 1800 - i) })).id);
     const printers: string[] = [];
     for (let i = 0; i < n(LOAD.printers); i++) printers.push((await insertPrinter(tx, ctx, { id: id(), name: `Carga ${i}`, costCents: 800000, lifeHours: 5000, maintenanceCentsPerHour: 50, kw: 0.12, hours: 100 })).id);
     const products = existing.map((p) => p.id);
