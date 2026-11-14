@@ -62,6 +62,25 @@ Registro cronológico de la construcción, para retomar en cualquier equipo. Lo 
 
 ---
 
+## 2026-11-13 · Ronda 2 (sesión en la nube, modo autónomo)
+Pedido: las cuatro fases de `docs/mejoras/ronda-2.md`, cada una en su rama desde `main` y fusionada al cerrar en verde.
+- **A · Medición** (`mejoras/informe-ronda2-a.md`): inventario, morado y marca, casos raros de datos, línea base y plan de la B.
+- **B · Rediseño** (`informe-ronda2-b.md`): variantes agrupadas por familia (migración aditiva 0007, `variant_label`), Productos y Existencias por familias, Inicio con atención por prioridad, panel neutro sin morado. **La mascota se quedó** por decisión de la persona.
+- **C · Clics** (`informe-ronda2-c.md`): 35 flujos medidos en `e2e/clicks/`.
+- **D · Menos clics** (`informe-ronda2-d.md`): selector propio con búsqueda (`components/Picker.tsx`; la fila nueva de filamento nace abierta), "Vender" en Existencias, abono directo desde "Debe", y más. 131 → 117 clics y 25 → 16 campos.
+
+## 2026-11-14 · Ronda 3 · Diseño visual (sesión en la nube, modo autónomo)
+Pedido: adoptar el diseño de `reference/ronda-3/` (`docs/mejoras/ronda-3.md`), con **tres excepciones de la persona**: los interruptores (segmentados) se quedan como estaban, el detalle del filamento sigue en el cajón, y la mascota se queda.
+- **A · Inventario** (`mejoras/informe-ronda3-a.md`), **B · Tokens y componentes** (`informe-ronda3-b.md`; también el arreglo del "%%" en los atajos de precio), **C · Pantallas** (`informe-ronda3-c.md`; marco nuevo y 16 pantallas, cuatro agentes en paralelo), **D · Revisión** (`informe-ronda3-d.md`; tres anchos, axe sin errores serios, limpieza; **resumen final de la ronda ahí**).
+- **Vocabulario nuevo:** Alertas, Disponibles, Stock bajo, Crítico, Al día, Próximo, Vencido, Saldo, Fecha de entrega, Correcta, Fallida, Precio mínimo.
+- **Después del cierre:** "Prueba de material" en una línea en el celular (pedido de la persona); las pruebas e2e borran su carpeta temporal al terminar (llenaban el disco); Electron 42.11.18 sin la excepción de seguridad.
+
+### Estado al cerrar
+- `pnpm test` 630, `pnpm e2e` 122 (5 de escritorio aparte, que pasan con `pnpm e2e:desktop`), lint 0 errores, typecheck y `pnpm security` en verde, `pnpm size` 214.7 KB de 350.
+- Todo en `main`. Las etiquetas `antes-ronda2-*` y `antes-ronda3-*` existen solo en la sesión de la nube (el remoto no acepta etiquetas).
+
+---
+
 ## Cómo seguir en la Mac
 
 ### 1. Preparar el equipo (una vez)
@@ -116,14 +135,14 @@ Es la última condición de la fase 4. Anota aquí, con fecha, lo que no se sien
 **Dónde están los datos:** `~/Library/Application Support/Quick Robot/data`. Ahí están la base, `backups/` y `logs/`. Reemplazar la app por una versión nueva no los toca.
 
 ### 6. Para continuar con Claude Code en la Mac
-- Pide: "Lee `docs/bitacora.md`, `docs/progreso.md`, `docs/informe-fase-4.md` y `docs/decisiones.md` y continúa".
+- Pide: "Lee `docs/bitacora.md`, `docs/progreso.md`, `docs/mejoras/informe-ronda3-d.md` y el final de `docs/decisiones.md` y continúa".
 - `pnpm desktop:dev` abre la app sin empaquetar contra el código.
 
 ---
 
 ## Pendientes
-- **Electron:** a partir del **2026-11-03**, subir a ≥ 42.11.16 (`apps/desktop/package.json`). Luego quitar la excepción `GHSA-jr5w-w6x2-84p9` de `pnpm-workspace.yaml` y correr `pnpm security`.
-- **Medir en la Mac:** `pnpm perf` y la apertura de la app. Aquí quedaron entre 1× y 2× del presupuesto:
+- **Seguridad:** desde el **2026-11-16**, subir `hono` (≥ 4.13.16) y `@hono/node-server` (≥ 1.19.18) en `packages/server` y `apps/desktop`; correr `pnpm security`, `pnpm test` y `pnpm e2e` (`decisiones.md`, 2026-11-14). Electron ya está en 42.11.18 y sin excepción.
+- **En la Mac:** generar e instalar la app, pasar los datos del mockup y usarla una semana (última condición de la fase 4); medir `pnpm perf` y la apertura de la app. Aquí quedaron entre 1× y 2× del presupuesto:
 
   | Qué | Medido aquí | Presupuesto |
   |---|---|---|
@@ -136,13 +155,13 @@ Es la última condición de la fase 4. Anota aquí, con fecha, lo que no se sien
   | Importar 25 000 ventas | 43 s | 30 s |
 
   Si en la Mac siguen arriba de 1×, lo siguiente es una tabla de sumas por día.
-- **Para revisar** (marcados en `decisiones.md`):
+- **Revisar la ronda 3** (`mejoras/informe-ronda3-d.md` › Qué debe revisar la persona): pantallas y palabras nuevas con datos reales; lo que la maqueta muestra y el sistema no tiene (lo más útil: fecha de aceptación del pedido y aviso de filamento en el tablero); decisiones "para revisión" (grises y verde más oscuros por contraste, contadores del menú, pasos del pedido sin fecha de Aceptado).
+- **Para revisar** (de fases anteriores, en `decisiones.md`):
   - En "Últimas compras" de Compras, el primer movimiento de cada insumo cuenta como existencia inicial.
   - La búsqueda de ventas y pedidos distingue acentos.
   - Valores de arranque de un negocio nuevo.
   - Nombre de la app en el instalador ("Quick Robot", provisional).
-- **Agregados que no están en el mockup** (los pide `06`): filtro de periodo en Gastos, "Inversión recuperada" en Reportes, columna "Total" en documentos, "Hacer copia ahora" y resumen al restaurar.
-- **PR abiertos de Dependabot** (#1–#3, acciones de GitHub): revisar y unir cuando convenga.
+- **PR abiertos de Dependabot** (acciones de GitHub): revisar y unir cuando convenga.
 - **Fase 5** (producto público): no iniciada. Requiere planeación (`16`, `17`, `legal/`).
 
 ---
