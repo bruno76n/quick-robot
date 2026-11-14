@@ -98,6 +98,7 @@ Principio: **nunca una pantalla en blanco, nunca un error técnico, y siempre de
 | Falla inesperada (`500`) | Aviso rojo: "Algo salió mal y no se guardó nada… código: {errorId}" con **Intentar de nuevo** | Repetir; si persiste, dar el código | Nada (transacción revertida) |
 | Botón en curso | Botón deshabilitado con "Guardando…" (evita doble clic) | Esperar | — |
 | Carga lenta | Esqueleto a los 300 ms; a los 8 s "Tarda más de lo normal" con **Reintentar** | Reintentar | — |
+| Los datos de una pantalla no llegan (el servidor falla o no responde al cargarla) | Tarjeta "No se pudieron cargar los datos de esta pantalla. No se cambió ningún dato." con **Reintentar** (y el código si lo hay) en lugar de la pantalla; **nunca una lista vacía** ni "Sin … registrados" | Reintentar | Todo |
 | Una pantalla se rompe al dibujarse | Tarjeta "Esta pantalla no se pudo mostrar" con **Volver al Inicio** y el código; el menú y el resto siguen funcionando | Volver, o seguir en otra pantalla | Todo |
 | **Escritorio:** el servidor local no responde | Banner fijo: "La aplicación no responde. Cerrarla y volver a abrirla." con **Reintentar**. Electron intenta reiniciar el servidor una vez solo | Reintentar o reabrir | Todo hasta la última operación completa |
 | **Escritorio:** falla al aplicar una migración al abrir | Pantalla: "No se pudo actualizar los datos. Se restauró la copia anterior; los datos están intactos." con **Abrir de nuevo** y **Mostrar archivo de registro** | Seguir con la versión anterior de la app | Todo (copia previa) |

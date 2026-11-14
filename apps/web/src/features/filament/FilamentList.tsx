@@ -63,7 +63,7 @@ export function FilamentList() {
         ]} />
       ) : null}
       {isLoading ? <div className="skel" /> : null}
-      {!isLoading && !items.length ? (
+      {data && !items.length ? (
         <div className="empty-card"><Mascot size={48} /><p>{L.empty}</p><Button variant="primary" onClick={() => setDialog({})}>{L.emptyButton}</Button></div>
       ) : null}
       <div className="fg-list">

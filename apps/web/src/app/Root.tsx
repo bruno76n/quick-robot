@@ -6,6 +6,7 @@ import { AppShell } from '../components/AppShell';
 import { Banner } from '../components/Banner';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { openPalette } from '../components/CommandPalette';
+import { LoadFailed, useFailedLoads } from '../components/LoadFailed';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { CommandLayer } from '../components/Shortcuts';
 import { ToastViewport } from '../components/Toast';
@@ -36,6 +37,8 @@ export function Root() {
     return () => clearTimeout(timer);
   }, [fetching]);
   const slow = slowFlag && fetching > 0;
+  // A first load that failed shows its card instead of an empty screen (docs/15 §5).
+  const failed = useFailedLoads();
   useEffect(() => { document.title = business?.name || me.data?.workspace.name || ''; }, [me.data, business?.name]);
   const banner = down ? (
     <Banner action={<button type="button" className="btn sm" onClick={() => void qc.refetchQueries()} disabled={fetching > 0}>{es.common.retry}</button>}>
@@ -48,8 +51,9 @@ export function Root() {
   ) : null;
   return (
     <>
-      <AppShell businessName={business?.name || me.data?.workspace.name || ''} trade={business?.trade ?? ''} banner={banner} counts={counts} onNewPiece={() => void go('/productos/pieza')} onSearch={openPalette}>
+      <AppShell businessName={business?.name || me.data?.workspace.name || ''} trade={business?.trade ?? ''} known={settings.data !== undefined} banner={banner} counts={counts} onNewPiece={() => void go('/productos/pieza')} onSearch={openPalette}>
         <ErrorBoundary resetKey={path} onHome={() => void go('/inicio')}>
+          {failed.count ? <LoadFailed errorId={failed.errorId} /> : null}
           <LoadingSkeleton />
           <Outlet />
         </ErrorBoundary>

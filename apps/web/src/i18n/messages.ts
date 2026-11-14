@@ -228,6 +228,13 @@ export const fatal = {
       "Volver al Inicio"
     ]
   },
+  "loadFailed": {
+    "text": "No se pudieron cargar los datos de esta pantalla. No se cambió ningún dato.",
+    "detail": "Código: {errorId}",
+    "buttons": [
+      "Reintentar"
+    ]
+  },
   "offline": {
     "text": "Sin conexión. Lo escrito sigue aquí; se puede guardar cuando vuelva.",
     "buttons": []

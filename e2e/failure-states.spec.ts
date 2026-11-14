@@ -94,3 +94,17 @@ test('undo that is no longer possible (RESTORE_CONFLICT) shows its text', async 
   await status(page).getByRole('button', { name: 'Deshacer' }).click();
   await expect(status(page)).toHaveText('No se pudo deshacer: ya existe otro registro con ese nombre.');
 });
+
+test('a list whose data does not arrive says so with Reintentar, never «Sin rollos registrados»', async ({ page }) => {
+  // Ronda 4 · D: a load that failed (here the server answers 500 without body, as a proxy does while the API starts)
+  // used to draw the empty state of the screen and the sidebar placeholders.
+  await page.route('**/api/v1/**', (r) => r.fulfill({ status: 500, contentType: 'text/plain', body: '' }));
+  await page.goto(`${server.url}/filamentos`);
+  await expect(page.getByTestId('load-failed')).toContainText('No se pudieron cargar los datos de esta pantalla. No se cambió ningún dato.');
+  await expect(page.getByText('Sin rollos registrados', { exact: false })).toBeHidden();
+  await expect(page.locator('.brand')).not.toContainText('Mi negocio');
+  await page.unroute('**/api/v1/**');
+  await page.getByTestId('load-failed').getByRole('button', { name: 'Reintentar' }).click();
+  await expect(page.getByTestId('load-failed')).toHaveCount(0);
+  await expect(page.locator('.fg, .empty-card').first()).toBeVisible();
+});

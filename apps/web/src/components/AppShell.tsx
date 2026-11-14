@@ -27,7 +27,7 @@ export const NAV: readonly (readonly [string | null, readonly NavItem[]])[] = [
 export type NavCounts = Partial<Record<string, number>>;
 const COUNT_TEXT: Record<string, string> = { '/pedidos': 'nav.ordersCount', '/compras': 'nav.purchasesCount' };
 
-export function AppShell({ businessName, trade, banner, counts, onNewPiece, onSearch, children }: { businessName: string; trade: string; banner?: ReactNode; counts?: NavCounts | undefined; onNewPiece?: () => void; onSearch?: () => void; children: ReactNode }) {
+export function AppShell({ businessName, trade, known = true, banner, counts, onNewPiece, onSearch, children }: { businessName: string; trade: string; known?: boolean; banner?: ReactNode; counts?: NavCounts | undefined; onNewPiece?: () => void; onSearch?: () => void; children: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   // The menu closes by itself when the route changes: it is open only for the path where it was opened.
   const [openAt, setOpenAt] = useState<string | null>(null);
@@ -57,7 +57,7 @@ export function AppShell({ businessName, trade, banner, counts, onNewPiece, onSe
           <b className="t-title">{screenTitle ?? sectionLabel}</b>
           <button type="button" className="btn primary icon" onClick={onNewPiece} disabled={!onNewPiece} aria-label={es.nav.newPiece} title={es.nav.newPiece}><Icon name="plus" size={16} /></button>
         </header>
-        <Sidebar ref={side} businessName={businessName} trade={trade} section={section} counts={counts} onNewPiece={onNewPiece} onSearch={onSearch} />
+        <Sidebar ref={side} businessName={businessName} trade={trade} known={known} section={section} counts={counts} onNewPiece={onNewPiece} onSearch={onSearch} />
         <div className="scrim" onClick={() => close()} />
         <main className="main" id="main">
           {banner}
@@ -69,14 +69,15 @@ export function AppShell({ businessName, trade, banner, counts, onNewPiece, onSe
 }
 
 /** The sidebar (≥ 1100 px fixed, below that the drawer): mascot, name and trade, search, «Nueva pieza» and the screens. */
-const Sidebar = forwardRef<HTMLElement, { businessName: string; trade: string; section: string; counts?: NavCounts | undefined; onNewPiece?: (() => void) | undefined; onSearch?: (() => void) | undefined }>(
-  function Sidebar({ businessName, trade, section, counts, onNewPiece, onSearch }, ref) {
+const Sidebar = forwardRef<HTMLElement, { businessName: string; trade: string; known: boolean; section: string; counts?: NavCounts | undefined; onNewPiece?: (() => void) | undefined; onSearch?: (() => void) | undefined }>(
+  function Sidebar({ businessName, trade, known, section, counts, onNewPiece, onSearch }, ref) {
     const name = businessName.trim();
     return (
       <aside ref={ref} className="side" id="side" aria-label={es.common.mainMenu}>
         <div className="brand">
           <span className="mk"><Mascot size={36} /></span>
-          <div><b className={name ? undefined : 'ph-txt'}>{name || es.sidebar.businessPlaceholder}</b>{trade.trim() ? <small>{trade}</small> : <small className="ph-txt">{es.sidebar.industryPlaceholder}</small>}</div>
+          {/* Until Ajustes arrives (or if it fails) nothing is written: the placeholders mean "no name yet", not "not loaded". */}
+          {known ? <div><b className={name ? undefined : 'ph-txt'}>{name || es.sidebar.businessPlaceholder}</b>{trade.trim() ? <small>{trade}</small> : <small className="ph-txt">{es.sidebar.industryPlaceholder}</small>}</div> : <div><b>{name}</b><small /></div>}
         </div>
         <button type="button" className="srch" onClick={onSearch} aria-label={es.common.searchAll}><Icon name="search" size={15} /><span>{es.common.search}</span><kbd aria-hidden="true" data-k={es.common.searchShortcut} /></button>
         <button type="button" className="btn primary block new-b" onClick={onNewPiece} disabled={!onNewPiece}><Icon name="plus" size={14} />{es.nav.newPiece}</button>

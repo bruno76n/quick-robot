@@ -160,6 +160,7 @@ Se muestran cuando la aplicación completa no puede seguir (`15 §5`). Cada una 
 | `fatal.migrationFailed` | No se pudo actualizar los datos. Se restauró la copia anterior; los datos están intactos. | Abrir de nuevo · Mostrar archivo de registro |
 | `fatal.dataFileUnreadable` | No se pudo abrir el archivo de datos. | Restaurar la copia más reciente · Elegir otra copia |
 | `fatal.screenCrashed` | Esta pantalla no se pudo mostrar. *(debajo, en gris:)* Código: {errorId} | Volver al Inicio |
+| `fatal.loadFailed` | No se pudieron cargar los datos de esta pantalla. No se cambió ningún dato. *(si hay `errorId`, debajo en gris:)* Código: {errorId} | Reintentar |
 | `fatal.offline` *(nube)* | Sin conexión. Lo escrito sigue aquí; se puede guardar cuando vuelva. | — |
 | `fatal.slow` | Tarda más de lo normal. | Reintentar |
 | `fatal.importing` | Importando… No cerrar la aplicación. | — |

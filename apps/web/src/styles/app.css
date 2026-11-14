@@ -3,6 +3,8 @@
 .fld-err { color: var(--red); font-weight: 500; }
 .banner { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px; justify-content: space-between; background: var(--amber-l); color: var(--amber-d); border-bottom: 1px solid var(--amber); padding: 10px 28px; font-weight: 500; }
 .crash { max-width: 520px; margin: 40px auto; display: grid; gap: 12px; justify-items: start; border: 1px solid var(--line-2); border-radius: var(--r-field); padding: 24px; }
+/* Failed first load (docs/15 §5): the card takes the place of the screen, which stays mounted (no refetch loop) but hidden. */
+.page:has(> .load-failed) > :not(.load-failed) { display: none !important; }
 .skel { height: 14px; border-radius: var(--r-xs); background: linear-gradient(90deg, var(--soft) 0%, var(--soft-2) 50%, var(--soft) 100%); background-size: 200% 100%; animation: skel 1.2s infinite linear; }
 @keyframes skel { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 .cfm { display: contents; }
