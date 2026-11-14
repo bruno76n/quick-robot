@@ -37,7 +37,7 @@ test('add spool → appears in the list → survives a restart', async ({ page }
     await page.keyboard.press('Escape');
     await page.getByTestId('filament-row').filter({ hasText: 'PLA Blanco' }).click();
     await drawer.getByRole('button', { name: 'Agregar rollo de PLA Blanco' }).click();
-    await expect(dialog.getByText('PLA Blanco ya existe: el rollo se agrega como uno nuevo, no se suma a los que tienes.')).toBeVisible();
+    await expect(dialog.getByText('PLA Blanco ya existe: el rollo se agrega como uno nuevo, no se suma a los que ya hay.')).toBeVisible();
     await dialog.locator('input[name=costo]').fill('350');
     await dialog.getByRole('button', { name: 'Agregar rollo' }).click();
     await expect(page.getByRole('status')).toHaveText('Rollo #10 agregado a PLA Blanco. Disponible: 2,720 g.');

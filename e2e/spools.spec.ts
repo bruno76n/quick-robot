@@ -34,9 +34,9 @@ test('add 2 spools: consecutive numbers, the shipping of the order split, the co
   const dlg = page.getByRole('dialog');
   await dlg.locator('select[name=material]').selectOption('PLA');
   await dlg.locator('select[name=color]').selectOption('Negro');
-  await expect(dlg.getByText('PLA Negro ya existe: el rollo se agrega como uno nuevo, no se suma a los que tienes.')).toBeVisible();
+  await expect(dlg.getByText('PLA Negro ya existe: el rollo se agrega como uno nuevo, no se suma a los que ya hay.')).toBeVisible();
   await dlg.locator('input[name=cantidad]').fill('2');
-  await expect(dlg.getByText('PLA Negro ya existe: los rollos se agregan como nuevos, no se suman a los que tienes.')).toBeVisible();
+  await expect(dlg.getByText('PLA Negro ya existe: los rollos se agregan como nuevos, no se suman a los que ya hay.')).toBeVisible();
   await dlg.locator('input[name=costo]').fill('360');
   await dlg.locator('input[name=envio]').fill('10');
   // (360 + 365 + 365) / 3,000 g = $0.363/g; before, only #2: $0.360/g.
