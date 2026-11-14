@@ -67,7 +67,7 @@ export function Brief({ T, K, gA, A, gP, when = '', compact = false, empty = L.b
   facts.push(...extra);
   const segs: Seg[] = [
     [L.seg.material, K.materialCents, '--c-m'], [L.seg.power, K.powerCents, '--c-l'], [L.seg.machine, K.machineCents, '--c-q'], [L.seg.extras, K.extrasCents, '--c-e', 'dk'],
-    [L.seg.failures, K.failureReserveCents, '--c-f', 'hatch'], [L.seg.commissions, T.commissionCents, '--blue'],
+    [L.seg.failures, K.failureReserveCents, '--c-f', 'hatch'], [L.seg.commissions, T.commissionCents, '--c-t'],
   ];
   if (gA !== null) segs.push([L.seg.expenses, gA, '--sand', 'dk']);
   segs.push([gA !== null ? L.seg.realProfit : L.seg.profit, Math.max(0, T.incomeCents - segs.reduce((a, s) => a + s[1], 0)), '--green', 'gan dk']);

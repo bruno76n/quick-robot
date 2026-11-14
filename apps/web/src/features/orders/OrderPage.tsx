@@ -23,6 +23,7 @@ import { NextStepButton, StepDialogs, useStepRunner, type StepRunner } from './O
 import { dueText } from './OrdersPage';
 import { countTags, countText, itemRows, sumCounts, type PieceRow } from './origins';
 import { Capas, CapasLegend, StatusChip, Where } from './parts';
+import './orders.css';
 
 const L = es.screens.order;
 type Tab = 'articulos' | 'pagos' | 'produccion' | 'datos';

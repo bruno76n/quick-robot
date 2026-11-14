@@ -18,6 +18,7 @@ import { api } from '../../lib/api';
 import { centsTotal, date, money, number1 } from '../../lib/format';
 import { keys, useSupplies } from '../../lib/queries';
 import { PurchaseDialog, SupplyDialog, UseDialog } from './SupplyDialogs';
+import './supplies.css';
 
 const L = es.screens.supplies;
 export const SUPPLY_TONE: Record<SupplyListItem['status'], Tone> = { out: 'bad', low: 'warn', ok: 'good' };

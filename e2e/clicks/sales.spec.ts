@@ -39,8 +39,8 @@ test('registrar venta con varios artículos, a customer and a note', async ({ pa
   await page.getByRole('button', { name: 'Registrar venta' }).first().click();
   await expect(page.getByRole('heading', { name: 'Nueva venta' })).toBeVisible();
   await page.locator('[data-b=cliente]').selectOption({ label: 'Mariana R.' });
-  // Three different pieces with free pieces (the seed's first three in the list that show "N libres").
-  const withFree = page.getByTestId('pick-piece').filter({ hasText: /\d+ libres?/ });
+  // Three different pieces with free pieces (the seed's first three in the list that show "N disponibles").
+  const withFree = page.getByTestId('pick-piece').filter({ hasText: /\d+ disponibles?/ });
   for (let i = 0; i < 3; i++) await withFree.nth(i).click();
   await expect(page.getByTestId('builder-line')).toHaveCount(3);
   await c.fill(page.locator('[data-b=nota]'), 'Venta clics');
@@ -49,10 +49,10 @@ test('registrar venta con varios artículos, a customer and a note', async ({ pa
   await c.expectBudget(BUDGET.saleSeveralItems);
 });
 
-test('registrar abono of a sale that owes: the "Debe" chip opens the payment', async ({ page }) => {
+test('registrar abono of a sale that owes: the "Saldo" chip opens the payment', async ({ page }) => {
   const c = await countedPage(page);
   await c.start(`${server.url}/ventas`);
-  await page.getByTestId('sale-row').filter({ hasText: 'Colección completa y dos llaveros' }).getByRole('button', { name: /^Debe .*: registrar abono$/ }).click();
+  await page.getByTestId('sale-row').filter({ hasText: 'Colección completa y dos llaveros' }).getByRole('button', { name: /^Saldo .*: registrar abono$/ }).click();
   const dlg = page.getByRole('dialog', { name: 'Registrar abono' });
   await expect(dlg.locator('input[name=monto]')).toBeFocused();
   await c.fill(dlg.locator('input[name=monto]'), '200');

@@ -24,6 +24,7 @@ import { rich } from '../sales/rich';
 import { builderApi, type OrderForEdit } from './api';
 import { calc, lineQty, splitSet, type Defs, type Line } from './calc';
 import { LineView, Pick, Summary } from './Parts';
+import './builder.css';
 
 const L = es.screens.builder;
 const NEW = '__nuevo';

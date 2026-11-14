@@ -8,7 +8,7 @@ import { es } from '../../i18n/es';
 import { t } from '../../i18n/t';
 import { cents, centsTotal, date } from '../../lib/format';
 import { go } from '../../lib/nav';
-import { Piece3d } from '../products/Piece3d';
+import { PieceThumb } from '../../components/PieceThumb';
 import { useStockDetail, type StockDetail, type StockMovementKind, type StockStatus } from './api';
 
 const L = es.screens.stock;
@@ -17,8 +17,8 @@ const MOVE_TONE: Record<StockMovementKind, Tone> = { initial: 'plain', print: 'i
 const ORDER_TONE: Record<string, Tone> = { quoted: '', accepted: 'info', in_production: 'warn', ready: 'good', delivered: '', cancelled: 'bad' };
 export type Dlg = { kind: 'print'; productId?: string } | { kind: 'adjust'; detail: StockDetail } | { kind: 'enable' } | null;
 
-export function MiniPiece({ photoUrl, hexes, id }: { photoUrl: string | null; hexes: string[]; id: string }) {
-  return photoUrl ? <span className="lay-img"><img src={photoUrl} alt="" /></span> : <Piece3d hexes={hexes} id={id} cls="sm" />;
+export function MiniPiece({ photoUrl, hexes }: { photoUrl: string | null; hexes: string[] }) {
+  return <PieceThumb photoUrl={photoUrl} hexes={hexes} size={38} />;
 }
 
 export function StockDrawer({ id, hexes, onClose, open }: { id: string | null; hexes: string[]; onClose: () => void; open: (d: Dlg) => void }) {
@@ -28,7 +28,7 @@ export function StockDrawer({ id, hexes, onClose, open }: { id: string | null; h
     <Drawer open={Boolean(id) && !isError} kind={L.drawerKind} onClose={onClose}>
       {s ? (
         <>
-          <div className="det-h"><MiniPiece photoUrl={s.photoUrl} hexes={hexes} id={s.productId} /><div><h2>{s.name}</h2><small>{t('screens.stock.priceLine', { price: centsTotal(s.listCents), cost: cents(s.costCents) })}</small></div></div>
+          <div className="det-h"><MiniPiece photoUrl={s.photoUrl} hexes={hexes} /><div><h2>{s.name}</h2><small>{t('screens.stock.priceLine', { price: centsTotal(s.listCents), cost: cents(s.costCents) })}</small></div></div>
           <dl className="dl">
             <div><dt>{L.total}</dt><dd className="num">{s.physical}<small><Pill tone={STOCK_TONE[s.status]}>{es.status.stock[s.status]}</Pill></small></dd></div>
             <div><dt>{L.free}</dt><dd className="num">{s.free}</dd></div>

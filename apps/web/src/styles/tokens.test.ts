@@ -1,6 +1,7 @@
 // Neutral panel (ronda-2 §2, D36–D37): every interface color lives in tokens.css; no purple, no tinted shadows.
 // Data colors (the real color of a filament) come from the data and are not checked here.
 import { describe, expect, it } from 'vitest';
+import segmented from './segmented.snapshot.json';
 
 // Sources read as text by Vite (the web package does not import node:fs; docs/03).
 const raw = (m: Record<string, unknown>) => Object.entries(m as Record<string, string>).filter(([p]) => !/\.test\.tsx?$/.test(p));
@@ -43,12 +44,69 @@ describe('design tokens', () => {
     expect(bad).toEqual([]);
   });
 
-  it('declares the neutral accent and cost tokens', () => {
+  it('declares the ronda-3 token values (ronda-3 §2, informe-ronda3-a §1.3)', () => {
     const t = read(TOKENS);
-    expect(t).toMatch(/--accent:\s*#121214/);
-    expect(t).toMatch(/--cost:\s*#5a5a65/);
-    expect(t).toMatch(/--cost-soft:\s*#f1f1f4/);
+    const want: Record<string, string> = {
+      '--accent': '#121214', '--ink': '#121214', '--ink-2': '#6a6a73', '--ink-3': '#9b9ba5', '--ink-3t': '#777782',
+      '--soft': '#f6f6f8', '--soft-2': '#e9e9ef', '--soft-3': '#dedee5', '--col': '#ececf0', '--track': '#ebebf0',
+      '--line': '#e9e9ee', '--line-soft': '#f0f0f3', '--cost': '#4a4a53',
+      '--green': '#00ae42', '--green-d': '#00873a', '--green-ink': '#067a30', '--green-l': '#e3f5e9',
+      '--amber': '#b4740a', '--amber-d': '#8a5a06', '--amber-l': '#fdf3e1', '--red': '#c8302a', '--red-l': '#fbeaea',
+      '--r-btn': '7px', '--r-field': '8px', '--r-panel': '12px', '--r-pill': '6px', '--r-in': '10px',
+    };
+    const got = Object.fromEntries([...t.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((m) => [m[1]!, m[2]!.trim()]));
+    expect(Object.fromEntries(Object.keys(want).map((k) => [k, got[k]]))).toEqual(want);
   });
+
+  it('every var(--x) used is declared, and no removed token is used', () => {
+    const all = [...sources.entries()];
+    // Declared: tokens, local custom properties set in a stylesheet, and style keys set from components ('--c': …).
+    const declared = new Set(all.flatMap(([, text]) => [...text.matchAll(/(--[\w-]+)\s*:/g), ...text.matchAll(/['"](--[\w-]+)['"]\s*(?:as string\]\s*)?:/g)].map((m) => m[1]!)));
+    const tokens = new Set([...read(TOKENS).matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]!));
+    const used = all.flatMap(([p, text]) => [...text.matchAll(/var\(\s*(--[\w-]+)/g)].map((m) => [p, m[1]!] as const));
+    expect(used.filter(([, v]) => !declared.has(v)).map(([p, v]) => `${rel(p)}: ${v}`)).toEqual([]);
+    // A token named as a value from a component ([label, cents, '--c-m']) must be a real token.
+    const named = all.filter(([p]) => p.endsWith('.tsx')).flatMap(([p, text]) => [...text.matchAll(/['"](--[\w-]+)['"](?!\s*(?:as string\]\s*)?:)/g)].map((m) => [p, m[1]!] as const));
+    expect(named.filter(([, v]) => !tokens.has(v)).map(([p, v]) => `${rel(p)}: ${v}`)).toEqual([]);
+    const REMOVED = ['--r', '--sh-soft', '--panel', '--panel-2', '--green-soft', '--amber-ink', '--amber-soft', '--red-ink', '--red-soft', '--blue', '--cost-soft', '--sh', '--c-legend'];
+    const hits = all.flatMap(([p, text]) => REMOVED.filter((r) => new RegExp(`${r}(?![\\w-])`).test(text)).map((r) => `${rel(p)}: ${r}`));
+    expect(hits).toEqual([]);
+  });
+
+  it('no hex color in a component: data fallbacks use var(--no-color)', () => {
+    const bad = [...sources.keys()].filter((p) => p.endsWith('.tsx')).flatMap((p) => [...read(p).matchAll(/['"`]#[0-9a-f]{3,8}\b/gi)].map((m) => `${rel(p)}: ${m[0]}`));
+    expect(bad).toEqual([]);
+  });
+
+  // Rules of every stylesheet, as [selector, body]; the segmented switches are guarded byte by byte elsewhere (exception 1).
+  const rulesOf = (p: string) => [...read(p).replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => [m[1]!.trim(), m[2]!] as const);
+  const SEG = /\.(seg|seg2|rad)\b/;
+  const notSeg = css.filter((p) => p !== TOKENS).flatMap((p) => rulesOf(p).filter(([sel]) => !SEG.test(sel)).map(([sel, body]) => [p, sel, body] as const));
+
+  it('border-radius only from a --r-* token, 0, a percentage or 99px', () => {
+    const ok = (term: string) => /^(0|\d+%|99px|var\(--r-[a-z]+\)|\/)$/.test(term);
+    const bad = notSeg.flatMap(([p, sel, body]) => [...body.matchAll(/border(?:-[a-z]+-[a-z]+)?-radius:\s*([^;]+)/g)]
+      .filter((m) => !(m[1]!.trim().match(/var\([^)]*\)|[^\s]+/g) ?? []).every(ok)).map((m) => `${rel(p)} ${sel}: ${m[1]!.trim()}`));
+    expect(bad).toEqual([]);
+  });
+
+  it('box-shadow: panels have none; only floating things take var(--sh-up), plus rings and inner lines', () => {
+    // A layer is fine when it is none, the floating token, an inner line (inset) or a ring with no offset and no blur.
+    const layer = (l: string) => /^(none|var\(--sh-up\)|inset\s.+|0 0 0 [\d.]+px\s.+)$/.test(l.trim());
+    const bad = notSeg.flatMap(([p, sel, body]) => [...body.matchAll(/box-shadow:\s*([^;]+)/g)]
+      .filter((m) => !m[1]!.split(/,(?![^(]*\))/).every(layer)).map((m) => `${rel(p)} ${sel}: ${m[1]!.trim()}`));
+    expect(bad).toEqual([]);
+    expect(read(TOKENS)).toMatch(/--sh-up:/);
+  });
+
+  it('the segmented switches (.seg, .seg2, .seg4, .rad) keep their rules byte for byte (exception 1 of the person, 2026-11-14)', () => {
+    // Snapshot taken at the start of ronda 3 · B4. A rule may move between files, never change.
+    const now = css.flatMap((p) => [...read(p).replace(/\/\*[\s\S]*?\*\//g, '').matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+      .filter((m) => /\.(seg|seg2|seg4|rad)\b/.test(m[1]!)).map((m) => `${m[1]!.trim()} {${m[2]!}}`)).sort();
+    expect(now).toEqual(segmented);
+    expect(read('/src/components/Segmented.tsx')).toContain('className="seg"');
+  });
+
   it('the focus ring and the accent of checkboxes and radios use --accent, in the app and on the fatal page', () => {
     const rules = (p: string) => read(p).replace(/\/\*[\s\S]*?\*\//g, '');
     const app = css.filter((p) => p !== TOKENS).map(rules).join('\n');

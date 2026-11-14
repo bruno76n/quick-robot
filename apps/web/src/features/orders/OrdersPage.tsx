@@ -16,6 +16,7 @@ import { isActive, ordersApi, STATUS_CLASS, useOrderList, type OrderListItem, ty
 import { NextStepButton, StepDialogs, useStepRunner } from './OrderSteps';
 import { itemRows, originsOf, countTags, sumCounts, originLabel } from './origins';
 import { Capas, StatusChip, tbc } from './parts';
+import './orders.css';
 
 const L = es.screens.orders;
 type View = 'tablero' | 'lista' | 'calendario';

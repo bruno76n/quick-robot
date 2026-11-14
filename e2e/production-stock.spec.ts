@@ -63,7 +63,7 @@ test('a run whose pieces were sold is locked; an order run is history', async ({
   await page.goto(`${server.url}/produccion`);
   await page.getByTestId('print-run-row').filter({ hasText: '10 × Llavero con nombre' }).click();
   const dlg = page.getByRole('dialog');
-  await expect(dlg.getByTestId('run-locked')).toContainText('Esta impresión sumó 10 piezas a Existencias y ya no hay tantas libres');
+  await expect(dlg.getByTestId('run-locked')).toContainText('Esta impresión sumó 10 piezas a Existencias y ya no hay tantas disponibles');
   await expect(dlg.getByRole('button', { name: 'Eliminar registro' })).toHaveCount(0);
   await dlg.getByRole('button', { name: 'Cerrar' }).click();
   await page.getByRole('button', { name: /^Pedidos 1$/ }).click();

@@ -19,7 +19,7 @@ test('D: cancel with reason and full refund', async ({ page, request }) => {
   await page.getByTestId('cancel-order').click();
   const dlg = page.getByRole('dialog');
   await expect(dlg.getByRole('heading', { name: `Cancelar pedido #${order.number}` })).toBeVisible();
-  await expect(dlg.getByText('2 piezas apartadas pasan a libres en Existencias.')).toBeVisible();
+  await expect(dlg.getByText('2 piezas apartadas pasan a disponibles en Existencias.')).toBeVisible();
   await dlg.locator('input[name=motivo]').fill('Cambió el diseño');
   await expect(dlg.locator('input[name=reembolso]')).toHaveValue('200');
   await dlg.getByRole('button', { name: 'Cancelar pedido' }).click();

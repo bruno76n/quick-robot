@@ -8,7 +8,7 @@ test.beforeAll(async () => { server = await startServer(); });
 test.afterAll(async () => { await server?.stop(); });
 
 const list = (page: Page) => page.getByTestId('attentions');
-const chip = (page: Page, name: RegExp) => page.getByRole('group', { name: 'Atención' }).getByRole('button', { name });
+const chip = (page: Page, name: RegExp) => page.getByRole('group', { name: 'Alertas' }).getByRole('button', { name });
 
 /** /home answered by the real server plus `extra` copies of the seed's owed sale (all "Esta semana"). */
 async function withExtraOwed(page: Page, extra: number) {
@@ -92,9 +92,9 @@ for (const width of [1440, 390]) {
       expect(asked).toEqual([]);
       await expect(page.getByRole('heading', { name: 'Filamento', exact: true })).toHaveCount(0);
       await expect(page.locator('.spool, .spools')).toHaveCount(0);
-      // Atención first; Piezas con más ganancia and Impresoras beside it (desktop) or after it (phone).
+      // Alertas first; Productos con más ganancia and Impresoras beside it (desktop) or after it (phone).
       const box = async (name: string) => (await page.getByRole('heading', { name, exact: true }).boundingBox())!;
-      const [att, top, prn] = [await box('Atención'), await box('Piezas con más ganancia'), await box('Impresoras')];
+      const [att, top, prn] = [await box('Alertas'), await box('Productos con más ganancia'), await box('Impresoras')];
       expect(top.y).toBeLessThan(prn.y);
       if (width >= 1000) { expect(top.x).toBeGreaterThan(att.x); expect(top.y).toBeCloseTo(att.y, -1); }
       else { expect(att.y).toBeLessThan(top.y); }

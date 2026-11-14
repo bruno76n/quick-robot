@@ -1,0 +1,21 @@
+/* Gastos: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
+.gap { margin-top: 26px; }
+.rk.cat { margin-top: 14px; gap: 12px; }
+.eq { display: grid; gap: 8px; margin-top: 14px; justify-items: start; }
+.eq .rk-b { width: 100%; }
+.eq-t { display: flex; justify-content: space-between; width: 100%; font-size: 13.5px; color: var(--ink-2); }
+.gi { display: grid; grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto; gap: 14px; align-items: center; background: var(--bg); border-radius: var(--r-panel); padding: 12px 16px; box-shadow: 0 0 0 1px var(--line); cursor: pointer; transition: box-shadow .18s; }
+.gi:hover { box-shadow: 0 0 0 1px var(--line-2); }
+.gi .pill { justify-self: start; max-width: 190px; overflow: hidden; text-overflow: ellipsis; }
+.gi-m { min-width: 0; }
+.gi-m b, .gi-m small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gi-v { text-align: right; }
+.gi-v small { display: block; }
+@media (max-width: 700px) {
+  .gi { grid-template-columns: minmax(0, 1fr) auto; }
+  .gi .pill { grid-column: 1 / -1; }
+}
+/* Gastos (agent D): period filter next to "Todos los gastos" (the mockup lists every expense; docs/06 §13 asks for a period). */
+.exp-h { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; }
+.exp-h h2.gap { margin-bottom: 8px; }
+.exp-h .seg { margin-bottom: 8px; }

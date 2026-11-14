@@ -1,0 +1,4 @@
+/* Ventas: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
+.itl { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.itl li { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.itl li small.blk { flex: 0 0 100%; }

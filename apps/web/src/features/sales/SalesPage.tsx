@@ -18,6 +18,7 @@ import { VsList } from './Breakdown';
 import { rich } from './rich';
 import { SaleDialogs } from './SaleDialogs';
 import { SalesBrief } from './SalesBrief';
+import './sales.css';
 
 const L = es.screens.sales;
 const ALL = 'all';

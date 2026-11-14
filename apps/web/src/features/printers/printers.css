@@ -1,0 +1,17 @@
+/* Impresoras: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
+.job { margin-top: 12px; display: grid; gap: 6px; }
+.pc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-items: start; }
+.pc2 { background: var(--bg); border-radius: var(--r-panel); box-shadow: 0 0 0 1px var(--line); padding: 20px; display: grid; gap: 16px; align-content: start; min-width: 0; }
+.pc2 header { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.pc2 footer { display: flex; gap: 8px; flex-wrap: wrap; padding-top: 4px; }
+.pc2 .dl { margin: 0; }
+.pc-sec { display: grid; gap: 8px; background: var(--soft); border-radius: var(--r-panel); padding: 14px 16px; }
+.pc-h { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.pc-sec .rk-b { background: var(--bg); }
+.mt-l { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.mt-l li { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.mt-m { flex: 1 1 180px; min-width: 0; display: grid; gap: 4px; }
+.mt-r { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+@media (max-width: 1000px) {
+  .pc-grid { grid-template-columns: minmax(0, 1fr); }
+}

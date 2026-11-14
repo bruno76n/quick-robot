@@ -1,0 +1,31 @@
+/* Filamentos: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
+.stk-td { white-space: nowrap; }
+.stk-td .stk { margin-right: 10px; }
+.fbar { border: 1px solid var(--line-2); border-radius: var(--r-panel); background: var(--bg); }
+.fbar > summary { list-style: none; display: flex; align-items: center; gap: 12px; padding: 10px 12px; cursor: pointer; border-radius: var(--r-panel); }
+.fbar > summary::-webkit-details-marker { display: none; }
+.fbar > summary:hover { background: var(--soft); }
+.fbar[open] > summary { border-bottom: 1px solid var(--line); border-radius: var(--r-panel) var(--r-panel) 0 0; }
+.fb-t { display: grid; min-width: 0; flex: 1; line-height: 1.25; }
+.fb-t b { font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fb-c { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-2); font-weight: 600; font-size: 13.5px; flex: none; }
+.fbar:not([open]) .fb-cc, .fbar[open] .fb-co { display: none; }
+.fb-b { padding: 12px 12px 14px; display: grid; gap: 10px; }
+.fb-b .hint { margin: 0; }
+.newc { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+.newc input[type="color"] { width: 46px; }
+.roll { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-in); padding: 10px 12px; display: grid; gap: 6px; }
+.roll-h { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.roll-h .rowa { margin-left: auto; }
+.roll-s { display: flex; align-items: center; gap: 10px; }
+.roll-s .stk { flex: 1; width: auto; min-width: 60px; }
+@media (max-width: 560px) {
+  .split .tbl.fil-t:not(.sm), .tbl.fil-t:not(.sm) { min-width: 0; }
+  .fil-t th:nth-child(4), .fil-t td:nth-child(4) { display: none; }
+  .fil-t th:nth-child(2), .fil-t td:nth-child(2) { display: none; }
+  .fil-t .stk { width: 44px; margin-right: 6px; }
+  .fil-t td, .fil-t th { padding-left: 8px; padding-right: 8px; }
+}
+.roll { border-radius: var(--r-panel); }
+.fb-c { color: var(--ink-2); }
+.tw > .tbl.fil-t { min-width: 520px; }

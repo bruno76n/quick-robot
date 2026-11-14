@@ -60,7 +60,7 @@ Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 3` · `t
 
 | Parte | Fase | Estado | Notas |
 |---|---|---|---|
-| Inventario contra la maqueta | A | en curso | Excepciones de la persona: interruptores y cajón de filamento como hoy; la mascota se queda (`decisiones.md`, 2026-11-14) |
-| Tokens y componentes base | B | no iniciada | |
+| Inventario contra la maqueta | A | terminada | [`mejoras/informe-ronda3-a.md`](mejoras/informe-ronda3-a.md). Excepciones de la persona: interruptores y cajón de filamento como hoy; la mascota se queda (`decisiones.md`, 2026-11-14) |
+| Tokens y componentes base | B | terminada | [`mejoras/informe-ronda3-b.md`](mejoras/informe-ronda3-b.md): tokens, CSS partido por pantalla (sin cambio visual), componentes base y compartidos, vocabulario §5, arreglo del doble % |
 | Pantallas (17 pasos de §6) | C | no iniciada | |
 | Revisión visual, accesibilidad y textos | D | no iniciada | |

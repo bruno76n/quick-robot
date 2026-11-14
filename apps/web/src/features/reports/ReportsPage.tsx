@@ -12,6 +12,7 @@ import { useSettings } from '../../lib/queries';
 import { useReport, type ApiPeriod, type Bucket, type Report } from './api';
 import { Brief, C100Bar } from './Brief';
 import { allBold, rt } from './text';
+import './reports.css';
 
 const L = es.screens.reports;
 export const PERIODS = ['7', '30', '90', 'todo'] as const;
@@ -115,7 +116,7 @@ function ReportBody({ R }: { R: Report }) {
   ) : (
     <>
       <ul className="lg mt" aria-label={L.legend}>
-        <li><i style={{ '--c': 'var(--cost)' } as CSSProperties} />{L.cost}</li><li><i style={{ '--c': 'var(--blue)' } as CSSProperties} />{L.commission}</li><li><i style={{ '--c': 'var(--green)' } as CSSProperties} />{L.profit}</li>
+        <li><i style={{ '--c': 'var(--cost)' } as CSSProperties} />{L.cost}</li><li><i style={{ '--c': 'var(--c-t)' } as CSSProperties} />{L.commission}</li><li><i style={{ '--c': 'var(--green)' } as CSSProperties} />{L.profit}</li>
       </ul>
       <div className={`rk-chart${many ? ' many' : ''}`} role="img" aria-label={t('screens.reports.chartLabel', { unit })}>
         <div className="rk-y">{marks.map((v) => <span key={v} style={{ bottom: `${(v / yMax) * 100}%` }}>{centsTotal(v)}</span>)}</div>
@@ -181,7 +182,7 @@ function ReportBody({ R }: { R: Report }) {
   const filament = !W.filaments.length ? <p className="muted mt">{L.noFilament}</p> : (
     <>
       <ul className="hb">{W.filaments.map((x) => (
-        <li key={x.filamentId}><span className="hb-l"><span className="sw" style={{ '--c': x.hex || '#9a9aa6' } as CSSProperties} />{x.name}</span><span className="hb-t"><i className="pu" style={{ width: `${Math.max(2, (x.grams / umax) * 100)}%`, '--fc': x.hex || '#8b8b97' } as CSSProperties} title={`${x.name}: ${grams(x.grams)}`} tabIndex={0} /></span><span className="hb-v">{grams(x.grams)}</span></li>
+        <li key={x.filamentId}><span className="hb-l"><span className="sw" style={{ '--c': x.hex || 'var(--no-color)' } as CSSProperties} />{x.name}</span><span className="hb-t"><i className="pu" style={{ width: `${Math.max(2, (x.grams / umax) * 100)}%`, '--fc': x.hex || 'var(--no-color)' } as CSSProperties} title={`${x.name}: ${grams(x.grams)}`} tabIndex={0} /></span><span className="hb-v">{grams(x.grams)}</span></li>
       ))}</ul>
       <p className={`note mt ${high ? 'warn' : ''}`}>
         {rt('screens.reports.failNote', { real: pct(real) }, { real: '' })}{W.runs ? t('screens.reports.failNoteRuns', { fails: W.failures, runs: W.runs }) : ''}{t('screens.reports.failNoteReserve', { reserve: pct(W.failurePct) })}

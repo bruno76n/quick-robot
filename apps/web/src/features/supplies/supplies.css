@@ -1,0 +1,26 @@
+/* Insumos: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
+/* existencias: cada unidad es un cubo */
+.xlist { display: grid; gap: 10px; min-width: 0; }
+.xc { background: var(--bg); border-radius: var(--r-panel); box-shadow: 0 0 0 1px var(--line); padding: 14px 16px; display: grid; gap: 10px; cursor: pointer; transition: box-shadow .18s; min-width: 0; }
+.xc:hover { box-shadow: 0 0 0 1px var(--line-2); }
+.xc.sel { box-shadow: 0 0 0 2px var(--accent); }
+.xc-h { display: flex; align-items: center; gap: 8px; }
+.xc-t { flex: 1; min-width: 0; }
+.xc-t b, .xc-t small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ins-ic { --s: 36px; width: var(--s); height: var(--s); border-radius: var(--r-panel); background: var(--soft-2); color: var(--ink-2); display: inline-grid; place-items: center; flex: none; }
+.ins-st { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; font-size: 13.5px; color: var(--ink-2); }
+.ins-st b { font-size: 26px; font-weight: 600; letter-spacing: -.03em; color: var(--ink); }
+.ins-b { position: relative; overflow: visible; height: 8px; background: var(--soft); }
+.ins-b i { position: absolute; left: 0; top: 0; background-color: var(--green); }
+.ins-b.warn i { background-color: var(--amber); }
+.ins-b.bad i { background-color: var(--red); }
+.ins-b s { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink-3t); border-radius: var(--r-xs); text-decoration: none; }
+@media (min-width: 1001px) {
+  .pn-s .split > .xlist { overflow-y: auto; min-height: 0; align-content: start; padding: 4px 10px 32px 4px; margin: -4px -10px 0 -4px; }
+}
+.ins-ic { background: var(--soft-2); color: var(--ink-2); }
+.xc.sel { box-shadow: 0 0 0 2px var(--ink); }
+/* ===== lista a ancho completo + cajón de detalle + página de cliente ===== */
+.xlist.grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.xc { grid-template-columns: minmax(0, 1fr); }
+.xc-h { min-width: 0; }

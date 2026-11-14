@@ -52,6 +52,9 @@ describe('i18n', () => {
   });
 
   it('the fixed vocabulary is not replaced by synonyms', () => {
-    for (const [k, v] of strings(es)) expect(v, k).not.toMatch(/\b(Importe|Utilidad|Stock)\b/);
+    // "Stock bajo" is the one state name ronda-3 §5 adds (Existencias, Filamentos, Insumos); "Stock" alone stays out.
+    for (const [k, v] of strings(es)) expect(v.replace(/\bStock bajo\b/g, ''), k).not.toMatch(/\b(Importe|Utilidad|Stock)\b/);
+    const st = es.status as Record<string, Record<string, string>>;
+    expect([st.stock!.few, st.filament!.low, st.supply!.low]).toEqual(['Stock bajo', 'Stock bajo', 'Stock bajo']);
   });
 });

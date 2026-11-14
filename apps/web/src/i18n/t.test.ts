@@ -1,3 +1,4 @@
+import { es } from './es';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fill, onTextProblem, t } from './t';
 
@@ -29,6 +30,16 @@ describe('t()', () => {
     expect(fill('{printerNames}', { printerNames: ['A1', 'Bambu'] })).toBe('A1 y Bambu');
     expect(fill('{marginPct}', { marginPct: 14.56 })).toBe('14.6%');
     expect(fill('{printHours}', { printHours: 7.25 })).toBe('7 h 15 min');
+  });
+
+  it('a percent parameter already carries its sign: no template writes another % after it (price shortcuts showed "30%%")', () => {
+    expect(t('screens.calculator.costPlus', { pct: 30 })).toBe('costo + 30%');
+    expect(t('screens.calculator.marginOf', { pct: 50 })).toBe('margen 50%');
+    expect(t('screens.calculator.formulaNote', { pct: 50 })).toContain('costo ÷ (1 − 50%)');
+    expect(t('screens.printers.recoveredAria', { pct: 40 })).toBe('40% de la inversión recuperada');
+    const walk = (o: unknown, path: string): string[] => typeof o === 'string' ? (/\{[A-Za-z0-9_]*(?:pct|Pct)\}\s?%/.test(o) ? [path] : [])
+      : o && typeof o === 'object' ? Object.entries(o).flatMap(([k, v]) => walk(v, path ? `${path}.${k}` : k)) : [];
+    expect(walk(es, '')).toEqual([]);
   });
 
   it('a missing parameter never prints {x}: generic text and a report', () => {

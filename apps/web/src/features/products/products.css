@@ -1,3 +1,99 @@
+/* Productos, pieza y colecciones: rules of this screen moved from mockup.css (ronda-3 B3). Colors only from tokens.css. */
+.grid4 { display: grid; gap: 12px 14px; }
+.grid4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.hm { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tbl .bar-td { width: 140px; }
+.tbl .bar-th { width: 140px; }
+/* catálogo: los encabezados largos se parten en dos líneas para que la tabla quepa sin recortar los botones */
+.tbl.prods th { white-space: normal; vertical-align: bottom; line-height: 1.25; }
+.tbl.prods th.nw { white-space: nowrap; }
+.tbl.prods .bar-td, .tbl.prods .bar-th { width: 112px; }
+.tbl.prods .mbar { width: 100%; min-width: 80px; }
+.mbar { display: flex; gap: 2px; width: 120px; height: 10px; border-radius: var(--r-xs); overflow: hidden; background: var(--soft-2); }
+.mbar i { display: block; height: 100%; }
+.mbar .c { background-color: var(--cost); }
+.mbar .g { background-color: var(--green); }
+.mbar.loss .c { background-color: var(--red); }
+.foot-note { color: var(--ink-3t); font-size: 13px; margin-top: 12px; max-width: 70ch; }
+.title-f input { font-family: var(--font-display); font-size: 26px; font-weight: 600; letter-spacing: -.02em; border: 0; border-bottom: 2px solid var(--line-2); border-radius: 0; padding: 4px 0 8px; background: transparent; }
+.title-f input:focus-visible { outline: none; border-color: var(--accent); }
+.fcost { text-align: right; font-weight: 600; }
+.sbar { display: flex; gap: 2px; height: 22px; border-radius: var(--r-xs); overflow: hidden; background: var(--soft-2); }
+.sbar i { display: block; height: 100%; background-color: var(--s); min-width: 2px; transition: width .25s; }
+.sbar i.hatch { background: repeating-linear-gradient(45deg, var(--s) 0 3px, transparent 3px 6px); }
+.sbar i.gain { background-color: var(--green); }
+.sbar i:hover, .sbar i:focus-visible { filter: brightness(1.15); }
+.sbar.loss { box-shadow: 0 0 0 2px var(--red); }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.kpis > div { display: grid; }
+.kpis b { font-family: var(--font-display); font-size: 22px; font-weight: 600; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.row2 .btn:only-child { grid-column: 1 / -1; }
+/* ---------- piezas, colecciones, armar venta o pedido, pedidos ---------- */
+.pcols { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+.pcols .chip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.frow.cparte { grid-template-columns: minmax(0, 1fr) 118px 76px auto; }
+.ex-td small { font-weight: 400; }
+.mbar i, .sbar i:not(.hatch) { background-image: repeating-linear-gradient(0deg, var(--ln, rgba(255, 255, 255, .34)) 0 1px, transparent 1px 3px); }
+@media (max-width: 899px) {
+  .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .frow.cparte { grid-template-columns: minmax(0, 1fr) 96px auto; }
+  .frow .fcost { display: none; }
+}
+@media (max-width: 1500px) {
+  .tbl.prods .rowa { flex-direction: column; align-items: stretch; gap: 4px; }
+}
+.lay-row { display: flex; align-items: flex-end; gap: 6px; position: relative; z-index: 1; }
+.lay-row .lay { --z: .78; }
+.pt-top.has-img { padding: 0; overflow: hidden; }
+.pt-top.has-img::after { display: none; }
+.pt-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto-row { display: flex; gap: 16px; align-items: center; margin: 4px 0 18px; flex-wrap: wrap; }
+.foto-prev { width: 132px; height: 100px; flex: none; border-radius: var(--r-panel); background: var(--soft); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 14px; overflow: hidden; }
+.foto-prev img { width: 100%; height: 100%; object-fit: cover; margin-bottom: -14px; }
+.foto-ctl { display: grid; gap: 6px; min-width: 0; flex: 1 1 220px; }
+.foto-ctl small { max-width: 44ch; }
+/* fichas de piezas */
+.pt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+.pt { background: var(--bg); border-radius: var(--r-panel); box-shadow: 0 0 0 1px var(--line); display: flex; flex-direction: column; cursor: pointer; overflow: hidden; transition: box-shadow .18s, transform .18s; min-width: 0; }
+.pt:hover, .pt:focus-visible { box-shadow: 0 0 0 1px var(--line-2); transform: translateY(-2px); }
+.pt-top { position: relative; height: 112px; background: var(--soft); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 15px; margin: 6px; border-radius: var(--r-panel); }
+.pt-top::after { content: ""; position: absolute; left: 16%; right: 16%; bottom: 10px; height: 5px; border-radius: var(--r-pill); background: var(--soft-2); }
+.pt-tags { position: absolute; left: 12px; top: 12px; display: flex; gap: 4px; flex-wrap: wrap; z-index: 2; }
+.pt-tags .pill { background: var(--bg); }
+.pt-b { padding: 8px 18px 18px; display: grid; gap: 6px; }
+.pt-n { font-weight: 600; font-size: 16.5px; letter-spacing: -.02em; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt-s { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pt-pr { display: flex; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; margin-top: 4px; }
+.pt-p { font-size: 28px; font-weight: 600; letter-spacing: -.04em; line-height: 1; }
+.pt-g { font-size: 13px; font-weight: 600; }
+.pt .mbar { width: 100%; height: 8px; border-radius: 99px; }
+.pt-f { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; color: var(--ink-2); }
+.pt-st { margin-top: 2px; }
+.pt { position: relative; }
+.pt-a { position: absolute; top: 12px; right: 12px; z-index: 3; display: flex; gap: 6px; }
+.pt-a .btn { background: var(--bg); border-color: transparent; box-shadow: 0 0 0 1px var(--line); }
+.pt-a .btn.ghost { color: var(--ink); }
+@media (hover: hover) {
+  .pt-a { opacity: 0; transition: opacity .15s; }
+  .pt:hover .pt-a, .pt:focus-within .pt-a { opacity: 1; }
+}
+@media (max-width: 700px) {
+  .pt-grid { grid-template-columns: minmax(0, 1fr); }
+  .pt-top { height: 96px; }
+  .pt-a { opacity: 1 !important; }
+}
+.irow { display: grid; grid-template-columns: minmax(0, 1fr) 150px 84px 34px; gap: 8px 10px; align-items: center; margin-bottom: 8px; }
+.irow .icost { text-align: right; }
+@media (max-width: 700px) {
+  .irow { grid-template-columns: minmax(0, 1fr) 118px 30px; }
+  .irow .icost { display: none; }
+}
+.mbar i, .sbar i, .sbar i:not(.hatch) { background-image: none; }
+.sbar i.hatch { background-image: none; }
+
 /* Productos by families (ronda-2 §3; reference/ronda-2/productos-fichas.html and productos-lista.html). Colors only from tokens. */
 .cost { color: var(--cost); }
 
@@ -5,14 +101,14 @@
 .pt-grid.fam { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
 @media (max-width: 1100px) { .pt-grid.fam { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .pt-grid.fam { grid-template-columns: minmax(0, 1fr); } }
-.pt.on { box-shadow: 0 0 0 2px var(--accent), var(--sh-soft); }
+.pt.on { box-shadow: 0 0 0 2px var(--accent); }
 .pt-st { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
-.vpill { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 99px; background: var(--panel-2); color: var(--ink); padding: 4px 10px 4px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.vpill { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 99px; background: var(--soft-2); color: var(--ink); padding: 4px 10px 4px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
 .vpill:hover { background: var(--line-2); }
 .vpill svg { transition: transform .15s; }
 .vpill[aria-expanded="true"] svg { transform: rotate(180deg); }
 
-.vpanel { grid-column: 1 / -1; position: relative; margin-top: 2px; border: 2px solid var(--accent); border-radius: var(--r); background: var(--bg); padding: 16px 20px 8px; }
+.vpanel { grid-column: 1 / -1; position: relative; margin-top: 2px; border: 2px solid var(--accent); border-radius: var(--r-panel); background: var(--bg); padding: 16px 20px 8px; }
 .vpanel::before { content: ""; position: absolute; top: -9px; left: calc(var(--notch, 50%) - 8px); width: 14px; height: 14px; background: var(--bg); border-left: 2px solid var(--accent); border-top: 2px solid var(--accent); transform: rotate(45deg); }
 .vp-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding-bottom: 10px; }
 .vp-h b { font-size: 16px; font-weight: 600; }
@@ -46,7 +142,7 @@
 /* Lista: the piece column stays fixed while the table scrolls sideways. */
 .fam-tw > .tbl.fam { min-width: 980px; }
 .tbl.fam th.pc, .tbl.fam td.pc { position: sticky; left: 0; z-index: 1; background: var(--bg); min-width: 260px; }
-.tbl.fam tr.click:hover td.pc { background: var(--panel); }
+.tbl.fam tr.click:hover td.pc { background: var(--soft); }
 .fam-gap { flex: none; width: 28px; }
 .more-row { display: flex; justify-content: center; margin: 18px 0 4px; }
 
@@ -54,19 +150,19 @@
 @media (min-width: 761px) { .prod-tb .tb-r { flex-wrap: nowrap; } .prod-tb .search { width: 230px; } }
 
 /* Lista: arrow, variant rows with a guide to their piece, and "+ Agregar variante de …". */
-.fam-chev { flex: none; width: 28px; height: 28px; border: 1px solid var(--line-2); background: var(--panel); border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; color: var(--ink); }
+.fam-chev { flex: none; width: 28px; height: 28px; border: 1px solid var(--line-2); background: var(--soft); border-radius: var(--r-btn); display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; color: var(--ink); }
 .fam-chev svg { transition: transform .15s; }
 .fam-chev[aria-expanded="true"] svg { transform: rotate(90deg); }
 .tbl.fam .pn { align-items: flex-start; }
 .tbl.fam .pn .sw { margin-top: 5px; }
 .pill.vcount { font-weight: 600; }
-.tbl.fam tr.var-r td { background: var(--panel); border-bottom: 1px dashed var(--line-2); padding-top: 8px; padding-bottom: 8px; }
-.tbl.fam tr.var-r:hover td { background: var(--panel-2); }
+.tbl.fam tr.var-r td { background: var(--soft); border-bottom: 1px dashed var(--line-2); padding-top: 8px; padding-bottom: 8px; }
+.tbl.fam tr.var-r:hover td { background: var(--soft-2); }
 .tbl.fam .var-n { position: relative; padding-left: 36px; align-items: center; gap: 8px; }
 .tbl.fam .var-n .sw { margin-top: 0; }
 .tbl.fam .var-n small { color: var(--ink-2); font-size: 13px; }
-.tbl.fam .guide { position: absolute; left: 13px; top: -14px; bottom: 50%; width: 14px; border-left: 2px solid var(--line-2); border-bottom: 2px solid var(--line-2); border-bottom-left-radius: 6px; }
-.tbl.fam tr.var-add td { background: var(--panel); border-bottom: 1px solid var(--line); }
+.tbl.fam .guide { position: absolute; left: 13px; top: -14px; bottom: 50%; width: 14px; border-left: 2px solid var(--line-2); border-bottom: 2px solid var(--line-2); border-bottom-left-radius: var(--r-pill); }
+.tbl.fam tr.var-add td { background: var(--soft); border-bottom: 1px solid var(--line); }
 .var-add-in { padding-left: 36px; }
 .btn.dashed { border-style: dashed; background: transparent; font-weight: 600; }
 
@@ -81,7 +177,7 @@
   .tbl.fam td.hide-m { display: none; }
   .tbl.fam td.acts { grid-column: 1 / -1; }
   .tbl.fam td[data-k]::before { content: attr(data-k); display: block; font-size: 12px; color: var(--ink-2); font-weight: 500; }
-  .tbl.fam tr.var-r, .tbl.fam tr.var-add { background: var(--panel); padding-left: 10px; padding-right: 10px; }
+  .tbl.fam tr.var-r, .tbl.fam tr.var-add { background: var(--soft); padding-left: 10px; padding-right: 10px; }
   .tbl.fam tr.var-r td, .tbl.fam tr.var-add td { background: none; }
 }
 .tbl.fam tr.var-r .rowa { flex-direction: row; align-items: center; }
@@ -91,8 +187,8 @@
 }
 @media (max-width: 560px) {
   .tbl.fam tr td, .tbl.fam tr.var-r td, .tbl.fam tr.click:hover td { border: 0; background: none; box-shadow: none; padding: 0; }
-  .tbl.fam tr.click:hover { background: var(--panel); }
-  .tbl.fam tr.var-r:hover { background: var(--panel-2); }
+  .tbl.fam tr.click:hover { background: var(--soft); }
+  .tbl.fam tr.var-r:hover { background: var(--soft-2); }
   .tbl.fam .var-n { padding-left: 30px; }
   .tbl.fam .guide { top: -10px; left: 10px; }
 }

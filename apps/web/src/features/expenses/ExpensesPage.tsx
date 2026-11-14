@@ -20,6 +20,7 @@ import { PERIODS, type Period } from '../reports/ReportsPage';
 import { rt } from '../reports/text';
 import { onNewExpenseRequest, takeNewExpenseRequest } from '../../components/CommandPalette';
 import { expensesApi, useExpenses, type ExpenseView } from './api';
+import './expenses.css';
 
 const L = es.screens.expenses;
 

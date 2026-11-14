@@ -19,6 +19,7 @@ import { useWrite } from '../../lib/mutate';
 import { go } from '../../lib/nav';
 import { keys, useProducts, useSettings } from '../../lib/queries';
 import { num } from './costing';
+import './products.css';
 
 const L = es.screens.collection;
 interface CDraft { name: string; parts: { productId: string; qty: string }[]; extras: string; price: string; tags: string[]; note: string }
