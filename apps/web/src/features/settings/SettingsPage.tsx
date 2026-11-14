@@ -1,6 +1,7 @@
 // Ajustes (docs/06 §15): workshop costs, sales channels and business data. Edits are kept in the form and saved together with the "Guardar cambios" button.
 // Ronda 3 (reference/ronda-3/ajustes.html): an index of the sections on the left, one panel per section, channels in a table.
 import type { ChannelView } from '@app/contract';
+import { COST_AVG_PURCHASES } from '@app/core';
 import { useQueryClient } from '@tanstack/react-query';
 import { useState, type FormEvent } from 'react';
 import { PageHead } from '../../components/PageHead';
@@ -50,6 +51,11 @@ export function SettingsPage() {
       const v = parseNumber(str(key), s[key]);
       if (v !== s[key]) patch[key] = v;
     }
+    const avg = Math.round(parseNumber(str('costAvgPurchases'), s.costAvgPurchases));
+    if (avg !== s.costAvgPurchases) {
+      if (!(avg >= COST_AVG_PURCHASES.min && avg <= COST_AVG_PURCHASES.max)) { toast(es.fields['settings.costAvgPurchases.range']); return; }
+      patch.costAvgPurchases = avg;
+    }
     const kwh = Math.round(parseNumber(str('kwhPriceCents'), s.kwhPriceCents / 100) * 100);
     if (kwh !== s.kwhPriceCents) patch.kwhPriceCents = kwh;
     const biz: Record<string, unknown> = {};
@@ -72,7 +78,7 @@ export function SettingsPage() {
     try {
       if (Object.keys(patch).length) await api.settings.update(patch);
       for (const c of chans) await api.settings.updateChannel(c.id, c.body);
-      await invalidate(qc, 'settings', 'products', 'collections', 'printers', 'me');
+      await invalidate(qc, 'settings', 'products', 'collections', 'printers', 'filaments', 'me');
       setDirty(false);
       toast(L.saved);
     } catch (e) { toast(errorText(e).text); await invalidate(qc, 'settings'); } finally { setSaving(false); }
@@ -112,6 +118,9 @@ export function SettingsPage() {
               <div className="grid3">
                 {cost(L.kwh, 'kwhPriceCents', L.kwhUnit, L.kwhHint)}{cost(L.failures, 'failurePct', '%', L.failuresHint)}{cost(L.purge, 'purgePct', '%', L.purgeHint)}
                 {cost(L.minMargin, 'minMarginPct', '%', L.minMarginHint)}{cost(L.formulaMargin, 'formulaMarginPct', '%', L.formulaMarginHint)}
+                <Field label={L.avgPurchases} hint={L.avgPurchasesHint}>
+                  <UnitInput unit={L.avgPurchasesUnit} name="costAvgPurchases" inputMode="numeric" defaultValue={String(s.costAvgPurchases)} key={`avg-${s.costAvgPurchases}`} />
+                </Field>
               </div>
               <p className="meta set-note">{p0 ? <>{tb('screens.settings.perHourLead', { printer: p0.name, total: money2d(machine + power) })} {t('screens.settings.perHourSplit', { machine: money2d(machine), power: money2d(power) })}</> : L.noPrinters}</p>
             </Panel>

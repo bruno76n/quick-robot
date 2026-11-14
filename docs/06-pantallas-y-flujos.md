@@ -301,7 +301,7 @@ Se arman en la interfaz con los datos del pedido o la venta y los **datos del ne
 
 | Sección | Qué contiene | Caso de uso |
 |---|---|---|
-| Costos del taller | kWh, fallos, purga, margen mínimo, margen de fórmula | `updateSettings` |
+| Costos del taller | kWh, fallos, purga, margen mínimo, margen de fórmula y **Compras para el promedio del filamento** (1–10, por omisión 3; ronda 4, `04 §1`: cambia el costo por gramo de los filamentos y el de las piezas al guardar) | `updateSettings` |
 | Canales de venta | Lista editable de canales con su comisión | `addChannel` / `removeChannel` |
 | Documentos | Datos del negocio que salen en cotizaciones y notas (nombre, giro, teléfono, correo, ciudad, vigencia, pie de página) | `updateSettings` |
 | Copia de seguridad | Estado ("Aún no hay una copia descargada" / "Última copia hace N días"), descargar copia (archivo), restaurar desde archivo, lista de **copias automáticas** (una por día, las últimas 7) con "Restaurar", y en escritorio "Mostrar archivo de registro". Aviso fijo: *"Esta copia contiene todos los datos del negocio. Guárdala en un lugar seguro."* (`11 › S3`) | `exportWorkspace` / `importWorkspace` / `createBackup` / `restoreBackup` |

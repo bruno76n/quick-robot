@@ -301,6 +301,7 @@ Salen de `VALIDATION_ERROR.details.fields[]` (`path` + `rule`). Aparecen **debaj
 | `spool.filament.required` | Elige el material y el color del rollo. |
 | `spool.cost.required` | Falta el costo del rollo. *(con «Sin costo» no se pide)* |
 | `spool.quantity.range` | La cantidad va de 1 a 20 rollos. |
+| `settings.costAvgPurchases.range` | Las compras para el promedio van de 1 a 10. |
 | `spool.reference.required` | Falta el precio de referencia por kilo. |
 | `spoolMovement.grams.required` | Falta la cantidad en gramos. |
 | `printRun.text.required` | Falta describir la prueba. |

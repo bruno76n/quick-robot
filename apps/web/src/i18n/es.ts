@@ -551,6 +551,7 @@ export const es = {
       costs: 'Costos del taller', kwh: 'Luz (CFE)', kwhUnit: '$/kWh', kwhHint: 'Recibo: total ÷ kWh', failures: 'Reserva para fallos', failuresHint: 'Se ajusta con el historial real',
       purge: 'Purga y desperdicio', purgeHint: 'Extra de filamento por pieza', minMargin: 'Margen mínimo', minMarginHint: 'Por debajo se muestra una alerta',
       formulaMargin: 'Margen por fórmula', formulaMarginHint: 'Por omisión en piezas por fórmula; cada pieza puede tener el suyo',
+      avgPurchases: 'Compras para el promedio del filamento', avgPurchasesUnit: 'compras', avgPurchasesHint: 'De 1 a 10: el costo por gramo es el promedio de las últimas compras con costo',
       perHourLead: 'Costo por hora en {printer}: {total}', perHourSplit: '({machine} de máquina + {power} de luz).', noPrinters: 'Sin impresoras: agrega una para calcular el costo por hora.',
       channels: 'Canales de venta', channelsHint: 'La comisión se resta de la ganancia en cada venta.', channel: 'Canal', commission: 'Comisión',
       removeChannel: 'Quitar el canal {name}', remove: 'Quitar', addChannel: 'Agregar canal', newChannel: 'Nuevo canal',
