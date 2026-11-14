@@ -38,7 +38,14 @@ const orderBase = { customerId: id.nullable().optional(), channelId: id, created
 export const orderInput = z.object({ ...orderBase, accepted: z.boolean() });
 export const orderUpdateInput = z.object(orderBase);
 export const assignmentsInput = z.object({ assignments: z.array(z.object({ lineItemId: id, printerId: id })).max(LIMITS.itemsPerDocument) });
-export const startProductionInput = assignmentsInput.extend({ deductFilament: z.boolean() });
+/** startProduction: `startSpools` is the spool each item starts with, per filament (ronda-4 §4); the rest goes in the use order. */
+export const startProductionInput = z.object({
+  assignments: z.array(z.object({
+    lineItemId: id, printerId: id,
+    startSpools: z.array(z.object({ filamentId: id, spoolId: id })).max(LIMITS.filamentsPerProduct).optional(),
+  })).max(LIMITS.itemsPerDocument),
+  deductFilament: z.boolean(),
+});
 export const deliverInput = z.object({ on: calendarDate, collectCents: cents().optional(), note: note.optional() });
 export const cancelInput = z.object({ reason: note, refundCents: cents().optional() });
 
@@ -47,7 +54,11 @@ export const printRunQuery = pageQuery.extend({ reason: z.enum(['stock', 'order'
 export const printRunInput = z.object({
   on: calendarDate, productId: id.nullable().optional(), text: z.string().trim().max(LIMITS.name).optional(), qty, printerId: id.nullable().optional(),
   result: z.enum(['ok', 'fail']), hours: z.number().min(0).max(LIMITS.hours), reason: z.enum(['stock', 'order', 'test']),
-  filaments: z.array(z.object({ filamentId: id, grams: grams(LIMITS.movementGrams) })).max(LIMITS.filamentsPerProduct), photoFileId: id.nullable().optional(),
+  filaments: z.array(z.object({
+    filamentId: id, grams: grams(LIMITS.movementGrams),
+    /** Chosen spools (ronda-4 §2.5): grams with purge from each; without grams, all it has up to what is still needed. */
+    spools: z.array(z.object({ spoolId: id, grams: grams(LIMITS.movementGrams).refine((g) => g > 0, { message: 'too_small' }).optional() })).max(LIMITS.spoolsPerFilament).optional(),
+  })).max(LIMITS.filamentsPerProduct), photoFileId: id.nullable().optional(),
 }).refine((x) => x.reason === 'test' || !!x.productId, { path: ['productId'], message: 'required' });
 
 // ---------- Expenses and reports ----------

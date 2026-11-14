@@ -1,14 +1,15 @@
-// addSpool — register a spool purchase; creates the filament if it does not exist (docs/04 §1, docs/06 §6, docs/12 §8).
+// addSpool — register a spool purchase (one or several equal spools with consecutive numbers); creates the filament if it does
+// not exist (docs/04 §1, docs/06 §6, docs/12 §8, ronda-4 §4).
 // Material, color and brand join the workspace pick lists when they are new (docs/06 §15).
-import type { AddSpoolInput, AddSpoolOutput } from '@app/contract';
-import { canonicalEntry, filamentKey, normalizeName, tidyName } from '@app/core';
+import { BusinessError, type AddSpoolInput, type AddSpoolOutput } from '@app/contract';
+import { canonicalEntry, filamentKey, nextSpoolNumbers, normalizeName, splitCents, tidyName } from '@app/core';
 import {
-  addCatalogItems, findFilamentByKey, getFilament, getSupplier, insertFilament, insertSpool, insertSpoolMovements, listSpools, transaction,
+  addCatalogItems, findFilamentByKey, getFilament, getSupplier, insertFilament, insertSpool, insertSpoolMovements, maxSpoolNumber, transaction, updateFilament,
   type Ctx, type Executor, type FilamentRow,
 } from '@app/db';
 import type { Deps } from '../deps';
 import { notFound } from '../http';
-import { filamentListView, loadFilamentCosts, spoolView } from '../views/filament-view';
+import { filamentOut } from '../views/filament-view';
 import { loadCatalogs } from './settings';
 
 /** Adds the brand to the pick list when it is new; returns its official spelling. */
@@ -39,15 +40,28 @@ export async function resolveFilament(deps: Deps, tx: Executor, ctx: Ctx, input:
 
 export async function addSpool(deps: Deps, ctx: Ctx, input: AddSpoolInput): Promise<AddSpoolOutput> {
   return transaction(deps.db, async (tx) => {
-    const filament = await resolveFilament(deps, tx, ctx, input);
+    let filament = await resolveFilament(deps, tx, ctx, input);
     if (input.supplierId && !(await getSupplier(tx, ctx, input.supplierId))) throw notFound('supplier');
     const brand = input.brand ? await catalogBrand(deps, tx, ctx, input.brand) : '';
-    const spool = await insertSpool(tx, ctx, {
-      id: deps.ids.next(), filamentId: filament.id, brand, costCents: input.costCents,
-      shippingCents: input.shippingCents, grams: input.grams, purchasedOn: input.purchasedOn, supplierId: input.supplierId ?? null,
-    });
-    await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: spool.id, on: input.purchasedOn, kind: 'purchase', grams: input.grams, note: input.note ?? '' }]);
-    const spools = await listSpools(tx, ctx, [filament.id]);
-    return { spool: spoolView(spools.find((s) => s.id === spool.id)!), filament: filamentListView(filament, spools, await loadFilamentCosts(tx, ctx)) };
+    if (input.referenceCentsPerKg !== undefined) filament = (await updateFilament(tx, ctx, filament.id, { referenceCentsPerKg: input.referenceCentsPerKg }))!;
+    const quantity = input.quantity ?? 1;
+    // A spool that cost nothing is a no-cost spool, whatever the switch says (decision of phase A, the same as migration 0008).
+    const noCost = Boolean(input.noCost) || input.costCents + input.shippingCents === 0;
+    const numbers = nextSpoolNumbers([await maxSpoolNumber(tx, ctx)], quantity);
+    const shipping = splitCents(input.shippingCents, quantity);
+    const ids = numbers.map(() => deps.ids.next());
+    for (const [i, number] of numbers.entries()) {
+      await insertSpool(tx, ctx, {
+        id: ids[i]!, number, noCost, filamentId: filament.id, brand, costCents: input.costCents, shippingCents: shipping[i]!, grams: input.grams,
+        purchasedOn: input.purchasedOn, supplierId: input.supplierId ?? null,
+      });
+    }
+    await insertSpoolMovements(tx, ctx, ids.map((spoolId) => ({ id: deps.ids.next(), spoolId, on: input.purchasedOn, kind: 'purchase' as const, grams: input.grams, note: input.note ?? '' })));
+    const o = await filamentOut(tx, ctx, filament.id);
+    // A spool marked «Sin costo» needs some way to cost pieces (docs/04 §1): purchases of the filament or its material, or a
+    // reference price. A $0 spool sent without the mark (older clients, the mockup importer) is kept as before, without asking.
+    if (input.noCost && o.cost.source === 'none') throw new BusinessError('REFERENCE_COST_REQUIRED');
+    const spools = ids.map(o.spool);
+    return { spool: spools[0]!, spools, filament: o.filament };
   });
 }

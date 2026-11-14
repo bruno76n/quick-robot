@@ -1,7 +1,7 @@
 // Which spool is used, finish and weigh (docs/04 §1, cases 1.2, 1.5a–c and 1.6; ronda-4 §2.5–2.7).
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { filamentShortfall, finishSpool, planDeduction, planSpoolUse, spoolRemaining, spoolUseOrder, suggestedSpool, weighSpool } from '../src/filament';
+import { filamentShortfall, finishSpool, planDeduction, planSpoolUse, spoolRemaining, spoolUseOrder, startSpoolPicks, suggestedSpool, weighSpool } from '../src/filament';
 import { aSpool } from './builders';
 
 describe('which spool is used without a choice (docs/04 §1, case 1.2)', () => {
@@ -93,6 +93,30 @@ describe('which spool is used with a choice (docs/04 §1, cases 1.5a–c)', () =
     expect([Math.round(by('s7') * 10) / 10, by('q')]).toEqual([-42.5, -10]);
   });
 
+});
+
+describe('the spool each item of an order starts with (Poner en producción, case 1.5c)', () => {
+  const s4 = aSpool({ id: 's4', number: 4, purchasedOn: '2026-10-01', remaining: 410 });
+  const s13 = aSpool({ id: 's13', number: 13, purchasedOn: '2026-11-01', remaining: 1000 });
+  const s20 = aSpool({ id: 's20', number: 20, purchasedOn: '2026-11-02', remaining: 1000 });
+
+  it('one item of 20 × 45 g starting with #4: #4 gives all it has (410 g) and #13 the rest, as case 1.5c', () => {
+    const picks = startSpoolPicks([s13, s4], [{ spoolId: 's4', grams: 900 }], 5);
+    expect(picks).toEqual([{ spoolId: 's4', grams: 410 }]);
+    const r = planSpoolUse([s13, s4], 900, 5, picks);
+    expect(r.ok && r.movements.map((m) => [m.spoolId, m.grams])).toEqual([['s4', -390.5], ['s4', -19.5], ['s13', -509.5], ['s13', -25.5]]);
+  });
+
+  it('two items: each takes from its own spool up to what it needs; a spool already used by an earlier item gives what is left', () => {
+    expect(startSpoolPicks([s4, s13, s20], [{ spoolId: 's20', grams: 100 }, { spoolId: 's4', grams: 300 }, { spoolId: 's4', grams: 200 }], 5))
+      .toEqual([{ spoolId: 's20', grams: 105 }, { spoolId: 's4', grams: 315 }, { spoolId: 's4', grams: 95 }]);
+  });
+
+  it('an empty start spool adds nothing; a spool of another filament stays as a part without grams (SPOOL_NOT_IN_FILAMENT)', () => {
+    const empty = aSpool({ id: 'e', remaining: 0 });
+    expect(startSpoolPicks([empty, s13], [{ spoolId: 'e', grams: 10 }, { spoolId: 'x', grams: 10 }], 5)).toEqual([{ spoolId: 'x' }]);
+    expect(planSpoolUse([empty, s13], 10, 5, [{ spoolId: 'x' }])).toMatchObject({ ok: false, code: 'SPOOL_NOT_IN_FILAMENT' });
+  });
 });
 
 describe('deduction details', () => {

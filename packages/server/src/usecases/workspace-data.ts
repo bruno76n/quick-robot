@@ -1,6 +1,7 @@
 // Export, import (own format or the mockup's v7 backup), automatic backups, restore and "Vaciar negocio" (docs/12 §10,
 // docs/05 › Importar el mockup). An import always saves a backup first and is applied in one transaction.
 import { BusinessError } from '@app/contract';
+import { COST_AVG_PURCHASES, numberSpools } from '@app/core';
 import {
   columnsOf, dumpWorkspace, getFile, getSettings, loadWorkspace, schemaVersion, tableByName, transaction, updateSettings, wipeWorkspace,
   type Ctx, type Db,
@@ -90,6 +91,37 @@ function normalizeImportedProducts(rows: Record<string, unknown>[]) {
   for (const r of rows) Object.assign(r, fixed.get(r.id as string));
 }
 
+const isInt = (v: unknown) => typeof v === 'number' && Number.isInteger(v);
+
+/**
+ * Ronda 4 columns (docs/05, migration 0008). Backups made before them get spool numbers in purchase order and no-cost spools
+ * where cost + shipping = 0, like the migration; values that are there must be valid (numbers ≥ 1 and not repeated, N 1–10,
+ * reference > 0, tare ≥ 0), or the file is refused before anything is written.
+ */
+function normalizeRonda4(tables: Record<string, Record<string, unknown>[]>) {
+  const spools = tables.spool ?? [];
+  const seen = new Set<unknown>();
+  for (const [i, r] of spools.entries()) {
+    if (r.number === undefined || r.number === null) continue;
+    if (!isInt(r.number) || (r.number as number) < 1 || seen.has(r.number)) throw invalid(`spool-number#${i}`);
+    seen.add(r.number);
+  }
+  const numbers = numberSpools(spools.map((r) => ({ id: r.id as string, purchasedOn: String(r.purchasedOn ?? ''), number: r.number as number | null | undefined })));
+  for (const r of spools) {
+    r.number = numbers.get(r.id as string);
+    if (r.noCost === undefined || r.noCost === null) r.noCost = Number(r.costCents ?? 0) + Number(r.shippingCents ?? 0) === 0;
+  }
+  const check = (table: string, column: string, ok: (v: number) => boolean) => {
+    for (const [i, r] of (tables[table] ?? []).entries()) {
+      const v = r[column];
+      if (v !== undefined && v !== null && !(isInt(v) && ok(v as number))) throw invalid(`value:${table}.${column}#${i}`);
+    }
+  };
+  check('workspace_settings', 'costAvgPurchases', (v) => v >= COST_AVG_PURCHASES.min && v <= COST_AVG_PURCHASES.max);
+  check('filament', 'referenceCentsPerKg', (v) => v > 0);
+  check('catalog_item', 'spoolTareGrams', (v) => v >= 0);
+}
+
 export interface ImportResult { format: 'workspace' | 'mockup-v7'; counts: Record<string, number>; differences: string[]; notes: string[]; backupId: string | null }
 
 function parse(bytes: Uint8Array): unknown {
@@ -106,6 +138,7 @@ export async function importWorkspace(deps: Deps, ctx: Ctx, bytes: Uint8Array, o
     if (r.data.schemaVersion > schemaVersion()) throw new BusinessError('IMPORT_UNSUPPORTED_VERSION', { found: String(r.data.schemaVersion), supported: String(schemaVersion()) });
     const valid = validateTables(r.data.tables);
     if (valid.product) normalizeImportedProducts(valid.product);
+    normalizeRonda4(valid);
     // New ids for every row, with every reference remapped (columns and ids inside JSON: parts, fromStock, stockReserved):
     // the file can be restored in place or loaded into another business of the same database.
     const ids = new Map<string, string>();

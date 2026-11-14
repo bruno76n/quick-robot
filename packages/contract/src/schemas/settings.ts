@@ -8,10 +8,11 @@ export const business = z.object({
 });
 export const settingsView = z.object({
   kwhPriceCents: z.number().int(), failurePct: z.number(), purgePct: z.number(), minMarginPct: z.number(), formulaMarginPct: z.number(),
-  business, lastBackupOn: calendarDate.nullable(),
+  business, lastBackupOn: calendarDate.nullable(), costAvgPurchases: z.number().int(),
 });
 export const channelView = z.object({ id, name: z.string(), commissionPct: z.number(), position: z.number().int() });
-export const catalogEntry = z.object({ name: z.string(), hex: z.string().nullable().optional() });
+/** `tareGrams`: brands only, the weight of their empty spool saved by weighSpool (ronda-4 §2.7). */
+export const catalogEntry = z.object({ name: z.string(), hex: z.string().nullable().optional(), tareGrams: z.number().int().nullable().optional() });
 export const catalogs = z.object({
   materials: z.array(catalogEntry), colors: z.array(catalogEntry), brands: z.array(catalogEntry),
   customerTypes: z.array(catalogEntry), expenseCategories: z.array(catalogEntry),
@@ -20,6 +21,8 @@ export const settingsOutput = z.object({ settings: settingsView, channels: z.arr
 
 export const updateSettingsInput = z.object({
   kwhPriceCents: cents(10_000_000).optional(), failurePct: pct.optional(), purgePct: pct.optional(), minMarginPct: pct.optional(), formulaMarginPct: pct.optional(),
+  /** Purchases with cost that form the cost per gram of a filament (docs/04 §1). */
+  costAvgPurchases: z.number().int().min(1).max(10).optional(),
   business: business.partial().optional(),
 }).strict();
 export const addChannelInput = z.object({ name, commissionPct: pct });

@@ -13,7 +13,7 @@ export const channelView = (c: ChannelRow): ChannelView => ({ id: c.id, name: c.
 function settingsView(s: SettingsRow): SettingsView {
   return {
     kwhPriceCents: s.kwhPriceCents, failurePct: s.failurePct, purgePct: s.purgePct, minMarginPct: s.minMarginPct, formulaMarginPct: s.formulaMarginPct,
-    business: s.business, lastBackupOn: s.lastBackupOn ?? null,
+    business: s.business, lastBackupOn: s.lastBackupOn ?? null, costAvgPurchases: s.costAvgPurchases,
   };
 }
 
@@ -41,7 +41,8 @@ export async function ensureWorkspaceDefaults(deps: Deps, ctx: Ctx, ex: Executor
 export async function loadCatalogs(ex: Executor, ctx: Ctx): Promise<Catalogs> {
   const rows = await listCatalog(ex, ctx);
   const of = (kind: string) => rows.filter((r) => r.kind === kind).map((r) => ({ name: r.name, hex: r.hex ?? null }));
-  return { materials: of('material'), colors: of('color'), brands: of('brand'), customerTypes: of('customer_type'), expenseCategories: of('expense_category') };
+  const brands = rows.filter((r) => r.kind === 'brand').map((r) => ({ name: r.name, hex: null, tareGrams: r.spoolTareGrams ?? null }));
+  return { materials: of('material'), colors: of('color'), brands, customerTypes: of('customer_type'), expenseCategories: of('expense_category') };
 }
 
 export async function getSettingsOutput(deps: Deps, ctx: Ctx): Promise<SettingsOutput> {

@@ -21,7 +21,7 @@ export function useMaterial(needs: readonly { filamentId: string; grams: number 
     const f = fils.get(n.filamentId);
     const need = n.grams * (1 + purge / 100);
     const left = f?.remainingGrams ?? 0;
-    return { filamentId: n.filamentId, name: f ? `${f.material} ${f.color}` : '', hex: f?.hex ?? 'var(--no-color)', need, left, spools: f?.spools ?? 0, short: need > left + 0.01 };
+    return { filamentId: n.filamentId, name: f ? `${f.material} ${f.color}` : '', hex: f?.hex ?? 'var(--no-color)', need, left, spools: f?.spoolCount ?? 0, short: need > left + 0.01 };
   });
   return { purge, lines, total: lines.reduce((a, l) => a + l.need, 0), short: lines.filter((l) => l.short) };
 }

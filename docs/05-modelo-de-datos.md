@@ -22,9 +22,9 @@ Punto de partida: el estado del mockup (esquema v7). Aquí se traduce a tablas. 
 | `user` | `id`, `email` (único), `name`, `password_hash` (solo nube) |
 | `membership` | `workspace_id`, `user_id`, `role` (`owner` \| `admin` \| `operator`) |
 | `subscription` *(solo nube)* | `workspace_id`, `plan`, `status`, `current_period_end`, `provider_customer_id` |
-| `workspace_settings` | `workspace_id` (PK), `kwh_price_cents`, `failure_pct`, `purge_pct`, `min_margin_pct`, `formula_margin_pct`, `business` (jsonb: `name`, `trade`, `phone`, `email`, `city`, `quote_valid_days`, `footer`), `last_backup_on` (date, nulo si nunca) |
+| `workspace_settings` | `workspace_id` (PK), `kwh_price_cents`, `failure_pct`, `purge_pct`, `min_margin_pct`, `formula_margin_pct`, `business` (jsonb: `name`, `trade`, `phone`, `email`, `city`, `quote_valid_days`, `footer`), `last_backup_on` (date, nulo si nunca), `cost_avg_purchases` (int, 3; de 1 a 10: compras con costo que forman el costo por gramo de un filamento, `04 §1`) |
 | `sales_channel` | `id`, `workspace_id`, `name` (único por negocio, sin importar mayúsculas), `commission_pct`, `position` |
-| `catalog_item` | `workspace_id`, `kind` (`material` \| `color` \| `brand` \| `customer_type` \| `expense_category`), `name`, `name_key` (único por tipo, sin mayúsculas ni acentos), `hex` (solo colores) |
+| `catalog_item` | `workspace_id`, `kind` (`material` \| `color` \| `brand` \| `customer_type` \| `expense_category`), `name`, `name_key` (único por tipo, sin mayúsculas ni acentos), `hex` (solo colores), `spool_tare_grams` (int, nulo; solo marcas: peso del carrete vacío, lo guarda `weighSpool`) |
 
 *En modo local* hay exactamente una fila de `workspace`, `user`, `membership`, con ids fijos.
 
@@ -32,8 +32,8 @@ Punto de partida: el estado del mockup (esquema v7). Aquí se traduce a tablas. 
 
 | Tabla | Columnas principales | Notas |
 |---|---|---|
-| `filament` | `workspace_id`, `material`, `color`, `hex` | Único por (`workspace_id`, material, color) sin importar mayúsculas |
-| `spool` | `workspace_id`, `filament_id`, `brand`, `cost_cents`, `shipping_cents`, `grams`, `purchased_on`, `supplier_id?` | Un rollo = una compra |
+| `filament` | `workspace_id`, `material`, `color`, `hex`, `reference_cents_per_kg?` | Único por (`workspace_id`, material, color) sin importar mayúsculas. `reference_cents_per_kg`: precio de referencia por kilo, para costear cuando solo hay rollos sin costo (`04 §1`) |
+| `spool` | `workspace_id`, `number`, `filament_id`, `brand`, `cost_cents`, `shipping_cents`, `grams`, `purchased_on`, `supplier_id?`, `no_cost` | Un rollo = una compra. `number` (#1, #2…): correlativo por negocio, único con `workspace_id`, nunca se reutiliza (un rollo borrado lo conserva). `no_cost` (falso por omisión): regalo o incluido con la impresora; cuenta en gramos, no en el costo (`04 §1`) |
 | `spool_movement` | `workspace_id`, `spool_id`, `on`, `kind` (`purchase` \| `consumption` \| `failure` \| `waste` \| `adjustment`), `grams` (± ), `note`, `ref_id?` | `ref_id` apunta al `print_run` o pedido que lo causó |
 | `supplier` | `workspace_id`, `name`, `phone`, `brands` (texto), `note` | |
 | `supply` | `workspace_id`, `name`, `unit`, `cost_cents`, `minimum`, `note`, `supplier_id?` | Insumo (argollas, imanes, cajas) |
@@ -124,6 +124,8 @@ Llevan `deleted_at` (y por tanto "Deshacer" = `restore…`, `12`): `product`, `c
 - `product (workspace_id, parent_id)` para traer las variantes de una página de familias (`parent_id IN (…)`).
 
 **Migración `0007` (ronda 2, aditiva):** agrega `variant_label`, el índice de arriba y la comprobación `product_variant_label` (etiqueta de 1 a 60 letras, obligatoria si hay `parent_id`). Normaliza los datos viejos: una cadena (variante de variante) apunta a la original raíz; una variante sin ninguna original viva arriba queda como pieza independiente (`parent_id` y etiqueta nulos); la etiqueta sale del nombre con la regla de `core › variantLabelFromName`. Ningún nombre cambia.
+
+**Migración `0008` (ronda 4, aditiva):** agrega `spool.number` (se llena por negocio en orden de `purchased_on`, desempate por id, incluidos los borrados; luego no nulo, ≥ 1 e índice único `(workspace_id, number)`), `spool.no_cost` (falso; verdadero donde `cost_cents + shipping_cents = 0`), `filament.reference_cents_per_kg` (nulo, > 0), `catalog_item.spool_tare_grams` (nulo, ≥ 0) y `workspace_settings.cost_avg_purchases` (3, de 1 a 10). No cambia ningún gramo ni ningún otro dato; antes de aplicarla en la Mac se copia la carpeta de datos (`migrate-local`). Una copia de seguridad propia anterior (sin estas columnas) se importa calculando lo mismo.
 
 ## Aislamiento entre negocios
 

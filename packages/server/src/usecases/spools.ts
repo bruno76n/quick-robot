@@ -1,24 +1,25 @@
-// updateSpool, deleteSpool, restoreSpool, recordSpoolMovement (docs/04 §1, docs/06 §6, docs/12 §8).
-import { BusinessError, type FilamentListItem, type Spool, type SpoolMovementInput, type UpdateSpoolInput } from '@app/contract';
-import { round1, tidyName } from '@app/core';
+// updateSpool, deleteSpool, restoreSpool, recordSpoolMovement, finishSpool, weighSpool (docs/04 §1, docs/06 §6, docs/12 §8).
 import {
-  countSpoolMovements, getFilament, getSpool, getSpoolAny, getSupplier, insertSpoolMovements, listSpools, setSpoolDeleted, spoolRemainingGrams,
+  BusinessError, type FilamentListItem, type FinishSpoolInput, type Spool, type SpoolMovementInput, type UpdateSpoolInput, type WeighSpoolInput, type WeighSpoolOutput,
+} from '@app/contract';
+import { finishSpool as finishRule, normalizeName, round1, tidyName, weighSpool as weighRule } from '@app/core';
+import {
+  countSpoolMovements, getSpool, getSpoolAny, getSupplier, insertSpoolMovements, saveBrandTare, setSpoolDeleted, spoolRemainingGrams,
   transaction, updateSpool as updateRow, type Ctx, type Executor,
 } from '@app/db';
 import type { Deps } from '../deps';
 import { notFound } from '../http';
-import { filamentListView, loadFilamentCosts, spoolView } from '../views/filament-view';
+import { filamentOut } from '../views/filament-view';
 import { resolveFilament } from './add-spool';
 
 async function out(tx: Executor, ctx: Ctx, spoolId: string, filamentId: string): Promise<{ spool: Spool; filament: FilamentListItem }> {
-  const f = (await getFilament(tx, ctx, filamentId))!;
-  const spools = await listSpools(tx, ctx, [filamentId]);
-  return { spool: spoolView(spools.find((s) => s.id === spoolId)!), filament: filamentListView(f, spools, await loadFilamentCosts(tx, ctx)) };
+  const o = await filamentOut(tx, ctx, filamentId);
+  return { spool: o.spool(spoolId), filament: o.filament };
 }
 
 /**
  * Edit a spool. The ledger is never rewritten: if the grams of the purchase change, an "adjustment" movement
- * records the difference (decision 2.3). Changing material or color moves the spool to that filament.
+ * records the difference (decision 2.3). Changing material or color moves the spool to that filament. Its number never changes.
  */
 export async function updateSpool(deps: Deps, ctx: Ctx, id: string, input: UpdateSpoolInput) {
   return transaction(deps.db, async (tx) => {
@@ -35,6 +36,8 @@ export async function updateSpool(deps: Deps, ctx: Ctx, id: string, input: Updat
       ...(input.grams !== undefined ? { grams: input.grams } : {}),
       ...(input.purchasedOn !== undefined ? { purchasedOn: input.purchasedOn } : {}),
       ...(input.supplierId !== undefined ? { supplierId: input.supplierId } : {}),
+      // A spool that ends up costing nothing is a no-cost spool (as in addSpool and migration 0008).
+      noCost: (input.noCost ?? s.noCost) || (input.costCents ?? s.costCents) + (input.shippingCents ?? s.shippingCents) === 0,
     });
     if (input.grams !== undefined && input.grams !== s.grams) {
       await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: id, on: deps.clock.today(), kind: 'adjustment', grams: round1(input.grams - s.grams), note: '' }]);
@@ -73,5 +76,35 @@ export async function recordSpoolMovement(deps: Deps, ctx: Ctx, id: string, inpu
     if (grams < 0 && -grams > available + 0.05) throw new BusinessError('SPOOL_INSUFFICIENT', { availableGrams: available });
     await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: id, on: input.on, kind: input.kind, grams, note: input.note?.trim() ?? '' }]);
     return out(tx, ctx, id, s.filamentId);
+  });
+}
+
+/** "Terminar rollo" (docs/04 §1): a waste movement for all that is left, noted «Rollo terminado»; an empty spool → SPOOL_ALREADY_EMPTY. */
+export async function finishSpool(deps: Deps, ctx: Ctx, id: string, input: FinishSpoolInput) {
+  return transaction(deps.db, async (tx) => {
+    const s = await getSpool(tx, ctx, id, { forUpdate: true });
+    if (!s) throw notFound('spool');
+    const r = finishRule({ remaining: await spoolRemainingGrams(tx, ctx, id) });
+    if (!r.ok) throw new BusinessError(r.code);
+    await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: id, on: input.on ?? deps.clock.today(), kind: 'waste', grams: r.grams, note: 'Rollo terminado' }]);
+    return out(tx, ctx, id, s.filamentId);
+  });
+}
+
+/**
+ * "Pesar" (docs/04 §1): left = scale − empty spool; an adjustment for left − what the ledger says (none when it is 0).
+ * The empty-spool weight is kept for the brand of the spool, to propose it next time. Out of 0…grams × 1.05 → WEIGHT_OUT_OF_RANGE.
+ */
+export async function weighSpool(deps: Deps, ctx: Ctx, id: string, input: WeighSpoolInput): Promise<WeighSpoolOutput> {
+  return transaction(deps.db, async (tx) => {
+    const s = await getSpool(tx, ctx, id, { forUpdate: true });
+    if (!s) throw notFound('spool');
+    const r = weighRule({ grams: s.grams, remaining: await spoolRemainingGrams(tx, ctx, id) }, input.scaleGrams, input.tareGrams);
+    if (!r.ok) throw new BusinessError(r.code, { maxGrams: r.maxGrams });
+    if (r.adjustmentGrams !== null) {
+      await insertSpoolMovements(tx, ctx, [{ id: deps.ids.next(), spoolId: id, on: input.on ?? deps.clock.today(), kind: 'adjustment', grams: r.adjustmentGrams, note: '' }]);
+    }
+    if (s.brand) await saveBrandTare(tx, ctx, { id: deps.ids.next(), name: s.brand, nameKey: normalizeName(s.brand) }, input.tareGrams);
+    return { ...(await out(tx, ctx, id, s.filamentId)), leftGrams: r.leftGrams, adjustmentGrams: r.adjustmentGrams };
   });
 }

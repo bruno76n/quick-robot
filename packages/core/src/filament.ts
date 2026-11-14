@@ -156,6 +156,20 @@ export function nextSpoolNumbers(existing: readonly number[], quantity: number):
   return Array.from({ length: Math.max(0, Math.floor(quantity)) }, (_, i) => start + i);
 }
 
+/**
+ * Numbers for spools that have none (data from before ronda 4: migration 0008, old backups): after the highest number in use,
+ * in purchase order, ties by id; deleted spools too. Spools that already have a number keep it.
+ */
+export function numberSpools(spools: readonly { id: string; purchasedOn: string; number?: number | null | undefined }[]): Map<string, number> {
+  const out = new Map<string, number>();
+  let next = spools.reduce((a, s) => Math.max(a, s.number ?? 0), 0) + 1;
+  for (const s of spools) if (s.number !== null && s.number !== undefined) out.set(s.id, s.number);
+  const missing = spools.filter((s) => s.number === null || s.number === undefined)
+    .sort((a, b) => a.purchasedOn.localeCompare(b.purchasedOn) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  for (const s of missing) out.set(s.id, next++);
+  return out;
+}
+
 /** Integer cents split in `parts` equal shares; the cents left over go to the first (shipping of N spools, ronda-4 §4). */
 export function splitCents(totalCents: number, parts: number): number[] {
   const n = Math.max(0, Math.floor(parts));
@@ -240,6 +254,29 @@ export function planSpoolUse(spools: readonly SpoolInput[], grams: number, purge
   const taken = round1([...parts.values()].reduce((a, g) => a + g, 0));
   const need = grams > 0 ? grams * k : 0;
   return { ok: true, movements, taken, missing: Math.max(0, round1(need - taken)) };
+}
+
+/** The spool an item of an order starts with (Poner en producción), and the grams of that filament it needs without purge. */
+export interface StartSpool { spoolId: string; grams: number }
+
+/**
+ * "Empezar con el rollo" (ronda-4 §4, case 1.5c) as chosen parts: each item takes first from its spool, up to what it needs with
+ * purge or what that spool still has after the items before it; whatever is not covered goes in the use order (planSpoolUse).
+ * A spool that is not one of these keeps a part without grams, so planSpoolUse answers SPOOL_NOT_IN_FILAMENT.
+ */
+export function startSpoolPicks(spools: readonly SpoolInput[], starts: readonly StartSpool[], purgePct: number): SpoolPick[] {
+  const k = 1 + purgePct / 100;
+  const left = new Map(live(spools).map((s) => [s.id, Math.max(0, s.remaining)]));
+  const picks: SpoolPick[] = [];
+  for (const st of starts) {
+    const avail = left.get(st.spoolId);
+    if (avail === undefined) { picks.push({ spoolId: st.spoolId }); continue; }
+    const t = round1(Math.min(Math.max(0, st.grams) * k, avail));
+    if (t <= 0) continue;
+    picks.push({ spoolId: st.spoolId, grams: t });
+    left.set(st.spoolId, avail - t);
+  }
+  return picks;
 }
 
 /** Deduct a job without a choice of spool (the automatic order). */

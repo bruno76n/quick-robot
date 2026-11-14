@@ -1,7 +1,7 @@
 // Typed client written by hand from packages/contract (docs/07). Same origin (/api/v1); in local mode the
 // launch secret is added by Electron or the Vite proxy, never by this code.
 import type {
-  AddChannelInput, AddSpoolInput, AddSpoolOutput, ChannelView, CollectionDetail, CollectionListItem, CompleteMaintenanceInput, CreateSupplyInput, ErrorCode,
+  AddChannelInput, AddSpoolInput, AddSpoolOutput, SpoolOutput, ChannelView, CollectionDetail, CollectionListItem, CompleteMaintenanceInput, CreateSupplyInput, ErrorCode,
   FilamentDetail, FilamentListItem, MaintenanceTaskInput, MaintenanceView, Page, PrinterInput, PrintersOutput, PrinterView, ProductDetail, ProductFamilyFilter, ProductFamilyPage, ProductOptions,
   SaveCollectionInput, SaveProductAsVariantInput, SaveProductInput, SettingsOutput, SettingsView, Spool, SpoolMovementInput, SupplierInput, SupplierView, SupplyDetail, SupplyListItem,
   SupplyMovementInput, SupplyPurchaseInput, UpdateChannelInput, UpdateSettingsInput, UpdateSpoolInput, UpdateSupplyInput, Warning,
@@ -59,10 +59,10 @@ export const api = {
   },
   spools: {
     add: (input: AddSpoolInput) => request<AddSpoolOutput>('POST', '/spools', input),
-    update: (id: string, input: UpdateSpoolInput) => request<AddSpoolOutput>('PATCH', `/spools/${id}`, input),
+    update: (id: string, input: UpdateSpoolInput) => request<SpoolOutput>('PATCH', `/spools/${id}`, input),
     remove: (id: string) => request<{ movements: number }>('DELETE', `/spools/${id}`),
     restore: (id: string) => request<{ spool: Spool; filament: FilamentListItem }>('POST', `/spools/${id}/restore`),
-    move: (id: string, input: SpoolMovementInput) => request<AddSpoolOutput>('POST', `/spools/${id}/movements`, input),
+    move: (id: string, input: SpoolMovementInput) => request<SpoolOutput>('POST', `/spools/${id}/movements`, input),
   },
   settings: {
     get: () => request<SettingsOutput>('GET', '/settings'),

@@ -5,12 +5,12 @@ import type { Connection } from '../src/connect';
 import * as schema from '../src/schema';
 import {
   findFilamentByKey, getFilament, getSpool, insertFilament, insertSpool, insertSpoolMovements, listFilaments,
-  listSpoolMovements, listSpools, lockSpoolsOfFilament,
+  listSpoolMovements, listSpools, lockSpoolsOfFilament, maxSpoolNumber, updateFilament,
 } from '../src/repos/filament-repo';
 import { getRole, getWorkspace } from '../src/repos/workspace-repo';
 import { deleteTask, getPrinter, getTask, insertTasks, listPrinters, listTasks, updatePrinter, updateTask } from '../src/repos/printer-repo';
 import { getCollection, getProduct, insertProduct, listCollections, listProducts, replaceCollectionParts, replaceProductParts, setProductDeleted, updateCollection } from '../src/repos/product-repo';
-import { deleteChannel, getChannel, getFile, getSettings, listCatalog, listChannels, updateChannel } from '../src/repos/settings-repo';
+import { deleteChannel, getChannel, getFile, getSettings, listCatalog, listChannels, saveBrandTare, updateChannel, updateSettings } from '../src/repos/settings-repo';
 import { findSupplyByKey, getSuppliesByIds, getSupplier, getSupply, insertSupply, insertSupplyMovements, listSuppliers, listSupplies, listSupplyMovements, productsUsingSupply, setSupplierDeleted, updateSupply } from '../src/repos/supply-repo';
 import { countLiveVariants, listProductFamilies } from '../src/repos/product-family-repo';
 import { openTestDb } from '../src/testing';
@@ -119,7 +119,7 @@ describe('workshop and catalog: reads with ctx A never return B', () => {
 
 describe('writes with ctx A never touch B', () => {
   it('cannot attach a spool to a filament of B (composite foreign key)', async () => {
-    await expect(insertSpool(conn.db, A.ctx, { id: uid(0xa), filamentId: B.filamentId, brand: '', costCents: 1, shippingCents: 0, grams: 1, purchasedOn: '2026-11-01' })).rejects.toThrow();
+    await expect(insertSpool(conn.db, A.ctx, { id: uid(0xa), number: 2, filamentId: B.filamentId, brand: '', costCents: 1, shippingCents: 0, grams: 1, purchasedOn: '2026-11-01' })).rejects.toThrow();
   });
   it('cannot add a movement to a spool of B', async () => {
     await expect(insertSpoolMovements(conn.db, A.ctx, [{ id: uid(0xa), spoolId: B.spoolId, on: '2026-11-01', kind: 'consumption', grams: -10, note: '' }])).rejects.toThrow();
@@ -136,12 +136,44 @@ describe('writes with ctx A never touch B', () => {
   });
 });
 
+describe('ronda 4 columns (spool number, no-cost, reference price, brand tare, purchases for the average)', () => {
+  it('each workspace numbers its own spools; a spool of A may share its number with one of B', async () => {
+    const a = await maxSpoolNumber(conn.db, A.ctx);
+    const b = await maxSpoolNumber(conn.db, B.ctx);
+    await insertSpool(conn.db, B.ctx, { id: uid(0xb), number: b + 1, filamentId: B.filamentId, brand: '', costCents: 0, shippingCents: 0, grams: 1, purchasedOn: '2026-11-02', noCost: true });
+    expect(await maxSpoolNumber(conn.db, A.ctx)).toBe(a);
+    expect(await maxSpoolNumber(conn.db, B.ctx)).toBe(b + 1);
+    await insertSpool(conn.db, A.ctx, { id: uid(0xa), number: b + 1, filamentId: A.filamentId, brand: '', costCents: 1, shippingCents: 0, grams: 1, purchasedOn: '2026-11-02' });
+    await expect(insertSpool(conn.db, A.ctx, { id: uid(0xa), number: b + 1, filamentId: A.filamentId, brand: '', costCents: 1, shippingCents: 0, grams: 1, purchasedOn: '2026-11-02' })).rejects.toThrow();
+    const listed = await listSpools(conn.db, A.ctx, [A.filamentId, B.filamentId]);
+    expect(listed.every((s) => s.workspaceId === A.ctx.workspaceId && typeof s.number === 'number' && typeof s.noCost === 'boolean')).toBe(true);
+  });
+  it('the reference price of a filament of B cannot be changed with ctx A', async () => {
+    expect(await updateFilament(conn.db, A.ctx, B.filamentId, { referenceCentsPerKg: 30000 })).toBeUndefined();
+    expect((await getFilament(conn.db, B.ctx, B.filamentId))?.referenceCentsPerKg).toBeNull();
+    expect((await updateFilament(conn.db, A.ctx, A.filamentId, { referenceCentsPerKg: 30000 }))?.referenceCentsPerKg).toBe(30000);
+  });
+  it('the tare of a brand is saved only in its own workspace', async () => {
+    await saveBrandTare(conn.db, A.ctx, { id: uid(0xa), name: 'Bambu Lab', nameKey: 'bambu lab' }, 248);
+    await saveBrandTare(conn.db, A.ctx, { id: uid(0xa), name: 'Bambu Lab', nameKey: 'bambu lab' }, 250);
+    expect((await listCatalog(conn.db, A.ctx, ['brand'])).map((c) => [c.name, c.spoolTareGrams])).toEqual([['Bambu Lab', 250]]);
+    expect(await listCatalog(conn.db, B.ctx, ['brand'])).toEqual([]);
+  });
+  it('purchases for the average: 3 by default, changed only for A', async () => {
+    expect((await getSettings(conn.db, B.ctx))?.costAvgPurchases).toBe(3);
+    await updateSettings(conn.db, A.ctx, { costAvgPurchases: 5 });
+    expect([(await getSettings(conn.db, A.ctx))?.costAvgPurchases, (await getSettings(conn.db, B.ctx))?.costAvgPurchases]).toEqual([5, 3]);
+  });
+});
+
 describe('a repository without ctx fails before SQL', () => {
   it.each([
     ['listFilaments', () => listFilaments(conn.db, undefined as never, { page: 1, pageSize: 1 })],
     ['getFilament', () => getFilament(conn.db, { workspaceId: '', userId: '' }, A.filamentId)],
     ['insertFilament', () => insertFilament(conn.db, { workspaceId: 'x', userId: 'x' }, { id: uid(1), material: 'a', color: 'b', hex: '#000000', nameKey: 'a|b' })],
     ['insertSpoolMovements', () => insertSpoolMovements(conn.db, null as never, [])],
+    ['maxSpoolNumber', () => maxSpoolNumber(conn.db, { workspaceId: '', userId: '' })],
+    ['saveBrandTare', () => saveBrandTare(conn.db, null as never, { id: uid(1), name: 'x', nameKey: 'x' }, 1)],
   ])('%s', async (_n, fn) => {
     await expect(fn()).rejects.toThrow(/ctx/);
   });

@@ -2,28 +2,19 @@
 import { z } from 'zod';
 import { calendarDate, cents, grams, hex, id, LIMITS, name, note, short } from './common';
 
+/** Spools created at once by addSpool (the same range as core › SPOOL_QUANTITY; contract does not depend on core). */
+const SPOOL_QUANTITY = { min: 1, max: 20 } as const;
+
 export const filamentStatus = z.enum(['no_spools', 'out', 'ending', 'low', 'new', 'ok']);
 export const spoolStatus = z.enum(['empty', 'new', 'in_use']);
 export const spoolMovementKind = z.enum(['purchase', 'consumption', 'failure', 'waste', 'adjustment']);
 
-export const filamentListItem = z.object({
-  id,
-  material: z.string(),
-  color: z.string(),
-  hex: z.string(),
-  remainingGrams: z.number(),
-  spools: z.number().int(),
-  costPerGram: z.number(),
-  status: filamentStatus,
-  /** Spools with material left (> 0.5 g), their brands and capacity (for the bar), and the value of what is left. */
-  activeSpools: z.number().int(),
-  brands: z.array(z.string()),
-  capacityGrams: z.number(),
-  valueCents: z.number().int(),
-});
+export const costSource = z.enum(['purchases', 'material', 'reference', 'none']);
 
 export const spool = z.object({
   id,
+  /** #1, #2…: per workspace, never reused (ronda-4 §2.4). */
+  number: z.number().int(),
   filamentId: id,
   brand: z.string(),
   costCents: z.number().int(),
@@ -31,9 +22,36 @@ export const spool = z.object({
   grams: z.number(),
   purchasedOn: calendarDate,
   supplierId: id.nullable(),
+  /** A gift or included with the printer: counts in grams, not in cost. */
+  noCost: z.boolean(),
   remainingGrams: z.number(),
+  /** Of this spool (0 if noCost); pieces use the cost per gram of the filament. */
   costPerGram: z.number(),
   status: spoolStatus,
+});
+
+export const filamentListItem = z.object({
+  id,
+  material: z.string(),
+  color: z.string(),
+  hex: z.string(),
+  remainingGrams: z.number(),
+  /** Live spools, in the order they are used and then the empty ones (newest first). */
+  spools: z.array(spool),
+  spoolCount: z.number().int(),
+  /** Cost per gram for pieces (docs/04 §1): where it comes from and the numbers of the spools in the average (newest first). */
+  costPerGram: z.number(),
+  costSource,
+  costSpoolNumbers: z.array(z.number().int()),
+  referenceCentsPerKg: z.number().int().nullable(),
+  status: filamentStatus,
+  /** Spools with material left (> 0.5 g), their brands and capacity (for the bar), and the value of what is left. */
+  activeSpools: z.number().int(),
+  /** No-cost spools with material left. */
+  noCostSpools: z.number().int(),
+  brands: z.array(z.string()),
+  capacityGrams: z.number(),
+  valueCents: z.number().int(),
 });
 
 export const spoolMovement = z.object({
@@ -47,8 +65,6 @@ export const spoolMovement = z.object({
 });
 
 export const filamentDetail = filamentListItem.extend({
-  spools: z.array(spool),
-  spoolCount: z.number().int(),
   movements: z.array(spoolMovement),
 });
 
@@ -65,18 +81,27 @@ export const addSpoolInput = z.object({
   purchasedOn: calendarDate,
   supplierId: id.optional(),
   note: note.optional(),
+  /** Equal spools bought together (ronda-4 §4): consecutive numbers; costCents is per spool, shippingCents for the whole order. */
+  quantity: z.number().int().min(SPOOL_QUANTITY.min).max(SPOOL_QUANTITY.max).optional(),
+  noCost: z.boolean().optional(),
+  referenceCentsPerKg: cents(LIMITS.unitPriceCents).refine((c) => c > 0, { message: 'too_small' }).optional(),
 }).refine((v) => Boolean(v.filamentId) !== Boolean(v.filament), { path: ['filament'], message: 'required' });
 
-export const addSpoolOutput = z.object({ spool, filament: filamentListItem });
+/** One spool and its filament after a write (updateSpool, restoreSpool, movements, finishSpool). */
+export const spoolOutput = z.object({ spool, filament: filamentListItem });
+/** addSpool: `spool` is the first one created, `spools` all of them by number. */
+export const addSpoolOutput = spoolOutput.extend({ spools: z.array(spool) });
 
 export type FilamentListItem = z.infer<typeof filamentListItem>;
 export type FilamentDetail = z.infer<typeof filamentDetail>;
 export type Spool = z.infer<typeof spool>;
+export type CostSource = z.infer<typeof costSource>;
 export type SpoolMovement = z.infer<typeof spoolMovement>;
 export type AddSpoolInput = z.infer<typeof addSpoolInput>;
 export type AddSpoolOutput = z.infer<typeof addSpoolOutput>;
+export type SpoolOutput = z.infer<typeof spoolOutput>;
 
-/** updateSpool · PATCH /spools/:id: the same fields as addSpool (docs/12 §8). */
+/** updateSpool · PATCH /spools/:id: the same fields as addSpool but quantity and reference price; the number never changes (docs/12 §8). */
 export const updateSpoolInput = z.object({
   filamentId: id.optional(),
   filament: newFilament.optional(),
@@ -86,6 +111,7 @@ export const updateSpoolInput = z.object({
   grams: grams(LIMITS.spoolGrams).refine((g) => g > 0, { message: 'too_small' }).optional(),
   purchasedOn: calendarDate.optional(),
   supplierId: id.nullable().optional(),
+  noCost: z.boolean().optional(),
 });
 
 /** recordSpoolMovement · POST /spools/:id/movements. Grams are signed: negative takes material out. */
@@ -98,3 +124,18 @@ export const spoolMovementInput = z.object({
 
 export type UpdateSpoolInput = z.infer<typeof updateSpoolInput>;
 export type SpoolMovementInput = z.infer<typeof spoolMovementInput>;
+
+/** finishSpool · POST /spools/:id/finish (ronda-4 §2.6): a waste movement for all that is left; `on` is today when left out. */
+export const finishSpoolInput = z.object({ on: calendarDate.optional() }).strict();
+
+/** weighSpool · POST /spools/:id/weigh (ronda-4 §2.7): scale − empty spool = what is left; the tare is kept for the brand. */
+export const weighSpoolInput = z.object({
+  scaleGrams: grams(LIMITS.spoolGrams),
+  tareGrams: z.number().int().min(0).max(LIMITS.spoolTareGrams),
+  on: calendarDate.optional(),
+}).strict();
+export const weighSpoolOutput = spoolOutput.extend({ leftGrams: z.number(), adjustmentGrams: z.number().nullable() });
+
+export type FinishSpoolInput = z.infer<typeof finishSpoolInput>;
+export type WeighSpoolInput = z.infer<typeof weighSpoolInput>;
+export type WeighSpoolOutput = z.infer<typeof weighSpoolOutput>;
