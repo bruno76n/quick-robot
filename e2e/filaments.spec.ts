@@ -42,8 +42,8 @@ test('add spool → appears in the list → survives a restart', async ({ page }
     await expect(page.getByRole('status')).toHaveText('Rollo agregado a PLA Blanco. Disponible: 2,720 g.');
     await expect(drawer.getByText('3 rollos registrados')).toBeVisible();
 
-    await server.stop();
-    server = await startServer({ dataDir: server.dataDir });
+    await server.stop({ keepData: true });
+    server = await startServer({ dataDir: server.dataDir, cleanup: true });
     await page.goto(`${server.url}/filamentos`);
     await expect(page.getByText('8 filamentos · 10 rollos', { exact: true })).toBeVisible();
     await expect(page.locator('dl.fil-k')).toContainText('Disponible6.9 kg');

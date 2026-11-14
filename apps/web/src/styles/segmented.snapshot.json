@@ -22,6 +22,7 @@
  ".seg.wide > * { flex: 1; }",
  ".seg.wide { display: flex; gap: 4px 0; }",
  ".seg.wide.seg4 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; border-bottom: 0; }",
+ ".seg.wide:not(.seg4) .rad span { padding-left: 6px; padding-right: 6px; white-space: nowrap; }",
  ".seg2 button { padding: 5px 14px; font-size: 13.5px; }",
  ".seg4 .rad span { padding: 7px 10px; }"
 ]
