@@ -241,6 +241,9 @@
 .pz-sec .hint { margin-top: 6px; }
 .pz-g.pos { color: var(--green-d); font-weight: 600; }
 .pz .res-act { border-top: 1px solid var(--line); }
+/* With the panel scrolling on its own (≥ 1261), its bottom padding would sit below the sticky footer and let the
+   rows scrolled under it show through; the footer brings its own bottom padding. */
+@media (min-width: 1261px) { .pn-e .ed.pz > .ed-res { padding-bottom: 0; } }
 @media (max-width: 1260px) { .ed.pz { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 560px) {
   .pz .res-top { grid-template-columns: minmax(0, 1fr); }
