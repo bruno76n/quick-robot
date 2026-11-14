@@ -14,7 +14,7 @@ test('catalog shows the mockup costs; the calculator saves the cost it shows', a
   const llavero = page.getByTestId('product-tile').filter({ hasText: 'Llavero con nombre' });
   await expect(llavero).toContainText('$50');
   await expect(llavero).toContainText('Costo $3.67');
-  await expect(page.getByTestId('product-tile').filter({ hasText: 'Doctor Doom' })).toContainText('Costo $41.56');
+  await expect(page.getByTestId('product-tile').filter({ hasText: 'Doctor Doom' })).toContainText('Costo $41.64');
   await page.getByRole('button', { name: 'Nueva pieza' }).first().click();
   await page.getByPlaceholder('Nombre de la pieza, por ejemplo: Llavero con nombre').fill('Pieza de prueba');
   await pick(page, page.locator('.frow .pkr-b').first(), 'PLA Negro');

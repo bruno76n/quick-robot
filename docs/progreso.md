@@ -72,7 +72,7 @@ Estados: `no iniciada` · `en curso` · `igual a la maqueta de la ronda 4` · `t
 
 | Parte | Fase | Estado | Notas |
 |---|---|---|---|
-| Reglas en `core`, `04 §1` y golden | A | en curso | Cambio de costo por gramo por decisión del dueño (`decisiones.md`, 2026-11-14) |
+| Reglas en `core`, `04 §1` y golden | A | terminada | [`mejoras/informe-ronda4-a.md`](mejoras/informe-ronda4-a.md): reglas de §2 en `core` con sus casos (1.1a–g, 1.4, 1.5a–c, 1.6 en `04 §1`); costo por gramo = últimas 3 compras con costo (decisión del dueño); golden: solo PLA Blanco 0.3784 → 0.38 y sus 5 piezas y 2 colecciones; servidor ya cuesta con la regla nueva. Plan de B y C en el informe |
 | Migración y operaciones | B | no iniciada | |
 | Pantallas | C | no iniciada | Excepciones E1–E3 de la ronda 3 siguen |
 | Revisión y flujo nuevo | D | no iniciada | |
