@@ -125,9 +125,9 @@ export const es = {
       miniSale: 'Registrar', miniOrder: 'Crear pedido', miniEdit: 'Guardar', owedAfterSale: 'Quedan {amount} por cobrar.',
     },
     customers: {
-      title: 'Clientes', sub: '{count} {count|cliente|clientes}', subActive: ' · {count} con pedidos en curso', subEmpty: 'Contacto e historial de cada cliente.',
-      newCustomer: 'Nuevo cliente', summary: 'Han comprado {income} en total y quedan {owed} por cobrar.',
-      colCustomer: 'Cliente', colContact: 'Contacto', colPurchases: 'Compras', colOwes: 'Saldo', noContact: 'Sin contacto', empty: 'Sin clientes registrados.',
+      title: 'Clientes', sub: '{count} {count|cliente|clientes}', subEmpty: 'Contacto e historial de cada cliente.',
+      newCustomer: 'Nuevo cliente', kpisAria: 'Resumen de clientes', kActive: 'Con pedidos en curso', kOwed: 'Saldo por cobrar',
+      colCustomer: 'Cliente', colContact: 'Contacto', colOrders: 'Pedidos', colPurchases: 'Compras', colOwes: 'Saldo', colLast: 'Última actividad', noContact: 'Sin contacto', empty: 'Sin clientes registrados.',
       since: '{type} · cliente desde el {date}', newOrder: 'Nuevo pedido', newSale: 'Registrar venta', edit: 'Editar',
       phrase: 'Ha comprado {income} en {sales} {sales|venta|ventas} y {orders} {orders|pedido|pedidos}, con una ganancia de {profit}.',
       phraseActive: 'Tiene {count} {count|pedido|pedidos} en curso.', phraseOwes: 'Saldo: {amount}.', phraseClear: 'Sin saldo.', noHistory: 'Todavía no tiene pedidos ni ventas.',
