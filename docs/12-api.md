@@ -101,7 +101,11 @@ Los nombres de los casos de uso son los de `06 §16`. Los textos en español de 
 | `LAST_CHANNEL` | 409 | — | Quitar el único canal |
 | `NO_SPOOL_FOR_FILAMENT` | 409 | — | Registrar movimiento o usar un filamento sin rollos |
 | `NO_SPOOLS` | 409 | — | Registrar una impresión sin ningún rollo |
-| `SPOOL_INSUFFICIENT` | 422 | `availableGrams` | Descontar de un rollo más de lo que tiene |
+| `SPOOL_INSUFFICIENT` | 422 | `availableGrams` | Descontar de un rollo más de lo que tiene (también al elegir rollo en `logPrintRun`) |
+| `SPOOL_NOT_IN_FILAMENT` | 422 | `spoolId` | Elegir, al imprimir o al poner en producción, un rollo que es de otro filamento (ronda 4) |
+| `SPOOL_ALREADY_EMPTY` | 409 | — | Terminar un rollo que ya está vacío (≤ 0.5 g) (ronda 4) |
+| `WEIGHT_OUT_OF_RANGE` | 422 | `maxGrams` | Pesar un rollo y que lo que queda (báscula − carrete vacío) sea negativo o mayor que sus gramos × 1.05 (ronda 4) |
+| `REFERENCE_COST_REQUIRED` | 422 | — | Agregar un rollo sin costo cuando el filamento no tiene compras con costo, su material tampoco y no hay precio de referencia (ronda 4, `04 §1`) |
 | `SUPPLY_NAME_EXISTS` | 409 | `name` | Insumo repetido |
 | `SUPPLY_IN_USE` | 409 | `products` | Eliminar un insumo que usan piezas |
 | `SUPPLY_INSUFFICIENT` | 422 | `available` | Usar más de lo que hay |
@@ -155,15 +159,15 @@ Page<T>    = { items: T[], page, pageSize, total }
 |---|---|---|---|
 | `GET /health` (sin sesión) | — | `{ ok, version, schemaVersion }` | — |
 | `GET /me` | — | `{ user, workspace, role }` | — |
-| `GET /settings` | — | `{ settings, channels[], catalogs }` donde `catalogs = { materials, colors, brands, customerTypes, expenseCategories }`. `settings` incluye `lastBackupOn` (solo lectura: lo fija `exportWorkspace`) | — |
-| `updateSettings` · `PATCH /settings` | Cualquiera de: `kwhPriceCents`, `failurePct`, `purgePct`, `minMarginPct`, `formulaMarginPct`, `business { name, trade, phone, email, city, quoteValidDays, footer }` | `settings` | — |
+| `GET /settings` | — | `{ settings, channels[], catalogs }` donde `catalogs = { materials, colors, brands, customerTypes, expenseCategories }`. `settings` incluye `lastBackupOn` (solo lectura: lo fija `exportWorkspace`) y `costAvgPurchases` (1–10). Cada marca de `catalogs.brands` trae `tareGrams` (peso del carrete vacío que guardó `weighSpool`, o `null`) | — |
+| `updateSettings` · `PATCH /settings` | Cualquiera de: `kwhPriceCents`, `failurePct`, `purgePct`, `minMarginPct`, `formulaMarginPct`, `costAvgPurchases` (entero 1–10: compras con costo que forman el costo por gramo de un filamento, `04 §1`), `business { name, trade, phone, email, city, quoteValidDays, footer }` | `settings` | — |
 | `addChannel` · `POST /channels` | `{ name, commissionPct }` | `channel` | `CHANNEL_NAME_EXISTS` |
 | `updateChannel` · `PATCH /channels/:id` | `{ name?, commissionPct?, position? }` | `channel` | `CHANNEL_NAME_EXISTS` |
 | `removeChannel` · `DELETE /channels/:id` | — | 204 | `CHANNEL_IN_USE`, `LAST_CHANNEL` |
 
 Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **no tienen rutas**: se crean solos cuando una operación recibe un valor nuevo (`addSpool` con un color nuevo, `createCustomer` con un tipo nuevo).
 
-**Invalidan:** `settings`, y `reports`/`home` cuando cambia un porcentaje.
+**Invalidan:** `settings`, y `reports`/`home` cuando cambia un porcentaje; `filaments` y `products` cuando cambia `costAvgPurchases`.
 
 ---
 
@@ -219,7 +223,7 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 | `deleteOrder` · `DELETE /orders/:id` | — | 204. Sale de colas; las piezas apartadas se liberan | — |
 | `restoreOrder` · `POST /orders/:id/restore` | — | Pedido | `RESTORE_CONFLICT` |
 | `acceptOrder` · `POST /orders/:id/accept` | — | Pedido en `accepted`; aparta lo planeado de existencias | `ORDER_INVALID_STATE` · aviso `STOCK_SHORT` |
-| `startProduction` · `POST /orders/:id/start-production` | `{ assignments: [{ lineItemId, printerId }], deductFilament: bool }` | Pedido en `in_production` con su cola | `ORDER_INVALID_STATE`, `PRINTER_ASSIGNMENT_REQUIRED`, `NO_PRINTERS` · aviso `FILAMENT_SHORTFALL` |
+| `startProduction` · `POST /orders/:id/start-production` | `{ assignments: [{ lineItemId, printerId, startSpools?: [{ filamentId, spoolId }] }], deductFilament: bool }`. `startSpools` (ronda 4): el rollo con que empieza cada artículo por filamento; al descontar, ese artículo toma primero de ese rollo (hasta lo que necesita con purga o lo que el rollo tenga) y lo demás sale en el orden de `04 §1` (caso 1.5c). Sin `startSpools`, el orden automático de siempre. Un rollo de otro negocio o borrado → `NOT_FOUND` | Pedido en `in_production` con su cola | `ORDER_INVALID_STATE`, `PRINTER_ASSIGNMENT_REQUIRED`, `NO_PRINTERS`, `SPOOL_NOT_IN_FILAMENT` · aviso `FILAMENT_SHORTFALL` |
 | `reassignPrinters` · `POST /orders/:id/reassign-printers` | `{ assignments }` | Pedido (quita de las colas y vuelve a asignar) | `ORDER_INVALID_STATE`, `PRINTER_ASSIGNMENT_REQUIRED` |
 | `markOrderReady` · `POST /orders/:id/ready` | — | Pedido en `ready`: sale de colas, registra impresiones si se descontó filamento, aparta piezas | `ORDER_INVALID_STATE` |
 | `deliverOrder` · `POST /orders/:id/deliver` | `{ on, collectCents? ≥ 0 (cobro final; por omisión el saldo), note? }` | `{ order, sale }`: el pedido en `delivered` y la venta creada | `ORDER_INVALID_STATE`, `PAYMENT_EXCEEDS_BALANCE` |
@@ -241,13 +245,20 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 
 | Operación | Entrada | Salida | Errores |
 |---|---|---|---|
-| `GET /filaments` | `q`, `page` | Página de `{ id, material, color, hex, remainingGrams, spools, costPerGram, status (`no_spools` \| `out` \| `ending` \| `low` \| `new` \| `ok`), activeSpools, brands[], capacityGrams, valueCents }` (rollos con material, sus marcas y capacidad para la barra, y el valor de lo que queda) | — |
-| `GET /filaments/:id` | — | Filamento con `spools[]` (restante y `status` de cada uno: `empty` \| `new` \| `in_use`) y `movements[]` | — |
-| `addSpool` · `POST /spools` | `{ filamentId? \| { material, color, hex? }, brand, costCents, shippingCents, grams, purchasedOn, supplierId? }`. Si el filamento no existe, se crea. Registra el movimiento `purchase` | Rollo + filamento | — |
-| `updateSpool` · `PATCH /spools/:id` | Los mismos campos | Rollo + filamento. Si cambian los gramos, se registra un movimiento `adjustment` por la diferencia (el libro no se reescribe) | — |
-| `deleteSpool` · `DELETE /spools/:id` | — | `{ movements }` (cuántos tenía, para el aviso). Borrado suave; sus movimientos se conservan y dejan de sumar | — |
-| `restoreSpool` · `POST /spools/:id/restore` | — | Rollo | — |
-| `recordSpoolMovement` · `POST /spools/:id/movements` | `{ kind ('consumption' \| 'failure' \| 'waste' \| 'adjustment'), grams, on, note? }`. `grams` con signo: negativo saca material (consumo, fallo y merma siempre restan); un ajuste puede sumar o restar | Rollo + filamento | `SPOOL_INSUFFICIENT`, `NO_SPOOL_FOR_FILAMENT` |
+| `GET /filaments` | `q`, `page` | Página de `Filament = { id, material, color, hex, remainingGrams, spoolCount, spools: Spool[], costPerGram, costSource, costSpoolNumbers[], referenceCentsPerKg, status (`no_spools` \| `out` \| `ending` \| `low` \| `new` \| `ok`), activeSpools, noCostSpools, brands[], capacityGrams, valueCents }` (rollos con material, sus marcas y capacidad para la barra, y el valor de lo que queda). `spools[]`: los rollos vivos, primero en el orden en que se gastan (`04 §1`) y luego los vacíos, del más nuevo al más viejo. `costSource` (`purchases` \| `material` \| `reference` \| `none`) dice de dónde sale `costPerGram` y `costSpoolNumbers[]` los números de los rollos que formaron el promedio (del más nuevo al más viejo; vacío con `reference` y `none`). `noCostSpools`: rollos sin costo con material | — |
+| `GET /filaments/:id` | — | `Filament` + `movements[]` | — |
+
+`Spool = { id, number, filamentId, brand, costCents, shippingCents, grams, purchasedOn, supplierId, noCost, remainingGrams, costPerGram, status (`empty` \| `new` \| `in_use`) }`. `costPerGram` es el del rollo (`(costo + envío) / gramos`, 0 si `noCost`); el costo de las piezas usa el del filamento.
+
+| Operación | Entrada | Salida | Errores |
+|---|---|---|---|
+| `addSpool` · `POST /spools` | `{ filamentId? \| filament { material, color, hex? }, brand, costCents, shippingCents, grams, purchasedOn, supplierId?, quantity? (1–20, 1 por omisión), noCost? (falso), referenceCentsPerKg? (> 0) }`. Si el filamento no existe, se crea. Crea `quantity` rollos iguales con números consecutivos (`max(number) + 1` del negocio, borrados incluidos, dentro de la transacción) y un movimiento `purchase` por rollo. `costCents` es el precio **por rollo**; `shippingCents` es el envío **del pedido** y se reparte entre los rollos en centavos, el residuo al primero. Un rollo con `costCents + shippingCents = 0` queda `noCost`. `referenceCentsPerKg` se guarda en el filamento | `{ spool (el primero), spools[] (los creados, en orden de número), filament }` | `REFERENCE_COST_REQUIRED` (si `noCost` y ni el filamento ni su material tienen compras con costo, ni hay precio de referencia guardado o enviado) |
+| `updateSpool` · `PATCH /spools/:id` | Los mismos campos que `addSpool` salvo `quantity` y `referenceCentsPerKg`; todos opcionales (`noCost` incluido). El número no cambia | `{ spool, filament }`. Si cambian los gramos, se registra un movimiento `adjustment` por la diferencia (el libro no se reescribe). Si el rollo queda con costo + envío = 0, queda `noCost` | — |
+| `deleteSpool` · `DELETE /spools/:id` | — | `{ movements }` (cuántos tenía, para el aviso). Borrado suave; sus movimientos se conservan y dejan de sumar; el número no se reutiliza | — |
+| `restoreSpool` · `POST /spools/:id/restore` | — | `{ spool, filament }` | — |
+| `recordSpoolMovement` · `POST /spools/:id/movements` | `{ kind ('consumption' \| 'failure' \| 'waste' \| 'adjustment'), grams, on, note? }`. `grams` con signo: negativo saca material (consumo, fallo y merma siempre restan); un ajuste puede sumar o restar | `{ spool, filament }` | `SPOOL_INSUFFICIENT`, `NO_SPOOL_FOR_FILAMENT` |
+| `finishSpool` · `POST /spools/:id/finish` (ronda 4) | `{ on? }` (hoy por omisión) | `{ spool, filament }`. Movimiento `waste` por todo lo que le queda, con nota «Rollo terminado»; el rollo queda `empty` (`04 §1`, terminar rollo) | `SPOOL_ALREADY_EMPTY` |
+| `weighSpool` · `POST /spools/:id/weigh` (ronda 4) | `{ scaleGrams (0–100 000, un decimal), tareGrams (entero 0–10 000), on? }` | `{ spool, filament, leftGrams, adjustmentGrams }`. `queda = scaleGrams − tareGrams`; movimiento `adjustment` por `queda − restante` (si es 0, `adjustmentGrams = null` y no se registra nada). `tareGrams` se guarda en la marca del rollo (`catalog_item.spool_tare_grams`; si la marca no está en la lista, se agrega; un rollo sin marca no guarda nada) | `WEIGHT_OUT_OF_RANGE` (`maxGrams` = gramos del rollo × 1.05) |
 
 ### Insumos y proveedores
 
@@ -288,7 +299,7 @@ Los catálogos (material, color, marca, tipo de cliente, categoría de gasto) **
 |---|---|---|---|
 | `GET /print-runs` | `reason` (`stock` \| `order` \| `test`), `page` | Página + totales (piezas, horas, gramos) | — |
 | `GET /print-runs/:id` | — | Registro con filamento por rollo y foto | — |
-| `logPrintRun` · `POST /print-runs` | `{ on, productId? (o `text` si es prueba), qty, printerId?, result ('ok' \| 'fail'), hours, reason, filaments[{ filamentId, grams }], photoFileId? }` | Registro. El filamento se descuenta rollo por rollo con la purga. `ok` + `stock` suma piezas a existencias; `ok` que no sea prueba gasta los insumos de la pieza | `NO_SPOOLS` · aviso `FILAMENT_SHORTFALL` |
+| `logPrintRun` · `POST /print-runs` | `{ on, productId? (o `text` si es prueba), qty, printerId?, result ('ok' \| 'fail'), hours, reason, filaments[{ filamentId, grams, spools?: [{ spoolId, grams? }] }], photoFileId? }`. `spools` (ronda 4, hasta 10 por filamento): los rollos elegidos, cada uno con los gramos **con purga** que se toman de él (sin `grams`: lo que tenga, hasta lo que falte); lo que no cubran sale de los demás rollos en el orden de `04 §1`. Sin `spools`, el orden automático de siempre. Un rollo de otro negocio o borrado → `NOT_FOUND` | Registro. El filamento se descuenta rollo por rollo con la purga (consumo y purga por separado en cada rollo). `ok` + `stock` suma piezas a existencias; `ok` que no sea prueba gasta los insumos de la pieza | `NO_SPOOLS`, `SPOOL_INSUFFICIENT` (una parte mayor a lo que tiene ese rollo), `SPOOL_NOT_IN_FILAMENT` · aviso `FILAMENT_SHORTFALL` |
 | `deletePrintRun` · `DELETE /print-runs/:id` | — | 204. Devuelve filamento e insumos, quita las piezas que sumó, resta las horas | `PRINT_RUN_LOCKED` · aviso `FILAMENT_NOT_RETURNED` |
 | `GET /stock` | `q` (nombre o etiqueta de cualquier miembro), `status` (`all` \| `few` \| `all_reserved` \| `ok` \| `out`), `sort` (`free_asc` por defecto \| `free_desc`; a igualdad, por nombre), `page`, `pageSize` | **Página de filas** (una pieza simple o una familia; solo piezas con `tracksStock`): `{ productId, name, displayName, photoUrl, hexes[], listCents, costCents, printerName, physical, reserved, free, status, members[] }`. Una familia suma sus miembros y su `status` sigue `04 §5` (caso 5.3); `members[]` trae `{ productId, name, label, displayName, isOriginal, printerName, physical, reserved, free, status, … }` (la original primero, con `label` nulo) y va vacío en una pieza simple. Si de una familia solo un miembro lleva existencias, sale como fila simple con su `displayName`. Además `counts { all, few, allReserved, ok, out }` (familias, sin aplicar `status`), `totals { units, pieces, free, reserved, physical }` (`pieces` cuenta familias; `physical` = `units`), `untracked[]` (piezas sin existencias, para “Llevar existencias de otra pieza”) y `sets[]` (sets armables por colección) | — |
 | `GET /stock/:productId` | — | Pieza con `movements[]` | — |

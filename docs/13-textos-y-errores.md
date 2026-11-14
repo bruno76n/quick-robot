@@ -125,6 +125,10 @@ Un renglón por código de `12 §2`. Entre llaves, los parámetros de `details`.
 | `NO_SPOOL_FOR_FILAMENT` | Primero agrega un rollo de este filamento. |
 | `NO_SPOOLS` | Primero agrega un rollo en Filamentos. |
 | `SPOOL_INSUFFICIENT` | Ese rollo solo tiene {availableGrams}. |
+| `SPOOL_NOT_IN_FILAMENT` | Ese rollo es de otro filamento. |
+| `SPOOL_ALREADY_EMPTY` | Este rollo ya está vacío. |
+| `WEIGHT_OUT_OF_RANGE` | El peso no cuadra con el rollo. Revisar el peso de la báscula y el del carrete vacío. |
+| `REFERENCE_COST_REQUIRED` | Escribir un precio de referencia por kilo para calcular piezas con este filamento. |
 | `SUPPLY_NAME_EXISTS` | Ya existe “{name}”. |
 | `SUPPLY_IN_USE` | Está en {products} {products\|pieza\|piezas}. Quítalo de ellas primero. |
 | `SUPPLY_INSUFFICIENT` | Solo hay {available} disponibles. |
@@ -416,6 +420,15 @@ Los textos nuevos de variantes agrupadas, Existencias (lista y fichas), Inicio (
 - `t.test.ts`: las tres formas (`{nombre}`, plural y elección), formato por sufijo y parámetros faltantes (no deben imprimir `{x}` en pantalla: se cae a un texto genérico y se registra).
 - Lint de textos literales en JSX (§2).
 - Revisión visual (modo autónomo, paso 4): cada pantalla se compara con `reference/mockup-textos.md`.
+
+## 9.4 Textos de la ronda 4 (`mejoras/ronda-4.md`)
+
+Los cuatro códigos nuevos de `12 §2` están en §3 › Taller (`SPOOL_NOT_IN_FILAMENT`, `SPOOL_ALREADY_EMPTY`, `WEIGHT_OUT_OF_RANGE`, `REFERENCE_COST_REQUIRED`). `WEIGHT_OUT_OF_RANGE` trae `maxGrams` en `details` para que la pantalla de Pesar diga hasta cuánto puede quedar; el texto del error no lo usa.
+
+| Dónde | Texto | Notas |
+|---|---|---|
+| Nota del movimiento de `finishSpool` (la escribe el servidor, como «Purga: …») | Rollo terminado | Se ve en Movimientos del rollo |
+| Pieza (calculadora), filamento con `costSource = none` (fase C) | Sin costo de referencia para {filamento} | Aviso junto al costo de la pieza |
 
 ## 9.3 Vocabulario de la ronda 3 (`mejoras/ronda-3.md §5`)
 
