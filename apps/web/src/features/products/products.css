@@ -7,7 +7,7 @@
 @media (max-width: 560px) { .pt-grid.fam { grid-template-columns: minmax(0, 1fr); } }
 .pt.on { box-shadow: 0 0 0 2px var(--accent), var(--sh-soft); }
 .pt-st { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
-.vpill { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 99px; background: var(--panel-2); color: var(--ink); padding: 4px 10px 4px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.vpill { display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 99px; background: var(--soft-2); color: var(--ink); padding: 4px 10px 4px 12px; font-size: 13px; font-weight: 600; white-space: nowrap; cursor: pointer; }
 .vpill:hover { background: var(--line-2); }
 .vpill svg { transition: transform .15s; }
 .vpill[aria-expanded="true"] svg { transform: rotate(180deg); }
@@ -46,7 +46,7 @@
 /* Lista: the piece column stays fixed while the table scrolls sideways. */
 .fam-tw > .tbl.fam { min-width: 980px; }
 .tbl.fam th.pc, .tbl.fam td.pc { position: sticky; left: 0; z-index: 1; background: var(--bg); min-width: 260px; }
-.tbl.fam tr.click:hover td.pc { background: var(--panel); }
+.tbl.fam tr.click:hover td.pc { background: var(--soft); }
 .fam-gap { flex: none; width: 28px; }
 .more-row { display: flex; justify-content: center; margin: 18px 0 4px; }
 
@@ -54,19 +54,19 @@
 @media (min-width: 761px) { .prod-tb .tb-r { flex-wrap: nowrap; } .prod-tb .search { width: 230px; } }
 
 /* Lista: arrow, variant rows with a guide to their piece, and "+ Agregar variante de …". */
-.fam-chev { flex: none; width: 28px; height: 28px; border: 1px solid var(--line-2); background: var(--panel); border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; color: var(--ink); }
+.fam-chev { flex: none; width: 28px; height: 28px; border: 1px solid var(--line-2); background: var(--soft); border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; color: var(--ink); }
 .fam-chev svg { transition: transform .15s; }
 .fam-chev[aria-expanded="true"] svg { transform: rotate(90deg); }
 .tbl.fam .pn { align-items: flex-start; }
 .tbl.fam .pn .sw { margin-top: 5px; }
 .pill.vcount { font-weight: 600; }
-.tbl.fam tr.var-r td { background: var(--panel); border-bottom: 1px dashed var(--line-2); padding-top: 8px; padding-bottom: 8px; }
-.tbl.fam tr.var-r:hover td { background: var(--panel-2); }
+.tbl.fam tr.var-r td { background: var(--soft); border-bottom: 1px dashed var(--line-2); padding-top: 8px; padding-bottom: 8px; }
+.tbl.fam tr.var-r:hover td { background: var(--soft-2); }
 .tbl.fam .var-n { position: relative; padding-left: 36px; align-items: center; gap: 8px; }
 .tbl.fam .var-n .sw { margin-top: 0; }
 .tbl.fam .var-n small { color: var(--ink-2); font-size: 13px; }
 .tbl.fam .guide { position: absolute; left: 13px; top: -14px; bottom: 50%; width: 14px; border-left: 2px solid var(--line-2); border-bottom: 2px solid var(--line-2); border-bottom-left-radius: 6px; }
-.tbl.fam tr.var-add td { background: var(--panel); border-bottom: 1px solid var(--line); }
+.tbl.fam tr.var-add td { background: var(--soft); border-bottom: 1px solid var(--line); }
 .var-add-in { padding-left: 36px; }
 .btn.dashed { border-style: dashed; background: transparent; font-weight: 600; }
 
@@ -81,7 +81,7 @@
   .tbl.fam td.hide-m { display: none; }
   .tbl.fam td.acts { grid-column: 1 / -1; }
   .tbl.fam td[data-k]::before { content: attr(data-k); display: block; font-size: 12px; color: var(--ink-2); font-weight: 500; }
-  .tbl.fam tr.var-r, .tbl.fam tr.var-add { background: var(--panel); padding-left: 10px; padding-right: 10px; }
+  .tbl.fam tr.var-r, .tbl.fam tr.var-add { background: var(--soft); padding-left: 10px; padding-right: 10px; }
   .tbl.fam tr.var-r td, .tbl.fam tr.var-add td { background: none; }
 }
 .tbl.fam tr.var-r .rowa { flex-direction: row; align-items: center; }
@@ -91,8 +91,8 @@
 }
 @media (max-width: 560px) {
   .tbl.fam tr td, .tbl.fam tr.var-r td, .tbl.fam tr.click:hover td { border: 0; background: none; box-shadow: none; padding: 0; }
-  .tbl.fam tr.click:hover { background: var(--panel); }
-  .tbl.fam tr.var-r:hover { background: var(--panel-2); }
+  .tbl.fam tr.click:hover { background: var(--soft); }
+  .tbl.fam tr.var-r:hover { background: var(--soft-2); }
   .tbl.fam .var-n { padding-left: 30px; }
   .tbl.fam .guide { top: -10px; left: 10px; }
 }

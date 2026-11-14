@@ -6,15 +6,15 @@
 
 .atn-h { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .atn-f { display: flex; flex-wrap: wrap; gap: 8px; }
-.atn-chip { --tb: var(--panel-2); --ti: var(--ink); border: 0; border-radius: 99px; padding: 6px 14px; font: inherit; font-size: 14px; font-weight: 500; background: var(--tb); color: var(--ti); cursor: pointer; }
+.atn-chip { --tb: var(--soft-2); --ti: var(--ink); border: 0; border-radius: 99px; padding: 6px 14px; font: inherit; font-size: 14px; font-weight: 500; background: var(--tb); color: var(--ti); cursor: pointer; }
 .atn-chip .num { font-weight: 500; opacity: .85; }
-.atn-chip.s-urgent { --tb: var(--red-soft); --ti: var(--red-ink); }
-.atn-chip.s-soon { --tb: var(--amber-soft); --ti: var(--amber-ink); }
+.atn-chip.s-urgent { --tb: var(--red-l); --ti: var(--red); }
+.atn-chip.s-soon { --tb: var(--amber-l); --ti: var(--amber-d); }
 .atn-chip[aria-pressed="true"] { --tb: var(--accent); --ti: var(--accent-ink); font-weight: 600; }
 
-.atn-g { --dot: var(--ink-2); --ib: var(--panel-2); --ii: var(--ink-2); }
-.atn-g.s-urgent { --dot: var(--red); --ib: var(--red-soft); --ii: var(--red-ink); }
-.atn-g.s-soon { --dot: var(--amber); --ib: var(--amber-soft); --ii: var(--amber-ink); }
+.atn-g { --dot: var(--ink-2); --ib: var(--soft-2); --ii: var(--ink-2); }
+.atn-g.s-urgent { --dot: var(--red); --ib: var(--red-l); --ii: var(--red); }
+.atn-g.s-soon { --dot: var(--amber); --ib: var(--amber-l); --ii: var(--amber-d); }
 .atn-g + .atn-g .atn-gh { padding-top: 22px; }
 .atn-gh { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; padding: 4px 4px 8px; }
 .atn-gh .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--dot); align-self: center; }

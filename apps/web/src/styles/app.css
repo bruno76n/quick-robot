@@ -1,16 +1,16 @@
 /* Additions for the product that the mockup did not need. */
 .fld.bad input, .fld.bad select, .fld.bad .unit { border-color: var(--red); }
-.fld-err { color: var(--red-ink); font-weight: 500; }
-.banner { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px; justify-content: space-between; background: var(--amber-soft); color: var(--amber-ink); border-bottom: 1px solid var(--amber); padding: 10px 28px; font-weight: 500; }
+.fld-err { color: var(--red); font-weight: 500; }
+.banner { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px; justify-content: space-between; background: var(--amber-l); color: var(--amber-d); border-bottom: 1px solid var(--amber); padding: 10px 28px; font-weight: 500; }
 .crash { max-width: 520px; margin: 40px auto; display: grid; gap: 12px; justify-items: start; border: 1px solid var(--line-2); border-radius: 8px; padding: 24px; }
-.skel { height: 14px; border-radius: 4px; background: linear-gradient(90deg, var(--panel) 0%, var(--panel-2) 50%, var(--panel) 100%); background-size: 200% 100%; animation: skel 1.2s infinite linear; }
+.skel { height: 14px; border-radius: 4px; background: linear-gradient(90deg, var(--soft) 0%, var(--soft-2) 50%, var(--soft) 100%); background-size: 200% 100%; animation: skel 1.2s infinite linear; }
 @keyframes skel { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 .cfm { display: contents; }
 #root { height: 100%; } /* the mockup sizes .app to the window; the React root sits in between */
 
 /* Esqueleto de carga lenta (docs/15 §5); el mockup no tiene uno: barras grises con los radios y colores de sus tokens. */
 .skel { display: grid; gap: 14px; padding: 4px 0; }
-.skel-h, .skel-l, .skel-c { background: linear-gradient(90deg, var(--panel-2) 0%, var(--panel) 50%, var(--panel-2) 100%); background-size: 200% 100%; animation: skel 1.2s ease-in-out infinite; border-radius: 8px; }
+.skel-h, .skel-l, .skel-c { background: linear-gradient(90deg, var(--soft-2) 0%, var(--soft) 50%, var(--soft-2) 100%); background-size: 200% 100%; animation: skel 1.2s ease-in-out infinite; border-radius: 8px; }
 .skel-h { height: 28px; width: min(320px, 60%); }
 .skel-l { height: 14px; width: min(520px, 85%); }
 .skel-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
@@ -21,30 +21,30 @@
 /* Every checkbox and radio, not only .chk and .switch, takes the neutral accent (ronda-2 §2). */
 input[type="checkbox"], input[type="radio"] { accent-color: var(--accent); }
 /* Grey placeholders when Ajustes has no name or trade (ronda-2 §2). */
-.ph-txt, .brand small.ph-txt { color: var(--ink-3); }
+.ph-txt, .brand small.ph-txt { color: var(--ink-3t); }
 
 /* Picker (components/Picker.tsx, ronda 2 · D1): looks like the field it replaces; its list floats below. Prefix pkr-: .pick is the mockup piece list. */
 .pkr { position: relative; min-width: 0; }
 .pkr-b { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 38px; padding: 8px 30px 8px 10px; font: inherit; color: var(--ink); text-align: left; background: var(--bg); border: 1px solid var(--line-2); border-radius: 10px; cursor: pointer; position: relative; }
 .pkr-b::after { content: ''; position: absolute; right: 12px; top: 50%; width: 7px; height: 7px; border: solid var(--ink-2); border-width: 0 1.5px 1.5px 0; transform: translateY(-70%) rotate(45deg); }
-.pkr-b.empty .pkr-v { color: var(--ink-3); }
+.pkr-b.empty .pkr-v { color: var(--ink-3t); }
 .pkr-b[aria-expanded='true'] { border-color: var(--accent); }
 .pkr-v { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pkr-pop { position: absolute; z-index: 40; top: calc(100% + 4px); left: 0; min-width: 100%; width: max-content; max-width: min(380px, calc(100vw - 32px)); background: var(--bg); border: 1px solid var(--line-2); border-radius: 10px; box-shadow: var(--sh-up); overflow: hidden; }
 .pkr-q { border: 0; border-bottom: 1px solid var(--line); border-radius: 0; min-height: 40px; outline: none; }
 .pkr-q:focus-visible { outline: none; box-shadow: inset 0 -2px 0 var(--accent); }
 .pkr-box { max-height: min(46vh, 300px); overflow: auto; padding: 4px; }
-.pkr-g { padding: 8px 10px 4px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+.pkr-g { padding: 8px 10px 4px; font-size: 12px; font-weight: 600; color: var(--ink-3t); }
 .pkr-o { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; cursor: pointer; }
-.pkr-o.on { background: var(--panel-2); box-shadow: inset 2px 0 0 var(--accent); }
+.pkr-o.on { background: var(--soft-2); box-shadow: inset 2px 0 0 var(--accent); }
 .pkr-o.cur .pkr-l { font-weight: 600; }
 .pkr-l { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pkr-o small { color: var(--ink-3); font-size: 12px; white-space: nowrap; }
-.pkr-e { padding: 12px 14px; margin: 0; color: var(--ink-3); font-size: 14px; }
+.pkr-o small { color: var(--ink-3t); font-size: 12px; white-space: nowrap; }
+.pkr-e { padding: 12px 14px; margin: 0; color: var(--ink-3t); font-size: 14px; }
 
 /* "Debe $X" of a sale row is a button that opens the payment (ronda 2 · D5): the same chip, clickable. */
 .chip-btn { font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; border-top: 0; border-right: 0; border-bottom: 0; }
-.chip-btn:hover { background: var(--amber-soft); }
+.chip-btn:hover { background: var(--amber-l); }
 
 /* "Registrar pago" under Saldo of an order (ronda 2 · D7). */
 .strip .band-pay { justify-self: start; margin-top: 6px; }

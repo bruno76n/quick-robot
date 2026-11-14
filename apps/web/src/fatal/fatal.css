@@ -10,15 +10,15 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); 
 .fatal h1 { font-family: var(--font-display); font-size: 20px; font-weight: 600; margin: 0; max-width: 34em; line-height: 1.35; }
 .fatal .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
 .fatal .note { color: var(--ink-2); margin: 0; }
-.fatal .note.error { color: var(--red-ink); }
+.fatal .note.error { color: var(--red); }
 .fatal ul { list-style: none; margin: 0; padding: 0; width: min(420px, 100%); border: 1px solid var(--line); border-radius: var(--r); text-align: left; }
 .fatal li { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-top: 1px solid var(--line); }
 .fatal li:first-child { border-top: 0; }
 .fatal li span { flex: 1; }
-.fatal li small { color: var(--ink-3); }
+.fatal li small { color: var(--ink-3t); }
 .fatal h2 { font-size: 14px; font-weight: 600; color: var(--ink-2); margin: 6px 0 0; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--line-2); background: var(--bg); color: var(--ink); padding: 8px 14px; border-radius: 10px; font: inherit; font-weight: 500; cursor: pointer; min-height: 38px; }
-.btn:hover { background: var(--panel); border-color: var(--ink-3); }
+.btn:hover { background: var(--soft); border-color: var(--ink-3t); }
 .btn.primary { background: var(--btn); color: var(--btn-ink); border-color: var(--btn); }
 .btn.primary:hover { filter: brightness(1.45); }
 .btn.sm { min-height: 32px; padding: 4px 11px; font-size: 13.5px; }

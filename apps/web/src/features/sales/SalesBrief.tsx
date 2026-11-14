@@ -14,7 +14,7 @@ export function SalesBrief({ T, K, when }: { T: BriefTotals; K: BriefConcepts; w
   if (!T.count) return <section className="brf one"><p className="brf-l mut">{L.briefEmpty}</p></section>;
   const segs: [string, number, string, string][] = [
     [L.cMaterial, K.M, '--c-m', ''], [L.cPower, K.L, '--c-l', ''], [L.cMachine, K.Q, '--c-q', ''], [L.cExtras, K.E, '--c-e', 'dk'],
-    [L.cFailure, K.F, '--c-f', 'hatch'], [L.cCommission, T.commission, '--blue', ''],
+    [L.cFailure, K.F, '--c-f', 'hatch'], [L.cCommission, T.commission, '--c-t', ''],
   ];
   segs.push([L.cProfit, Math.max(0, T.income - segs.reduce((a, s) => a + s[1], 0)), '--green', 'gan dk']);
   const base = T.income;

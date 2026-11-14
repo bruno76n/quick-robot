@@ -1,29 +1,37 @@
-/* Design tokens (docs/07 › Sistema de diseño). Light mode only.
-   Every interface color lives here and nowhere else (tokens.test.ts): changing the accent of the panel is
-   changing --accent. Color with meaning: gris oscuro = costo, verde = ganancia; ámbar, rojo y gris = estados;
-   azul solo informativo. Data colors (the real color of each filament) come from the data, not from here. */
+/* Design tokens (docs/07 › Sistema de diseño; ronda-3 §2, reference/ronda-3/app.css and ui.css). Light mode only.
+   Every interface color lives here and nowhere else (tokens.test.ts). Color with meaning: gris oscuro = costo,
+   verde = ganancia (solo ganancia y estado correcto); ámbar y rojo = estados, siempre con texto. Sin morado.
+   Data colors (the real color of each filament) come from the data, not from here. */
 :root {
-  /* surfaces and ink */
-  --bg: #ffffff; --panel: #f6f6f8; --panel-2: #ececf1;
-  --ink: #121214; --ink-2: #6a6a73; --ink-3: #777782; --doc-ink: #44444c; --on-dark: #ffffff;
-  --line: #e7e7ec; --line-2: #d2d2da;
+  /* surfaces */
+  --bg: #ffffff;        /* panels, fields, white buttons */
+  --soft: #f6f6f8;      /* app background and inner blocks (mockup --u-app / --soft) */
+  --soft-2: #e9e9ef;    /* neutral pills and counters, hover of light rows */
+  --soft-3: #dedee5;    /* sales in the week columns, switch off (mockup --u-soft) */
+  --col: #ececf0;       /* board columns */
+  --track: #ebebf0;     /* background of every meter and bar */
+  /* ink: --ink-3 is for non-text only (pending steps, disabled); light grey text uses --ink-3t (D-3, contrast) */
+  --ink: #121214; --ink-2: #6a6a73; --ink-3: #9b9ba5; --ink-3t: #777782; --doc-ink: #44444c; --on-dark: #ffffff;
+  /* lines: panels and tables, rows, fields */
+  --line: #e9e9ee; --line-soft: #f0f0f3; --line-2: #d2d2da;
   /* main action, selection and focus ring */
   --accent: #121214; --accent-ink: #ffffff;
   --btn: var(--accent); --btn-ink: var(--accent-ink); --on-green: #121214;
-  /* cost (gris oscuro) and profit (verde) */
-  --cost: #5a5a65; --cost-soft: #f1f1f4;
-  --green: #00ae42; --green-ink: #067a30; --green-soft: #e3f5e9;
+  /* cost (gris oscuro) and profit (verde). --green-d for figures on white, --green-ink for text on --green-l (D-4) */
+  --cost: #4a4a53;
+  --green: #00ae42; --green-d: #00873a; --green-ink: #067a30; --green-l: #e3f5e9;
   /* states */
-  --amber: #e9a817; --amber-ink: #86500a; --amber-soft: #fff1d3;
-  --red: #d6334f; --red-ink: #b3223f; --red-soft: #fde8ec;
-  --blue: #3f86c9;
-  /* layers of the cost breakdown (greys, darkest = material), failures reserve and business expenses */
-  --c-m: #2d2d35; --c-l: var(--cost); --c-q: #8b8b97; --c-t: #b9b9c3; --c-e: #dcdce3; --c-f: #d6a2ab; --c-legend: #9a9aa6; --sand: #cdb083;
+  --amber: #b4740a; --amber-d: #8a5a06; --amber-l: #fdf3e1;
+  --red: #c8302a; --red-l: #fbeaea;
+  /* layers of the cost breakdown (greys, darkest = material), failures reserve and business expenses (phase C replaces them) */
+  --c-m: #2d2d35; --c-l: var(--cost); --c-q: #8b8b97; --c-t: #b9b9c3; --c-e: #dcdce3; --c-f: #d6a2ab; --sand: #cdb083;
   /* printer timeline tags and pieces with no filament color */
   --tg-sale: #4b4b55; --tg-queue: #b9b9c3; --tg-todo: #f0b429; --tg-done: #cfcfd8; --no-color: #c9c9d1;
-  /* shadows: neutral ink only */
-  --sh: 0 1px 2px rgba(18, 18, 20, .07); --sh-soft: 0 1px 2px rgba(18, 18, 20, .04); --sh-up: 0 10px 28px rgba(18, 18, 20, .10);
-  --r: 14px;  /* radio de tarjetas y paneles */
+  /* shadows: only floating things (popover, drawer, dialog); panels have none */
+  --sh-soft: 0 1px 2px rgba(18, 18, 20, .04); --sh-up: 0 10px 28px rgba(18, 18, 20, .10);
+  /* radii (ronda-3 §2): button 7, field 8, panel 12, state pill 6, inner block 10 */
+  --r-btn: 7px; --r-field: 8px; --r-panel: 12px; --r-pill: 6px; --r-in: 10px;
+  --r: 14px;  /* legacy card radius; replaced by --r-* in B2 */
   --font-display: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-body: 'Geist Variable', 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
   color-scheme: light;

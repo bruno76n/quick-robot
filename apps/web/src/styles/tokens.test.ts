@@ -43,12 +43,35 @@ describe('design tokens', () => {
     expect(bad).toEqual([]);
   });
 
-  it('declares the neutral accent and cost tokens', () => {
+  it('declares the ronda-3 token values (ronda-3 §2, informe-ronda3-a §1.3)', () => {
     const t = read(TOKENS);
-    expect(t).toMatch(/--accent:\s*#121214/);
-    expect(t).toMatch(/--cost:\s*#5a5a65/);
-    expect(t).toMatch(/--cost-soft:\s*#f1f1f4/);
+    const want: Record<string, string> = {
+      '--accent': '#121214', '--ink': '#121214', '--ink-2': '#6a6a73', '--ink-3': '#9b9ba5', '--ink-3t': '#777782',
+      '--soft': '#f6f6f8', '--soft-2': '#e9e9ef', '--soft-3': '#dedee5', '--col': '#ececf0', '--track': '#ebebf0',
+      '--line': '#e9e9ee', '--line-soft': '#f0f0f3', '--cost': '#4a4a53',
+      '--green': '#00ae42', '--green-d': '#00873a', '--green-ink': '#067a30', '--green-l': '#e3f5e9',
+      '--amber': '#b4740a', '--amber-d': '#8a5a06', '--amber-l': '#fdf3e1', '--red': '#c8302a', '--red-l': '#fbeaea',
+      '--r-btn': '7px', '--r-field': '8px', '--r-panel': '12px', '--r-pill': '6px', '--r-in': '10px',
+    };
+    const got = Object.fromEntries([...t.matchAll(/(--[\w-]+):\s*([^;]+);/g)].map((m) => [m[1]!, m[2]!.trim()]));
+    expect(Object.fromEntries(Object.keys(want).map((k) => [k, got[k]]))).toEqual(want);
   });
+
+  it('every var(--x) used is declared, and no removed token is used', () => {
+    const all = [...sources.entries()];
+    // Declared: tokens, local custom properties set in a stylesheet, and style keys set from components ('--c': …).
+    const declared = new Set(all.flatMap(([, text]) => [...text.matchAll(/(--[\w-]+)\s*:/g), ...text.matchAll(/['"](--[\w-]+)['"]\s*(?:as string\]\s*)?:/g)].map((m) => m[1]!)));
+    const tokens = new Set([...read(TOKENS).matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]!));
+    const used = all.flatMap(([p, text]) => [...text.matchAll(/var\(\s*(--[\w-]+)/g)].map((m) => [p, m[1]!] as const));
+    expect(used.filter(([, v]) => !declared.has(v)).map(([p, v]) => `${rel(p)}: ${v}`)).toEqual([]);
+    // A token named as a value from a component ([label, cents, '--c-m']) must be a real token.
+    const named = all.filter(([p]) => p.endsWith('.tsx')).flatMap(([p, text]) => [...text.matchAll(/['"](--[\w-]+)['"](?!\s*(?:as string\]\s*)?:)/g)].map((m) => [p, m[1]!] as const));
+    expect(named.filter(([, v]) => !tokens.has(v)).map(([p, v]) => `${rel(p)}: ${v}`)).toEqual([]);
+    const REMOVED = ['--panel', '--panel-2', '--green-soft', '--amber-ink', '--amber-soft', '--red-ink', '--red-soft', '--blue', '--cost-soft', '--sh', '--c-legend'];
+    const hits = all.flatMap(([p, text]) => REMOVED.filter((r) => new RegExp(`${r}(?![\\w-])`).test(text)).map((r) => `${rel(p)}: ${r}`));
+    expect(hits).toEqual([]);
+  });
+
   it('the focus ring and the accent of checkboxes and radios use --accent, in the app and on the fatal page', () => {
     const rules = (p: string) => read(p).replace(/\/\*[\s\S]*?\*\//g, '');
     const app = css.filter((p) => p !== TOKENS).map(rules).join('\n');

@@ -46,18 +46,19 @@ features/orders/
 
 | Token | Valor | Uso |
 |---|---|---|
-| `--bg` | `#ffffff` | Fondo |
-| `--panel`, `--panel-2` | `#f6f6f8`, `#ececf1` | Paneles, chips neutros, pastillas |
-| `--ink`, `--ink-2`, `--ink-3` | `#121214`, `#6a6a73`, `#777782` | Texto: principal, secundario, terciario |
-| `--line`, `--line-2` | `#e7e7ec`, `#d2d2da` | Bordes |
+| `--bg` | `#ffffff` | Fondo de paneles, campos y botones blancos |
+| `--soft`, `--soft-2`, `--soft-3` | `#f6f6f8`, `#e9e9ef`, `#dedee5` | Fondo de la app y bloques internos; pastillas neutras y contadores; ventas en columnas |
+| `--col`, `--track` | `#ececf0`, `#ebebf0` | Columnas del tablero; fondo de toda barra |
+| `--ink`, `--ink-2`, `--ink-3`, `--ink-3t` | `#121214`, `#6a6a73`, `#9b9ba5`, `#777782` | Texto principal y secundario; `--ink-3` solo para lo que no es texto (pasos pendientes, deshabilitado); texto gris claro con `--ink-3t` (contraste, D-3) |
+| `--line`, `--line-soft`, `--line-2` | `#e9e9ee`, `#f0f0f3`, `#d2d2da` | Bordes de panel y tabla; separador entre filas; borde de campo |
 | `--accent` | `#121214` (igual a `--ink`) | Acción principal, selección y anillo de foco. **Neutro a propósito**: el panel no lleva color de marca (`mejoras/ronda-2.md §2`) |
-| `--cost`, `--cost-soft` | `#5a5a65`, `#f1f1f4` | **Costo** |
-| `--green`, `--green-ink`, `--green-soft` | `#00ae42`, `#067a30`, `#e3f5e9` | **Ganancia**, estados buenos |
-| `--amber`, `--amber-ink`, `--amber-soft` | `#e9a817`, `#86500a`, `#fff1d3` | Avisos |
-| `--red`, `--red-ink`, `--red-soft` | `#d6334f`, `#b3223f`, `#fde8ec` | Errores, cancelado |
-| `--blue` | `#3f86c9` | Informativo |
-| `--c-m … --c-f` | grises (y tonos neutros) | Capas de la barra de desglose del costo |
-| Radio | tarjetas 20 px, botones/campos 10 px, diálogos 18 px, pastillas 99 px | |
+| `--cost` | `#4a4a53` | **Costo**, barras de avance |
+| `--green`, `--green-d`, `--green-ink`, `--green-l` | `#00ae42`, `#00873a`, `#067a30`, `#e3f5e9` | **Solo ganancia** y estado correcto; `--green-d` cifras sobre blanco, `--green-ink` texto sobre `--green-l` (D-4) |
+| `--amber`, `--amber-d`, `--amber-l` | `#b4740a`, `#8a5a06`, `#fdf3e1` | Stock bajo, próximo, fecha de entrega cercana |
+| `--red`, `--red-l` | `#c8302a`, `#fbeaea` | Crítico, vencido, fallida, saldo, urgente |
+| `--c-m … --c-f`, `--sand` | grises (y tonos neutros) | Capas de la barra de desglose del costo (la fase C de la ronda 3 las cambia por gráficas de un color) |
+| `--sh-up` | sombra neutra | Solo lo que flota (globo, cajón, diálogo); los paneles van sin sombra |
+| Radio | `--r-btn` 7, `--r-field` 8, `--r-panel` 12, `--r-pill` 6, `--r-in` 10 | Botón, campo, panel, estado, bloque interno (`ronda-3 §2`) |
 | Texto base | 15 px / 1.45; títulos con espaciado negativo | |
 
 **Regla de color con significado:** *gris oscuro = costo*, *verde = ganancia*. Se mantiene en toda la interfaz. **No se usa morado** en la interfaz (era el color de la marca de Quick Robot; D36–D37). La mascota (`components/Mascot.tsx`, `styles/mascot.svg`) es arte de marca y conserva sus colores; se ve en la barra lateral, Inicio, estados vacíos y la página de falla (decisión de la persona, 2026-11-13). Todo el color sale de estos tokens, definidos en un solo archivo, de modo que cambiar el color de acento de un negocio sea cambiar una variable. Los colores de **datos** (el swatch de un filamento) no son color de interfaz y no cambian.
