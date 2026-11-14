@@ -24,6 +24,14 @@ describe('updateSpool + noCost', () => {
     expect(on.filament).toMatchObject({ costPerGram: 0.3, costSpoolNumbers: [2, 1] });
   });
 
+  it('the value of the inventory in Reportes counts a no-cost spool as $0 (docs/04 §1, case 1.4)', async () => {
+    const s = await addSpool(h.deps, h.B, validSpool({ filament: { material: 'PLA', color: 'Valor' }, costCents: 30000, shippingCents: 0 }) as never);
+    const value = async () => ((await h.call('GET', '/api/v1/reports?period=all', { token: B_TOKEN })).json.data as { inventory: { valueCents: number } }).inventory.valueCents;
+    expect(await value()).toBe(30000);
+    await updateSpool(h.deps, h.B, s.spool.id, { noCost: true });
+    expect(await value()).toBe(0);
+  });
+
   it('a price of $0 makes it a no-cost spool even if the switch says otherwise', async () => {
     const s = await gray({ costCents: 10000, purchasedOn: '2026-08-01' });
     expect((await updateSpool(h.deps, h.A, s.spool.id, { costCents: 0, noCost: false })).spool.noCost).toBe(true);

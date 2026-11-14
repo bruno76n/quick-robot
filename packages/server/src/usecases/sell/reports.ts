@@ -15,9 +15,10 @@ import { cents, childrenOf, commissionOf, factSale, itemsText, lineItemData, ord
 import { queueViews } from './queue';
 import { grossProfitAndExpensesFast, totalsOf } from './fast';
 // Reportes › taller y estado actual (agent D).
-import { orderPaid, orderProfit, orderTotal } from '@app/core';
+import { orderPaid, orderProfit, orderTotal, spoolCostPerGram } from '@app/core';
 import { collectionLines, firstSaleOn, listPrintRuns, productLines, saleFacts, saleTotals, searchOrders, spoolUseByFilament, type SaleTotalsRow } from '@app/db';
 import { priceOf } from '../../views/costing';
+import { toSpoolInput } from '../../views/filament-view';
 import { loadStock } from './common';
 
 const expenseData = (e: ExpenseListRow): ExpenseData => ({ on: e.on, amount: e.amountCents / 100, recurring: e.recurring, endsOn: e.endsOn });
@@ -98,7 +99,7 @@ async function reportWorkshopAndState(ex: Executor, ctx: Ctx, from: string, to: 
     pieces += physical; reserved += Math.min(physical, st.reserved(p.id)); free += st.free(p.id); atCost += physical * total; atList += physical * priceOf(p, c, total);
   }
   let grams = 0; let value = 0; let spoolCount = 0;
-  for (const s of spools) { const left = Math.max(0, s.remainingGrams); if (left > 0.05) spoolCount++; grams += left; value += s.grams > 0 ? (left * (s.costCents + s.shippingCents)) / 100 / s.grams : 0; }
+  for (const s of spools) { const left = Math.max(0, s.remainingGrams); if (left > 0.05) spoolCount++; grams += left; value += left * spoolCostPerGram(toSpoolInput(s)); }
   const channels = await listChannels(ex, ctx);
   const orders = await listOrders(ex, ctx, { statuses: ['quoted', 'accepted', 'in_production', 'ready'] });
   const oc = await childrenOf(ex, ctx, 'order', orders.map((o) => o.id));
@@ -228,7 +229,7 @@ export async function purchases(_deps: Deps, ex: Executor, ctx: Ctx) {
   const lines = [
     ...fils.map((f) => {
       const own = spools.filter((s) => s.filamentId === f.id);
-      const last = [...own].sort((a, b) => (a.purchasedOn + a.id).localeCompare(b.purchasedOn + b.id)).at(-1);
+      const last = [...own].sort((a, b) => a.purchasedOn.localeCompare(b.purchasedOn) || a.number - b.number).at(-1);
       const remaining = own.reduce((a, s) => a + Math.max(0, s.remainingGrams), 0);
       const line = filamentPurchase({
         id: f.id, hasSpools: own.length > 0, remaining, neededByOrders: needed[f.id] ?? 0,
