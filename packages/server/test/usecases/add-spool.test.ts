@@ -47,3 +47,18 @@ describe('addSpool', () => {
     expect(spools).toHaveLength(3);
   });
 });
+
+describe('cost per gram of ronda 4 (docs/04 §1, cases 1.1a and 1.1d)', () => {
+  it('last purchases with cost; a $0 spool does not count (nor adds value), and a filament with only that takes its material cost', async () => {
+    const spool = (color: string, costCents: number, purchasedOn: string) => addSpool(h.deps, h.B, validSpool({ filament: { material: 'PLA', color }, costCents, shippingCents: 0, purchasedOn }));
+    await spool('Gris', 20000, '2026-09-20');
+    await spool('Gris', 25000, '2026-10-10');
+    const gift = await spool('Gris', 0, '2026-09-15');
+    const gray = await spool('Gris', 30000, '2026-11-05');
+    expect(gray.filament.costPerGram).toBe(0.25);
+    expect(gift.filament.spools).toBe(3);
+    const white = await spool('Blanco', 0, '2026-08-01');
+    expect(white.filament.costPerGram).toBe(0.25);
+    expect(white.filament.valueCents).toBe(0);
+  });
+});

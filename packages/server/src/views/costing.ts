@@ -2,7 +2,7 @@
 // The server always recalculates; it never trusts a cost sent by the client (CLAUDE.md rule 4).
 import type { Breakdown, CollectionDetail, CollectionListItem, ProductDetail, ProductListItem } from '@app/contract';
 import {
-  costProduct, effectiveMargin, filamentCostPerGram, floorPrice, isTechnicalMaterial, listPrice, looseSum, partQty, profitAt,
+  costProduct, effectiveMargin, floorPrice, isTechnicalMaterial, listPrice, looseSum, partQty, profitAt,
   setCost, setPrice, suggestedPrice, toCents, variantDisplayName, type CostSettings, type PrinterCost, type SetPart,
 } from '@app/core';
 import {
@@ -10,7 +10,7 @@ import {
   type ProductFull, type PrinterRow,
 } from '@app/db';
 import { getSuppliesByIds } from '@app/db';
-import { toSpoolInput } from './filament-view';
+import { filamentCostMap } from './filament-view';
 
 export interface ProductExtras { photoUrl: string | null; free: number; physical: number; reserved: number; sold: number; printerName: string | null; parentName: string | null; collections: { id: string; name: string }[] }
 
@@ -39,7 +39,7 @@ export async function loadCostingContext(ex: Executor, ctx: Ctx, supplyIds: read
     },
     printers: new Map(printers.map((p) => [p.id, printerCost(p)])),
     allPrinters: printers.map(printerCost),
-    filamentCost: new Map(filaments.map((f) => [f.id, filamentCostPerGram(spools.filter((x) => x.filamentId === f.id).map(toSpoolInput))])),
+    filamentCost: new Map([...filamentCostMap(filaments, spools)].map(([id, x]) => [id, x.costPerGram])),
     filaments: new Map(filaments.map((f) => [f.id, f])),
     supplyCost: new Map(supplies.map((x) => [x.id, x.costCents / 100])),
     channels: (await listChannels(ex, ctx)).map((c) => ({ id: c.id, name: c.name, commissionPct: c.commissionPct })),

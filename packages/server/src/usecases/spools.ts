@@ -7,13 +7,13 @@ import {
 } from '@app/db';
 import type { Deps } from '../deps';
 import { notFound } from '../http';
-import { filamentListView, spoolView } from '../views/filament-view';
+import { filamentListView, loadFilamentCosts, spoolView } from '../views/filament-view';
 import { resolveFilament } from './add-spool';
 
 async function out(tx: Executor, ctx: Ctx, spoolId: string, filamentId: string): Promise<{ spool: Spool; filament: FilamentListItem }> {
   const f = (await getFilament(tx, ctx, filamentId))!;
   const spools = await listSpools(tx, ctx, [filamentId]);
-  return { spool: spoolView(spools.find((s) => s.id === spoolId)!), filament: filamentListView(f, spools) };
+  return { spool: spoolView(spools.find((s) => s.id === spoolId)!), filament: filamentListView(f, spools, await loadFilamentCosts(tx, ctx)) };
 }
 
 /**
