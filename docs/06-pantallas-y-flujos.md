@@ -364,3 +364,6 @@ Ventas → abrir → Devolver → ¿regresa a existencias? ¿reembolso? → `ret
 
 **F. Comprar lo que falta**
 Compras muestra la lista calculada → Copiar por proveedor → (compra real) → Filamentos "Agregar rollo" / Insumos "Registrar compra".
+
+**G. Rollos (ronda 4)**
+Filamentos → *Agregar rollo* con cantidad 2 (`addSpool`: números consecutivos, envío repartido) → Producción → *Registrar impresión* eligiendo un rollo que no es el sugerido (`logPrintRun` con `spools`) → otra repartida entre dos rollos (el primero se termina) → en el cajón del rollo, *Pesar* (`weighSpool`: ajuste por la diferencia) → *Terminar rollo* (`finishSpool`: merma por lo que queda). En cada paso cuadran los gramos de cada rollo, el disponible del filamento, el valor del inventario (cada rollo a lo que costó) y el costo por gramo para piezas, que no cambia con el rollo elegido. Prueba: `e2e/flow-g-spools.spec.ts`.
