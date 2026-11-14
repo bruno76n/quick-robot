@@ -15,7 +15,7 @@ import {
 import type { Deps } from '../../deps';
 import { notFound } from '../../http';
 import { buildItems, cents, childrenOf, commissionOf, itemsText, lineItemData, loadStock, orderData } from './common';
-import { deductFilament, shortfall, useSupplies } from './material';
+import { assertSpoolPicks, deductFilament, shortfall, useSupplies } from './material';
 import { dequeue, enqueue, queueViews } from './queue';
 
 type Result<T> = { data: T; warnings: Warning[] };
@@ -186,6 +186,27 @@ async function assign(tx: Executor, ctx: Ctx, items: readonly LineItemRow[], inp
   return out;
 }
 
+/**
+ * "Empezar con el rollo" (ronda-4 §4): per filament, the spool each item starts with and the grams that item needs, in the
+ * order of the items. The spools must be of this workspace (404) and of that filament (SPOOL_NOT_IN_FILAMENT).
+ */
+async function startSpoolsOf(tx: Executor, ctx: Ctx, items: readonly LineItemRow[], products: Awaited<ReturnType<typeof listProducts>>, input: StartProductionInput) {
+  const chosen = new Map(input.assignments.map((a) => [a.lineItemId, a.startSpools ?? []]));
+  const byFilament: Record<string, { spoolId: string }[]> = {};
+  for (const list of chosen.values()) for (const st of list) byFilament[st.filamentId] = [...(byFilament[st.filamentId] ?? []), { spoolId: st.spoolId }];
+  await assertSpoolPicks(tx, ctx, byFilament);
+  const byId = new Map(products.map((p) => [p.id, p]));
+  const starts: Record<string, { spoolId: string; grams: number }[]> = {};
+  for (const it of items) {
+    const need = itemMaterial(lineItemData(it), (pid) => byId.get(pid)?.filaments ?? []);
+    for (const st of chosen.get(it.id) ?? []) {
+      const g = need[st.filamentId] ?? 0;
+      if (g > 0) starts[st.filamentId] = [...(starts[st.filamentId] ?? []), { spoolId: st.spoolId, grams: g }];
+    }
+  }
+  return starts;
+}
+
 export async function startProduction(deps: Deps, ctx: Ctx, id: string, input: StartProductionInput): Promise<Result<Awaited<ReturnType<typeof orderDetail>>>> {
   const warnings = await transaction(deps.db, async (tx) => {
     const { o, items } = await load(tx, ctx, id);
@@ -194,8 +215,9 @@ export async function startProduction(deps: Deps, ctx: Ctx, id: string, input: S
     const products = await listProducts(tx, ctx);
     await enqueue(tx, ctx, o, assigned, products, deps.clock.now(), () => deps.ids.next());
     const mat = materialOf(assigned, products);
+    const starts = await startSpoolsOf(tx, ctx, assigned, products, input);
     const warn = await shortfall(tx, ctx, mat);
-    if (input.deductFilament) await deductFilament(tx, ctx, mat, { on: deps.clock.today(), note: `Pedido #${o.number}`, refId: o.id, nextId: () => deps.ids.next() });
+    if (input.deductFilament) await deductFilament(tx, ctx, mat, { on: deps.clock.today(), note: `Pedido #${o.number}`, refId: o.id, nextId: () => deps.ids.next(), starts });
     await updateOrder(tx, ctx, id, { status: 'in_production', productionOn: deps.clock.today(), filamentDeducted: input.deductFilament });
     return warn ? [warn] : [];
   });

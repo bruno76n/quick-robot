@@ -242,6 +242,29 @@ export function planSpoolUse(spools: readonly SpoolInput[], grams: number, purge
   return { ok: true, movements, taken, missing: Math.max(0, round1(need - taken)) };
 }
 
+/** The spool an item of an order starts with (Poner en producción), and the grams of that filament it needs without purge. */
+export interface StartSpool { spoolId: string; grams: number }
+
+/**
+ * "Empezar con el rollo" (ronda-4 §4, case 1.5c) as chosen parts: each item takes first from its spool, up to what it needs with
+ * purge or what that spool still has after the items before it; whatever is not covered goes in the use order (planSpoolUse).
+ * A spool that is not one of these keeps a part without grams, so planSpoolUse answers SPOOL_NOT_IN_FILAMENT.
+ */
+export function startSpoolPicks(spools: readonly SpoolInput[], starts: readonly StartSpool[], purgePct: number): SpoolPick[] {
+  const k = 1 + purgePct / 100;
+  const left = new Map(live(spools).map((s) => [s.id, Math.max(0, s.remaining)]));
+  const picks: SpoolPick[] = [];
+  for (const st of starts) {
+    const avail = left.get(st.spoolId);
+    if (avail === undefined) { picks.push({ spoolId: st.spoolId }); continue; }
+    const t = round1(Math.min(Math.max(0, st.grams) * k, avail));
+    if (t <= 0) continue;
+    picks.push({ spoolId: st.spoolId, grams: t });
+    left.set(st.spoolId, avail - t);
+  }
+  return picks;
+}
+
 /** Deduct a job without a choice of spool (the automatic order). */
 export function planDeduction(spools: readonly SpoolInput[], grams: number, purgePct: number): Deduction {
   const r = planSpoolUse(spools, grams, purgePct) as { ok: true } & Deduction;

@@ -1,6 +1,6 @@
 // Filament and supplies spent by production (docs/04 §1, §8): spool by spool, never negative; purge recorded apart.
 import { BusinessError, type Warning } from '@app/contract';
-import { filamentShortfall, planSpoolUse, round1, type SpoolPick } from '@app/core';
+import { filamentShortfall, planSpoolUse, round1, startSpoolPicks, type SpoolPick, type StartSpool } from '@app/core';
 import { getSettings, getSpool, insertSpoolMovements, insertSupplyMovements, listAllFilaments, listSpools, lockSpoolsOfFilament, type Ctx, type Executor } from '@app/db';
 import { notFound } from '../../http';
 import { toSpoolInput } from '../../views/filament-view';
@@ -28,7 +28,7 @@ export type SpoolPicks = Readonly<Record<string, readonly SpoolPick[]>>;
  * Chosen spools must exist in this workspace (else NOT_FOUND, like any id of another business) and belong to the filament
  * they are chosen for (else SPOOL_NOT_IN_FILAMENT). Checked before anything is written.
  */
-export async function assertSpoolPicks(ex: Executor, ctx: Ctx, picks: SpoolPicks) {
+export async function assertSpoolPicks(ex: Executor, ctx: Ctx, picks: Readonly<Record<string, readonly { spoolId: string }[]>>) {
   for (const [filamentId, list] of Object.entries(picks)) {
     for (const p of list) {
       const s = await getSpool(ex, ctx, p.spoolId);
@@ -39,18 +39,22 @@ export async function assertSpoolPicks(ex: Executor, ctx: Ctx, picks: SpoolPicks
 }
 
 /**
- * Deducts consumption and purge of each filament from its spools: the chosen ones first, then the use order (docs/04 §1);
+ * Deducts consumption and purge of each filament from its spools: the chosen ones (or the spool each item of an order starts
+ * with) first, then the use order (docs/04 §1);
  * returns what could not be taken. A chosen part larger than what that spool has → SPOOL_INSUFFICIENT.
  */
 export async function deductFilament(
-  tx: Executor, ctx: Ctx, grams: Readonly<Record<string, number>>, opts: { on: string; note: string; refId: string; nextId: () => string; picks?: SpoolPicks | undefined },
+  tx: Executor, ctx: Ctx, grams: Readonly<Record<string, number>>,
+  opts: { on: string; note: string; refId: string; nextId: () => string; picks?: SpoolPicks | undefined; starts?: Readonly<Record<string, readonly StartSpool[]>> | undefined },
 ) {
   const purge = (await getSettings(tx, ctx))?.purgePct ?? 0;
   const missing: Record<string, number> = {};
   for (const [filamentId, g] of Object.entries(grams)) {
     if (!(g > 0)) continue;
     await lockSpoolsOfFilament(tx, ctx, filamentId);
-    const plan = planSpoolUse((await listSpools(tx, ctx, [filamentId])).map(toSpoolInput), g, purge, opts.picks?.[filamentId] ?? []);
+    const spools = (await listSpools(tx, ctx, [filamentId])).map(toSpoolInput);
+    const picks = opts.picks?.[filamentId] ?? startSpoolPicks(spools, opts.starts?.[filamentId] ?? [], purge);
+    const plan = planSpoolUse(spools, g, purge, picks);
     if (!plan.ok) {
       throw plan.code === 'SPOOL_INSUFFICIENT'
         ? new BusinessError('SPOOL_INSUFFICIENT', { availableGrams: plan.availableGrams })
